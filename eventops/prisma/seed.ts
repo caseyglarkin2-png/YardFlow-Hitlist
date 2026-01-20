@@ -121,7 +121,7 @@ async function main() {
   console.log('  Member: jake@eventops.com / password');
   console.log('\n🎯 Sample data:');
   console.log(`  Event: ${manifest2026.name}`);
-  console.log(`  Accounts: ${gxo.companyName}, ${stockx.companyName}`);
+  console.log(`  Accounts: ${gxo.name}, ${stockx.name}`);
 }
 
 main()

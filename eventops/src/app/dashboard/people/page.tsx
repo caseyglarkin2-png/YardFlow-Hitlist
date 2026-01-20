@@ -70,7 +70,7 @@ export default async function PeoplePage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">People</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Managing {people.length} contact{people.length !== 1 ? 's' : ''} for <strong>{user.activeEvent.name}</strong>
+            Managing {people.length} contact{people.length !== 1 ? 's' : ''} for <strong>{user.activeEvent?.name || 'No Event'}</strong>
           </p>
         </div>
         <Link

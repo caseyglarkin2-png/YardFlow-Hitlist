@@ -136,7 +136,7 @@ export default async function DashboardPage() {
             No Active Event
           </h3>
           <p className="mt-2 text-sm text-yellow-700">
-            You don't have an active event selected. Create or select an event to get
+            You don&apos;t have an active event selected. Create or select an event to get
             started.
           </p>
           <a

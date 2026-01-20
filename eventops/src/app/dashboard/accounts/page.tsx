@@ -73,7 +73,7 @@ export default async function AccountsPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Target Accounts</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Managing {accounts.length} account{accounts.length !== 1 ? 's' : ''} for <strong>{user.activeEvent.name}</strong>
+            Managing {accounts.length} account{accounts.length !== 1 ? 's' : ''} for <strong>{user.activeEvent?.name || 'No Event'}</strong>
           </p>
         </div>
         <Link

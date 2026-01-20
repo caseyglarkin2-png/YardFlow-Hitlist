@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
           // Check for duplicate company name (case-insensitive)
           const existing = await prisma.targetAccount.findFirst({
             where: {
-              eventId: user.activeEventId,
+              eventId: user.activeEventId!,
               name: {
                 equals: item.name,
                 mode: 'insensitive',
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
           // First find the account
           const account = await prisma.targetAccount.findFirst({
             where: {
-              eventId: user.activeEventId,
+              eventId: user.activeEventId!,
               name: {
                 equals: item.accountName,
                 mode: 'insensitive',

@@ -18,6 +18,7 @@ export default function PreviewImportPage() {
   const [isChecking, setIsChecking] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [stats, setStats] = useState({ new: 0, duplicates: 0, errors: 0 });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadAndCheck() {
@@ -37,41 +38,55 @@ export default function PreviewImportPage() {
         header: true,
         skipEmptyLines: true,
         complete: async (results) => {
-          const mappedData = results.data.map((row: any) => {
-            const mapped: any = {};
-            Object.keys(mapping).forEach((fieldKey) => {
-              const csvColumn = mapping[fieldKey];
-              if (csvColumn && row[csvColumn]) {
-                mapped[fieldKey] = row[csvColumn];
-              }
+          try {
+            const mappedData = results.data.map((row: any) => {
+              const mapped: any = {};
+              Object.keys(mapping).forEach((fieldKey) => {
+                const csvColumn = mapping[fieldKey];
+                if (csvColumn && row[csvColumn]) {
+                  mapped[fieldKey] = row[csvColumn];
+                }
+              });
+              return mapped;
             });
-            return mapped;
-          });
 
-          // Check for duplicates
-          const response = await fetch('/api/import/check-duplicates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, data: mappedData }),
-          });
+            // Check for duplicates
+            const response = await fetch('/api/import/check-duplicates', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type, data: mappedData }),
+            });
 
-          const { results: checkResults } = await response.json();
-          
-          const processedRows: ImportRow[] = checkResults.map((result: any) => ({
-            data: result.data,
-            status: result.isDuplicate ? 'duplicate' : 'new',
-            message: result.message,
-            matchedId: result.matchedId,
-          }));
+            if (!response.ok) {
+              const errorData = await response.json();
+              setError(errorData.error || 'Failed to check duplicates');
+              setIsChecking(false);
+              return;
+            }
 
-          setRows(processedRows);
-          
-          const newCount = processedRows.filter((r) => r.status === 'new').length;
-          const dupCount = processedRows.filter((r) => r.status === 'duplicate').length;
-          const errCount = processedRows.filter((r) => r.status === 'error').length;
-          
-          setStats({ new: newCount, duplicates: dupCount, errors: errCount });
-          setIsChecking(false);
+            const responseData = await response.json();
+            const checkResults = responseData.results || [];
+            
+            const processedRows: ImportRow[] = checkResults.map((result: any) => ({
+              data: result.data,
+              status: result.isDuplicate ? 'duplicate' : 'new',
+              message: result.message,
+              matchedId: result.matchedId,
+            }));
+
+            setRows(processedRows);
+            
+            const newCount = processedRows.filter((r) => r.status === 'new').length;
+            const dupCount = processedRows.filter((r) => r.status === 'duplicate').length;
+            const errCount = processedRows.filter((r) => r.status === 'error').length;
+            
+            setStats({ new: newCount, duplicates: dupCount, errors: errCount });
+            setIsChecking(false);
+          } catch (err) {
+            console.error('Error checking duplicates:', err);
+            setError('An unexpected error occurred while checking for duplicates');
+            setIsChecking(false);
+          }
         },
       });
     }
@@ -125,6 +140,25 @@ export default function PreviewImportPage() {
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
           <p className="mt-2 text-sm text-gray-600">Checking for duplicates...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Import Error</h1>
+        </div>
+        <div className="rounded-md bg-red-50 p-4">
+          <p className="text-sm text-red-800">{error}</p>
+        </div>
+        <button
+          onClick={() => router.push('/dashboard/import')}
+          className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          Back to Import
+        </button>
       </div>
     );
   }

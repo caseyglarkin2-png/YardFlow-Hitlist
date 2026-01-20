@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
 import { prisma } from './db';
+import { verifyPassword } from './password';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -30,7 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const isPasswordValid = await bcrypt.compare(
+        const isPasswordValid = await verifyPassword(
           credentials.password as string,
           user.password
         );
