@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          Role      @default(MEMBER)
+  activeEventId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  activeEvent   Event?    @relation("ActiveEvent", fields: [activeEventId], references: [id])
+  @@map("users")
+}
+
+enum EventStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  name        String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  status      EventStatus @default(PLANNING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  accounts    TargetAccount[]
+  activeUsers User[]      @relation("ActiveEvent")
+  @@map("events")
+}
+
+model TargetAccount {
+  id           String         @id @default(cuid())
+  eventId      String
+  name         String
+  website      String?
+  industry     String?
+  headquarters String?
+  icpScore     Int?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  event        Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  people       Person[]
+  scoreHistory ScoreHistory[]
+  @@index([eventId])
+  @@map("target_accounts")
+}
+
+model Person {
+  id        String          @id @default(cuid())
+  accountId String
+  name      String
+  title     String?
+  email     String?
+  phone     String?
+  linkedin  String?
+  notes     String?
+  isExecOps Boolean         @default(false)
+  isOps     Boolean         @default(false)
+  isProc    Boolean         @default(false)
+  isSales   Boolean         @default(false)
+  isTech    Boolean         @default(false)
+  isNonOps  Boolean         @default(false)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  account   TargetAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  outreach  Outreach[]
+  @@index([accountId])
+  @@map("people")
+}
+
+model ScoreHistory {
+  id        String        @id @default(cuid())
+  accountId String
+  oldScore  Int?
+  newScore  Int?
+  reason    String
+  changedBy String?
+  notes     String?
+  createdAt DateTime      @default(now())
+  account   TargetAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  @@index([accountId])
+  @@map("score_history")
+}
+
+enum OutreachChannel {
+  EMAIL
+  LINKEDIN
+  PHONE
+}
+
+enum OutreachStatus {
+  DRAFT
+  SENT
+  RESPONDED
+  BOUNCED
+  NO_RESPONSE
+}
+
+model Outreach {
+  id          String          @id @default(cuid())
+  personId    String
+  channel     OutreachChannel
+  status      OutreachStatus  @default(DRAFT)
+  subject     String?
+  message     String
+  templateId  String?
+  sentBy      String?
+  sentAt      DateTime?
+  respondedAt DateTime?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  person      Person          @relation(fields: [personId], references: [id], onDelete: Cascade)
+  @@index([personId])
+  @@index([status])
+  @@map("outreach")
+}
+
+model MessageTemplate {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  channel     OutreachChannel
+  subject     String?
+  template    String
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  @@map("message_templates")
+}
