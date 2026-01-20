@@ -138,6 +138,3 @@ export async function DELETE(
     );
   }
 }
-    );
-  }
-}

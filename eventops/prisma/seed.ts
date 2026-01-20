@@ -63,7 +63,7 @@ async function main() {
     create: {
       id: 'sample-gxo',
       eventId: manifest2026.id,
-      companyName: 'GXO',
+      name: 'GXO',
       website: 'https://gxo.com',
       industry: 'Logistics',
     },
@@ -75,7 +75,7 @@ async function main() {
     create: {
       id: 'sample-stockx',
       eventId: manifest2026.id,
-      companyName: 'StockX',
+      name: 'StockX',
       website: 'https://stockx.com',
       industry: 'E-Commerce',
     },
