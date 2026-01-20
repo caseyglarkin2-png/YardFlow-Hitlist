@@ -13,6 +13,9 @@ Provide the following in a structured JSON format:
 3. industryContext: Key trends in their industry that would be relevant for outreach
 4. keyPainPoints: 3-5 common operational challenges companies like this face
 5. companySize: Estimated employee count and revenue bracket (if known)
+6. facilityCount: Estimated number of warehouses, distribution centers, or facilities in their network (if applicable)
+7. locations: Key geographic markets or regions they operate in
+8. operationalScale: Describe their supply chain footprint (e.g., "regional 3PL", "national retailer with 500+ stores", "global manufacturer")
 
 Focus on logistics, supply chain, and operations context since this is for Manifest conference attendees.
 

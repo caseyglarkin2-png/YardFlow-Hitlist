@@ -73,6 +73,9 @@ export async function POST(req: NextRequest) {
               industryContext: researchData.industryContext || null,
               keyPainPoints: researchData.keyPainPoints || null,
               companySize: researchData.companySize || null,
+              facilityCount: researchData.facilityCount || null,
+              locations: researchData.locations || null,
+              operationalScale: researchData.operationalScale || null,
               rawData: JSON.stringify(researchData),
               researchedBy: session.user.email,
             },
@@ -136,8 +139,13 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating AI outreach:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to generate outreach" },
+      { 
+        error: "Failed to generate outreach",
+        details: errorMessage,
+        hint: errorMessage.includes('API key') ? 'Check OPENAI_API_KEY environment variable' : undefined
+      },
       { status: 500 }
     );
   }

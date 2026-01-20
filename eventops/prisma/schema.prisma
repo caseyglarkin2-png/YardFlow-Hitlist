@@ -76,6 +76,9 @@ model CompanyDossier {
   keyPainPoints    String?       // AI-identified challenges
   techStack        String?       // Technologies they use
   companySize      String?       // Employee count, revenue estimates
+  facilityCount    String?       // Number of warehouses/DCs/facilities
+  locations        String?       // Geographic markets/regions
+  operationalScale String?       // Supply chain footprint description
   socialPresence   String?       // LinkedIn, Twitter activity summary
   rawData          String?       // JSON blob of all scraped data
   researchedAt     DateTime      @default(now())
