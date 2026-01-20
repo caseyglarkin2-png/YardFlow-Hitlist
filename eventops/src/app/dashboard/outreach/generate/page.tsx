@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { GenerateOutreachForm } from "@/components/generate-outreach-form";
+import { GenerateAIOutreachForm } from "@/components/generate-ai-outreach-form";
 
 export default async function GenerateOutreachPage() {
   const session = await auth();
@@ -17,7 +17,7 @@ export default async function GenerateOutreachPage() {
   if (!user?.activeEventId) {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Generate Outreach</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Generate AI Outreach</h1>
         <div className="rounded-lg border border-dashed p-12 text-center">
           <p className="text-muted-foreground">
             Please select an active event to generate outreach.
@@ -26,11 +26,6 @@ export default async function GenerateOutreachPage() {
       </div>
     );
   }
-
-  const templates = await db.messageTemplate.findMany({
-    where: { isActive: true },
-    orderBy: { name: "asc" },
-  });
 
   const accounts = await db.targetAccount.findMany({
     where: { eventId: user.activeEventId },
@@ -43,14 +38,13 @@ export default async function GenerateOutreachPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Generate Outreach</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Generate AI Outreach</h1>
         <p className="text-muted-foreground">
-          Create personalized outreach messages for your target accounts
+          AI-powered personalized outreach with company research and context
         </p>
       </div>
 
-      <GenerateOutreachForm
-        templates={templates}
+      <GenerateAIOutreachForm
         accounts={accounts}
         eventId={user.activeEventId}
       />

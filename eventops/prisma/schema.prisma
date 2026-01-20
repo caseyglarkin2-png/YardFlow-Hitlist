@@ -62,8 +62,27 @@ model TargetAccount {
   event        Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   people       Person[]
   scoreHistory ScoreHistory[]
+  dossier      CompanyDossier?
   @@index([eventId])
   @@map("target_accounts")
+}
+
+model CompanyDossier {
+  id               String        @id @default(cuid())
+  accountId        String        @unique
+  companyOverview  String?       // AI-generated company summary
+  recentNews       String?       // Latest news/announcements
+  industryContext  String?       // Industry trends relevant to this company
+  keyPainPoints    String?       // AI-identified challenges
+  techStack        String?       // Technologies they use
+  companySize      String?       // Employee count, revenue estimates
+  socialPresence   String?       // LinkedIn, Twitter activity summary
+  rawData          String?       // JSON blob of all scraped data
+  researchedAt     DateTime      @default(now())
+  researchedBy     String?       // User who triggered research
+  account          TargetAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  @@index([accountId])
+  @@map("company_dossiers")
 }
 
 model Person {

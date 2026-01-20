@@ -30,6 +30,7 @@
     "lucide-react": "^0.436.0",
     "next": "^14.2.0",
     "next-auth": "^5.0.0-beta.30",
+    "openai": "^6.16.0",
     "papaparse": "^5.5.3",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",

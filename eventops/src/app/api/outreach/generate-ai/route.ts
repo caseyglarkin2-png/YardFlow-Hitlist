@@ -1,0 +1,144 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
+import { generateCompanyResearch, generatePersonalizedOutreach } from "@/lib/ai-research";
+
+function getPersonaLabel(person: any): string {
+  if (person.isExecOps) return "Executive Operations Leader";
+  if (person.isOps) return "Operations Professional";
+  if (person.isProc) return "Procurement Specialist";
+  if (person.isSales) return "Sales Leader";
+  if (person.isTech) return "Technology Leader";
+  if (person.isNonOps) return "Business Leader";
+  return "Professional";
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { personIds, channel = 'EMAIL', eventId } = body;
+
+    if (!personIds || personIds.length === 0) {
+      return NextResponse.json(
+        { error: "Person IDs required" },
+        { status: 400 }
+      );
+    }
+
+    // Get event
+    const event = await db.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    // Get people with accounts and dossiers
+    const people = await db.person.findMany({
+      where: { id: { in: personIds } },
+      include: {
+        account: {
+          include: {
+            dossier: true,
+          },
+        },
+      },
+    });
+
+    const results = [];
+    let created = 0;
+
+    for (const person of people) {
+      try {
+        // Generate or get company research
+        let dossier = person.account.dossier;
+        
+        if (!dossier) {
+          const researchData = await generateCompanyResearch(
+            person.account.name,
+            person.account.website || undefined
+          );
+
+          dossier = await db.companyDossier.create({
+            data: {
+              accountId: person.account.id,
+              companyOverview: researchData.companyOverview || null,
+              recentNews: researchData.recentNews || null,
+              industryContext: researchData.industryContext || null,
+              keyPainPoints: researchData.keyPainPoints || null,
+              companySize: researchData.companySize || null,
+              rawData: JSON.stringify(researchData),
+              researchedBy: session.user.email,
+            },
+          });
+        }
+
+        // Parse dossier data
+        const dossierData = dossier.rawData ? JSON.parse(dossier.rawData) : {
+          companyOverview: dossier.companyOverview,
+          keyPainPoints: dossier.keyPainPoints,
+          industryContext: dossier.industryContext,
+        };
+
+        // Generate personalized outreach
+        const persona = getPersonaLabel(person);
+        const outreachData = await generatePersonalizedOutreach(
+          person.name,
+          person.title,
+          person.account.name,
+          persona,
+          dossierData,
+          channel
+        );
+
+        // Create outreach record
+        const outreach = await db.outreach.create({
+          data: {
+            personId: person.id,
+            channel,
+            status: "DRAFT",
+            subject: outreachData.subject || null,
+            message: outreachData.message,
+            sentBy: session.user.email,
+          },
+        });
+
+        created++;
+        results.push({
+          personId: person.id,
+          personName: person.name,
+          companyName: person.account.name,
+          success: true,
+        });
+      } catch (error) {
+        console.error(`Error generating outreach for ${person.name}:`, error);
+        results.push({
+          personId: person.id,
+          personName: person.name,
+          companyName: person.account.name,
+          success: false,
+          error: (error as Error).message,
+        });
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      created,
+      total: personIds.length,
+      results,
+    });
+  } catch (error) {
+    console.error("Error generating AI outreach:", error);
+    return NextResponse.json(
+      { error: "Failed to generate outreach" },
+      { status: 500 }
+    );
+  }
+}
