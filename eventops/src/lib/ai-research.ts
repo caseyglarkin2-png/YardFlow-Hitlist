@@ -54,9 +54,38 @@ export async function generatePersonalizedOutreach(
   companyName: string,
   persona: string,
   companyDossier: any,
-  channel: 'EMAIL' | 'LINKEDIN' | 'PHONE'
+  channel: 'EMAIL' | 'LINKEDIN' | 'PHONE',
+  contactInsights?: any,
+  roiData?: any
 ) {
   const eventName = 'Manifest 2026';
+  
+  let contextSection = `Company Context:
+${JSON.stringify(companyDossier, null, 2)}`;
+
+  if (contactInsights) {
+    contextSection += `
+
+Contact-Specific Insights:
+- Role: ${contactInsights.roleContext}
+- Pain Points: ${contactInsights.likelyPainPoints}
+- ROI Opportunity: ${contactInsights.roiOpportunity}`;
+  }
+
+  if (roiData) {
+    const savings = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0
+    }).format(roiData.annualSavings);
+    
+    contextSection += `
+
+ROI Calculation:
+- Estimated Annual Savings: ${savings}
+- Payback Period: ${roiData.paybackPeriod} months
+- Based on: ${roiData.assumptions?.totalFacilities || 'N/A'} facilities`;
+  }
   
   const prompt = `Write a highly personalized ${channel.toLowerCase()} outreach message for:
 
@@ -66,12 +95,13 @@ Company: ${companyName}
 Role/Persona: ${persona}
 Event: ${eventName}
 
-Company Context:
-${JSON.stringify(companyDossier, null, 2)}
+${contextSection}
 
 Requirements:
 - Natural, conversational tone (not salesy)
 - Reference specific company context or pain points
+${roiData ? '- Subtly reference the ROI opportunity (don\'t quote exact numbers, but hint at the scale of value)' : ''}
+${contactInsights ? '- Address their specific role context and pain points' : ''}
 - Mention ${eventName} naturally
 - Keep it concise (3-4 short paragraphs for email, 2-3 for LinkedIn)
 - Include a soft call-to-action

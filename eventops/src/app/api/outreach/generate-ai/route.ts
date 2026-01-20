@@ -39,15 +39,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    // Get people with accounts and dossiers
+    // Get people with accounts, dossiers, insights, and ROI calculations
     const people = await db.person.findMany({
       where: { id: { in: personIds } },
       include: {
         account: {
           include: {
             dossier: true,
+            roiCalculations: {
+              orderBy: { calculatedAt: 'desc' },
+              take: 1,
+            },
           },
         },
+        insights: true,
       },
     });
 
@@ -87,7 +92,25 @@ export async function POST(req: NextRequest) {
           companyOverview: dossier.companyOverview,
           keyPainPoints: dossier.keyPainPoints,
           industryContext: dossier.industryContext,
+          facilityCount: dossier.facilityCount,
+          operationalScale: dossier.operationalScale,
         };
+
+        // Get contact insights if available
+        const contactInsights = person.insights ? {
+          roleContext: person.insights.roleContext,
+          likelyPainPoints: person.insights.likelyPainPoints,
+          roiOpportunity: person.insights.roiOpportunity,
+        } : undefined;
+
+        // Get ROI data if available
+        const roiData = person.account.roiCalculations?.[0] ? {
+          annualSavings: person.account.roiCalculations[0].annualSavings,
+          paybackPeriod: person.account.roiCalculations[0].paybackPeriod,
+          assumptions: person.account.roiCalculations[0].assumptions 
+            ? JSON.parse(person.account.roiCalculations[0].assumptions) 
+            : undefined,
+        } : undefined;
 
         // Generate personalized outreach
         const persona = getPersonaLabel(person);
@@ -97,7 +120,9 @@ export async function POST(req: NextRequest) {
           person.account.name,
           persona,
           dossierData,
-          channel
+          channel,
+          contactInsights,
+          roiData
         );
 
         // Create outreach record

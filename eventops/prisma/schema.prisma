@@ -63,6 +63,7 @@ model TargetAccount {
   people       Person[]
   scoreHistory ScoreHistory[]
   dossier      CompanyDossier?
+  roiCalculations RoiCalculation[]
   @@index([eventId])
   @@map("target_accounts")
 }
@@ -107,6 +108,8 @@ model Person {
   updatedAt DateTime        @updatedAt
   account   TargetAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   outreach  Outreach[]
+  insights  ContactInsights?
+  meetings  Meeting[]
   @@index([accountId])
   @@map("people")
 }
@@ -170,4 +173,56 @@ model MessageTemplate {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   @@map("message_templates")
+}
+
+model ContactInsights {
+  id                String   @id @default(cuid())
+  personId          String   @unique
+  roleContext       String?  // e.g., "Oversees 15-person ops team managing 5 DCs"
+  likelyPainPoints  String?  // JSON array of pain points specific to role
+  suggestedApproach String?  // How to pitch to this persona
+  roiOpportunity    String?  // Estimated value prop for this role
+  confidence        String?  // LOW, MEDIUM, HIGH
+  generatedAt       DateTime @default(now())
+  generatedBy       String?
+  person            Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  @@index([personId])
+  @@map("contact_insights")
+}
+
+model RoiCalculation {
+  id              String        @id @default(cuid())
+  accountId       String
+  facilityCount   Int?
+  operationalScale String?
+  annualSavings   Float?        // Estimated $ saved per year
+  paybackPeriod   Int?          // Months to ROI
+  assumptions     String?       // JSON of calculation inputs
+  calculatedAt    DateTime      @default(now())
+  calculatedBy    String?
+  account         TargetAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  @@index([accountId])
+  @@map("roi_calculations")
+}
+
+model Meeting {
+  id           String   @id @default(cuid())
+  personId     String
+  scheduledAt  DateTime
+  duration     Int      // Minutes
+  location     String?  // Booth number, room name, virtual link
+  status       String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
+  meetingType  String?  // INTRO, DEMO, NEGOTIATION, FOLLOW_UP
+  outcome      String?
+  nextSteps    String?
+  followUpDate DateTime?
+  dealStage    String?
+  notes        String?
+  createdBy    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  person       Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  @@index([personId])
+  @@index([scheduledAt])
+  @@map("meetings")
 }

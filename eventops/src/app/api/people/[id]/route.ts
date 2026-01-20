@@ -33,7 +33,12 @@ export async function GET(
     const person = await prisma.person.findUnique({
       where: { id: params.id },
       include: {
-        account: true,
+        account: {
+          include: {
+            dossier: true,
+          },
+        },
+        insights: true,
       },
     });
 
@@ -41,7 +46,7 @@ export async function GET(
       return NextResponse.json({ error: 'Person not found' }, { status: 404 });
     }
 
-    return NextResponse.json(person);
+    return NextResponse.json({ person });
   } catch (error) {
     console.error('Error fetching person:', error);
     return NextResponse.json(
