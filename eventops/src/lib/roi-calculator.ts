@@ -35,7 +35,7 @@ export async function calculateRoi(input: RoiCalculationInput): Promise<RoiCalcu
 
   // Base assumptions based on operational scale
   let baseShipmentsPerDay = 100;
-  let avgCostPerShipment = 12;
+  const avgCostPerShipment = 12;
   let savingsPercentage = 0.15; // 15% savings on average
 
   // Adjust based on operational scale

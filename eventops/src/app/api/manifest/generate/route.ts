@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { generateManifestMeetingRequest, generateSimpleManifestRequest } from "@/lib/manifest-generator";
 import { getPersonaLabel } from "@/lib/ai-contact-insights";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();

@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { generateCompanyResearch, generatePersonalizedOutreach } from "@/lib/ai-research";
 
+export const dynamic = 'force-dynamic';
+
 function getPersonaLabel(person: any): string {
   if (person.isExecOps) return "Executive Operations Leader";
   if (person.isOps) return "Operations Professional";

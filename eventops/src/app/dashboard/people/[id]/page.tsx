@@ -254,7 +254,7 @@ export default function PersonDetailPage() {
               </div>
             ) : (
               <p className="text-gray-500 text-sm">
-                No insights generated yet. Click "Generate Insights" to create AI-powered contact analysis.
+                No insights generated yet. Click &quot;Generate Insights&quot; to create AI-powered contact analysis.
               </p>
             )}
           </div>

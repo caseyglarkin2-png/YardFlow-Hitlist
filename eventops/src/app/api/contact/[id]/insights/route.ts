@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { generateContactInsights, getPersonaLabel } from "@/lib/ai-contact-insights";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -46,7 +48,7 @@ export async function POST(
     }
 
     // Get company dossier (or create if missing)
-    let dossier = person.account.dossier;
+    const dossier = person.account.dossier;
     if (!dossier) {
       return NextResponse.json(
         { error: "Company dossier not found. Please generate company research first." },

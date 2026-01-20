@@ -1,8 +1,15 @@
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient() {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+}
 
 export async function generateCompanyResearch(companyName: string, website?: string) {
   const prompt = `Research and create a comprehensive business dossier for ${companyName}${website ? ` (${website})` : ''}.
@@ -22,6 +29,7 @@ Focus on logistics, supply chain, and operations context since this is for Manif
 Return ONLY valid JSON, no markdown formatting.`;
 
   try {
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -114,6 +122,7 @@ ${channel === 'EMAIL' ? '- subject: email subject line\n' : ''}- message: the ou
 Return ONLY valid JSON, no markdown formatting.`;
 
   try {
+    const openai = getOpenAIClient();
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
