@@ -22,6 +22,12 @@ const peopleFields = {
   email: { label: 'Email', required: false },
   phone: { label: 'Phone', required: false },
   linkedin: { label: 'LinkedIn URL', required: false },
+  isExecOps: { label: 'Executive Ops Flag (TRUE/FALSE)', required: false },
+  isOps: { label: 'Operations Flag (TRUE/FALSE)', required: false },
+  isProc: { label: 'Procurement Flag (TRUE/FALSE)', required: false },
+  isSales: { label: 'Sales Flag (TRUE/FALSE)', required: false },
+  isTech: { label: 'Tech Flag (TRUE/FALSE)', required: false },
+  isNonOps: { label: 'Non-Ops Flag (TRUE/FALSE)', required: false },
   notes: { label: 'Notes', required: false },
 };
 

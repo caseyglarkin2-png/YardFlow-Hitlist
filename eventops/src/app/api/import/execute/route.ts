@@ -77,12 +77,12 @@ export async function POST(request: NextRequest) {
             phone: data.phone || null,
             linkedin: data.linkedin || null,
             notes: data.notes || null,
-            isExecOps: false,
-            isOps: false,
-            isProc: false,
-            isSales: false,
-            isTech: false,
-            isNonOps: false,
+            isExecOps: data.isExecOps === 'TRUE' || data.isExecOps === true || data.isExecOps === '1',
+            isOps: data.isOps === 'TRUE' || data.isOps === true || data.isOps === '1',
+            isProc: data.isProc === 'TRUE' || data.isProc === true || data.isProc === '1',
+            isSales: data.isSales === 'TRUE' || data.isSales === true || data.isSales === '1',
+            isTech: data.isTech === 'TRUE' || data.isTech === true || data.isTech === '1',
+            isNonOps: data.isNonOps === 'TRUE' || data.isNonOps === true || data.isNonOps === '1',
           },
         });
         created++;
