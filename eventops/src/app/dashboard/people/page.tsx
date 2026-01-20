@@ -84,35 +84,41 @@ export default async function PeoplePage({
       <PeopleFilters />
 
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-300">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                Name
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Company
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Title
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Contact
-              </th>
-              <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Personas
-              </th>
-              <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                <span className="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {people.map((person: Person & { account: TargetAccount }) => (
-              <tr key={person.id}>
-                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                  {person.name}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-300">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                  Name
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Company
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Title
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Contact
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                  Personas
+                </th>
+                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {people.map((person: Person & { account: TargetAccount }) => (
+                <tr key={person.id}>
+                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">
+                    <Link
+                      href={`/dashboard/people/${person.id}`}
+                      className="text-blue-600 hover:text-blue-900 font-medium"
+                    >
+                      {person.name}
+                    </Link>
+                  </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   <Link
                     href={`/dashboard/accounts/${person.account.id}`}
@@ -180,6 +186,7 @@ export default async function PeoplePage({
             ))}
           </tbody>
         </table>
+        </div>
         {people.length === 0 && (
           <div className="px-6 py-14 text-center text-sm text-gray-500">
             <svg
