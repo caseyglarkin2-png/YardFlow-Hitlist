@@ -1,0 +1,46 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
+import { OutreachEditor } from "@/components/outreach-editor";
+
+export default async function OutreachDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/");
+  }
+
+  const outreach = await db.outreach.findUnique({
+    where: { id: params.id },
+    include: {
+      person: {
+        include: {
+          account: true,
+        },
+      },
+    },
+  });
+
+  if (!outreach) {
+    notFound();
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Outreach: {outreach.person.name}
+        </h1>
+        <p className="text-muted-foreground">
+          {outreach.person.account.name} • {outreach.person.title || "No title"}
+        </p>
+      </div>
+
+      <OutreachEditor outreach={outreach} />
+    </div>
+  );
+}

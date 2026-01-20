@@ -18,6 +18,8 @@ export function DashboardNav() {
     { name: 'Events', href: '/dashboard/events' },
     { name: 'Accounts', href: '/dashboard/accounts' },
     { name: 'People', href: '/dashboard/people' },
+    { name: 'Templates', href: '/dashboard/templates' },
+    { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Import', href: '/dashboard/import' },
   ];
 
