@@ -17,6 +17,8 @@
     "@edge-runtime/ponyfill": "^4.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "^5.18.0",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
     "bcrypt-edge": "^0.1.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
