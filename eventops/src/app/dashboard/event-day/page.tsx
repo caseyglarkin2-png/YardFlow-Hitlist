@@ -126,7 +126,7 @@ export default function EventDayDashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Event Day Dashboard</h1>
-        <p className="text-gray-600 mt-1">Real-time view of today's activities</p>
+        <p className="text-gray-600 mt-1">Real-time view of today&apos;s activities</p>
         <p className="text-sm text-gray-500 mt-1">
           Last updated: {currentTime.toLocaleTimeString()}
         </p>

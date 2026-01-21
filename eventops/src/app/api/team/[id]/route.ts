@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getServerSession } from 'next-auth';
+import { auth } from '@/lib/auth';
 
 // PATCH /api/team/[id] - Update team member role
 export async function PATCH(

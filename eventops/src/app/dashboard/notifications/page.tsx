@@ -149,7 +149,7 @@ export default function NotificationsPage() {
         <div className="bg-white p-12 rounded-lg shadow text-center">
           <div className="text-6xl mb-4">🔔</div>
           <h2 className="text-2xl font-semibold mb-2">No Notifications</h2>
-          <p className="text-gray-600">You're all caught up!</p>
+          <p className="text-gray-600">You&apos;re all caught up!</p>
         </div>
       ) : (
         <div className="space-y-3">

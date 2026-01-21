@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const groupBy = searchParams.get('groupBy') || 'month'; // month, week, persona, icpTier
+    const groupBy = searchParams.get('groupBy') || 'month'; // month, week, persona, icpScore
     const metric = searchParams.get('metric') || 'response_rate'; // response_rate, meeting_rate, completion_rate
 
     let cohorts = [];
@@ -16,9 +16,10 @@ export async function GET(request: NextRequest) {
         include: {
           person: {
             select: {
-              persona: true,
+              name: true,
+              title: true,
               account: {
-                select: { icpTier: true },
+                select: { icpScore: true, name: true },
               },
             },
           },
@@ -114,8 +115,8 @@ export async function GET(request: NextRequest) {
         responseRate: c.sent > 0 ? (c.responded / c.sent) * 100 : 0,
         meetingRate: c.responded > 0 ? (c.meetings / c.responded) * 100 : 0,
       }));
-    } else if (groupBy === 'icpTier') {
-      // ICP Tier-based cohorts
+    } else if (groupBy === 'icpScore') {
+      // ICP Score-based cohorts
       const accounts = await prisma.targetAccount.findMany({
         include: {
           people: {
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
       const cohortMap = new Map();
 
       for (const account of accounts) {
-        const cohortKey = account.icpTier || 'Unknown';
+        const cohortKey = account.icpScore ? `Score ${Math.floor(account.icpScore / 20) * 20}-${Math.floor(account.icpScore / 20) * 20 + 20}` : 'Unknown';
 
         if (!cohortMap.has(cohortKey)) {
           cohortMap.set(cohortKey, {
