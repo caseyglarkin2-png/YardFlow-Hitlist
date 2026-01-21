@@ -23,6 +23,9 @@ export function DashboardNav() {
     { name: 'Meetings', href: '/dashboard/meetings' },
     { name: 'Analytics', href: '/dashboard/analytics' },
     { name: 'Event Day', href: '/dashboard/event-day' },
+    { name: 'A/B Tests', href: '/dashboard/ab-test' },
+    { name: 'Engagement', href: '/dashboard/engagement' },
+    { name: 'Research', href: '/dashboard/research-refresh' },
   ];
 
   return (
