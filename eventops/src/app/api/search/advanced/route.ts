@@ -47,14 +47,13 @@ export async function GET(req: NextRequest) {
         AND: [
           {
             OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { domain: { contains: query, mode: 'insensitive' } },
-              { website: { contains: query, mode: 'insensitive' } },
-              { industry: { contains: query, mode: 'insensitive' } },
+              { name: { contains: query, mode: 'insensitive' as const } },
+              { website: { contains: query, mode: 'insensitive' as const } },
+              { industry: { contains: query, mode: 'insensitive' as const } },
             ],
           },
           { icpScore: { gte: minIcpScore, lte: maxIcpScore } },
-          ...(industry ? [{ industry: { contains: industry, mode: 'insensitive' } }] : []),
+          ...(industry ? [{ industry: { contains: industry, mode: 'insensitive' as const } }] : []),
         ],
       },
       include: {
@@ -81,19 +80,24 @@ export async function GET(req: NextRequest) {
 
   // Search people
   if (type === 'all' || type === 'people') {
+    // Build persona filter
+    const personaFilter = persona ? { 
+      [`is${persona.charAt(0).toUpperCase() + persona.slice(1)}`]: true 
+    } : {};
+    
     const people = await prisma.person.findMany({
       where: {
         account: { eventId: user.activeEventId },
         AND: [
           {
             OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { email: { contains: query, mode: 'insensitive' } },
-              { title: { contains: query, mode: 'insensitive' } },
-              { linkedin: { contains: query, mode: 'insensitive' } },
+              { name: { contains: query, mode: 'insensitive' as const } },
+              { email: { contains: query, mode: 'insensitive' as const } },
+              { title: { contains: query, mode: 'insensitive' as const } },
+              { linkedin: { contains: query, mode: 'insensitive' as const } },
             ],
           },
-          ...(persona ? [{ persona: { has: persona } }] : []),
+          ...(persona ? [personaFilter] : []),
           ...(hasEmail === 'true' ? [{ email: { not: null } }] : []),
           ...(hasEmail === 'false' ? [{ email: null }] : []),
         ],

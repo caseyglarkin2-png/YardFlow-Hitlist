@@ -10,10 +10,8 @@ interface TeamMember {
   role: string;
   createdAt: string;
   _count: {
-    events: number;
-    campaigns: number;
-    outreach: number;
-    meetings: number;
+    activityLogs: number;
+    auditLogs: number;
   };
 }
 
@@ -172,10 +170,8 @@ export default function TeamPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-600">
-                      <div>{member._count.events} events</div>
-                      <div>{member._count.campaigns} campaigns</div>
-                      <div>{member._count.outreach} outreach</div>
-                      <div>{member._count.meetings} meetings</div>
+                      <div>{member._count.activityLogs} activities</div>
+                      <div>{member._count.auditLogs} audits</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">

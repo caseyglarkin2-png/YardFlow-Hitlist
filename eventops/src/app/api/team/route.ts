@@ -33,10 +33,8 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         _count: {
           select: {
-            events: true,
-            campaigns: true,
-            outreach: true,
-            meetings: true,
+            activityLogs: true,
+            auditLogs: true,
           },
         },
       },

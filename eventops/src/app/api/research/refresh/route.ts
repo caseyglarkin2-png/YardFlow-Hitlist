@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
     try {
       const account = await prisma.targetAccount.findUnique({
         where: { id: accountId },
+        include: { dossier: true },
       });
 
       if (!account) {
@@ -34,8 +35,8 @@ export async function POST(req: NextRequest) {
       }
 
       // Check if refresh needed (7+ days old)
-      const daysSinceUpdate = account.dossierUpdatedAt
-        ? Math.floor((Date.now() - account.dossierUpdatedAt.getTime()) / (1000 * 60 * 60 * 24))
+      const daysSinceUpdate = account.dossier?.researchedAt
+        ? Math.floor((Date.now() - account.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
         : 999;
 
       if (!forceRefresh && daysSinceUpdate < 7) {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Generate new dossier
-      const newDossier = await generateCompanyResearch(account.name, account.domain || account.website || undefined);
+      const newDossier = await generateCompanyResearch(account.name, account.website || undefined);
 
       // Compare with old dossier (simple JSON comparison)
       const oldDossierStr = account.dossier ? JSON.stringify(account.dossier) : '';
@@ -56,22 +57,30 @@ export async function POST(req: NextRequest) {
         where: { accountId: accountId },
         create: {
           accountId,
-          overview: newDossier.overview || '',
-          keyProducts: newDossier.keyProducts || [],
-          recentNews: newDossier.recentNews || [],
-          competitivePosition: newDossier.competitivePosition || '',
-          painPoints: newDossier.painPoints || [],
-          valueProps: newDossier.valueProps || [],
+          companyOverview: newDossier.companyOverview || null,
+          recentNews: newDossier.recentNews || null,
+          industryContext: newDossier.industryContext || null,
+          keyPainPoints: newDossier.keyPainPoints || null,
+          companySize: newDossier.companySize || null,
+          facilityCount: newDossier.facilityCount || null,
+          locations: newDossier.locations || null,
+          operationalScale: newDossier.operationalScale || null,
+          rawData: JSON.stringify(newDossier),
           researchedAt: new Date(),
+          researchedBy: session.user.email,
         },
         update: {
-          overview: newDossier.overview || '',
-          keyProducts: newDossier.keyProducts || [],
-          recentNews: newDossier.recentNews || [],
-          competitivePosition: newDossier.competitivePosition || '',
-          painPoints: newDossier.painPoints || [],
-          valueProps: newDossier.valueProps || [],
+          companyOverview: newDossier.companyOverview || null,
+          recentNews: newDossier.recentNews || null,
+          industryContext: newDossier.industryContext || null,
+          keyPainPoints: newDossier.keyPainPoints || null,
+          companySize: newDossier.companySize || null,
+          facilityCount: newDossier.facilityCount || null,
+          locations: newDossier.locations || null,
+          operationalScale: newDossier.operationalScale || null,
+          rawData: JSON.stringify(newDossier),
           researchedAt: new Date(),
+          researchedBy: session.user.email,
         },
       });
 

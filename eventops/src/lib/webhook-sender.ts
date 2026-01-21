@@ -5,6 +5,7 @@ interface WebhookPayload {
   event: string;
   data: unknown;
   timestamp: string;
+  [key: string]: unknown; // Add index signature for Prisma JSON compatibility
 }
 
 export async function sendWebhook(event: string, data: unknown) {
@@ -56,7 +57,7 @@ export async function sendWebhook(event: string, data: unknown) {
           data: {
             webhookId: webhook.id,
             event,
-            payload,
+            payload: payload as any,
             statusCode: response.status,
             success: response.ok,
             responseBody: response.ok ? null : await response.text(),
