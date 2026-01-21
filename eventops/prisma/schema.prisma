@@ -24,6 +24,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   activeEvent   Event?    @relation("ActiveEvent", fields: [activeEventId], references: [id])
+  activityLogs  ActivityLog[]
+  editLocks     EditLock[]
+  auditLogs     AuditLog[]
   @@map("users")
 }
 
@@ -359,6 +362,7 @@ model UserPresence {
 model ActivityLog {
   id         String   @id @default(cuid())
   userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action     String   // "created", "updated", "deleted", "viewed", etc.
   entityType String   // "account", "person", "outreach", etc.
   entityId   String?  // ID of the entity
@@ -373,6 +377,7 @@ model ActivityLog {
 model EditLock {
   id         String   @id @default(cuid())
   userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   entityType String   // "account", "person", etc.
   entityId   String   // ID of entity being edited
   expiresAt  DateTime
@@ -410,4 +415,24 @@ model WebhookDelivery {
   @@index([webhookId])
   @@index([createdAt])
   @@map("webhook_deliveries")
+}
+
+// Sprint 27: Audit Logs
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action     String   // "created", "updated", "deleted", "login", "logout", etc.
+  entityType String   // "account", "person", "outreach", etc.
+  entityId   String?  // ID of affected entity
+  changes    Json?    // { field: { old: value, new: value } }
+  metadata   Json?    // Additional context (IP, user agent, etc.)
+  ipAddress  String?
+  userAgent  String?  @db.Text
+  createdAt  DateTime @default(now())
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
