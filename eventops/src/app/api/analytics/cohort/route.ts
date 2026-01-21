@@ -91,7 +91,13 @@ export async function GET(request: NextRequest) {
       const cohortMap = new Map();
 
       for (const person of people) {
-        const cohortKey = person.persona || 'Unknown';
+        // Determine persona based on boolean flags
+        let cohortKey = 'Other';
+        if (person.isExecOps) cohortKey = 'ExecOps';
+        else if (person.isOps) cohortKey = 'Ops';
+        else if (person.isProc) cohortKey = 'Procurement';
+        else if (person.isSales) cohortKey = 'Sales';
+        else if (person.isTech) cohortKey = 'Tech';
 
         if (!cohortMap.has(cohortKey)) {
           cohortMap.set(cohortKey, {

@@ -18,23 +18,24 @@ export async function GET(request: NextRequest) {
         }
       : {};
 
-    const campaignFilter = campaignId ? { campaignId } : {};
+    const campaignFilter = campaignId ? { campaigns: { some: { id: campaignId } } } : {};
 
     // Funnel stages
     const totalAccounts = await prisma.targetAccount.count({
-      where: { ...campaignFilter, ...dateFilter },
+      where: { ...dateFilter },
     });
 
     const totalPeople = await prisma.person.count({
       where: {
-        account: { ...campaignFilter },
         ...dateFilter,
       },
     });
 
+    const outreachFilter = campaignId ? { campaignId } : {};
+
     const outreachSent = await prisma.outreach.count({
       where: {
-        ...campaignFilter,
+        ...outreachFilter,
         status: { in: ['SENT', 'OPENED', 'RESPONDED'] },
         ...dateFilter,
       },
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     const outreachOpened = await prisma.outreach.count({
       where: {
-        ...campaignFilter,
+        ...outreachFilter,
         status: { in: ['OPENED', 'RESPONDED'] },
         ...dateFilter,
       },
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     const outreachResponded = await prisma.outreach.count({
       where: {
-        ...campaignFilter,
+        ...outreachFilter,
         status: 'RESPONDED',
         ...dateFilter,
       },
@@ -58,18 +59,12 @@ export async function GET(request: NextRequest) {
 
     const meetingsScheduled = await prisma.meeting.count({
       where: {
-        person: {
-          account: { ...campaignFilter },
-        },
         ...dateFilter,
       },
     });
 
     const meetingsCompleted = await prisma.meeting.count({
       where: {
-        person: {
-          account: { ...campaignFilter },
-        },
         status: 'COMPLETED',
         ...dateFilter,
       },
