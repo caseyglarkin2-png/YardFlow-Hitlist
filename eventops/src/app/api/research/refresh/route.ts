@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
-import { generateAccountDossier } from '@/lib/openai';
+import { generateCompanyResearch } from '@/lib/ai-research';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,17 +44,34 @@ export async function POST(req: NextRequest) {
       }
 
       // Generate new dossier
-      const newDossier = await generateAccountDossier(account.name, account.domain || '');
+      const newDossier = await generateCompanyResearch(account.name, account.domain || account.website || undefined);
 
-      // Compare with old dossier
-      const hasChanged = JSON.stringify(newDossier) !== account.dossier;
+      // Compare with old dossier (simple JSON comparison)
+      const oldDossierStr = account.dossier ? JSON.stringify(account.dossier) : '';
+      const newDossierStr = JSON.stringify(newDossier);
+      const hasChanged = oldDossierStr !== newDossierStr;
 
-      // Update account
-      await prisma.targetAccount.update({
-        where: { id: accountId },
-        data: {
-          dossier: JSON.stringify(newDossier),
-          dossierUpdatedAt: new Date(),
+      // Update or create dossier
+      await prisma.companyDossier.upsert({
+        where: { accountId: accountId },
+        create: {
+          accountId,
+          overview: newDossier.overview || '',
+          keyProducts: newDossier.keyProducts || [],
+          recentNews: newDossier.recentNews || [],
+          competitivePosition: newDossier.competitivePosition || '',
+          painPoints: newDossier.painPoints || [],
+          valueProps: newDossier.valueProps || [],
+          researchedAt: new Date(),
+        },
+        update: {
+          overview: newDossier.overview || '',
+          keyProducts: newDossier.keyProducts || [],
+          recentNews: newDossier.recentNews || [],
+          competitivePosition: newDossier.competitivePosition || '',
+          painPoints: newDossier.painPoints || [],
+          valueProps: newDossier.valueProps || [],
+          researchedAt: new Date(),
         },
       });
 
@@ -110,7 +127,7 @@ export async function GET(req: NextRequest) {
   const daysOld = parseInt(searchParams.get('daysOld') || '7');
   const minIcpScore = parseInt(searchParams.get('minIcpScore') || '75');
 
-  // Get accounts needing refresh
+  // Get accounts needing refresh (those without dossiers or old dossiers)
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
@@ -118,19 +135,30 @@ export async function GET(req: NextRequest) {
     where: {
       eventId: user.activeEventId,
       icpScore: { gte: minIcpScore },
-      OR: [{ dossierUpdatedAt: null }, { dossierUpdatedAt: { lt: cutoffDate } }],
+    },
+    include: {
+      dossier: true,
     },
     orderBy: { icpScore: 'desc' },
     take: 100,
   });
 
-  const accountsWithAge = accounts.map((a) => ({
+  // Filter accounts that need refresh
+  const accountsNeedingRefresh = accounts.filter((a) => {
+    if (!a.dossier) return true; // Never researched
+    const daysSinceUpdate = Math.floor(
+      (Date.now() - a.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return daysSinceUpdate >= daysOld;
+  });
+
+  const accountsWithAge = accountsNeedingRefresh.map((a) => ({
     id: a.id,
     name: a.name,
     icpScore: a.icpScore,
-    dossierUpdatedAt: a.dossierUpdatedAt,
-    daysSinceUpdate: a.dossierUpdatedAt
-      ? Math.floor((Date.now() - a.dossierUpdatedAt.getTime()) / (1000 * 60 * 60 * 24))
+    dossierUpdatedAt: a.dossier?.researchedAt || null,
+    daysSinceUpdate: a.dossier
+      ? Math.floor((Date.now() - a.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
       : null,
   }));
 
