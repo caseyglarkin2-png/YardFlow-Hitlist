@@ -23,8 +23,8 @@ export function DashboardNav() {
     { name: 'Workflows', href: '/dashboard/workflows' },
     { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Team', href: '/dashboard/team' },
+    { name: 'Custom', href: '/dashboard/custom' },
     { name: 'Analytics', href: '/dashboard/analytics' },
-    { name: 'Advanced', href: '/dashboard/analytics-advanced' },
   ];
 
   return (

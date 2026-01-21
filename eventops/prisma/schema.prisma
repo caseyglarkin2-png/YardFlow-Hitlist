@@ -436,3 +436,31 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+// Sprint 28: Custom Dashboards
+model CustomDashboard {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  layout    String   // "grid", "flex", "masonry"
+  widgets   Json     // Array of widget configs
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@map("custom_dashboards")
+}
+
+// Sprint 30: Performance & Caching
+model CacheEntry {
+  id             String   @id @default(cuid())
+  key            String   @unique
+  value          Json
+  expiresAt      DateTime
+  hitCount       Int      @default(0)
+  lastAccessedAt DateTime @default(now())
+  createdAt      DateTime @default(now())
+  @@index([expiresAt])
+  @@index([key])
+  @@map("cache_entries")
+}
