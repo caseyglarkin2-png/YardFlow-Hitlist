@@ -24,9 +24,8 @@ export function DashboardNav() {
     { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Meetings', href: '/dashboard/meetings' },
     { name: 'Analytics', href: '/dashboard/analytics' },
-    { name: 'Engagement', href: '/dashboard/engagement' },
+    { name: 'Advanced', href: '/dashboard/analytics-advanced' },
     { name: 'Search', href: '/dashboard/search' },
-    { name: 'Export', href: '/dashboard/export' },
   ];
 
   return (
