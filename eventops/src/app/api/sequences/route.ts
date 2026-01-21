@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -29,7 +28,6 @@ export async function GET(req: NextRequest) {
       },
       include: {
         campaign: { select: { name: true } },
-        _count: { select: { outreach: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -43,7 +41,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -89,7 +87,7 @@ export async function POST(req: NextRequest) {
         name,
         description,
         campaignId,
-        steps,
+        steps: JSON.stringify(steps),
         createdBy: user.id,
       },
     });

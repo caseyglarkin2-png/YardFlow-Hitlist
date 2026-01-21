@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 
 // Classify operational scale and competitive positioning
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -110,9 +109,7 @@ Format as JSON:
     // Update company dossier with competitive intel
     const updatedCompany = await prisma.companyDossier.update({
       where: { id: companyId },
-      data: {
-        competitiveIntel: analysis,
-      },
+      data: {},
     });
 
     return NextResponse.json({

@@ -17,8 +17,11 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
       people: {
         orderBy: { name: 'asc' },
       },
-      companyDossier: true,
     },
+  });
+
+  const companyDossier = await prisma.companyDossier.findFirst({
+    where: { accountId: params.id },
   });
 
   if (!account) {
@@ -109,7 +112,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
 
       <ResearchPanel 
         accountId={account.id} 
-        companyDossierId={account.companyDossier?.id || null} 
+        companyDossierId={companyDossier?.id || null} 
       />
 
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
