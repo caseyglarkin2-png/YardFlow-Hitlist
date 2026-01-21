@@ -5,7 +5,7 @@ import { auth } from '@/lib/auth';
 // GET /api/team - List team members
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

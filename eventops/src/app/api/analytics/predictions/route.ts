@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
           account: {
             select: {
               icpScore: true,
-              icpTier: true,
               industry: true,
-              companySize: true,
+              headquarters: true,
+              name: true,
             },
           },
         },
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
           account: {
             select: {
               icpScore: true,
-              icpTier: true,
+              name: true,
             },
           },
         },

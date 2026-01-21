@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 // GET /api/dashboards - List user dashboards
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
+    const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

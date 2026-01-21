@@ -40,8 +40,9 @@ export async function POST(req: NextRequest) {
 
     data = accounts.map((a) => ({
       'Account Name': a.name,
+      Website: a.website,
       Industry: a.industry,
-      Domain: a.domain,
+      Headquarters: a.headquarters,
       'ICP Score': a.icpScore,
       'People Count': a.people.length,
       'Created At': a.createdAt.toISOString(),
@@ -73,7 +74,11 @@ export async function POST(req: NextRequest) {
       LinkedIn: p.linkedin,
       Account: p.account.name,
       Industry: p.account.industry,
-      Persona: p.persona?.join(', ') || '',
+      'Exec Ops': p.isExecOps,
+      'Ops': p.isOps,
+      'Procurement': p.isProc,
+      'Sales': p.isSales,
+      'Tech': p.isTech,
       'Created At': p.createdAt.toISOString(),
     }));
 
