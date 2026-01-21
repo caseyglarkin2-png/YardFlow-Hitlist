@@ -45,24 +45,31 @@ export async function GET(request: NextRequest) {
     // Get presences updated in last 5 minutes
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
+    const whereClause: any = {
+      lastSeen: { gte: fiveMinutesAgo },
+    };
+
+    if (page) {
+      whereClause.page = page;
+    }
+
     const presences = await prisma.userPresence.findMany({
-      where: {
-        lastSeen: { gte: fiveMinutesAgo },
-        ...(page && { page }),
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
+      where: whereClause,
       orderBy: { lastSeen: 'desc' },
     });
 
-    return NextResponse.json(presences);
+    // Manually fetch user details for each presence
+    const presencesWithUsers = await Promise.all(
+      presences.map(async (presence) => {
+        const user = await prisma.user.findUnique({
+          where: { id: presence.userId },
+          select: { id: true, name: true, email: true },
+        });
+        return { ...presence, user };
+      })
+    );
+
+    return NextResponse.json(presencesWithUsers);
   } catch (error) {
     console.error('Error fetching presence:', error);
     return NextResponse.json(
