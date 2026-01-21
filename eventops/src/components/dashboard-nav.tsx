@@ -26,6 +26,9 @@ export function DashboardNav() {
     { name: 'A/B Tests', href: '/dashboard/ab-test' },
     { name: 'Engagement', href: '/dashboard/engagement' },
     { name: 'Research', href: '/dashboard/research-refresh' },
+    { name: 'Search', href: '/dashboard/search' },
+    { name: 'Export', href: '/dashboard/export' },
+    { name: 'Notifications', href: '/dashboard/notifications' },
   ];
 
   return (

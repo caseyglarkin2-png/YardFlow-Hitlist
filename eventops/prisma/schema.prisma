@@ -279,3 +279,36 @@ model Meeting {
   @@index([scheduledAt])
   @@map("meetings")
 }
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  ENGAGEMENT
+  MEETING
+  CAMPAIGN
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String
+  type      NotificationType     @default(INFO)
+  priority  NotificationPriority @default(NORMAL)
+  title     String
+  message   String
+  actionUrl String?
+  read      Boolean              @default(false)
+  readAt    DateTime?
+  createdAt DateTime             @default(now())
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
