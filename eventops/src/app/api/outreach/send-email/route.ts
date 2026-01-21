@@ -59,8 +59,8 @@ export async function POST(req: NextRequest) {
 
   try {
     // Send email via SendGrid
-    const sgMail = require('@sendgrid/mail');
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const sgMail = await import('@sendgrid/mail');
+    sgMail.default.setApiKey(process.env.SENDGRID_API_KEY || '');
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@yardflow.com';
 
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       html: outreach.message + trackingPixel,
     };
 
-    await sgMail.send(msg);
+    await sgMail.default.send(msg);
 
     // Update outreach status
     await prisma.outreach.update({

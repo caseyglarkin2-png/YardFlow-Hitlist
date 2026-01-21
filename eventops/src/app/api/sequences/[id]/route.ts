@@ -17,10 +17,17 @@ export async function GET(
       select: { activeEventId: true },
     });
 
+    if (!user || !user.activeEventId) {
+      return NextResponse.json(
+        { error: 'No active event selected' },
+        { status: 400 }
+      );
+    }
+
     const sequence = await prisma.sequence.findFirst({
       where: {
         id: params.id,
-        campaign: { eventId: user?.activeEventId! },
+        campaign: { eventId: user.activeEventId },
       },
       include: {
         campaign: true,

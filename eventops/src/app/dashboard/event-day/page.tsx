@@ -135,7 +135,7 @@ export default function EventDayDashboard() {
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-          <p className="text-blue-800 text-sm font-medium">Today's Meetings</p>
+          <p className="text-blue-800 text-sm font-medium">Today&apos;s Meetings</p>
           <p className="text-3xl font-bold text-blue-900">{stats.totalToday}</p>
         </div>
         <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">

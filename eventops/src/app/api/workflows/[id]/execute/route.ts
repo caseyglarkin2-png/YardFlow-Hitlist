@@ -28,7 +28,7 @@ export async function POST(
   const conditions = JSON.parse(workflow.conditions);
   const actions = JSON.parse(workflow.actions);
 
-  let executedActions = [];
+  const executedActions = [];
 
   // Process actions
   for (const action of actions) {

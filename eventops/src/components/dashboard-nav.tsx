@@ -21,6 +21,7 @@ export function DashboardNav() {
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
     { name: 'Workflows', href: '/dashboard/workflows' },
+    { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Meetings', href: '/dashboard/meetings' },
     { name: 'Analytics', href: '/dashboard/analytics' },
     { name: 'Engagement', href: '/dashboard/engagement' },

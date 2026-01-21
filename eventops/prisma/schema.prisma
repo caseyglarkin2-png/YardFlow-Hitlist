@@ -341,3 +341,44 @@ model WorkflowExecution {
   @@index([executedAt])
   @@map("workflow_executions")
 }
+
+// Sprint 23: Real-time Collaboration
+model UserPresence {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  page      String?  // Current page/path
+  status    String   @default("active") // "active", "away", "busy"
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@index([lastSeen])
+  @@map("user_presence")
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // "created", "updated", "deleted", "viewed", etc.
+  entityType String   // "account", "person", "outreach", etc.
+  entityId   String?  // ID of the entity
+  metadata   Json?    // Additional context
+  createdAt  DateTime @default(now())
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+model EditLock {
+  id         String   @id @default(cuid())
+  userId     String
+  entityType String   // "account", "person", etc.
+  entityId   String   // ID of entity being edited
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  @@unique([userId, entityType, entityId])
+  @@index([entityType, entityId])
+  @@index([expiresAt])
+  @@map("edit_locks")
+}

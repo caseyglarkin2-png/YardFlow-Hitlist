@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Meeting {
@@ -30,11 +30,7 @@ export default function MeetingsPage() {
   const [filter, setFilter] = useState<string>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
-    fetchMeetings();
-  }, [filter]);
-
-  async function fetchMeetings() {
+  const fetchMeetings = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -50,7 +46,11 @@ export default function MeetingsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter]);
+
+  useEffect(() => {
+    fetchMeetings();
+  }, [fetchMeetings]);
 
   const statusColors: Record<string, string> = {
     SCHEDULED: 'bg-blue-100 text-blue-800',
@@ -254,7 +254,7 @@ export default function MeetingsPage() {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Schedule Meeting</h2>
             <p className="text-gray-600 mb-4">
-              To schedule a meeting, navigate to a person's profile and use the "Schedule Meeting"
+              To schedule a meeting, navigate to a person&apos;s profile and use the &quot;Schedule Meeting&quot;
               button there.
             </p>
             <div className="flex gap-2">

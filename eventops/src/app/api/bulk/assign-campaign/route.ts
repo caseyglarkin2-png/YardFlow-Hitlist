@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let results = { success: 0, failed: 0, errors: [] as string[] };
+  const results = { success: 0, failed: 0, errors: [] as string[] };
 
   if (entityType === 'people') {
     // Assign people to campaign by creating outreach records
