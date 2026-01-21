@@ -88,7 +88,6 @@ export async function POST(req: NextRequest) {
         description,
         campaignId,
         steps: JSON.stringify(steps),
-        createdBy: user.id,
       },
     });
 
