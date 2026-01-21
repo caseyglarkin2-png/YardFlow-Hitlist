@@ -17,6 +17,7 @@ export default function EmailEnrichmentPage() {
   const [selectedPersonas, setSelectedPersonas] = useState<string[]>([]);
   const [minIcpScore, setMinIcpScore] = useState<number>(0);
   const [onlyMissingEmail, setOnlyMissingEmail] = useState<boolean>(true);
+  const [enrichmentMethod, setEnrichmentMethod] = useState<'smart-guess' | 'hunter'>('smart-guess');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<EnrichmentResult[]>([]);
   const [stats, setStats] = useState<{ total: number; enriched: number; failed: number } | null>(null);
@@ -51,12 +52,17 @@ export default function EmailEnrichmentPage() {
         return;
       }
 
-      // Limit to 50 at a time
-      const peopleToEnrich = peopleData.people.slice(0, 50);
+      // Limit to 50 at a time for Hunter.io, unlimited for smart-guess
+      const maxContacts = enrichmentMethod === 'hunter' ? 50 : 200;
+      const peopleToEnrich = peopleData.people.slice(0, maxContacts);
       
       if (peopleToEnrich.length > 20) {
+        const methodText = enrichmentMethod === 'smart-guess' 
+          ? '(FREE - Pattern matching, no API costs)'
+          : 'and consume Hunter.io API credits';
+        
         const confirm = window.confirm(
-          `This will enrich ${peopleToEnrich.length} contacts. This may take several minutes and consume API credits. Continue?`
+          `This will enrich ${peopleToEnrich.length} contacts ${methodText}. This may take several minutes. Continue?`
         );
         if (!confirm) {
           setIsLoading(false);
@@ -64,8 +70,12 @@ export default function EmailEnrichmentPage() {
         }
       }
 
-      // Step 2: Batch enrich
-      const enrichRes = await fetch('/api/enrichment/email', {
+      // Step 2: Batch enrich using selected method
+      const endpoint = enrichmentMethod === 'smart-guess' 
+        ? '/api/enrichment/smart-guess'
+        : '/api/enrichment/email';
+        
+      const enrichRes = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -130,6 +140,49 @@ export default function EmailEnrichmentPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">Enrichment Method</h2>
+
+        <div className="mb-6">
+          <div className="flex gap-4">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="method"
+                value="smart-guess"
+                checked={enrichmentMethod === 'smart-guess'}
+                onChange={() => setEnrichmentMethod('smart-guess')}
+                className="mr-2"
+              />
+              <span className="font-medium">Smart Guess (FREE)</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                name="method"
+                value="hunter"
+                checked={enrichmentMethod === 'hunter'}
+                onChange={() => setEnrichmentMethod('hunter')}
+                className="mr-2"
+              />
+              <span className="font-medium">Hunter.io API</span>
+            </label>
+          </div>
+          
+          {enrichmentMethod === 'smart-guess' && (
+            <p className="mt-2 text-sm text-green-700 bg-green-50 p-3 rounded">
+              ✨ Uses pattern matching to guess emails based on company size and known contacts. 
+              Also generates LinkedIn profile URLs. Completely free, no API costs.
+            </p>
+          )}
+          
+          {enrichmentMethod === 'hunter' && (
+            <p className="mt-2 text-sm text-blue-700 bg-blue-50 p-3 rounded">
+              Uses Hunter.io API for verified emails. Requires HUNTER_API_KEY environment variable.
+              Free tier: 25 requests/month.
+            </p>
+          )}
+        </div>
+
         <h2 className="text-lg font-semibold mb-4">Filters</h2>
 
         <div className="space-y-4">
