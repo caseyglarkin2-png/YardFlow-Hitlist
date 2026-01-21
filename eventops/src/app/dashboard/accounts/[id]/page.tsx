@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { DeleteAccountButton } from '@/components/delete-account-button';
 import { ScoreManager } from '@/components/score-manager';
 import { ScoreHistory } from '@/components/score-history';
+import { ResearchPanel } from '@/components/research-panel';
 
 export default async function AccountDetailPage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -16,6 +17,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
       people: {
         orderBy: { name: 'asc' },
       },
+      companyDossier: true,
     },
   });
 
@@ -104,6 +106,11 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
       <ScoreManager accountId={account.id} currentScore={account.icpScore} />
 
       <ScoreHistory accountId={account.id} />
+
+      <ResearchPanel 
+        accountId={account.id} 
+        companyDossierId={account.companyDossier?.id || null} 
+      />
 
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
