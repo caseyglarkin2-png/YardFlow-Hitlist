@@ -21,6 +21,7 @@ export function DashboardNav() {
     { name: 'Enrich', href: '/dashboard/people/enrich' },
     { name: 'Templates', href: '/dashboard/templates' },
     { name: 'Outreach', href: '/dashboard/outreach' },
+    { name: 'Campaigns', href: '/dashboard/campaigns' },
     { name: 'Manifest', href: '/dashboard/manifest/requests' },
     { name: 'Import', href: '/dashboard/import' },
   ];
