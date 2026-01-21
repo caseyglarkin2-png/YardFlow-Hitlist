@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
@@ -107,22 +107,46 @@ export async function GET() {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json([]);
+      return NextResponse.json({ people: [] });
+    }
+
+    // Get query params for filtering
+    const { searchParams } = new URL(request.url);
+    const missingEmail = searchParams.get('missingEmail') === 'true';
+    const minIcpScore = searchParams.get('minIcpScore') ? parseInt(searchParams.get('minIcpScore')!) : 0;
+    const personas = searchParams.getAll('persona'); // Can have multiple
+
+    // Build where clause
+    const where: any = {
+      account: {
+        eventId: user.activeEventId,
+      },
+    };
+
+    // Filter by missing email
+    if (missingEmail) {
+      where.email = null;
+    }
+
+    // Filter by persona (OR logic - any of the selected personas)
+    if (personas.length > 0) {
+      where.OR = personas.map(persona => ({ [persona]: true }));
+    }
+
+    // Filter by ICP score (need to join with account)
+    if (minIcpScore > 0) {
+      where.account.icpScore = { gte: minIcpScore };
     }
 
     const people = await prisma.person.findMany({
-      where: {
-        account: {
-          eventId: user.activeEventId,
-        },
-      },
+      where,
       include: {
         account: true,
       },
       orderBy: { name: 'asc' },
     });
 
-    return NextResponse.json(people);
+    return NextResponse.json({ people });
   } catch (error) {
     console.error('Error fetching people:', error);
     return NextResponse.json(
