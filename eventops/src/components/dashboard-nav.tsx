@@ -22,6 +22,7 @@ export function DashboardNav() {
     { name: 'Templates', href: '/dashboard/templates' },
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
+    { name: 'Sequences', href: '/dashboard/sequences' },
     { name: 'Manifest', href: '/dashboard/manifest/requests' },
     { name: 'Import', href: '/dashboard/import' },
   ];
