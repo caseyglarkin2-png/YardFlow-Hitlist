@@ -45,6 +45,7 @@ model Event {
   updatedAt   DateTime    @updatedAt
   accounts    TargetAccount[]
   activeUsers User[]      @relation("ActiveEvent")
+  campaigns   Campaign[]
   @@map("events")
 }
 
@@ -136,15 +137,63 @@ enum OutreachChannel {
 
 enum OutreachStatus {
   DRAFT
+  SCHEDULED
   SENT
+  OPENED
   RESPONDED
   BOUNCED
   NO_RESPONSE
 }
 
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+model Campaign {
+  id              String          @id @default(cuid())
+  eventId         String
+  name            String
+  description     String?
+  targetPersonas  String?         // JSON array: ["isExecOps", "isProcurement"]
+  minIcpScore     Int?
+  startDate       DateTime?
+  endDate         DateTime?
+  status          CampaignStatus  @default(DRAFT)
+  goals           String?         // JSON: {"meetings": 20, "emails": 100, "responses": 15}
+  createdBy       String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  event           Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  outreach        Outreach[]
+  sequences       Sequence[]
+  @@index([eventId])
+  @@index([status])
+  @@map("campaigns")
+}
+
+model Sequence {
+  id          String   @id @default(cuid())
+  campaignId  String?
+  name        String
+  description String?
+  steps       String   // JSON array of touchpoints with delays
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  @@index([campaignId])
+  @@map("sequences")
+}
+
 model Outreach {
   id          String          @id @default(cuid())
   personId    String
+  campaignId  String?
+  sequenceId  String?
   channel     OutreachChannel
   status      OutreachStatus  @default(DRAFT)
   subject     String?
@@ -152,12 +201,16 @@ model Outreach {
   templateId  String?
   sentBy      String?
   sentAt      DateTime?
+  openedAt    DateTime?
   respondedAt DateTime?
+  bouncedAt   DateTime?
   notes       String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   person      Person          @relation(fields: [personId], references: [id], onDelete: Cascade)
+  campaign    Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   @@index([personId])
+  @@index([campaignId])
   @@index([status])
   @@map("outreach")
 }
