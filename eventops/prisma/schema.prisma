@@ -312,3 +312,32 @@ model Notification {
   @@index([createdAt])
   @@map("notifications")
 }
+
+model Workflow {
+  id         String              @id @default(cuid())
+  name       String
+  trigger    String              // JSON: { type: 'email_opened', 'meeting_scheduled', etc }
+  conditions String              // JSON: filter criteria
+  actions    String              // JSON: [ { type: 'send_notification', ... }, { type: 'update_status' } ]
+  enabled    Boolean             @default(true)
+  createdBy  String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  executions WorkflowExecution[]
+  @@map("workflows")
+}
+
+model WorkflowExecution {
+  id              String   @id @default(cuid())
+  workflowId      String
+  triggeredBy     String   // 'MANUAL', 'AUTO', 'SCHEDULED'
+  status          String   // 'RUNNING', 'COMPLETED', 'FAILED'
+  actionsExecuted Int      @default(0)
+  errorMessage    String?
+  executedBy      String?
+  executedAt      DateTime @default(now())
+  workflow        Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  @@index([workflowId])
+  @@index([executedAt])
+  @@map("workflow_executions")
+}

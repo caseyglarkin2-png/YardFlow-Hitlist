@@ -20,15 +20,12 @@ export function DashboardNav() {
     { name: 'People', href: '/dashboard/people' },
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
+    { name: 'Workflows', href: '/dashboard/workflows' },
     { name: 'Meetings', href: '/dashboard/meetings' },
     { name: 'Analytics', href: '/dashboard/analytics' },
-    { name: 'Event Day', href: '/dashboard/event-day' },
-    { name: 'A/B Tests', href: '/dashboard/ab-test' },
     { name: 'Engagement', href: '/dashboard/engagement' },
-    { name: 'Research', href: '/dashboard/research-refresh' },
     { name: 'Search', href: '/dashboard/search' },
     { name: 'Export', href: '/dashboard/export' },
-    { name: 'Notifications', href: '/dashboard/notifications' },
   ];
 
   return (
