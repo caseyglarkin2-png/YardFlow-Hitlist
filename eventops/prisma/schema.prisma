@@ -382,3 +382,32 @@ model EditLock {
   @@index([expiresAt])
   @@map("edit_locks")
 }
+
+// Sprint 26: API Webhooks
+model Webhook {
+  id         String             @id @default(cuid())
+  url        String
+  events     String[]           // ["outreach.sent", "meeting.scheduled", etc.]
+  secret     String?            // For HMAC signature
+  active     Boolean            @default(true)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  deliveries WebhookDelivery[]
+  @@index([active])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id           String   @id @default(cuid())
+  webhookId    String
+  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  event        String
+  payload      Json
+  statusCode   Int?
+  success      Boolean  @default(false)
+  responseBody String?  @db.Text
+  createdAt    DateTime @default(now())
+  @@index([webhookId])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}

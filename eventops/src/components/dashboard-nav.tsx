@@ -22,10 +22,9 @@ export function DashboardNav() {
     { name: 'Campaigns', href: '/dashboard/campaigns' },
     { name: 'Workflows', href: '/dashboard/workflows' },
     { name: 'Activity', href: '/dashboard/activity' },
-    { name: 'Meetings', href: '/dashboard/meetings' },
+    { name: 'Team', href: '/dashboard/team' },
     { name: 'Analytics', href: '/dashboard/analytics' },
     { name: 'Advanced', href: '/dashboard/analytics-advanced' },
-    { name: 'Search', href: '/dashboard/search' },
   ];
 
   return (
