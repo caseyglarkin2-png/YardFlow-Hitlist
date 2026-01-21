@@ -1,7 +1,0 @@
-{
-  "framework": "nextjs",
-  "buildCommand": "cd eventops && npx prisma generate && npm run build",
-  "outputDirectory": "eventops/.next",
-  "installCommand": "cd eventops && npm install",
-  "devCommand": "cd eventops && npm run dev"
-}
