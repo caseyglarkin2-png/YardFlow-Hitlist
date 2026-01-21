@@ -1,9 +1,0 @@
-[build]
-builder = "NIXPACKS"
-nixpacksConfigPath = "eventops/nixpacks.toml"
-watchPatterns = ["eventops/**"]
-
-[deploy]
-startCommand = "cd eventops && npx prisma migrate deploy && npm start"
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
