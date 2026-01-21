@@ -18,13 +18,11 @@ export function DashboardNav() {
     { name: 'Events', href: '/dashboard/events' },
     { name: 'Accounts', href: '/dashboard/accounts' },
     { name: 'People', href: '/dashboard/people' },
-    { name: 'Enrich', href: '/dashboard/people/enrich' },
-    { name: 'Templates', href: '/dashboard/templates' },
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
-    { name: 'Sequences', href: '/dashboard/sequences' },
-    { name: 'Manifest', href: '/dashboard/manifest/requests' },
-    { name: 'Import', href: '/dashboard/import' },
+    { name: 'Meetings', href: '/dashboard/meetings' },
+    { name: 'Analytics', href: '/dashboard/analytics' },
+    { name: 'Event Day', href: '/dashboard/event-day' },
   ];
 
   return (
