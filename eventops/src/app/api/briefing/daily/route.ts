@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     // Get today's meetings
-    const todaysMeetings = await prisma.Meeting.findMany({
+    const todaysMeetings = await prisma.meeting.findMany({
       where: {
         scheduledAt: {
           gte: today,
