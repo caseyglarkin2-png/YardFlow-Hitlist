@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   for (const accountId of accountIds) {
     try {
-      const account = await prisma.targetAccount.findUnique({
+      const account = await prisma.target_accounts.findUnique({
         where: { id: accountId },
         include: { dossier: true },
       });
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       const hasChanged = oldDossierStr !== newDossierStr;
 
       // Update or create dossier
-      await prisma.companyDossier.upsert({
+      await prisma.company_dossiers.upsert({
         where: { accountId: accountId },
         create: {
           accountId,
@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -140,7 +140,7 @@ export async function GET(req: NextRequest) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-  const accounts = await prisma.targetAccount.findMany({
+  const accounts = await prisma.target_accounts.findMany({
     where: {
       eventId: user.activeEventId,
       icpScore: { gte: minIcpScore },

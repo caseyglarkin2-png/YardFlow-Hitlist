@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       // Bulk create accounts
       for (const row of rows) {
         const { data } = row;
-        await prisma.targetAccount.create({
+        await prisma.target_accounts.create({
           data: {
             name: data.name,
             website: data.website || null,
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         const { data } = row;
 
         // Find or create account
-        let account = await prisma.targetAccount.findFirst({
+        let account = await prisma.target_accounts.findFirst({
           where: {
             eventId: user.activeEventId,
             name: {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (!account) {
-          account = await prisma.targetAccount.create({
+          account = await prisma.target_accounts.create({
             data: {
               name: data.accountName,
               eventId: user.activeEventId,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create person
-        await prisma.person.create({
+        await prisma.people.create({
           data: {
             accountId: account.id,
             name: data.name,

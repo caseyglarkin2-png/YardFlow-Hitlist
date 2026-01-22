@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.users.findUnique({
       where: { email: session.user.email },
     });
 
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role');
 
-    const users = await prisma.user.findMany({
+    const users = await prisma.users.findMany({
       where: {
         ...(role && { role: role as 'ADMIN' | 'MEMBER' }),
       },
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.users.findUnique({
       where: { email: session.user.email },
     });
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: { email },
     });
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user (in real app, send invite email)
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
         email,
         name: name || email.split('@')[0],

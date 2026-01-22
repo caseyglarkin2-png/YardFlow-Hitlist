@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     // Manually fetch user details for each presence
     const presencesWithUsers = await Promise.all(
       presences.map(async (presence) => {
-        const user = await prisma.user.findUnique({
+        const user = await prisma.users.findUnique({
           where: { id: presence.userId },
           select: { id: true, name: true, email: true },
         });

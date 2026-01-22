@@ -50,9 +50,9 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
       const data = await res.json();
       setCampaign(data.campaign);
       setEditData({
-        status: data.campaign.status,
-        startDate: data.campaign.startDate || '',
-        endDate: data.campaign.endDate || '',
+        status: data.campaigns.status,
+        startDate: data.campaigns.startDate || '',
+        endDate: data.campaigns.endDate || '',
       });
     } catch (error) {
       console.error('Error fetching campaign:', error);

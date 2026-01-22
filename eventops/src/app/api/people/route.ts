@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const data = personSchema.parse(body);
 
     // Verify account exists and belongs to user's active event
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const account = await prisma.targetAccount.findFirst({
+    const account = await prisma.target_accounts.findFirst({
       where: {
         id: data.accountId,
         eventId: user.activeEventId,
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const person = await prisma.person.create({
+    const person = await prisma.people.create({
       data: {
         accountId: data.accountId,
         name: data.name,
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {
-      account: {
+      target_accounts: {
         eventId: user.activeEventId,
       },
     };
@@ -135,13 +135,13 @@ export async function GET(request: NextRequest) {
 
     // Filter by ICP score (need to join with account)
     if (minIcpScore > 0) {
-      where.account.icpScore = { gte: minIcpScore };
+      where.target_accounts.icpScore = { gte: minIcpScore };
     }
 
-    const people = await prisma.person.findMany({
+    const people = await prisma.people.findMany({
       where,
       include: {
-        account: true,
+        target_accounts: true,
       },
       orderBy: { name: 'asc' },
     });

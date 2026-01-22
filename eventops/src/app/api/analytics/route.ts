@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -26,8 +26,8 @@ export async function GET(req: NextRequest) {
 
   // Get all outreach for the event
   const outreachQuery: any = {
-    person: {
-      account: {
+    people: {
+      target_accounts: {
         eventId: user.activeEventId,
       },
     },
@@ -40,12 +40,12 @@ export async function GET(req: NextRequest) {
   const allOutreach = await prisma.outreach.findMany({
     where: outreachQuery,
     include: {
-      person: {
+      people: {
         include: {
-          account: true,
+          target_accounts: true,
         },
       },
-      campaign: true,
+      campaigns: true,
     },
   });
 
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
   };
 
   allOutreach.forEach((o) => {
-    const person = o.person;
+    const person = o.people;
     let personaKey = 'Non-Ops';
     if (person.isExecOps) personaKey = 'Executive Ops';
     else if (person.isOps) personaKey = 'Operations';
@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
   };
 
   allOutreach.forEach((o) => {
-    const score = o.person.account.icpScore || 0;
+    const score = o.people.target_accounts.icpScore || 0;
     let tier = 'Low (<50)';
     if (score >= 90) tier = 'Top Tier (90+)';
     else if (score >= 75) tier = 'High (75-89)';
@@ -134,8 +134,8 @@ export async function GET(req: NextRequest) {
   // Get meetings data
   const meetings = await prisma.meeting.findMany({
     where: {
-      person: {
-        account: {
+      people: {
+        target_accounts: {
           eventId: user.activeEventId,
         },
       },

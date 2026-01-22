@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-01-22T02:38:48.522Z",
+  "database": {
+    "accounts": {
+      "total": 2,
+      "withDossiers": 0,
+      "avgIcpScore": 0
+    },
+    "people": 3
+  }
+}

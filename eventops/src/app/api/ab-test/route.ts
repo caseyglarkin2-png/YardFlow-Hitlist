@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Create campaign for A/B test
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -31,8 +31,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No active event' }, { status: 400 });
   }
 
-  const campaign = await prisma.campaign.create({
+  const campaign = await prisma.campaigns.create({
     data: {
+      id: `ab-test-${Date.now()}`,
       eventId: user.activeEventId,
       name: `A/B Test: ${name}`,
       description: `${description}\n\nVariants: ${variants.map((v: any, i: number) => `${String.fromCharCode(65 + i)}: ${v.name}`).join(', ')}`,
@@ -44,6 +45,8 @@ export async function POST(req: NextRequest) {
         sampleSize: sampleSize || 100,
         targetFilters,
       }),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
@@ -73,12 +76,12 @@ export async function GET(req: NextRequest) {
   }
 
   // Get campaign (test)
-  const campaign = await prisma.campaign.findUnique({
+  const campaign = await prisma.campaigns.findUnique({
     where: { id: testId },
     include: {
       outreach: {
         include: {
-          person: true,
+          people: true,
         },
       },
     },

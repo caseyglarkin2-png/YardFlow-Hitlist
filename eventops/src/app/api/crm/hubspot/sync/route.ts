@@ -43,10 +43,10 @@ export async function POST(req: NextRequest) {
 
   for (const personId of personIds) {
     try {
-      const person = await prisma.person.findUnique({
+      const person = await prisma.people.findUnique({
         where: { id: personId },
         include: {
-          account: true,
+          target_accounts: true,
         },
       });
 

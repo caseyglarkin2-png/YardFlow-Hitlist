@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
     }
 
-    const company = await prisma.companyDossier.findUnique({
+    const company = await prisma.company_dossiers.findUnique({
       where: { id: companyId },
-      include: { account: true },
+      include: { target_accounts: true },
     });
 
     if (!company) {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 });
     }
 
-    const analysisPrompt = `Analyze the operational scale and competitive positioning of "${company.account.name}".
+    const analysisPrompt = `Analyze the operational scale and competitive positioning of "${company.target_accounts.name}".
 
 Company Context:
 ${company.industryContext || 'Not available'}
@@ -107,7 +107,7 @@ Format as JSON:
     const analysis = JSON.parse(openaiData.choices[0].message.content);
 
     // Update company dossier with competitive intel
-    const updatedCompany = await prisma.companyDossier.update({
+    const updatedCompany = await prisma.company_dossiers.update({
       where: { id: companyId },
       data: {},
     });

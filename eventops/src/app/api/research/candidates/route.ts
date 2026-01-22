@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email! },
     });
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     const missingOnly = searchParams.get('missingOnly') === 'true';
 
     // Get accounts with their dossier status
-    const accounts = await prisma.targetAccount.findMany({
+    const accounts = await prisma.target_accounts.findMany({
       where: {
         eventId: user.activeEventId,
         ...(minIcpScore > 0 ? { icpScore: { gte: minIcpScore } } : {}),

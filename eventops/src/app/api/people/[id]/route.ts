@@ -30,10 +30,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const person = await prisma.person.findUnique({
+    const person = await prisma.people.findUnique({
       where: { id: params.id },
       include: {
-        account: {
+        target_accounts: {
           include: {
             dossier: true,
           },
@@ -69,7 +69,7 @@ export async function PATCH(
     const body = await request.json();
     const data = personUpdateSchema.parse(body);
 
-    const person = await prisma.person.update({
+    const person = await prisma.people.update({
       where: { id: params.id },
       data: {
         ...(data.accountId && { accountId: data.accountId }),
@@ -118,7 +118,7 @@ export async function DELETE(
     }
 
     // Get person to know which account to recalculate
-    const person = await prisma.person.findUnique({
+    const person = await prisma.people.findUnique({
       where: { id: params.id },
       select: { accountId: true },
     });
@@ -127,7 +127,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Person not found' }, { status: 404 });
     }
 
-    await prisma.person.delete({
+    await prisma.people.delete({
       where: { id: params.id },
     });
 

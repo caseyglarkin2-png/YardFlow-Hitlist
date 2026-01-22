@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const event = await prisma.event.create({
+    const event = await prisma.events.create({
       data: {
         name: data.name,
         location: data.location,
@@ -62,7 +62,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const events = await prisma.event.findMany({
+    const events = await prisma.events.findMany({
       orderBy: { startDate: 'desc' },
     });
 

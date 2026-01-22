@@ -6,12 +6,12 @@ import type { Event } from '@prisma/client';
 export default async function EventsPage() {
   const session = await auth();
   
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
     include: { activeEvent: true },
   });
 
-  const events = await prisma.event.findMany({
+  const events = await prisma.events.findMany({
     orderBy: { startDate: 'desc' },
   });
 

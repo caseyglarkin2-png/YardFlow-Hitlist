@@ -26,9 +26,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Get person with account data
-    const person = await prisma.person.findUnique({
+    const person = await prisma.people.findUnique({
       where: { id: personId },
-      include: { account: true },
+      include: { target_accounts: true },
     });
 
     if (!person) {
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Update person record
-    await prisma.person.update({
+    await prisma.people.update({
       where: { id: personId },
       data: {
         email: result.email,
@@ -114,9 +114,9 @@ export async function PUT(req: NextRequest) {
     }
 
     // Get all people
-    const people = await prisma.person.findMany({
+    const people = await prisma.people.findMany({
       where: { id: { in: personIds } },
-      include: { account: true },
+      include: { target_accounts: true },
     });
 
     const results = [];
@@ -131,7 +131,7 @@ export async function PUT(req: NextRequest) {
 
       if (result.email && validateEmailFormat(result.email)) {
         // Update in database
-        await prisma.person.update({
+        await prisma.people.update({
           where: { id: person.id },
           data: { email: result.email },
         });

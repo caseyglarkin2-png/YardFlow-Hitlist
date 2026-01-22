@@ -22,10 +22,10 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const account = await prisma.targetAccount.findUnique({
+    const account = await prisma.target_accounts.findUnique({
       where: { id: params.id },
       include: {
-        event: true,
+        events: true,
         people: {
           orderBy: { name: 'asc' },
         },
@@ -59,7 +59,7 @@ export async function PATCH(
     const body = await request.json();
     const data = accountUpdateSchema.parse(body);
 
-    const account = await prisma.targetAccount.update({
+    const account = await prisma.target_accounts.update({
       where: { id: params.id },
       data: {
         ...(data.name && { name: data.name }),
@@ -97,7 +97,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await prisma.targetAccount.delete({
+    await prisma.target_accounts.delete({
       where: { id: params.id },
     });
 

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Update person's notes with Manifest view timestamp
-  const person = await prisma.person.update({
+  const person = await prisma.people.update({
     where: { id: personId },
     data: {
       notes: {

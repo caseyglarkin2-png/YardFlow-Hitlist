@@ -22,7 +22,7 @@ class ResearchQueue {
   private currentItem: QueueItem | null = null;
 
   async addBatch(accountIds: string[], forceRefresh = false) {
-    const accounts = await prisma.targetAccount.findMany({
+    const accounts = await prisma.target_accounts.findMany({
       where: { id: { in: accountIds } },
       select: { id: true, name: true, icpScore: true },
     });
@@ -57,7 +57,7 @@ class ResearchQueue {
     this.currentItem = item;
 
     try {
-      const account = await prisma.targetAccount.findUnique({
+      const account = await prisma.target_accounts.findUnique({
         where: { id: item.accountId },
         include: { dossier: true },
       });
@@ -93,7 +93,7 @@ class ResearchQueue {
       const research = await generateCompanyResearch(account.name, account.website || undefined);
 
       // Save dossier
-      await prisma.companyDossier.upsert({
+      await prisma.company_dossiers.upsert({
         where: { accountId: item.accountId },
         create: {
           accountId: item.accountId,

@@ -17,12 +17,12 @@ export interface LinkedInProfile {
 /**
  * Generate LinkedIn connection request message (max 300 chars)
  */
-export function generateConnectionNote(person: {
+export function generateConnectionNote(people: {
   name: string;
   title?: string | null;
-  account: { name: string };
+  target_accounts: { name: string };
 }): string {
-  const note = `Hi ${person.name.split(' ')[0]}, I'm with YardFlow and would love to connect about optimizing waste management at ${person.account.name}. Looking forward to connecting!`;
+  const note = `Hi ${person.name.split(' ')[0]}, I'm with YardFlow and would love to connect about optimizing waste management at ${person.target_accounts.name}. Looking forward to connecting!`;
   
   return note.substring(0, 300); // LinkedIn limit
 }
@@ -30,15 +30,15 @@ export function generateConnectionNote(person: {
 /**
  * Generate LinkedIn InMail message (max 1900 chars)
  */
-export function generateInMailMessage(person: {
+export function generateInMailMessage(people: {
   name: string;
   title?: string | null;
-  account: { name: string };
+  target_accounts: { name: string };
 }, insights?: string): string {
   const firstName = person.name.split(' ')[0];
   
   let message = `Hi ${firstName},\n\n`;
-  message += `I noticed ${person.account.name} could benefit from YardFlow's waste management platform. `;
+  message += `I noticed ${person.target_accounts.name} could benefit from YardFlow's waste management platform. `;
   
   if (insights) {
     message += `${insights}\n\n`;
@@ -46,7 +46,7 @@ export function generateInMailMessage(person: {
     message += `We help companies like yours reduce waste costs by 25% through optimized pickup scheduling and route management.\n\n`;
   }
   
-  message += `Would you be open to a quick 15-minute call to discuss how we can help ${person.account.name}?\n\n`;
+  message += `Would you be open to a quick 15-minute call to discuss how we can help ${person.target_accounts.name}?\n\n`;
   message += `Best regards,\nCasey\nYardFlow`;
   
   return message.substring(0, 1900); // LinkedIn InMail limit
@@ -79,7 +79,7 @@ export function exportLinkedInBatch(
     name: string;
     title?: string | null;
     linkedin?: string | null;
-    account: { name: string };
+    target_accounts: { name: string };
   }>
 ): string {
   const csv = [
@@ -89,7 +89,7 @@ export function exportLinkedInBatch(
       .map((p) => [
         p.linkedin!,
         p.name,
-        p.account.name,
+        p.target_accounts.name,
         generateConnectionNote(p),
       ]),
   ];

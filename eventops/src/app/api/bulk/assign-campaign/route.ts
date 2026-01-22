@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
     // Assign people to campaign by creating outreach records
     for (const personId of entityIds) {
       try {
-        const person = await prisma.person.findUnique({
+        const person = await prisma.people.findUnique({
           where: { id: personId },
-          include: { account: true },
+          include: { target_accounts: true },
         });
 
         if (!person) {
@@ -42,12 +42,15 @@ export async function POST(req: NextRequest) {
         // Create outreach record for campaign
         await prisma.outreach.create({
           data: {
+            id: `out-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             personId,
             campaignId,
             status: 'DRAFT',
             channel: 'EMAIL',
             subject: '',
             message: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
           },
         });
 
@@ -63,19 +66,22 @@ export async function POST(req: NextRequest) {
     // Assign all people from accounts to campaign
     for (const accountId of entityIds) {
       try {
-        const people = await prisma.person.findMany({
+        const people = await prisma.people.findMany({
           where: { accountId },
         });
 
         for (const person of people) {
           await prisma.outreach.create({
             data: {
+              id: `out-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               personId: person.id,
               campaignId,
               status: 'DRAFT',
               channel: 'EMAIL',
               subject: '',
               message: '',
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
           });
         }

@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
     const channel = searchParams.get("channel");
 
     const whereClause: any = {
-      person: {
-        account: {
+      people: {
+        target_accounts: {
           eventId: user.activeEventId,
         },
       },
@@ -45,9 +45,9 @@ export async function GET(req: NextRequest) {
     const outreach = await db.outreach.findMany({
       where: whereClause,
       include: {
-        person: {
+        people: {
           include: {
-            account: true,
+            target_accounts: true,
           },
         },
       },
@@ -71,11 +71,11 @@ export async function GET(req: NextRequest) {
     ];
 
     const csvRows = outreach.map((item) => [
-      item.person.account.name,
-      item.person.name,
-      item.person.title || "",
-      item.person.email || "",
-      item.person.linkedin || "",
+      item.people.target_accounts.name,
+      item.people.name,
+      item.people.title || "",
+      item.people.email || "",
+      item.people.linkedin || "",
       item.channel,
       item.status,
       item.subject || "",

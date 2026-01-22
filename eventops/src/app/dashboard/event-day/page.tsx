@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 interface TodaysMeeting {
   id: string;
   scheduledAt: string;
-  person: {
+  people: {
     name: string;
     title?: string;
-    account: {
+    target_accounts: {
       name: string;
     };
   };
@@ -22,9 +22,9 @@ interface RecentOutreach {
   id: string;
   channel: string;
   status: string;
-  person: {
+  people: {
     name: string;
-    account: {
+    target_accounts: {
       name: string;
     };
   };
@@ -175,9 +175,9 @@ export default function EventDayDashboard() {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <p className="font-semibold">{meeting.person.name}</p>
+                        <p className="font-semibold">{meeting.people.name}</p>
                         <p className="text-sm text-gray-600">
-                          {meeting.person.title} at {meeting.person.account.name}
+                          {meeting.people.title} at {meeting.people.target_accounts.name}
                         </p>
                         <p className="text-sm mt-1">
                           {new Date(meeting.scheduledAt).toLocaleTimeString([], {
@@ -230,8 +230,8 @@ export default function EventDayDashboard() {
                 <div key={meeting.id} className="p-3 rounded bg-green-50 border-l-4 border-green-500">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-semibold">{meeting.person.name}</p>
-                      <p className="text-sm text-gray-600">{meeting.person.account.name}</p>
+                      <p className="font-semibold">{meeting.people.name}</p>
+                      <p className="text-sm text-gray-600">{meeting.people.target_accounts.name}</p>
                       <p className="text-sm text-gray-500">
                         {new Date(meeting.scheduledAt).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -273,8 +273,8 @@ export default function EventDayDashboard() {
               <tbody>
                 {recentOutreach.slice(0, 10).map((outreach) => (
                   <tr key={outreach.id} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-4">{outreach.person.name}</td>
-                    <td className="py-2 px-4">{outreach.person.account.name}</td>
+                    <td className="py-2 px-4">{outreach.people.name}</td>
+                    <td className="py-2 px-4">{outreach.people.target_accounts.name}</td>
                     <td className="py-2 px-4">{outreach.channel}</td>
                     <td className="py-2 px-4">
                       <span

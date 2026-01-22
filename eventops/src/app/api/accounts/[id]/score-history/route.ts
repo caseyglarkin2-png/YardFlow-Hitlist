@@ -12,7 +12,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const history = await prisma.scoreHistory.findMany({
+    const history = await prisma.score_history.findMany({
       where: { accountId: params.id },
       orderBy: { createdAt: 'desc' },
     });

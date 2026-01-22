@@ -13,10 +13,10 @@ interface Meeting {
   meetingType: string;
   outcome?: string;
   notes?: string;
-  person: {
+  people: {
     name: string;
     title: string;
-    account: {
+    target_accounts: {
       name: string;
       icpScore: number;
     };
@@ -145,9 +145,9 @@ export default function MeetingsPage() {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-semibold text-lg">{meeting.person.name}</h3>
+                        <h3 className="font-semibold text-lg">{meeting.people.name}</h3>
                         <p className="text-gray-600 text-sm">
-                          {meeting.person.title} at {meeting.person.account.name}
+                          {meeting.people.title} at {meeting.people.target_accounts.name}
                         </p>
                       </div>
                       <span
@@ -203,9 +203,9 @@ export default function MeetingsPage() {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-semibold">{meeting.person.name}</h3>
+                        <h3 className="font-semibold">{meeting.people.name}</h3>
                         <p className="text-gray-600 text-sm">
-                          {meeting.person.title} at {meeting.person.account.name}
+                          {meeting.people.title} at {meeting.people.target_accounts.name}
                         </p>
                       </div>
                       <span

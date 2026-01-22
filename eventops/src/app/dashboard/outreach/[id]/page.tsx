@@ -17,9 +17,9 @@ export default async function OutreachDetailPage({
   const outreach = await db.outreach.findUnique({
     where: { id: params.id },
     include: {
-      person: {
+      people: {
         include: {
-          account: true,
+          target_accounts: true,
         },
       },
     },
@@ -33,10 +33,10 @@ export default async function OutreachDetailPage({
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">
-          Outreach: {outreach.person.name}
+          Outreach: {outreach.people.name}
         </h1>
         <p className="text-muted-foreground">
-          {outreach.person.account.name} • {outreach.person.title || "No title"}
+          {outreach.people.target_accounts.name} • {outreach.people.title || "No title"}
         </p>
       </div>
 

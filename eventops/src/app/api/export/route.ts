@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   const { type, format, filters } = await req.json();
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   // Export accounts
   if (type === 'accounts') {
-    const accounts = await prisma.targetAccount.findMany({
+    const accounts = await prisma.target_accounts.findMany({
       where: {
         eventId: user.activeEventId,
         ...(filters?.minIcpScore && { icpScore: { gte: filters.minIcpScore } }),
@@ -53,12 +53,12 @@ export async function POST(req: NextRequest) {
 
   // Export people
   if (type === 'people') {
-    const people = await prisma.person.findMany({
+    const people = await prisma.people.findMany({
       where: {
-        account: { eventId: user.activeEventId },
+        target_accounts: { eventId: user.activeEventId },
       },
       include: {
-        account: {
+        target_accounts: {
           select: {
             name: true,
             industry: true,
@@ -72,8 +72,8 @@ export async function POST(req: NextRequest) {
       Title: p.title,
       Email: p.email,
       LinkedIn: p.linkedin,
-      Account: p.account.name,
-      Industry: p.account.industry,
+      Account: p.target_accounts.name,
+      Industry: p.target_accounts.industry,
       'Exec Ops': p.isExecOps,
       'Ops': p.isOps,
       'Procurement': p.isProc,
@@ -89,17 +89,17 @@ export async function POST(req: NextRequest) {
   if (type === 'outreach') {
     const outreach = await prisma.outreach.findMany({
       where: {
-        person: {
-          account: { eventId: user.activeEventId },
+        people: {
+          target_accounts: { eventId: user.activeEventId },
         },
         ...(filters?.status && { status: filters.status }),
       },
       include: {
-        person: {
+        people: {
           select: {
             name: true,
             email: true,
-            account: {
+            target_accounts: {
               select: {
                 name: true,
               },
@@ -110,9 +110,9 @@ export async function POST(req: NextRequest) {
     });
 
     data = outreach.map((o) => ({
-      Person: o.person.name,
-      Email: o.person.email,
-      Account: o.person.account.name,
+      Person: o.people.name,
+      Email: o.people.email,
+      Account: o.people.target_accounts.name,
       Subject: o.subject,
       Status: o.status,
       Channel: o.channel,

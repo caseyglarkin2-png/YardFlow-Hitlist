@@ -11,7 +11,7 @@ export default async function PeoplePage({
 }) {
   const session = await auth();
   
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
     include: { activeEvent: true },
   });
@@ -38,7 +38,7 @@ export default async function PeoplePage({
 
   // Build where clause with filters
   const where: any = {
-    account: {
+    target_accounts: {
       eventId: user.activeEventId,
     },
   };
@@ -56,10 +56,10 @@ export default async function PeoplePage({
     where[personaField] = true;
   }
 
-  const people = await prisma.person.findMany({
+  const people = await prisma.people.findMany({
     where,
     include: {
-      account: true,
+      target_accounts: true,
     },
     orderBy: { name: 'asc' },
   });
@@ -121,10 +121,10 @@ export default async function PeoplePage({
                   </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   <Link
-                    href={`/dashboard/accounts/${person.account.id}`}
+                    href={`/dashboard/accounts/${person.target_accounts.id}`}
                     className="text-blue-600 hover:text-blue-500"
                   >
-                    {person.account.name}
+                    {person.target_accounts.name}
                   </Link>
                 </td>
                 <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">

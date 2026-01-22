@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ campaigns: [] });
     }
 
-    const campaigns = await prisma.campaign.findMany({
+    const campaigns = await prisma.campaigns.findMany({
       where: { eventId: user.activeEventId },
       include: {
         _count: {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true, email: true },
     });
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    const campaign = await prisma.campaign.create({
+    const campaign = await prisma.campaigns.create({
       data: {
         eventId: user.activeEventId,
         name,

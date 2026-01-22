@@ -37,7 +37,7 @@ export function getManifestMeetingRequestUrl(attendeeId: string): string {
  * Extract potential Manifest attendee ID from LinkedIn URL or email
  * This is a best-guess - actual ID mapping would require API access
  */
-export function guessManifestId(person: {
+export function guessManifestId(people: {
   name: string;
   email?: string | null;
   linkedin?: string | null;

@@ -11,7 +11,7 @@ export default async function AccountsPage({
 }) {
   const session = await auth();
   
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
     include: { activeEvent: true },
   });
@@ -57,7 +57,7 @@ export default async function AccountsPage({
     orderBy = { name: 'desc' };
   }
 
-  const accounts = await prisma.targetAccount.findMany({
+  const accounts = await prisma.target_accounts.findMany({
     where,
     include: {
       _count: {

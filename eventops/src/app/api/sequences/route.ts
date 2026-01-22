@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email! },
       select: { activeEventId: true },
     });
@@ -23,11 +23,11 @@ export async function GET(req: NextRequest) {
 
     const sequences = await prisma.sequence.findMany({
       where: {
-        campaign: { eventId: user.activeEventId },
+        campaigns: { eventId: user.activeEventId },
         ...(campaignId && { campaignId }),
       },
       include: {
-        campaign: { select: { name: true } },
+        campaigns: { select: { name: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email! },
       select: { id: true, activeEventId: true },
     });
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
     // Verify campaign belongs to active event
     if (campaignId) {
-      const campaign = await prisma.campaign.findFirst({
+      const campaign = await prisma.campaigns.findFirst({
         where: { id: campaignId, eventId: user.activeEventId },
       });
       if (!campaign) {

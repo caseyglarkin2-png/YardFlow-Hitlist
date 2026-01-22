@@ -22,9 +22,9 @@ export async function GET(
   const meeting = await prisma.meeting.findUnique({
     where: { id: params.id },
     include: {
-      person: {
+      people: {
         include: {
-          account: {
+          target_accounts: {
             include: {
               dossier: true,
             },
@@ -60,9 +60,9 @@ export async function PATCH(
     where: { id: params.id },
     data,
     include: {
-      person: {
+      people: {
         include: {
-          account: true,
+          target_accounts: true,
         },
       },
     },
@@ -111,9 +111,9 @@ export async function POST(
   const meeting = await prisma.meeting.findUnique({
     where: { id: params.id },
     include: {
-      person: {
+      people: {
         include: {
-          account: {
+          target_accounts: {
             include: {
               dossier: true,
               roiCalculations: {
@@ -135,35 +135,35 @@ export async function POST(
   // Generate prep document using AI
   const prompt = `Generate a concise meeting preparation document for the following meeting:
 
-Contact: ${meeting.person.name}
-Title: ${meeting.person.title || 'Unknown'}
-Company: ${meeting.person.account.name}
-Industry: ${meeting.person.account.industry || 'Unknown'}
+Contact: ${meeting.people.name}
+Title: ${meeting.people.title || 'Unknown'}
+Company: ${meeting.people.target_accounts.name}
+Industry: ${meeting.people.target_accounts.industry || 'Unknown'}
 
-${meeting.person.account.dossier ? `
+${meeting.people.target_accounts.dossier ? `
 Company Context:
-${meeting.person.account.dossier.companyOverview}
+${meeting.people.target_accounts.dossier.companyOverview}
 
 Key Pain Points:
-${meeting.person.account.dossier.keyPainPoints}
+${meeting.people.target_accounts.dossier.keyPainPoints}
 
 Operational Scale:
-${meeting.person.account.dossier.operationalScale}
+${meeting.people.target_accounts.dossier.operationalScale}
 ` : ''}
 
-${meeting.person.insights ? `
+${meeting.people.insights ? `
 Contact Insights:
-- Role Context: ${meeting.person.insights.roleContext}
-- Pain Points: ${meeting.person.insights.likelyPainPoints}
-- Suggested Approach: ${meeting.person.insights.suggestedApproach}
-- ROI Opportunity: ${meeting.person.insights.roiOpportunity}
+- Role Context: ${meeting.people.insights.roleContext}
+- Pain Points: ${meeting.people.insights.likelyPainPoints}
+- Suggested Approach: ${meeting.people.insights.suggestedApproach}
+- ROI Opportunity: ${meeting.people.insights.roiOpportunity}
 ` : ''}
 
-${meeting.person.account.roiCalculations?.[0] ? `
+${meeting.people.target_accounts.roiCalculations?.[0] ? `
 ROI Estimate:
-- Annual Savings: $${meeting.person.account.roiCalculations[0].annualSavings?.toLocaleString()}
-- Payback Period: ${meeting.person.account.roiCalculations[0].paybackPeriod} months
-- Facilities: ${meeting.person.account.roiCalculations[0].facilityCount}
+- Annual Savings: $${meeting.people.target_accounts.roiCalculations[0].annualSavings?.toLocaleString()}
+- Payback Period: ${meeting.people.target_accounts.roiCalculations[0].paybackPeriod} months
+- Facilities: ${meeting.people.target_accounts.roiCalculations[0].facilityCount}
 ` : ''}
 
 Generate a 1-page meeting prep document with:

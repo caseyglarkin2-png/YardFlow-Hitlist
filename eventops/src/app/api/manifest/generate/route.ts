@@ -24,10 +24,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get people with all context
-    const people = await db.person.findMany({
+    const people = await db.people.findMany({
       where: { id: { in: personIds } },
       include: {
-        account: {
+        target_accounts: {
           include: {
             dossier: true,
             roiCalculations: {
@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
 
         if (useAI) {
           // Get company dossier
-          const dossierData = person.account.dossier?.rawData 
-            ? JSON.parse(person.account.dossier.rawData)
+          const dossierData = person.target_accounts.dossier?.rawData 
+            ? JSON.parse(person.target_accounts.dossier.rawData)
             : undefined;
 
           // Get ROI opportunity from insights
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           requestData = await generateManifestMeetingRequest(
             person.name,
             person.title,
-            person.account.name,
+            person.target_accounts.name,
             persona,
             dossierData,
             roiOpportunity
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
           // Use simple template
           requestData = generateSimpleManifestRequest(
             person.name,
-            person.account.name,
+            person.target_accounts.name,
             persona
           );
         }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         results.push({
           personId: person.id,
           personName: person.name,
-          companyName: person.account.name,
+          companyName: person.target_accounts.name,
           email: person.email,
           message: requestData.message,
           characterCount: requestData.characterCount,
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
         results.push({
           personId: person.id,
           personName: person.name,
-          companyName: person.account.name,
+          companyName: person.target_accounts.name,
           success: false,
           error: (error as Error).message,
         });

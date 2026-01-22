@@ -16,7 +16,7 @@ export async function POST(
     const eventId = params.id;
 
     // Verify event exists
-    const event = await prisma.event.findUnique({
+    const event = await prisma.events.findUnique({
       where: { id: eventId },
     });
 
@@ -25,7 +25,7 @@ export async function POST(
     }
 
     // Update user's active event
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: session.user.id },
       data: { activeEventId: eventId },
     });

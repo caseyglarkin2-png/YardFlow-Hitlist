@@ -16,7 +16,7 @@ export type ScoreBreakdown = ScoreFactors & {
  * Calculate ICP score for an account based on various factors
  */
 export async function calculateICPScore(accountId: string): Promise<ScoreBreakdown> {
-  const account = await prisma.targetAccount.findUnique({
+  const account = await prisma.target_accounts.findUnique({
     where: { id: accountId },
     include: {
       people: true,
@@ -111,7 +111,7 @@ export async function updateAccountScore(
   changedBy?: string,
   notes?: string
 ): Promise<void> {
-  const account = await prisma.targetAccount.findUnique({
+  const account = await prisma.target_accounts.findUnique({
     where: { id: accountId },
     select: { icpScore: true },
   });
@@ -121,13 +121,13 @@ export async function updateAccountScore(
   }
 
   // Update account score
-  await prisma.targetAccount.update({
+  await prisma.target_accounts.update({
     where: { id: accountId },
     data: { icpScore: newScore },
   });
 
   // Log to history
-  await prisma.scoreHistory.create({
+  await prisma.score_history.create({
     data: {
       accountId,
       oldScore: account.icpScore,

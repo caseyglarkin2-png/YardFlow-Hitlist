@@ -42,7 +42,7 @@ export default function PersonDetailPage() {
       // Try to fetch ROI data
       if (data.person?.accountId) {
         try {
-          const roiRes = await fetch(`/api/roi/calculate?accountId=${data.person.accountId}`);
+          const roiRes = await fetch(`/api/roi/calculate?accountId=${data.people.accountId}`);
           if (roiRes.ok) {
             const roiResult = await roiRes.json();
             setRoiData(roiResult.roiCalculation);
@@ -197,11 +197,11 @@ export default function PersonDetailPage() {
                 <div>
                   <span className="font-medium">Company:</span>{" "}
                   <Link href={`/dashboard/accounts/${person.accountId}`} className="text-blue-600 hover:underline">
-                    {person.account.name}
+                    {person.target_accounts.name}
                   </Link>
-                  {person.account.icpScore && (
+                  {person.target_accounts.icpScore && (
                     <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                      ICP: {person.account.icpScore}
+                      ICP: {person.target_accounts.icpScore}
                     </span>
                   )}
                 </div>

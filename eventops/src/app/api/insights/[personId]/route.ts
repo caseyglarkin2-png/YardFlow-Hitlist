@@ -14,7 +14,7 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const insights = await prisma.contactInsights.findUnique({
+  const insights = await prisma.contact_insights.findUnique({
     where: { personId: params.personId },
   });
 
@@ -31,10 +31,10 @@ export async function POST(
   }
 
   // Get person with account and company dossier
-  const person = await prisma.person.findUnique({
+  const person = await prisma.people.findUnique({
     where: { id: params.personId },
     include: {
-      account: {
+      target_accounts: {
         include: {
           dossier: true,
         },
@@ -62,15 +62,15 @@ export async function POST(
 Contact: ${person.name}
 Title: ${person.title || 'Unknown'}
 Persona: ${primaryPersona}
-Company: ${person.account.name}
-Industry: ${person.account.industry || 'Unknown'}
+Company: ${person.target_accounts.name}
+Industry: ${person.target_accounts.industry || 'Unknown'}
 
-${person.account.dossier ? `
+${person.target_accounts.dossier ? `
 Company Context:
-- Overview: ${person.account.dossier.companyOverview || 'Unknown'}
-- Facility Count: ${person.account.dossier.facilityCount || 'Unknown'}
-- Operational Scale: ${person.account.dossier.operationalScale || 'Unknown'}
-- Key Pain Points: ${person.account.dossier.keyPainPoints || 'Unknown'}
+- Overview: ${person.target_accounts.dossier.companyOverview || 'Unknown'}
+- Facility Count: ${person.target_accounts.dossier.facilityCount || 'Unknown'}
+- Operational Scale: ${person.target_accounts.dossier.operationalScale || 'Unknown'}
+- Key Pain Points: ${person.target_accounts.dossier.keyPainPoints || 'Unknown'}
 ` : 'No company research available.'}
 
 Provide insights in JSON format:
@@ -101,7 +101,7 @@ Provide insights in JSON format:
     );
 
     // Save insights to database
-    const insights = await prisma.contactInsights.upsert({
+    const insights = await prisma.contact_insights.upsert({
       where: { personId: params.personId },
       create: {
         personId: params.personId,

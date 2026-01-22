@@ -10,7 +10,7 @@ import { ResearchPanel } from '@/components/research-panel';
 export default async function AccountDetailPage({ params }: { params: { id: string } }) {
   const session = await auth();
   
-  const account = await prisma.targetAccount.findUnique({
+  const account = await prisma.target_accounts.findUnique({
     where: { id: params.id },
     include: {
       event: true,
@@ -20,7 +20,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
     },
   });
 
-  const companyDossier = await prisma.companyDossier.findFirst({
+  const companyDossier = await prisma.company_dossiers.findFirst({
     where: { accountId: params.id },
   });
 

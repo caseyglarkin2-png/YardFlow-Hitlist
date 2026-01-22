@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get account with dossier
-    const account = await db.targetAccount.findUnique({
+    const account = await db.target_accounts.findUnique({
       where: { id: accountId },
       include: {
         dossier: true,

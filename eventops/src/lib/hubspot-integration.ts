@@ -32,13 +32,13 @@ export interface HubSpotActivity {
 /**
  * Convert EventOps person to HubSpot contact format
  */
-export function personToHubSpotContact(person: {
+export function personToHubSpotContact(people: {
   name: string;
   email?: string | null;
   title?: string | null;
   phone?: string | null;
   linkedin?: string | null;
-  account: {
+  target_accounts: {
     name: string;
     icpScore?: number | null;
   };
@@ -63,11 +63,11 @@ export function personToHubSpotContact(person: {
     email: person.email || '',
     firstname,
     lastname,
-    company: person.account.name,
+    company: person.target_accounts.name,
     jobtitle: person.title || undefined,
     phone: person.phone || undefined,
     linkedin_url: person.linkedin || undefined,
-    icp_score: person.account.icpScore || undefined,
+    icp_score: person.target_accounts.icpScore || undefined,
     persona_type: persona,
     event_name: 'Manifest 2026',
   };

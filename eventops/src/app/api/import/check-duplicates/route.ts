@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       data.map(async (item: any) => {
         if (type === 'accounts') {
           // Check for duplicate company name (case-insensitive)
-          const existing = await prisma.targetAccount.findFirst({
+          const existing = await prisma.target_accounts.findFirst({
             where: {
               eventId: user.activeEventId!,
               name: {
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         } else {
           // For people, check name + account combination
           // First find the account
-          const account = await prisma.targetAccount.findFirst({
+          const account = await prisma.target_accounts.findFirst({
             where: {
               eventId: user.activeEventId!,
               name: {
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Check if person exists
-          const existing = await prisma.person.findFirst({
+          const existing = await prisma.people.findFirst({
             where: {
               accountId: account.id,
               name: {

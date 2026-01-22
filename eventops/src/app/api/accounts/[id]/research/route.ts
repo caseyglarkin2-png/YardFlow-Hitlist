@@ -15,9 +15,9 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await db.targetAccount.findUnique({
+    const account = await db.target_accounts.findUnique({
       where: { id: params.id },
-      include: { dossier: true },
+      include: { company_dossiers: true },
     });
 
     if (!account) {
@@ -25,14 +25,14 @@ export async function POST(
     }
 
     // Check if dossier already exists and is recent (less than 7 days old)
-    if (account.dossier) {
+    if (account.company_dossiers) {
       const daysSinceResearch = Math.floor(
-        (Date.now() - account.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
+        (Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
       );
       
       if (daysSinceResearch < 7) {
         return NextResponse.json({
-          dossier: account.dossier,
+          dossier: account.company_dossiers,
           cached: true,
         });
       }
@@ -45,9 +45,10 @@ export async function POST(
     );
 
     // Save or update dossier
-    const dossier = await db.companyDossier.upsert({
+    const dossier = await db.company_dossiers.upsert({
       where: { accountId: account.id },
       create: {
+        id: `dossier-${account.id}`,
         accountId: account.id,
         companyOverview: researchData.companyOverview || null,
         recentNews: researchData.recentNews || null,
@@ -56,6 +57,7 @@ export async function POST(
         companySize: researchData.companySize || null,
         rawData: JSON.stringify(researchData),
         researchedBy: session.user.email,
+        researchedAt: new Date(),
       },
       update: {
         companyOverview: researchData.companyOverview || null,

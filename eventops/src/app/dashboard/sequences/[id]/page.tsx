@@ -313,10 +313,10 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
         <div className="bg-blue-50 rounded-lg p-4">
           <h3 className="font-medium mb-2">Part of Campaign</h3>
           <Link
-            href={`/dashboard/campaigns/${sequence.campaign.id}`}
+            href={`/dashboard/campaigns/${sequence.campaigns.id}`}
             className="text-blue-600 hover:text-blue-700"
           >
-            {sequence.campaign.name} →
+            {sequence.campaigns.name} →
           </Link>
         </div>
       )}

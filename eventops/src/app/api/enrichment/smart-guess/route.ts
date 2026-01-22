@@ -27,10 +27,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get person with account data
-    const person = await prisma.person.findUnique({
+    const person = await prisma.people.findUnique({
       where: { id: personId },
       include: { 
-        account: {
+        target_accounts: {
           include: {
             dossier: true, // For facility count and size data
           },
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     // Determine company size for pattern scoring
     let companySize = 'Medium';
     if (person.account?.dossier?.facilityCount) {
-      const facilities = parseInt(person.account.dossier.facilityCount);
+      const facilities = parseInt(person.target_accounts.dossier.facilityCount);
       if (!isNaN(facilities)) {
         if (facilities >= 50) companySize = 'Large';
         else if (facilities <= 5) companySize = 'Small';
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get other people from same company to detect pattern
-    const knownEmails = await prisma.person.findMany({
+    const knownEmails = await prisma.people.findMany({
       where: {
         accountId: person.accountId,
         email: { not: null },
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Update person record
-    await prisma.person.update({
+    await prisma.people.update({
       where: { id: personId },
       data: {
         email: guess.email,
@@ -144,10 +144,10 @@ export async function PUT(req: NextRequest) {
     const results = [];
 
     // Get all people with their accounts
-    const people = await prisma.person.findMany({
+    const people = await prisma.people.findMany({
       where: { id: { in: personIds } },
       include: { 
-        account: {
+        target_accounts: {
           include: { dossier: true },
         },
       },
@@ -173,7 +173,7 @@ export async function PUT(req: NextRequest) {
 
       let companySize = 'Medium';
       if (person.account?.dossier?.facilityCount) {
-        const facilities = parseInt(person.account.dossier.facilityCount);
+        const facilities = parseInt(person.target_accounts.dossier.facilityCount);
         if (!isNaN(facilities)) {
           if (facilities >= 50) companySize = 'Large';
           else if (facilities <= 5) companySize = 'Small';
@@ -181,7 +181,7 @@ export async function PUT(req: NextRequest) {
       }
 
       // Get known emails from company
-      const knownEmails = await prisma.person.findMany({
+      const knownEmails = await prisma.people.findMany({
         where: {
           accountId: person.accountId,
           email: { not: null },
@@ -200,7 +200,7 @@ export async function PUT(req: NextRequest) {
       );
 
       // Update in database
-      await prisma.person.update({
+      await prisma.people.update({
         where: { id: person.id },
         data: {
           email: guess.email,

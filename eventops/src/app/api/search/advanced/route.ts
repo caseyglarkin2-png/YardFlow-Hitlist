@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
   // Search accounts
   if (type === 'all' || type === 'accounts') {
-    const accounts = await prisma.targetAccount.findMany({
+    const accounts = await prisma.target_accounts.findMany({
       where: {
         eventId: user.activeEventId,
         AND: [
@@ -85,9 +85,9 @@ export async function GET(req: NextRequest) {
       [`is${persona.charAt(0).toUpperCase() + persona.slice(1)}`]: true 
     } : {};
     
-    const people = await prisma.person.findMany({
+    const people = await prisma.people.findMany({
       where: {
-        account: { eventId: user.activeEventId },
+        target_accounts: { eventId: user.activeEventId },
         AND: [
           {
             OR: [
@@ -103,7 +103,7 @@ export async function GET(req: NextRequest) {
         ],
       },
       include: {
-        account: {
+        target_accounts: {
           select: {
             name: true,
             icpScore: true,
@@ -118,8 +118,8 @@ export async function GET(req: NextRequest) {
       name: p.name,
       title: p.title,
       email: p.email,
-      accountName: p.account.name,
-      icpScore: p.account.icpScore,
+      accountName: p.target_accounts.name,
+      icpScore: p.target_accounts.icpScore,
       type: 'person',
     }));
   }
@@ -128,8 +128,8 @@ export async function GET(req: NextRequest) {
   if (type === 'all' || type === 'outreach') {
     const outreach = await prisma.outreach.findMany({
       where: {
-        person: {
-          account: { eventId: user.activeEventId },
+        people: {
+          target_accounts: { eventId: user.activeEventId },
         },
         AND: [
           {
@@ -142,10 +142,10 @@ export async function GET(req: NextRequest) {
         ],
       },
       include: {
-        person: {
+        people: {
           select: {
             name: true,
-            account: {
+            target_accounts: {
               select: {
                 name: true,
               },
@@ -160,8 +160,8 @@ export async function GET(req: NextRequest) {
       id: o.id,
       subject: o.subject,
       status: o.status,
-      personName: o.person.name,
-      accountName: o.person.account.name,
+      personName: o.people.name,
+      accountName: o.people.target_accounts.name,
       sentAt: o.sentAt,
       type: 'outreach',
     }));

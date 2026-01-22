@@ -42,10 +42,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get people with accounts, dossiers, insights, and ROI calculations
-    const people = await db.person.findMany({
+    const people = await db.people.findMany({
       where: { id: { in: personIds } },
       include: {
-        account: {
+        target_accounts: {
           include: {
             dossier: true,
             roiCalculations: {
@@ -64,17 +64,17 @@ export async function POST(req: NextRequest) {
     for (const person of people) {
       try {
         // Generate or get company research
-        let dossier = person.account.dossier;
+        let dossier = person.target_accounts.dossier;
         
         if (!dossier) {
           const researchData = await generateCompanyResearch(
-            person.account.name,
-            person.account.website || undefined
+            person.target_accounts.name,
+            person.target_accounts.website || undefined
           );
 
           dossier = await db.companyDossier.create({
             data: {
-              accountId: person.account.id,
+              accountId: person.target_accounts.id,
               companyOverview: researchData.companyOverview || null,
               recentNews: researchData.recentNews || null,
               industryContext: researchData.industryContext || null,
@@ -106,11 +106,11 @@ export async function POST(req: NextRequest) {
         } : undefined;
 
         // Get ROI data if available
-        const roiData = person.account.roiCalculations?.[0] ? {
-          annualSavings: person.account.roiCalculations[0].annualSavings,
-          paybackPeriod: person.account.roiCalculations[0].paybackPeriod,
-          assumptions: person.account.roiCalculations[0].assumptions 
-            ? JSON.parse(person.account.roiCalculations[0].assumptions) 
+        const roiData = person.target_accounts.roiCalculations?.[0] ? {
+          annualSavings: person.target_accounts.roiCalculations[0].annualSavings,
+          paybackPeriod: person.target_accounts.roiCalculations[0].paybackPeriod,
+          assumptions: person.target_accounts.roiCalculations[0].assumptions 
+            ? JSON.parse(person.target_accounts.roiCalculations[0].assumptions) 
             : undefined,
         } : undefined;
 
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         const outreachData = await generatePersonalizedOutreach(
           person.name,
           person.title,
-          person.account.name,
+          person.target_accounts.name,
           persona,
           dossierData,
           channel,
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
         results.push({
           personId: person.id,
           personName: person.name,
-          companyName: person.account.name,
+          companyName: person.target_accounts.name,
           success: true,
         });
       } catch (error) {
@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
         results.push({
           personId: person.id,
           personName: person.name,
-          companyName: person.account.name,
+          companyName: person.target_accounts.name,
           success: false,
           error: (error as Error).message,
         });

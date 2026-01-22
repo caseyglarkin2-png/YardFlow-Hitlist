@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
       // Time-based cohorts
       const outreach = await prisma.outreach.findMany({
         include: {
-          person: {
+          people: {
             select: {
               name: true,
               title: true,
-              account: {
+              target_accounts: {
                 select: { icpScore: true, name: true },
               },
             },
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       // Add meeting data
       const meetings = await prisma.meeting.findMany({
         include: {
-          person: true,
+          people: true,
         },
       });
 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       }));
     } else if (groupBy === 'persona') {
       // Persona-based cohorts
-      const people = await prisma.person.findMany({
+      const people = await prisma.people.findMany({
         include: {
           outreach: true,
           meetings: true,
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
       }));
     } else if (groupBy === 'icpScore') {
       // ICP Score-based cohorts
-      const accounts = await prisma.targetAccount.findMany({
+      const accounts = await prisma.target_accounts.findMany({
         include: {
           people: {
             include: {

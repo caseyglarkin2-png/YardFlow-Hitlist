@@ -13,7 +13,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.users.findUnique({
       where: { email: session.user.email },
     });
 
@@ -38,7 +38,7 @@ export async function PATCH(
       );
     }
 
-    const user = await prisma.user.update({
+    const user = await prisma.users.update({
       where: { id: params.id },
       data: { role },
     });
@@ -64,7 +64,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const currentUser = await prisma.user.findUnique({
+    const currentUser = await prisma.users.findUnique({
       where: { email: session.user.email },
     });
 
@@ -80,7 +80,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.user.delete({
+    await prisma.users.delete({
       where: { id: params.id },
     });
 

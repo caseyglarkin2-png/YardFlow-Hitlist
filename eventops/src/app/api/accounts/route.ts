@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's active event
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -36,8 +36,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = accountSchema.parse(body);
 
-    const account = await prisma.targetAccount.create({
+    const account = await prisma.target_accounts.create({
       data: {
+        id: `acc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: data.name,
         website: data.website || null,
         industry: data.industry || null,
@@ -45,6 +46,8 @@ export async function POST(request: NextRequest) {
         icpScore: data.icpScore ?? null,
         notes: data.notes || null,
         eventId: user.activeEventId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { activeEventId: true },
     });
@@ -83,7 +86,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const { cursor, limit } = parsePaginationParams(searchParams);
 
-    const accounts = await prisma.targetAccount.findMany({
+    const accounts = await prisma.target_accounts.findMany({
       where: { eventId: user.activeEventId },
       include: {
         _count: {
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get total count for pagination metadata
-    const total = await prisma.targetAccount.count({
+    const total = await prisma.target_accounts.count({
       where: { eventId: user.activeEventId },
     });
 

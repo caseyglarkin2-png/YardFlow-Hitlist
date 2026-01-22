@@ -27,7 +27,7 @@ export default async function GenerateOutreachPage() {
     );
   }
 
-  const accounts = await db.targetAccount.findMany({
+  const accounts = await db.target_accounts.findMany({
     where: { eventId: user.activeEventId },
     include: {
       people: true,

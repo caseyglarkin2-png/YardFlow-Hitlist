@@ -18,10 +18,10 @@ export async function POST(
     const personId = params.id;
 
     // Get person with account and dossier
-    const person = await db.person.findUnique({
+    const person = await db.people.findUnique({
       where: { id: personId },
       include: {
-        account: {
+        target_accounts: {
           include: {
             dossier: true,
           },
@@ -48,7 +48,7 @@ export async function POST(
     }
 
     // Get company dossier (or create if missing)
-    const dossier = person.account.dossier;
+    const dossier = person.target_accounts.dossier;
     if (!dossier) {
       return NextResponse.json(
         { error: "Company dossier not found. Please generate company research first." },

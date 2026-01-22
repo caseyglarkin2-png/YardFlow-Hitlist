@@ -23,9 +23,9 @@ export async function POST(req: NextRequest) {
   const outreach = await prisma.outreach.findUnique({
     where: { id: outreachId },
     include: {
-      person: {
+      people: {
         include: {
-          account: true,
+          target_accounts: true,
         },
       },
     },
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Outreach not found' }, { status: 404 });
   }
 
-  if (!outreach.person.email) {
+  if (!outreach.people.email) {
     return NextResponse.json(
       { error: 'Person has no email address' },
       { status: 400 }
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/outreach/track/${outreach.id}/open" width="1" height="1" />`;
 
     const msg = {
-      to: outreach.person.email,
+      to: outreach.people.email,
       from: fromEmail,
       subject: outreach.subject || 'YardFlow - Optimizing Waste Management',
       html: outreach.message + trackingPixel,

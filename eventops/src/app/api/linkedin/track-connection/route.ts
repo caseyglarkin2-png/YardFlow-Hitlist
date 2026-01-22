@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -78,8 +78,8 @@ export async function GET(req: NextRequest) {
   // Get LinkedIn outreach stats
   const linkedInOutreach = await prisma.outreach.findMany({
     where: {
-      person: {
-        account: {
+      people: {
+        target_accounts: {
           eventId: user.activeEventId,
         },
       },

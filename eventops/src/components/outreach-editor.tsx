@@ -22,7 +22,7 @@ type OutreachData = {
   subject: string | null;
   message: string;
   notes: string | null;
-  person: {
+  people: {
     name: string;
     email: string | null;
     linkedin: string | null;
@@ -108,11 +108,11 @@ export function OutreachEditor({ outreach }: { outreach: OutreachData }) {
           {outreach.channel === "LINKEDIN" && <Send className="h-5 w-5" />}
           <span className="font-semibold">{outreach.channel}</span>
         </div>
-        {outreach.person.email && (
-          <p className="text-sm">To: {outreach.person.email}</p>
+        {outreach.people.email && (
+          <p className="text-sm">To: {outreach.people.email}</p>
         )}
-        {outreach.person.linkedin && (
-          <p className="text-sm">LinkedIn: {outreach.person.linkedin}</p>
+        {outreach.people.linkedin && (
+          <p className="text-sm">LinkedIn: {outreach.people.linkedin}</p>
         )}
       </div>
 

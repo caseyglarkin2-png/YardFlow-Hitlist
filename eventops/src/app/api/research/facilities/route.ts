@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Company ID required' }, { status: 400 });
     }
 
-    const company = await prisma.companyDossier.findUnique({
+    const company = await prisma.company_dossiers.findUnique({
       where: { id: companyId },
-      include: { account: true },
+      include: { target_accounts: true },
     });
 
     if (!company) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use AI to research facility count with multiple data points
-    const researchPrompt = `Research the company "${company.account.name}" and estimate their facility count.
+    const researchPrompt = `Research the company "${company.target_accounts.name}" and estimate their facility count.
 
 Company Context:
 ${company.industryContext || 'Not available'}
@@ -92,7 +92,7 @@ Format as JSON:
     const researchData = JSON.parse(openaiData.choices[0].message.content);
 
     // Update company dossier with enhanced facility insights
-    const updatedCompany = await prisma.companyDossier.update({
+    const updatedCompany = await prisma.company_dossiers.update({
       where: { id: companyId },
       data: {
         facilityCount: researchData.estimatedFacilities,

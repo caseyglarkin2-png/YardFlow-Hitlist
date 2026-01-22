@@ -9,30 +9,36 @@ async function main() {
   // Create users
   const hashedPassword = await bcrypt.hash('password', 10);
 
-  const casey = await prisma.user.upsert({
+  const casey = await prisma.users.upsert({
     where: { email: 'casey@freightroll.com' },
     update: {},
     create: {
+      id: 'user_casey',
       email: 'casey@freightroll.com',
       name: 'Casey Glarkin',
       password: hashedPassword,
       role: 'ADMIN',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
-  const jake = await prisma.user.upsert({
+  const jake = await prisma.users.upsert({
     where: { email: 'jake@freightroll.com' },
     update: {},
     create: {
+      id: 'user_jake',
       email: 'jake@freightroll.com',
       name: 'Jake',
       password: hashedPassword,
       role: 'MEMBER',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Create events
-  const manifest2026 = await prisma.event.upsert({
+  const manifest2026 = await prisma.events.upsert({
     where: { id: 'manifest-2026' },
     update: {},
     create: {
@@ -41,23 +47,25 @@ async function main() {
       location: 'Las Vegas, NV',
       startDate: new Date('2026-02-10'),
       endDate: new Date('2026-02-12'),
-      status: 'ACTIVE',
+      status: 'PLANNING',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
   // Set as active event for users
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: casey.id },
     data: { activeEventId: manifest2026.id },
   });
 
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: jake.id },
     data: { activeEventId: manifest2026.id },
   });
 
   // Create sample accounts
-  const gxo = await prisma.targetAccount.upsert({
+  const gxo = await prisma.target_accounts.upsert({
     where: { id: 'sample-gxo' },
     update: {},
     create: {
@@ -66,10 +74,12 @@ async function main() {
       name: 'GXO',
       website: 'https://gxo.com',
       industry: 'Logistics',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
-  const stockx = await prisma.targetAccount.upsert({
+  const stockx = await prisma.target_accounts.upsert({
     where: { id: 'sample-stockx' },
     update: {},
     create: {
@@ -77,12 +87,12 @@ async function main() {
       eventId: manifest2026.id,
       name: 'StockX',
       website: 'https://stockx.com',
-      industry: 'E-Commerce',
-    },
+      industry: 'E-Commerce',      createdAt: new Date(),
+      updatedAt: new Date(),    },
   });
 
   // Create sample people
-  await prisma.person.upsert({
+  await prisma.people.upsert({
     where: { id: 'person-1' },
     update: {},
     create: {
@@ -90,10 +100,12 @@ async function main() {
       accountId: gxo.id,
       name: 'Jamie Saucedo',
       title: 'Vice President, Business Operations',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
-  await prisma.person.upsert({
+  await prisma.people.upsert({
     where: { id: 'person-2' },
     update: {},
     create: {
@@ -101,10 +113,12 @@ async function main() {
       accountId: gxo.id,
       name: 'Kim Kyle',
       title: 'Senior Vice President, Operations',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 
-  await prisma.person.upsert({
+  await prisma.people.upsert({
     where: { id: 'person-3' },
     update: {},
     create: {
@@ -112,6 +126,8 @@ async function main() {
       accountId: stockx.id,
       name: 'Victor Wilson',
       title: 'VP, Operations',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   });
 

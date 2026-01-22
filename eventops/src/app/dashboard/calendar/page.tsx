@@ -13,10 +13,10 @@ interface Meeting {
   status: string;
   meetingType: string;
   notes?: string;
-  person: {
+  people: {
     name: string;
     title: string;
-    account: {
+    target_accounts: {
       name: string;
       icpScore: number;
     };
@@ -273,12 +273,12 @@ export default function CalendarPage() {
                     </div>
 
                     {/* Person & Company */}
-                    <div className="font-medium mb-1">{meeting.person.name}</div>
-                    <div className="text-sm text-gray-600 mb-1">{meeting.person.title}</div>
+                    <div className="font-medium mb-1">{meeting.people.name}</div>
+                    <div className="text-sm text-gray-600 mb-1">{meeting.people.title}</div>
                     
                     <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                       <Building2 className="h-4 w-4" />
-                      <span>{meeting.person.account.name}</span>
+                      <span>{meeting.people.target_accounts.name}</span>
                     </div>
 
                     {/* Location */}

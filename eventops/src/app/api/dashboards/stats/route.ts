@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email },
     });
 
@@ -26,9 +26,9 @@ export async function GET(request: NextRequest) {
 
     // Get total counts
     const [accounts, people, campaigns, currentMeetings, previousMeetings, totalOutreach, openedCount, repliedCount] = await Promise.all([
-      prisma.targetAccount.count(),
-      prisma.person.count(),
-      prisma.campaign.count(),
+      prisma.target_accounts.count(),
+      prisma.people.count(),
+      prisma.campaigns.count(),
       prisma.meeting.count({
         where: { 
           createdAt: { gte: last30Days }
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     );
 
     // Get top campaigns
-    const recentCampaigns = await prisma.campaign.findMany({
+    const recentCampaigns = await prisma.campaigns.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
       include: {

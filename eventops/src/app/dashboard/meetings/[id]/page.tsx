@@ -16,11 +16,11 @@ interface Meeting {
   followUpDate?: string;
   dealStage?: string;
   notes?: string;
-  person: {
+  people: {
     name: string;
     title?: string;
     email?: string;
-    account: {
+    target_accounts: {
       name: string;
       icpScore?: number;
       dossier?: {
@@ -126,9 +126,9 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
         </button>
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold">Meeting with {meeting.person.name}</h1>
+            <h1 className="text-3xl font-bold">Meeting with {meeting.people.name}</h1>
             <p className="text-gray-600">
-              {meeting.person.title} at {meeting.person.account.name}
+              {meeting.people.title} at {meeting.people.target_accounts.name}
             </p>
           </div>
           <div className="flex gap-2">
@@ -277,26 +277,26 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
           <div className="space-y-3">
             <div>
               <p className="text-sm text-gray-500">Name</p>
-              <p className="font-medium">{meeting.person.name}</p>
+              <p className="font-medium">{meeting.people.name}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Title</p>
-              <p className="font-medium">{meeting.person.title || 'N/A'}</p>
+              <p className="font-medium">{meeting.people.title || 'N/A'}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Company</p>
               <a
-                href={`/dashboard/accounts/${meeting.person.account}`}
+                href={`/dashboard/accounts/${meeting.people.account}`}
                 className="font-medium text-blue-600 hover:underline"
               >
-                {meeting.person.account.name}
+                {meeting.people.target_accounts.name}
               </a>
             </div>
-            {meeting.person.email && (
+            {meeting.people.email && (
               <div>
                 <p className="text-sm text-gray-500">Email</p>
-                <a href={`mailto:${meeting.person.email}`} className="text-blue-600">
-                  {meeting.person.email}
+                <a href={`mailto:${meeting.people.email}`} className="text-blue-600">
+                  {meeting.people.email}
                 </a>
               </div>
             )}

@@ -7,13 +7,236 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  MEMBER
+model campaigns {
+  id             String         @id
+  eventId        String
+  name           String
+  description    String?
+  targetPersonas String?
+  minIcpScore    Int?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         CampaignStatus @default(DRAFT)
+  goals          String?
+  createdBy      String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime
+  events         events         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  outreach       outreach[]
+  sequences      sequences[]
+
+  @@index([eventId])
+  @@index([status])
 }
 
-model User {
-  id            String    @id @default(cuid())
+model company_dossiers {
+  id               String          @id
+  accountId        String          @unique
+  companyOverview  String?
+  recentNews       String?
+  industryContext  String?
+  keyPainPoints    String?
+  techStack        String?
+  companySize      String?
+  socialPresence   String?
+  rawData          String?
+  researchedAt     DateTime        @default(now())
+  researchedBy     String?
+  facilityCount    String?
+  locations        String?
+  operationalScale String?
+  target_accounts  target_accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model contact_insights {
+  id                String   @id
+  personId          String   @unique
+  roleContext       String?
+  likelyPainPoints  String?
+  suggestedApproach String?
+  roiOpportunity    String?
+  confidence        String?
+  generatedAt       DateTime @default(now())
+  generatedBy       String?
+  people            people   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+}
+
+model events {
+  id              String            @id
+  name            String
+  location        String?
+  startDate       DateTime
+  endDate         DateTime
+  status          EventStatus       @default(PLANNING)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  campaigns       campaigns[]
+  target_accounts target_accounts[]
+  users           users[]
+}
+
+model Meeting {
+  id           String    @id
+  personId     String
+  scheduledAt  DateTime
+  duration     Int
+  location     String?
+  status       MeetingStatus @default(SCHEDULED)
+  meetingType  String?
+  outcome      String?
+  nextSteps    String?
+  followUpDate DateTime?
+  dealStage    String?
+  notes        String?
+  createdBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime
+  people       people    @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("meetings")
+  @@index([personId])
+  @@index([scheduledAt])
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model message_templates {
+  id          String          @id
+  name        String
+  description String?
+  channel     OutreachChannel
+  subject     String?
+  template    String
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime
+}
+
+model outreach {
+  id          String          @id
+  personId    String
+  channel     OutreachChannel
+  status      OutreachStatus  @default(DRAFT)
+  subject     String?
+  message     String
+  templateId  String?
+  sentBy      String?
+  sentAt      DateTime?
+  respondedAt DateTime?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime
+  bouncedAt   DateTime?
+  campaignId  String?
+  openedAt    DateTime?
+  sequenceId  String?
+  campaigns   campaigns?      @relation(fields: [campaignId], references: [id])
+  people      people          @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([personId])
+  @@index([status])
+}
+
+model people {
+  id               String            @id
+  accountId        String
+  name             String
+  title            String?
+  email            String?
+  phone            String?
+  linkedin         String?
+  notes            String?
+  isExecOps        Boolean           @default(false)
+  isOps            Boolean           @default(false)
+  isProc           Boolean           @default(false)
+  isSales          Boolean           @default(false)
+  isTech           Boolean           @default(false)
+  isNonOps         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime
+  contact_insights contact_insights?
+  meetings         Meeting[]
+  outreach         outreach[]
+  target_accounts  target_accounts   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model roi_calculations {
+  id               String          @id
+  accountId        String
+  facilityCount    Int?
+  operationalScale String?
+  annualSavings    Float?
+  paybackPeriod    Int?
+  assumptions      String?
+  calculatedAt     DateTime        @default(now())
+  calculatedBy     String?
+  target_accounts  target_accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model score_history {
+  id              String          @id
+  accountId       String
+  oldScore        Int?
+  newScore        Int?
+  reason          String
+  changedBy       String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  target_accounts target_accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model sequences {
+  id          String     @id
+  campaignId  String?
+  name        String
+  description String?
+  steps       String
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime
+  campaigns   campaigns? @relation(fields: [campaignId], references: [id])
+
+  @@index([campaignId])
+}
+
+model target_accounts {
+  id               String             @id
+  eventId          String
+  name             String
+  website          String?
+  industry         String?
+  headquarters     String?
+  icpScore         Int?
+  notes            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  company_dossiers company_dossiers?
+  people           people[]
+  roi_calculations roi_calculations[]
+  score_history    score_history[]
+  events           events             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model users {
+  id            String    @id
   name          String?
   email         String    @unique
   emailVerified DateTime?
@@ -22,130 +245,8 @@ model User {
   role          Role      @default(MEMBER)
   activeEventId String?
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  activeEvent   Event?    @relation("ActiveEvent", fields: [activeEventId], references: [id])
-  activityLogs  ActivityLog[]
-  editLocks     EditLock[]
-  auditLogs     AuditLog[]
-  @@map("users")
-}
-
-enum EventStatus {
-  PLANNING
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-model Event {
-  id          String      @id @default(cuid())
-  name        String
-  location    String?
-  startDate   DateTime
-  endDate     DateTime
-  status      EventStatus @default(PLANNING)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  accounts    TargetAccount[]
-  activeUsers User[]      @relation("ActiveEvent")
-  campaigns   Campaign[]
-  @@map("events")
-}
-
-model TargetAccount {
-  id           String         @id @default(cuid())
-  eventId      String
-  name         String
-  website      String?
-  industry     String?
-  headquarters String?
-  icpScore     Int?
-  notes        String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  event        Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  people       Person[]
-  scoreHistory ScoreHistory[]
-  dossier      CompanyDossier?
-  roiCalculations RoiCalculation[]
-  @@index([eventId])
-  @@map("target_accounts")
-}
-
-model CompanyDossier {
-  id               String        @id @default(cuid())
-  accountId        String        @unique
-  companyOverview  String?       // AI-generated company summary
-  recentNews       String?       // Latest news/announcements
-  industryContext  String?       // Industry trends relevant to this company
-  keyPainPoints    String?       // AI-identified challenges
-  techStack        String?       // Technologies they use
-  companySize      String?       // Employee count, revenue estimates
-  facilityCount    String?       // Number of warehouses/DCs/facilities
-  locations        String?       // Geographic markets/regions
-  operationalScale String?       // Supply chain footprint description
-  socialPresence   String?       // LinkedIn, Twitter activity summary
-  rawData          String?       // JSON blob of all scraped data
-  researchedAt     DateTime      @default(now())
-  researchedBy     String?       // User who triggered research
-  account          TargetAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  @@index([accountId])
-  @@map("company_dossiers")
-}
-
-model Person {
-  id        String          @id @default(cuid())
-  accountId String
-  name      String
-  title     String?
-  email     String?
-  phone     String?
-  linkedin  String?
-  notes     String?
-  isExecOps Boolean         @default(false)
-  isOps     Boolean         @default(false)
-  isProc    Boolean         @default(false)
-  isSales   Boolean         @default(false)
-  isTech    Boolean         @default(false)
-  isNonOps  Boolean         @default(false)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
-  account   TargetAccount   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  outreach  Outreach[]
-  insights  ContactInsights?
-  meetings  Meeting[]
-  @@index([accountId])
-  @@map("people")
-}
-
-model ScoreHistory {
-  id        String        @id @default(cuid())
-  accountId String
-  oldScore  Int?
-  newScore  Int?
-  reason    String
-  changedBy String?
-  notes     String?
-  createdAt DateTime      @default(now())
-  account   TargetAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  @@index([accountId])
-  @@map("score_history")
-}
-
-enum OutreachChannel {
-  EMAIL
-  LINKEDIN
-  PHONE
-}
-
-enum OutreachStatus {
-  DRAFT
-  SCHEDULED
-  SENT
-  OPENED
-  RESPONDED
-  BOUNCED
-  NO_RESPONSE
+  updatedAt     DateTime
+  events        events?   @relation(fields: [activeEventId], references: [id])
 }
 
 enum CampaignStatus {
@@ -156,311 +257,30 @@ enum CampaignStatus {
   ARCHIVED
 }
 
-model Campaign {
-  id              String          @id @default(cuid())
-  eventId         String
-  name            String
-  description     String?
-  targetPersonas  String?         // JSON array: ["isExecOps", "isProcurement"]
-  minIcpScore     Int?
-  startDate       DateTime?
-  endDate         DateTime?
-  status          CampaignStatus  @default(DRAFT)
-  goals           String?         // JSON: {"meetings": 20, "emails": 100, "responses": 15}
-  createdBy       String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  event           Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  outreach        Outreach[]
-  sequences       Sequence[]
-  @@index([eventId])
-  @@index([status])
-  @@map("campaigns")
+enum EventStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }
 
-model Sequence {
-  id          String   @id @default(cuid())
-  campaignId  String?
-  name        String
-  description String?
-  steps       String   // JSON array of touchpoints with delays
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  @@index([campaignId])
-  @@map("sequences")
+enum OutreachChannel {
+  EMAIL
+  LINKEDIN
+  PHONE
 }
 
-model Outreach {
-  id          String          @id @default(cuid())
-  personId    String
-  campaignId  String?
-  sequenceId  String?
-  channel     OutreachChannel
-  status      OutreachStatus  @default(DRAFT)
-  subject     String?
-  message     String
-  templateId  String?
-  sentBy      String?
-  sentAt      DateTime?
-  openedAt    DateTime?
-  respondedAt DateTime?
-  bouncedAt   DateTime?
-  notes       String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  person      Person          @relation(fields: [personId], references: [id], onDelete: Cascade)
-  campaign    Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  @@index([personId])
-  @@index([campaignId])
-  @@index([status])
-  @@map("outreach")
+enum OutreachStatus {
+  DRAFT
+  SENT
+  RESPONDED
+  BOUNCED
+  NO_RESPONSE
+  SCHEDULED
+  OPENED
 }
 
-model MessageTemplate {
-  id          String          @id @default(cuid())
-  name        String
-  description String?
-  channel     OutreachChannel
-  subject     String?
-  template    String
-  isActive    Boolean         @default(true)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  @@map("message_templates")
-}
-
-model ContactInsights {
-  id                String   @id @default(cuid())
-  personId          String   @unique
-  roleContext       String?  // e.g., "Oversees 15-person ops team managing 5 DCs"
-  likelyPainPoints  String?  // JSON array of pain points specific to role
-  suggestedApproach String?  // How to pitch to this persona
-  roiOpportunity    String?  // Estimated value prop for this role
-  confidence        String?  // LOW, MEDIUM, HIGH
-  generatedAt       DateTime @default(now())
-  generatedBy       String?
-  person            Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  @@index([personId])
-  @@map("contact_insights")
-}
-
-model RoiCalculation {
-  id              String        @id @default(cuid())
-  accountId       String
-  facilityCount   Int?
-  operationalScale String?
-  annualSavings   Float?        // Estimated $ saved per year
-  paybackPeriod   Int?          // Months to ROI
-  assumptions     String?       // JSON of calculation inputs
-  calculatedAt    DateTime      @default(now())
-  calculatedBy    String?
-  account         TargetAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  @@index([accountId])
-  @@map("roi_calculations")
-}
-
-model Meeting {
-  id           String   @id @default(cuid())
-  personId     String
-  scheduledAt  DateTime
-  duration     Int      // Minutes
-  location     String?  // Booth number, room name, virtual link
-  status       String   @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
-  meetingType  String?  // INTRO, DEMO, NEGOTIATION, FOLLOW_UP
-  outcome      String?
-  nextSteps    String?
-  followUpDate DateTime?
-  dealStage    String?
-  notes        String?
-  createdBy    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  person       Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  @@index([personId])
-  @@index([scheduledAt])
-  @@map("meetings")
-}
-
-enum NotificationType {
-  INFO
-  SUCCESS
-  WARNING
-  ERROR
-  ENGAGEMENT
-  MEETING
-  CAMPAIGN
-}
-
-enum NotificationPriority {
-  LOW
-  NORMAL
-  HIGH
-  URGENT
-}
-
-model Notification {
-  id        String               @id @default(cuid())
-  userId    String
-  type      NotificationType     @default(INFO)
-  priority  NotificationPriority @default(NORMAL)
-  title     String
-  message   String
-  actionUrl String?
-  read      Boolean              @default(false)
-  readAt    DateTime?
-  createdAt DateTime             @default(now())
-  @@index([userId, read])
-  @@index([createdAt])
-  @@map("notifications")
-}
-
-model Workflow {
-  id         String              @id @default(cuid())
-  name       String
-  trigger    String              // JSON: { type: 'email_opened', 'meeting_scheduled', etc }
-  conditions String              // JSON: filter criteria
-  actions    String              // JSON: [ { type: 'send_notification', ... }, { type: 'update_status' } ]
-  enabled    Boolean             @default(true)
-  createdBy  String?
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  executions WorkflowExecution[]
-  @@map("workflows")
-}
-
-model WorkflowExecution {
-  id              String   @id @default(cuid())
-  workflowId      String
-  triggeredBy     String   // 'MANUAL', 'AUTO', 'SCHEDULED'
-  status          String   // 'RUNNING', 'COMPLETED', 'FAILED'
-  actionsExecuted Int      @default(0)
-  errorMessage    String?
-  executedBy      String?
-  executedAt      DateTime @default(now())
-  workflow        Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  @@index([workflowId])
-  @@index([executedAt])
-  @@map("workflow_executions")
-}
-
-// Sprint 23: Real-time Collaboration
-model UserPresence {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  page      String?  // Current page/path
-  status    String   @default("active") // "active", "away", "busy"
-  lastSeen  DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@index([userId])
-  @@index([lastSeen])
-  @@map("user_presence")
-}
-
-model ActivityLog {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  action     String   // "created", "updated", "deleted", "viewed", etc.
-  entityType String   // "account", "person", "outreach", etc.
-  entityId   String?  // ID of the entity
-  metadata   Json?    // Additional context
-  createdAt  DateTime @default(now())
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@index([createdAt])
-  @@map("activity_logs")
-}
-
-model EditLock {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entityType String   // "account", "person", etc.
-  entityId   String   // ID of entity being edited
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  @@unique([userId, entityType, entityId])
-  @@index([entityType, entityId])
-  @@index([expiresAt])
-  @@map("edit_locks")
-}
-
-// Sprint 26: API Webhooks
-model Webhook {
-  id         String             @id @default(cuid())
-  url        String
-  events     String[]           // ["outreach.sent", "meeting.scheduled", etc.]
-  secret     String?            // For HMAC signature
-  active     Boolean            @default(true)
-  createdAt  DateTime           @default(now())
-  updatedAt  DateTime           @updatedAt
-  deliveries WebhookDelivery[]
-  @@index([active])
-  @@map("webhooks")
-}
-
-model WebhookDelivery {
-  id           String   @id @default(cuid())
-  webhookId    String
-  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-  event        String
-  payload      Json
-  statusCode   Int?
-  success      Boolean  @default(false)
-  responseBody String?  @db.Text
-  createdAt    DateTime @default(now())
-  @@index([webhookId])
-  @@index([createdAt])
-  @@map("webhook_deliveries")
-}
-
-// Sprint 27: Audit Logs
-model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  action     String   // "created", "updated", "deleted", "login", "logout", etc.
-  entityType String   // "account", "person", "outreach", etc.
-  entityId   String?  // ID of affected entity
-  changes    Json?    // { field: { old: value, new: value } }
-  metadata   Json?    // Additional context (IP, user agent, etc.)
-  ipAddress  String?
-  userAgent  String?  @db.Text
-  createdAt  DateTime @default(now())
-  @@index([userId])
-  @@index([action])
-  @@index([entityType, entityId])
-  @@index([createdAt])
-  @@map("audit_logs")
-}
-
-// Sprint 28: Custom Dashboards
-model CustomDashboard {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  layout    String   // "grid", "flex", "masonry"
-  widgets   Json     // Array of widget configs
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@index([userId])
-  @@map("custom_dashboards")
-}
-
-// Sprint 30: Performance & Caching
-model CacheEntry {
-  id             String   @id @default(cuid())
-  key            String   @unique
-  value          Json
-  expiresAt      DateTime
-  hitCount       Int      @default(0)
-  lastAccessedAt DateTime @default(now())
-  createdAt      DateTime @default(now())
-  @@index([expiresAt])
-  @@index([key])
-  @@map("cache_entries")
+enum Role {
+  ADMIN
+  MEMBER
 }

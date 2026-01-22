@@ -13,10 +13,10 @@ type OutreachItem = {
   subject: string | null;
   message: string;
   createdAt: Date;
-  person: {
+  people: {
     name: string;
     title: string | null;
-    account: {
+    target_accounts: {
       name: string;
     };
   };
@@ -204,7 +204,7 @@ export function OutreachList({ outreach }: { outreach: OutreachItem[] }) {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="text-lg font-semibold">
-                    {item.person.name} @ {item.person.account.name}
+                    {item.people.name} @ {item.people.target_accounts.name}
                   </h3>
                   <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700">
                     {channelIcons[item.channel]}
@@ -218,9 +218,9 @@ export function OutreachList({ outreach }: { outreach: OutreachItem[] }) {
                     {item.status.replace("_", " ")}
                   </span>
                 </div>
-                {item.person.title && (
+                {item.people.title && (
                   <p className="text-sm text-muted-foreground mb-3">
-                    {item.person.title}
+                    {item.people.title}
                   </p>
                 )}
                 {item.subject && (

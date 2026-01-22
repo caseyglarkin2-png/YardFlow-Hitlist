@@ -5,7 +5,7 @@ export default async function DashboardPage() {
   const session = await auth();
   
   // Get active event for user
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
     include: {
       activeEvent: true,
@@ -14,11 +14,11 @@ export default async function DashboardPage() {
 
   const stats = user?.activeEventId
     ? await Promise.all([
-        prisma.targetAccount.count({
+        prisma.target_accounts.count({
           where: { eventId: user.activeEventId },
         }),
-        prisma.person.count({
-          where: { account: { eventId: user.activeEventId } },
+        prisma.people.count({
+          where: { target_accounts: { eventId: user.activeEventId } },
         }),
       ])
     : [0, 0];

@@ -66,9 +66,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Get people with accounts
-    const people = await db.person.findMany({
+    const people = await db.people.findMany({
       where: { id: { in: personIds } },
-      include: { account: true },
+      include: { target_accounts: true },
     });
 
     // Generate outreach for each person
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       const message = fillTemplate(template.template, {
         name: person.name,
         title: person.title,
-        company: person.account.name,
+        company: person.target_accounts.name,
         event: event.name,
         persona,
       });
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         ? fillTemplate(template.subject, {
             name: person.name,
             title: person.title,
-            company: person.account.name,
+            company: person.target_accounts.name,
             event: event.name,
             persona,
           })

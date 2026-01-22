@@ -37,8 +37,8 @@ export default async function OutreachPage({
   }
 
   const whereClause: any = {
-    person: {
-      account: {
+    people: {
+      target_accounts: {
         eventId: user.activeEventId,
       },
     },
@@ -54,9 +54,9 @@ export default async function OutreachPage({
   const outreach = await db.outreach.findMany({
     where: whereClause,
     include: {
-      person: {
+      people: {
         include: {
-          account: true,
+          target_accounts: true,
         },
       },
     },

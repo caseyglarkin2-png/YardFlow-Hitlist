@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Get all accounts for active event
-  const accounts = await prisma.targetAccount.findMany({
+  const accounts = await prisma.target_accounts.findMany({
     where: { eventId: user.activeEventId },
     include: {
       people: {
@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
   });
 
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '100');
 
   // Get accounts with outreach and meeting data
-  const accounts = await prisma.targetAccount.findMany({
+  const accounts = await prisma.target_accounts.findMany({
     where: { eventId: user.activeEventId },
     include: {
       people: {

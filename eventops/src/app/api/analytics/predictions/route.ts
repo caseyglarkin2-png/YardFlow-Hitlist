@@ -9,12 +9,12 @@ export async function GET(request: NextRequest) {
 
     if (personId) {
       // Individual prediction
-      const person = await prisma.person.findUnique({
+      const person = await prisma.people.findUnique({
         where: { id: personId },
         include: {
           outreach: true,
           meetings: true,
-          account: {
+          target_accounts: {
             select: {
               icpScore: true,
               industry: true,
@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
       let score = 0;
 
       // ICP score weight (40%)
-      if (person.account.icpScore) {
-        score += (person.account.icpScore / 100) * 40;
+      if (person.target_accounts.icpScore) {
+        score += (person.target_accounts.icpScore / 100) * 40;
       }
 
       // Engagement history weight (30%)
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         personId: person.id,
         score: Math.round(score),
         factors: {
-          icpScore: person.account.icpScore,
+          icpScore: person.target_accounts.icpScore,
           engagementRate: totalOutreach > 0 ? (responded / totalOutreach) * 100 : 0,
           meetingCompletionRate:
             person.meetings.length > 0 ? (completedMeetings / person.meetings.length) * 100 : 0,
@@ -77,11 +77,11 @@ export async function GET(request: NextRequest) {
       });
     } else {
       // Aggregate predictions
-      const people = await prisma.person.findMany({
+      const people = await prisma.people.findMany({
         include: {
           outreach: true,
           meetings: true,
-          account: {
+          target_accounts: {
             select: {
               icpScore: true,
               name: true,
@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
       const predictions = people.map((person) => {
         let score = 0;
 
-        if (person.account.icpScore) {
-          score += (person.account.icpScore / 100) * 40;
+        if (person.target_accounts.icpScore) {
+          score += (person.target_accounts.icpScore / 100) * 40;
         }
 
         const totalOutreach = person.outreach.length;
