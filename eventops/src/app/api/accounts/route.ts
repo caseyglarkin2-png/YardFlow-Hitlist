@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { parsePaginationParams, buildPaginatedResponse, getPrismaCursorParams } from '@/lib/pagination';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
@@ -79,6 +80,9 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
+    const { searchParams } = new URL(request.url);
+    const { cursor, limit } = parsePaginationParams(searchParams);
+
     const accounts = await prisma.targetAccount.findMany({
       where: { eventId: user.activeEventId },
       include: {
@@ -87,9 +91,16 @@ export async function GET() {
         },
       },
       orderBy: { name: 'asc' },
+      ...getPrismaCursorParams(cursor, limit),
     });
 
-    return NextResponse.json(accounts);
+    // Get total count for pagination metadata
+    const total = await prisma.targetAccount.count({
+      where: { eventId: user.activeEventId },
+    });
+
+    const response = buildPaginatedResponse(accounts, limit!, total);
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching accounts:', error);
     return NextResponse.json(

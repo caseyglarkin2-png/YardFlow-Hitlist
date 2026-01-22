@@ -15,15 +15,17 @@ export function DashboardNav() {
 
   const navItems = [
     { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Overview', href: '/dashboard/custom' },
     { name: 'Events', href: '/dashboard/events' },
     { name: 'Accounts', href: '/dashboard/accounts' },
     { name: 'People', href: '/dashboard/people' },
+    { name: 'Calendar', href: '/dashboard/calendar' },
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
+    { name: 'Research', href: '/dashboard/research/bulk' },
     { name: 'Workflows', href: '/dashboard/workflows' },
     { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Team', href: '/dashboard/team' },
-    { name: 'Custom', href: '/dashboard/custom' },
     { name: 'Analytics', href: '/dashboard/analytics' },
   ];
 
