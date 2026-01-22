@@ -48,26 +48,26 @@ export function personToHubSpotContact(people: {
   isSales: boolean;
   isTech: boolean;
 }): HubSpotContact {
-  const [firstname, ...lastnameParts] = person.name.split(' ');
+  const [firstname, ...lastnameParts] = people.name.split(' ');
   const lastname = lastnameParts.join(' ');
 
   // Determine persona
   let persona = 'Non-Ops';
-  if (person.isExecOps) persona = 'Executive Ops';
-  else if (person.isOps) persona = 'Operations';
-  else if (person.isProc) persona = 'Procurement';
-  else if (person.isSales) persona = 'Sales';
-  else if (person.isTech) persona = 'Technology';
+  if (people.isExecOps) persona = 'Executive Ops';
+  else if (people.isOps) persona = 'Operations';
+  else if (people.isProc) persona = 'Procurement';
+  else if (people.isSales) persona = 'Sales';
+  else if (people.isTech) persona = 'Technology';
 
   return {
-    email: person.email || '',
+    email: people.email || '',
     firstname,
     lastname,
-    company: person.target_accounts.name,
-    jobtitle: person.title || undefined,
-    phone: person.phone || undefined,
-    linkedin_url: person.linkedin || undefined,
-    icp_score: person.target_accounts.icpScore || undefined,
+    company: people.target_accounts.name,
+    jobtitle: people.title || undefined,
+    phone: people.phone || undefined,
+    linkedin_url: people.linkedin || undefined,
+    icp_score: people.target_accounts.icpScore || undefined,
     persona_type: persona,
     event_name: 'Manifest 2026',
   };

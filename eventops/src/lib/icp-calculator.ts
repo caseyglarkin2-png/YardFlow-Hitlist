@@ -129,6 +129,7 @@ export async function updateAccountScore(
   // Log to history
   await prisma.score_history.create({
     data: {
+      id: crypto.randomUUID(),
       accountId,
       oldScore: account.icpScore,
       newScore,

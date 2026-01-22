@@ -176,7 +176,7 @@ export default function SequencesPage() {
                     </div>
                     {sequence.campaign && (
                       <div>
-                        Campaign: <span className="font-medium text-gray-700">{sequence.campaigns.name}</span>
+                        Campaign: <span className="font-medium text-gray-700">{sequence.campaign.name}</span>
                       </div>
                     )}
                   </div>

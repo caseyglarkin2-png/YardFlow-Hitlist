@@ -184,8 +184,8 @@ export default function ResearchRefreshPage() {
                   <td className="py-2 px-4 font-medium">{account.name}</td>
                   <td className="text-right py-2 px-4">{account.icpScore || 'N/A'}</td>
                   <td className="text-right py-2 px-4 text-sm">
-                    {account.company_dossiersUpdatedAt
-                      ? new Date(account.company_dossiersUpdatedAt).toLocaleDateString()
+                    {account.dossierUpdatedAt
+                      ? new Date(account.dossierUpdatedAt).toLocaleDateString()
                       : 'Never'}
                   </td>
                   <td className="text-right py-2 px-4">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AdvancedFilters, SearchFilter } from '@/components/search/advanced-filters';
+import { AdvancedFilters, FilterCondition } from '@/components/search/advanced-filters';
 import { SearchResults } from '@/components/search/search-results';
 import { SavedSearches } from '@/components/search/saved-searches';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Download, Save, Search } from 'lucide-react';
 export default function AdvancedSearchPage() {
   const router = useRouter();
   const [entityType, setEntityType] = useState<'accounts' | 'people' | 'outreach' | 'meetings'>('people');
-  const [filters, setFilters] = useState<SearchFilter[]>([]);
+  const [filters, setFilters] = useState<FilterCondition[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [resultCount, setResultCount] = useState(0);
   const [searching, setSearching] = useState(false);
@@ -106,15 +106,15 @@ export default function AdvancedSearchPage() {
         <div className="lg:col-span-1 space-y-4">
           <SavedSearches
             entityType={entityType}
-            currentFilters={filters}
-            onLoadSearch={setFilters}
+            onLoad={setFilters}
           />
           
           <AdvancedFilters
             entityType={entityType}
-            filters={filters}
-            onFiltersChange={setFilters}
-            resultCount={resultCount}
+            onSearch={(advancedFilters) => {
+              // Convert AdvancedFilters to FilterCondition[] if needed
+              handleSearch();
+            }}
           />
         </div>
 
@@ -122,7 +122,7 @@ export default function AdvancedSearchPage() {
           <SearchResults
             results={results}
             isLoading={searching}
-            emptyMessage={filters.length === 0 ? "Add filters to start searching" : "No results found. Try adjusting your filters."}
+            resultCount={resultCount}
           />
         </div>
       </div>

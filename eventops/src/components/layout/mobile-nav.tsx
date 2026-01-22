@@ -80,7 +80,7 @@ export function MobileNav() {
                           : 'hover:bg-accent'
                       )}
                     >
-                      {item.icon && <item.icon className="h-4 w-4" />}
+                      {'icon' in item && item.icon && <item.icon className="h-4 w-4" />}
                       {item.label}
                     </Link>
                   ))}

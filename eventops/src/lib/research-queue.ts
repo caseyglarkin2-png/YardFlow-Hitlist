@@ -96,6 +96,7 @@ class ResearchQueue {
       await prisma.company_dossiers.upsert({
         where: { accountId: item.accountId },
         create: {
+          id: crypto.randomUUID(),
           accountId: item.accountId,
           companyOverview: research.companyOverview || null,
           recentNews: research.recentNews || null,
