@@ -155,7 +155,7 @@ export async function GET(req: NextRequest) {
         type: 'prepare_meeting',
         priority: hoursUntil < 2 ? 'high' : 'medium',
         title: `Prepare for meeting with ${meeting.people.name}`,
-        description: `Meeting in ${hoursUntil.toFixed(1)} hours at ${meeting.people.account.name}`,
+        description: `Meeting in ${hoursUntil.toFixed(1)} hours at ${meeting.people.target_accounts.name}`,
         entityType: 'meeting',
         entityId: meeting.id,
         dueDate: meeting.scheduledAt,
