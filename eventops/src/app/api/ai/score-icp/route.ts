@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   try {
     let score = 0;
-    let reasoning: string[] = [];
+    const reasoning: string[] = [];
 
     if (accountId) {
       // Score account

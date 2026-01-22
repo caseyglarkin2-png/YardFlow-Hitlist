@@ -48,9 +48,15 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'update-tier':
+        // Tier field doesn't exist in schema - remove this action or add field
+        return NextResponse.json(
+          { error: 'Tier field not implemented in current schema' },
+          { status: 400 }
+        );
+        /*
         const { tier } = body;
         if (!tier) {
-          return NextResponse.json({ error: 'Missing tier' }, { status: 400 });
+          return NextResponse.json({ error: 'Tier is required' }, { status: 400 });
         }
 
         result = await prisma.target_accounts.updateMany({
@@ -63,24 +69,32 @@ export async function POST(request: NextRequest) {
             updatedAt: new Date(),
           },
         });
+        */
         break;
 
       case 'update-status':
+        // Status field doesn't exist in schema - remove this action or add field
+        return NextResponse.json(
+          { error: 'Status field not implemented in current schema' },
+          { status: 400 }
+        );
+        /*
         const { status } = body;
         if (!status) {
-          return NextResponse.json({ error: 'Missing status' }, { status: 400 });
+          return NextResponse.json({ error: 'Status is required' }, { status: 400 });
         }
 
         result = await prisma.target_accounts.updateMany({
           where: {
             id: { in: accountIds },
-            eventId: user.activeEventId,
+            eventId: user.activeEventId },
           },
           data: {
             status,
             updatedAt: new Date(),
           },
         });
+        */
         break;
 
       case 'export':

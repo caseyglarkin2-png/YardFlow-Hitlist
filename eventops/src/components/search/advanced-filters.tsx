@@ -253,3 +253,6 @@ export function AdvancedFiltersComponent({
     </Card>
   );
 }
+
+export default AdvancedFiltersComponent;
+export { AdvancedFiltersComponent as AdvancedFilters };

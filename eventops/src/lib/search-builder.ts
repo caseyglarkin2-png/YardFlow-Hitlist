@@ -77,3 +77,10 @@ export function exportToCSV(data: any[], filename: string) {
   link.click();
   document.body.removeChild(link);
 }
+
+export function formatSearchResults(results: any[], entityType: string) {
+  return results.map((result) => ({
+    ...result,
+    entityType,
+  }));
+}

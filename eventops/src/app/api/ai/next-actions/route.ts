@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     // 2. Check for pending responses (opened but no reply)
     const openedNotReplied = await prisma.outreach.findMany({
       where: {
-        person: {
+        people: {
           target_accounts: { eventId: user.activeEventId },
         },
         status: 'OPENED',
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
         },
       },
       include: {
-        people: { include: { account: true } },
+        people: { include: { target_accounts: true } },
       },
       take: 3,
     });
@@ -92,9 +92,9 @@ export async function GET(req: NextRequest) {
     });
 
     // 3. Check for meetings without notes
-    const meetingsWithoutNotes = await prisma.Meeting.findMany({
+    const meetingsWithoutNotes = await prisma.meeting.findMany({
       where: {
-        person: {
+        people: {
           target_accounts: { eventId: user.activeEventId },
         },
         status: 'COMPLETED',
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
         },
       },
       include: {
-        people: { include: { account: true } },
+        people: { include: { target_accounts: true } },
       },
       take: 3,
     });
@@ -130,9 +130,9 @@ export async function GET(req: NextRequest) {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
-    const todayMeetings = await prisma.Meeting.findMany({
+    const todayMeetings = await prisma.meeting.findMany({
       where: {
-        person: {
+        people: {
           target_accounts: { eventId: user.activeEventId },
         },
         status: 'SCHEDULED',
@@ -142,7 +142,7 @@ export async function GET(req: NextRequest) {
         },
       },
       include: {
-        people: { include: { account: true } },
+        people: { include: { target_accounts: true } },
       },
       orderBy: { scheduledAt: 'asc' },
     });

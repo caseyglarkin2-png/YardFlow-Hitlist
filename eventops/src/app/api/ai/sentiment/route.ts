@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,7 +71,7 @@ export async function POST(req: NextRequest) {
     else if (score < -0.2) sentiment = 'negative';
 
     // Determine intent
-    let intent: string[] = [];
+    const intent: string[] = [];
     if (lowerText.includes('meeting') || lowerText.includes('schedule') || lowerText.includes('call')) {
       intent.push('schedule_meeting');
     }
