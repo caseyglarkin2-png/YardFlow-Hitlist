@@ -1,11 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
+import { buildPrismaWhere, formatSearchResults } from '@/lib/search-builder';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Advanced search across accounts and people
+ * Advanced search with filter builder support
+ */
+export async function POST(req: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const user = await prisma.users.findUnique({
+    where: { email: session.user.email! },
+  });
+
+  if (!user?.activeEventId) {
+    return NextResponse.json({ error: 'No active event' }, { status: 400 });
+  }
+
+  const { entityType, filters } = await req.json();
+  
+  const where = {
+    ...buildPrismaWhere(filters),
+    ...(entityType === 'accounts' ? { eventId: user.activeEventId } : {}),
+    ...(entityType === 'people' ? { target_accounts: { eventId: user.activeEventId } } : {}),
+    ...(entityType === 'outreach' ? { person: { target_accounts: { eventId: user.activeEventId } } } : {}),
+    ...(entityType === 'meetings' ? { account: { eventId: user.activeEventId } } : {}),
+  };
+
+  let data: any[] = [];
+
+  try {
+    switch (entityType) {
+      case 'accounts':
+        data = await prisma.target_accounts.findMany({
+          where,
+          include: {
+            people: { select: { id: true } },
+          },
+          take: 100,
+        });
+        break;
+
+      case 'people':
+        data = await prisma.people.findMany({
+          where,
+          include: {
+            account: { select: { name: true } },
+          },
+          take: 100,
+        });
+        break;
+
+      case 'outreach':
+        data = await prisma.outreach.findMany({
+          where,
+          include: {
+            person: {
+              include: {
+                account: { select: { name: true } },
+              },
+            },
+          },
+          take: 100,
+        });
+        break;
+
+      case 'meetings':
+        data = await prisma.meetings.findMany({
+          where,
+          include: {
+            person: { select: { name: true } },
+            account: { select: { name: true } },
+          },
+          take: 100,
+        });
+        break;
+    }
+
+    const results = formatSearchResults(data, entityType);
+
+    return NextResponse.json({
+      results,
+      totalResults: results.length,
+    });
+  } catch (error: any) {
+    console.error('Search error:', error);
+    return NextResponse.json({ error: error.message || 'Search failed', results: [], totalResults: 0 }, { status: 500 });
+  }
+}
+
+/**
+ * Legacy GET endpoint for backwards compatibility
  */
 export async function GET(req: NextRequest) {
   const session = await auth();

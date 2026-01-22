@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
+import { MobileNav } from '@/components/layout/mobile-nav';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,7 +35,10 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <MobileNav />
+        </Providers>
         <script
           dangerouslySetInnerHTML={{
             __html: `

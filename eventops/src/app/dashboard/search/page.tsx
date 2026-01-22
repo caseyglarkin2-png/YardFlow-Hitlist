@@ -1,231 +1,132 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { AdvancedFilters, SearchFilter } from '@/components/search/advanced-filters';
+import { SearchResults } from '@/components/search/search-results';
+import { SavedSearches } from '@/components/search/saved-searches';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Download, Save, Search } from 'lucide-react';
 
 export default function AdvancedSearchPage() {
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState('all');
-  const [minIcpScore, setMinIcpScore] = useState('0');
-  const [maxIcpScore, setMaxIcpScore] = useState('100');
-  const [outreachStatus, setOutreachStatus] = useState('');
-  const [hasEmail, setHasEmail] = useState('');
-  const [results, setResults] = useState<any>(null);
+  const [entityType, setEntityType] = useState<'accounts' | 'people' | 'outreach' | 'meetings'>('people');
+  const [filters, setFilters] = useState<SearchFilter[]>([]);
+  const [results, setResults] = useState<any[]>([]);
+  const [resultCount, setResultCount] = useState(0);
   const [searching, setSearching] = useState(false);
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  // Auto-search when filters change (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (filters.length > 0) {
+        handleSearch();
+      } else {
+        setResults([]);
+        setResultCount(0);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters]);
+
+  async function handleSearch() {
     setSearching(true);
 
     try {
-      const params = new URLSearchParams({
-        q: query,
-        type,
-        minIcpScore,
-        maxIcpScore,
-        ...(outreachStatus && { outreachStatus }),
-        ...(hasEmail && { hasEmail }),
+      const res = await fetch('/api/search/advanced', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entityType, filters }),
       });
-
-      const res = await fetch(`/api/search/advanced?${params}`);
       const data = await res.json();
-      setResults(data);
+      
+      setResults(data.results || []);
+      setResultCount(data.totalResults || 0);
     } catch (error) {
       console.error('Search error:', error);
-      alert('Search failed');
     } finally {
       setSearching(false);
     }
   }
 
+  async function handleExport() {
+    if (results.length === 0) return;
+
+    const csv = convertToCSV(results);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${entityType}-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  }
+
+  function convertToCSV(data: any[]): string {
+    if (data.length === 0) return '';
+
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map((item) =>
+      Object.values(item)
+        .map((v) => (typeof v === 'object' ? JSON.stringify(v) : v))
+        .join(',')
+    );
+
+    return [headers, ...rows].join('\n');
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Advanced Search</h1>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Advanced Search</h1>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleExport}
+            disabled={results.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export Results
+          </Button>
+        </div>
+      </div>
 
-      <form onSubmit={handleSearch} className="bg-white p-6 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Search Query</label>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Company name, email, title..."
-              className="w-full px-3 py-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Search Type</label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
-            >
-              <option value="all">All</option>
-              <option value="accounts">Accounts Only</option>
-              <option value="people">People Only</option>
-              <option value="outreach">Outreach Only</option>
-            </select>
-          </div>
+      <Tabs value={entityType} onValueChange={(v) => setEntityType(v as any)} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="accounts">Accounts</TabsTrigger>
+          <TabsTrigger value="people">People</TabsTrigger>
+          <TabsTrigger value="outreach">Outreach</TabsTrigger>
+          <TabsTrigger value="meetings">Meetings</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-4">
+          <SavedSearches
+            entityType={entityType}
+            currentFilters={filters}
+            onLoadSearch={setFilters}
+          />
+          
+          <AdvancedFilters
+            entityType={entityType}
+            filters={filters}
+            onFiltersChange={setFilters}
+            resultCount={resultCount}
+          />
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Min ICP Score</label>
-            <input
-              type="number"
-              value={minIcpScore}
-              onChange={(e) => setMinIcpScore(e.target.value)}
-              min="0"
-              max="100"
-              className="w-full px-3 py-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Max ICP Score</label>
-            <input
-              type="number"
-              value={maxIcpScore}
-              onChange={(e) => setMaxIcpScore(e.target.value)}
-              min="0"
-              max="100"
-              className="w-full px-3 py-2 border rounded"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Has Email</label>
-            <select
-              value={hasEmail}
-              onChange={(e) => setHasEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
-            >
-              <option value="">Any</option>
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
-          </div>
+        <div className="lg:col-span-2">
+          <SearchResults
+            results={results}
+            isLoading={searching}
+            emptyMessage={filters.length === 0 ? "Add filters to start searching" : "No results found. Try adjusting your filters."}
+          />
         </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Outreach Status</label>
-            <select
-              value={outreachStatus}
-              onChange={(e) => setOutreachStatus(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
-            >
-              <option value="">Any</option>
-              <option value="DRAFT">Draft</option>
-              <option value="SENT">Sent</option>
-              <option value="OPENED">Opened</option>
-              <option value="RESPONDED">Responded</option>
-            </select>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={searching}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-        >
-          {searching ? 'Searching...' : 'Search'}
-        </button>
-      </form>
-
-      {results && (
-        <div className="space-y-6">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-2">Search Results</h2>
-            <p className="text-gray-600">
-              Found {results.totalResults} result{results.totalResults !== 1 ? 's' : ''}
-            </p>
-          </div>
-
-          {results.accounts?.length > 0 && (
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">
-                Accounts ({results.accounts.length})
-              </h3>
-              <div className="space-y-2">
-                {results.accounts.map((account: any) => (
-                  <div
-                    key={account.id}
-                    className="p-3 border rounded hover:bg-gray-50 cursor-pointer"
-                    onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                  >
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">{account.name}</p>
-                        <p className="text-sm text-gray-600">{account.industry}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">ICP: {account.icpScore}</p>
-                        <p className="text-sm text-gray-600">
-                          {account.peopleCount} contact{account.peopleCount !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {results.people?.length > 0 && (
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">People ({results.people.length})</h3>
-              <div className="space-y-2">
-                {results.people.map((person: any) => (
-                  <div key={person.id} className="p-3 border rounded hover:bg-gray-50">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">{person.name}</p>
-                        <p className="text-sm text-gray-600">{person.title}</p>
-                        <p className="text-sm text-gray-600">{person.accountName}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm">{person.email || 'No email'}</p>
-                        <p className="text-sm text-gray-600">ICP: {person.icpScore}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {results.outreach?.length > 0 && (
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold mb-4">
-                Outreach ({results.outreach.length})
-              </h3>
-              <div className="space-y-2">
-                {results.outreach.map((outreach: any) => (
-                  <div key={outreach.id} className="p-3 border rounded hover:bg-gray-50">
-                    <div className="flex justify-between">
-                      <div>
-                        <p className="font-medium">{outreach.subject}</p>
-                        <p className="text-sm text-gray-600">
-                          {outreach.personName} • {outreach.accountName}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold">{outreach.status}</p>
-                        <p className="text-sm text-gray-600">
-                          {outreach.sentAt
-                            ? new Date(outreach.sentAt).toLocaleDateString()
-                            : 'Not sent'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
+

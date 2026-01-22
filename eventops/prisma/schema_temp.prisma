@@ -77,11 +77,10 @@ model events {
   campaigns       campaigns[]
   target_accounts target_accounts[]
   users           users[]
-  ab_tests        ab_tests[]
 }
 
 model Meeting {
-  id           String        @id
+  id           String    @id
   personId     String
   scheduledAt  DateTime
   duration     Int
@@ -94,13 +93,13 @@ model Meeting {
   dealStage    String?
   notes        String?
   createdBy    String?
-  createdAt    DateTime      @default(now())
+  createdAt    DateTime  @default(now())
   updatedAt    DateTime
-  people       people        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  people       people    @relation(fields: [personId], references: [id], onDelete: Cascade)
 
+  @@map("meetings")
   @@index([personId])
   @@index([scheduledAt])
-  @@map("meetings")
 }
 
 enum MeetingStatus {
@@ -163,7 +162,7 @@ model people {
   isSales          Boolean           @default(false)
   isTech           Boolean           @default(false)
   isNonOps         Boolean           @default(false)
-  assignedTo       String?
+  assignedTo       String?           // User ID
   createdAt        DateTime          @default(now())
   updatedAt        DateTime
   contact_insights contact_insights?
@@ -219,151 +218,3 @@ model sequences {
   @@index([campaignId])
 }
 
-model target_accounts {
-  id               String             @id
-  eventId          String
-  name             String
-  website          String?
-  industry         String?
-  headquarters     String?
-  icpScore         Int?
-  notes            String?
-  assignedTo       String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime
-  company_dossiers company_dossiers?
-  people           people[]
-  roi_calculations roi_calculations[]
-  score_history    score_history[]
-  events           events             @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  assignedUser     users?             @relation("AccountAssignments", fields: [assignedTo], references: [id])
-
-  @@index([eventId])
-  @@index([assignedTo])
-}
-
-model users {
-  id                 String            @id
-  name               String?
-  email              String            @unique
-  emailVerified      DateTime?
-  password           String?
-  image              String?
-  role               Role              @default(MEMBER)
-  activeEventId      String?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime
-  events             events?           @relation(fields: [activeEventId], references: [id])
-  activities         activities[]
-  saved_searches     saved_searches[]
-  notifications      notifications[]
-  accountAssignments target_accounts[] @relation("AccountAssignments")
-  personAssignments  people[]          @relation("PersonAssignments")
-}
-
-model activities {
-  id          String   @id @default(cuid())
-  userId      String
-  entityType  String
-  entityId    String
-  action      String
-  description String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  users       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@index([createdAt])
-}
-
-model saved_searches {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String
-  description String?
-  entityType  String
-  filters     Json
-  isGlobal    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  users       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([entityType])
-  @@index([isGlobal])
-}
-
-model notifications {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String
-  title     String
-  message   String
-  read      Boolean  @default(false)
-  metadata  Json?
-  createdAt DateTime @default(now())
-  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, read])
-  @@index([createdAt])
-}
-
-model ab_tests {
-  id              String    @id @default(cuid())
-  name            String
-  description     String?
-  status          String    @default("RUNNING") // RUNNING, COMPLETED, STOPPED
-  templateAId     String
-  templateBId     String
-  sampleSize      Int       @default(100)
-  winnerThreshold Float     @default(0.05) // 95% confidence
-  startedAt       DateTime  @default(now())
-  completedAt     DateTime?
-  winnerId        String?
-  results         Json? // {variantA: {sent, opened, clicked, replied}, variantB: {...}}
-  createdBy       String
-  eventId         String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  events          events    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
-  @@index([status])
-}
-
-enum CampaignStatus {
-  DRAFT
-  ACTIVE
-  PAUSED
-  COMPLETED
-  ARCHIVED
-}
-
-enum EventStatus {
-  PLANNING
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-enum OutreachChannel {
-  EMAIL
-  LINKEDIN
-  PHONE
-}
-
-enum OutreachStatus {
-  DRAFT
-  SENT
-  RESPONDED
-  BOUNCED
-  NO_RESPONSE
-  SCHEDULED
-  OPENED
-}
-
-enum Role {
-  ADMIN
-  MEMBER
-}
