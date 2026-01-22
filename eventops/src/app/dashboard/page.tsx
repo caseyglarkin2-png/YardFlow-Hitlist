@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { QuickActions } from '@/components/quick-actions';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -46,6 +47,10 @@ export default async function DashboardPage() {
               {new Date(user.activeEvent.startDate).toLocaleDateString()} -{' '}
               {new Date(user.activeEvent.endDate).toLocaleDateString()}
             </p>
+          </div>
+
+          <div className="mb-6">
+            <QuickActions />
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
