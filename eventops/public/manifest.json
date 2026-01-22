@@ -1,11 +1,11 @@
 {
-  "name": "YardFlow Hitlist",
-  "short_name": "YardFlow",
-  "description": "B2B event outreach and account management platform",
+  "name": "EventOps - Event Intelligence Platform",
+  "short_name": "EventOps",
+  "description": "Intelligent event operations and outreach platform for B2B sales teams",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0070f3",
+  "theme_color": "#2563eb",
   "orientation": "portrait",
   "icons": [
     {
@@ -20,5 +20,29 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Daily Brief",
+      "short_name": "Brief",
+      "description": "View today's intelligence briefing",
+      "url": "/dashboard?tab=brief",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Meetings",
+      "short_name": "Calendar",
+      "description": "View today's meetings",
+      "url": "/dashboard/calendar",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "People",
+      "short_name": "Contacts",
+      "description": "View all contacts",
+      "url": "/dashboard/people",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"]
 }

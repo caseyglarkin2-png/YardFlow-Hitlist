@@ -13,7 +13,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
   const account = await prisma.target_accounts.findUnique({
     where: { id: params.id },
     include: {
-      event: true,
+      events: true,
       people: {
         orderBy: { name: 'asc' },
       },

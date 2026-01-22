@@ -21,7 +21,7 @@ export async function GET(
     const campaign = await prisma.campaigns.findUnique({
       where: { id: params.id },
       include: {
-        event: true,
+        events: true,
         _count: {
           select: {
             outreach: true,

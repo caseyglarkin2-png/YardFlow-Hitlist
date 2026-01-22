@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
 
     const campaign = await prisma.campaigns.create({
       data: {
+        id: `camp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         eventId: user.activeEventId,
         name,
         description: description || null,
@@ -91,6 +92,8 @@ export async function POST(req: NextRequest) {
         goals: goals ? JSON.stringify(goals) : null,
         createdBy: user.email || session.user.id,
         status: 'DRAFT',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 

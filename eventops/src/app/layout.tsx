@@ -6,8 +6,21 @@ import { Providers } from '@/components/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'EventOps - Event Execution Platform',
-  description: 'Manage event execution, accounts, and outreach',
+  title: 'EventOps - Event Intelligence Platform',
+  description: 'Intelligent event operations and outreach platform for B2B sales teams',
+  manifest: '/manifest.json',
+  themeColor: '#2563eb',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'EventOps',
+  },
 };
 
 export default function RootLayout({
@@ -17,8 +30,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js');
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
