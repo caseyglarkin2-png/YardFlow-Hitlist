@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       include: { 
         target_accounts: {
           include: {
-            dossier: true, // For facility count and size data
+            company_dossiers: true, // For facility count and size data
           },
         },
       },
@@ -55,13 +55,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Get domain from account
-    const domain = person.account?.website || 
-                   person.account?.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
+    const domain = person.target_accounts?.website || 
+                   person.target_accounts?.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
 
     // Determine company size for pattern scoring
     let companySize = 'Medium';
-    if (person.account?.dossier?.facilityCount) {
-      const facilities = parseInt(person.target_accounts.dossier.facilityCount);
+    if (person.target_accounts?.company_dossiers?.facilityCount) {
+      const facilities = parseInt(person.target_accounts.company_dossiers.facilityCount);
       if (!isNaN(facilities)) {
         if (facilities >= 50) companySize = 'Large';
         else if (facilities <= 5) companySize = 'Small';
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       firstName,
       lastName,
       domain,
-      person.account?.name || '',
+      person.target_accounts?.name || '',
       companySize,
       knownEmails.filter(e => e.email).map(e => ({ name: e.name, email: e.email! }))
     );
@@ -148,7 +148,7 @@ export async function PUT(req: NextRequest) {
       where: { id: { in: personIds } },
       include: { 
         target_accounts: {
-          include: { dossier: true },
+          include: { company_dossiers: true },
         },
       },
     });
@@ -168,12 +168,12 @@ export async function PUT(req: NextRequest) {
         continue;
       }
 
-      const domain = person.account?.website || 
-                     person.account?.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
+      const domain = person.target_accounts?.website || 
+                     person.target_accounts?.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
 
       let companySize = 'Medium';
-      if (person.account?.dossier?.facilityCount) {
-        const facilities = parseInt(person.target_accounts.dossier.facilityCount);
+      if (person.target_accounts?.company_dossiers?.facilityCount) {
+        const facilities = parseInt(person.target_accounts.company_dossiers.facilityCount);
         if (!isNaN(facilities)) {
           if (facilities >= 50) companySize = 'Large';
           else if (facilities <= 5) companySize = 'Small';
@@ -194,7 +194,7 @@ export async function PUT(req: NextRequest) {
         firstName,
         lastName,
         domain,
-        person.account?.name || '',
+        person.target_accounts?.name || '',
         companySize,
         knownEmails.filter(e => e.email).map(e => ({ name: e.name, email: e.email! }))
       );

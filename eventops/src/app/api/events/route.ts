@@ -31,11 +31,13 @@ export async function POST(request: NextRequest) {
 
     const event = await prisma.events.create({
       data: {
+        id: `evt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: data.name,
         location: data.location,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         status: data.status,
+        updatedAt: new Date(),
       },
     });
 

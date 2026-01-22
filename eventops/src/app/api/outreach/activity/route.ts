@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
     let newStatus = outreach.status;
     const updateData: any = { updatedAt: new Date() };
 
-    if (type === 'REPLIED' && outreach.status !== 'REPLIED') {
-      newStatus = 'REPLIED';
-      updateData.status = 'REPLIED';
+    if (type === 'RESPONDED' && outreach.status !== 'RESPONDED') {
+      newStatus = 'RESPONDED';
+      updateData.status = 'RESPONDED';
       updateData.repliedAt = new Date();
     } else if (type === 'CLICKED' && outreach.status === 'OPENED') {
       // Track clicks but don't change status if already replied
@@ -50,17 +50,17 @@ export async function POST(request: NextRequest) {
     // Log the activity
     await prisma.activities.create({
       data: {
-        id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        personId: outreach.personId,
-        type: type as any,
-        timestamp: new Date(),
-        metadata: JSON.stringify({
+        userId: session.user.id,
+        entityType: 'outreach',
+        entityId: outreachId,
+        action: type as string,
+        description: `Outreach activity: ${type}`,
+        metadata: {
           outreachId,
+          personId: outreach.personId,
           subject: outreach.subject,
           ...metadata,
-        }),
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        },
       },
     });
 
@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
       success: true,
       status: newStatus,
     });
+
   } catch (error) {
     console.error('Error tracking email activity:', error);
     return NextResponse.json(

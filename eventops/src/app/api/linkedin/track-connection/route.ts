@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
     // Create new
     await prisma.outreach.create({
       data: {
+        id: crypto.randomUUID(),
         personId,
         channel: 'LINKEDIN',
         status: status === 'CONNECTED' ? 'RESPONDED' : status === 'DECLINED' ? 'BOUNCED' : 'SENT',
@@ -51,6 +52,7 @@ export async function POST(req: NextRequest) {
         sentAt: new Date(),
         sentBy: session.user.id,
         notes: `LinkedIn connection ${status.toLowerCase()} on ${new Date().toISOString()}`,
+        updatedAt: new Date(),
       },
     });
   }

@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
         ...(minIcpScore > 0 ? { icpScore: { gte: minIcpScore } } : {}),
       },
       include: {
-        dossier: {
+        company_dossiers: {
           select: {
             id: true,
             researchedAt: true,
@@ -50,11 +50,11 @@ export async function GET(req: NextRequest) {
     // Filter and map accounts
     const candidates = accounts
       .map(account => {
-        const daysSinceUpdate = account.dossier
-          ? Math.floor((Date.now() - account.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
+        const daysSinceUpdate = account.company_dossiers
+          ? Math.floor((Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
           : null;
 
-        const needsResearch = !account.dossier || (daysSinceUpdate !== null && daysSinceUpdate >= daysOld);
+        const needsResearch = !account.company_dossiers || (daysSinceUpdate !== null && daysSinceUpdate >= daysOld);
 
         return {
           id: account.id,
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           website: account.website,
           industry: account.industry,
           icpScore: account.icpScore,
-          hasDossier: !!account.dossier,
+          hasDossier: !!account.company_dossiers,
           daysSinceUpdate,
           needsResearch,
         };

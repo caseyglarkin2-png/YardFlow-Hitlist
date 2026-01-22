@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { generateCompanyResearch } from "@/lib/ai-research";
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await db.target_accounts.findUnique({
+    const account = await prisma.target_accounts.findUnique({
       where: { id: params.id },
       include: { company_dossiers: true },
     });
@@ -32,7 +32,7 @@ export async function POST(
       
       if (daysSinceResearch < 7) {
         return NextResponse.json({
-          dossier: account.company_dossiers,
+          company_dossiers: account.company_dossiers,
           cached: true,
         });
       }
@@ -45,7 +45,7 @@ export async function POST(
     );
 
     // Save or update dossier
-    const dossier = await db.company_dossiers.upsert({
+    const dossier = await prisma.company_dossiers.upsert({
       where: { accountId: account.id },
       create: {
         id: `dossier-${account.id}`,

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
@@ -18,7 +18,7 @@ export default async function OutreachPage({
     redirect("/");
   }
 
-  const user = await db.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
     select: { activeEventId: true },
   });
@@ -51,7 +51,7 @@ export default async function OutreachPage({
     whereClause.channel = searchParams.channel;
   }
 
-  const outreach = await db.outreach.findMany({
+  const outreach = await prisma.outreach.findMany({
     where: whereClause,
     include: {
       people: {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await db.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email },
       select: { activeEventId: true },
     });
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
       whereClause.channel = channel;
     }
 
-    const outreach = await db.outreach.findMany({
+    const outreach = await prisma.outreach.findMany({
       where: whereClause,
       include: {
         people: {

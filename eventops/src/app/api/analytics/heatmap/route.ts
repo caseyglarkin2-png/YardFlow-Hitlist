@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     // Get all outreach for the event
     const outreach = await prisma.outreach.findMany({
       where: {
-        person: {
+        people: {
           target_accounts: {
             eventId: user.activeEventId,
           },

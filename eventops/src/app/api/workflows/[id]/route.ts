@@ -1,46 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { db as prisma } from '@/lib/db';
+// import { prisma } from '@/lib/db';
 
-export const dynamic = 'force-dynamic';
-
-/**
- * Toggle workflow enabled/disabled
- */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { enabled } = await req.json();
-
-  const workflow = await prisma.workflow.update({
-    where: { id: params.id },
-    data: { enabled },
-  });
-
-  return NextResponse.json(workflow);
+// TODO: Implement workflows - requires workflows table in schema
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  return NextResponse.json({
+    success: false,
+    error: 'Workflows feature not yet implemented'
+  }, { status: 501 });
 }
 
-/**
- * Delete workflow
- */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  return NextResponse.json({
+    success: false,
+    error: 'Workflows feature not yet implemented'
+  }, { status: 501 });
+}
 
-  await prisma.workflow.delete({
-    where: { id: params.id },
-  });
-
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   return NextResponse.json({ success: true });
 }

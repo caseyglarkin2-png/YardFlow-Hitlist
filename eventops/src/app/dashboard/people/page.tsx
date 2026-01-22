@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
-import type { Person, TargetAccount } from '@prisma/client';
+import type { people, target_accounts } from '@prisma/client';
 import { PeopleFilters } from '@/components/people-filters';
 
 export default async function PeoplePage({
@@ -13,7 +13,7 @@ export default async function PeoplePage({
   
   const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
-    include: { activeEvent: true },
+    include: { events: true },
   });
 
   if (!user?.activeEventId) {
@@ -70,7 +70,7 @@ export default async function PeoplePage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">People</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Managing {people.length} contact{people.length !== 1 ? 's' : ''} for <strong>{user.activeEvent?.name || 'No Event'}</strong>
+            Managing {people.length} contact{people.length !== 1 ? 's' : ''} for <strong>{user.events?.name || 'No Event'}</strong>
           </p>
         </div>
         <Link
@@ -109,7 +109,7 @@ export default async function PeoplePage({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {people.map((person: Person & { account: TargetAccount }) => (
+              {people.map((person: people & { target_accounts: target_accounts }) => (
                 <tr key={person.id}>
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">
                     <Link

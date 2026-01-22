@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
           eventId: user.activeEventId,
         },
       },
-      ...(status && { status }),
+      ...(status && { status: status as any }),
       ...(startDate && {
         scheduledAt: {
           gte: new Date(startDate),
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
 
   const meeting = await prisma.meeting.create({
     data: {
+      id: crypto.randomUUID(),
       personId,
       scheduledAt: new Date(scheduledAt),
       duration: duration || 30,
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest) {
       meetingType,
       notes,
       createdBy: session.user.id,
+      updatedAt: new Date(),
     },
     include: {
       people: {

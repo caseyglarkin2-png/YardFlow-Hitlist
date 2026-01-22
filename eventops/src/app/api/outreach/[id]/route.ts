@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
@@ -15,7 +15,7 @@ export async function PATCH(
     const body = await req.json();
     const { status, subject, message, notes } = body;
 
-    const updated = await db.outreach.update({
+    const updated = await prisma.outreach.update({
       where: { id: params.id },
       data: {
         status,
@@ -45,7 +45,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await db.outreach.delete({
+    await prisma.outreach.delete({
       where: { id: params.id },
     });
 

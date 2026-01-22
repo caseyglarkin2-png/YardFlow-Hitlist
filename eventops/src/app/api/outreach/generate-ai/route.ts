@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { generateCompanyResearch, generatePersonalizedOutreach } from "@/lib/ai-research";
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get event
-    const event = await db.event.findUnique({
+    const event = await prisma.events.findUnique({
       where: { id: eventId },
     });
 
@@ -42,19 +42,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Get people with accounts, dossiers, insights, and ROI calculations
-    const people = await db.people.findMany({
+    const people = await prisma.people.findMany({
       where: { id: { in: personIds } },
       include: {
         target_accounts: {
           include: {
-            dossier: true,
-            roiCalculations: {
+            company_dossiers: true,
+            roi_calculations: {
               orderBy: { calculatedAt: 'desc' },
               take: 1,
             },
           },
         },
-        insights: true,
+        contact_insights: true,
       },
     });
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     for (const person of people) {
       try {
         // Generate or get company research
-        let dossier = person.target_accounts.dossier;
+        let dossier = person.target_accounts.company_dossiers;
         
         if (!dossier) {
           const researchData = await generateCompanyResearch(
@@ -72,8 +72,9 @@ export async function POST(req: NextRequest) {
             person.target_accounts.website || undefined
           );
 
-          dossier = await db.companyDossier.create({
+          dossier = await prisma.company_dossiers.create({
             data: {
+              id: crypto.randomUUID(),
               accountId: person.target_accounts.id,
               companyOverview: researchData.companyOverview || null,
               recentNews: researchData.recentNews || null,
@@ -99,18 +100,18 @@ export async function POST(req: NextRequest) {
         };
 
         // Get contact insights if available
-        const contactInsights = person.insights ? {
-          roleContext: person.insights.roleContext,
-          likelyPainPoints: person.insights.likelyPainPoints,
-          roiOpportunity: person.insights.roiOpportunity,
+        const contactInsights = person.contact_insights ? {
+          roleContext: person.contact_insights.roleContext,
+          likelyPainPoints: person.contact_insights.likelyPainPoints,
+          roiOpportunity: person.contact_insights.roiOpportunity,
         } : undefined;
 
         // Get ROI data if available
-        const roiData = person.target_accounts.roiCalculations?.[0] ? {
-          annualSavings: person.target_accounts.roiCalculations[0].annualSavings,
-          paybackPeriod: person.target_accounts.roiCalculations[0].paybackPeriod,
-          assumptions: person.target_accounts.roiCalculations[0].assumptions 
-            ? JSON.parse(person.target_accounts.roiCalculations[0].assumptions) 
+        const roiData = person.target_accounts.roi_calculations?.[0] ? {
+          annualSavings: person.target_accounts.roi_calculations[0].annualSavings,
+          paybackPeriod: person.target_accounts.roi_calculations[0].paybackPeriod,
+          assumptions: person.target_accounts.roi_calculations[0].assumptions 
+            ? JSON.parse(person.target_accounts.roi_calculations[0].assumptions) 
             : undefined,
         } : undefined;
 
@@ -128,14 +129,16 @@ export async function POST(req: NextRequest) {
         );
 
         // Create outreach record
-        const outreach = await db.outreach.create({
+        const outreach = await prisma.outreach.create({
           data: {
+            id: crypto.randomUUID(),
             personId: person.id,
             channel,
             status: "DRAFT",
             subject: outreachData.subject || null,
             message: outreachData.message,
             sentBy: session.user.email,
+            updatedAt: new Date(),
           },
         });
 

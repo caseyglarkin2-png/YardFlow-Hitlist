@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     try {
       const account = await prisma.target_accounts.findUnique({
         where: { id: accountId },
-        include: { dossier: true },
+        include: { company_dossiers: true },
       });
 
       if (!account) {
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
       }
 
       // Check if refresh needed (7+ days old)
-      const daysSinceUpdate = account.dossier?.researchedAt
-        ? Math.floor((Date.now() - account.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
+      const daysSinceUpdate = account.company_dossiers?.researchedAt
+        ? Math.floor((Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
         : 999;
 
       if (!forceRefresh && daysSinceUpdate < 7) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       const newDossier = await generateCompanyResearch(account.name, account.website || undefined);
 
       // Compare with old dossier (simple JSON comparison)
-      const oldDossierStr = account.dossier ? JSON.stringify(account.dossier) : '';
+      const oldDossierStr = account.company_dossiers ? JSON.stringify(account.company_dossiers) : '';
       const newDossierStr = JSON.stringify(newDossier);
       const hasChanged = oldDossierStr !== newDossierStr;
 
@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
       await prisma.company_dossiers.upsert({
         where: { accountId: accountId },
         create: {
+          id: crypto.randomUUID(),
           accountId,
           companyOverview: newDossier.companyOverview || null,
           recentNews: newDossier.recentNews || null,
@@ -146,7 +147,7 @@ export async function GET(req: NextRequest) {
       icpScore: { gte: minIcpScore },
     },
     include: {
-      dossier: true,
+      company_dossiers: true,
     },
     orderBy: { icpScore: 'desc' },
     take: 100,
@@ -154,9 +155,9 @@ export async function GET(req: NextRequest) {
 
   // Filter accounts that need refresh
   const accountsNeedingRefresh = accounts.filter((a) => {
-    if (!a.dossier) return true; // Never researched
+    if (!a.company_dossiers) return true; // Never researched
     const daysSinceUpdate = Math.floor(
-      (Date.now() - a.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - a.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
     );
     return daysSinceUpdate >= daysOld;
   });
@@ -165,9 +166,9 @@ export async function GET(req: NextRequest) {
     id: a.id,
     name: a.name,
     icpScore: a.icpScore,
-    dossierUpdatedAt: a.dossier?.researchedAt || null,
-    daysSinceUpdate: a.dossier
-      ? Math.floor((Date.now() - a.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
+    dossierUpdatedAt: a.company_dossiers?.researchedAt || null,
+    daysSinceUpdate: a.company_dossiers
+      ? Math.floor((Date.now() - a.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
       : null,
   }));
 

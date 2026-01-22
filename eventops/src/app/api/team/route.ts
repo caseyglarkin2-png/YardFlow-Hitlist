@@ -33,8 +33,7 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         _count: {
           select: {
-            activityLogs: true,
-            auditLogs: true,
+            activities: true,
           },
         },
       },
@@ -91,9 +90,11 @@ export async function POST(request: NextRequest) {
     // Create user (in real app, send invite email)
     const user = await prisma.users.create({
       data: {
+        id: crypto.randomUUID(),
         email,
         name: name || email.split('@')[0],
         role: role as 'ADMIN' | 'MEMBER',
+        updatedAt: new Date(),
       },
     });
 

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { OutreachEditor } from "@/components/outreach-editor";
 
@@ -14,7 +14,7 @@ export default async function OutreachDetailPage({
     redirect("/");
   }
 
-  const outreach = await db.outreach.findUnique({
+  const outreach = await prisma.outreach.findUnique({
     where: { id: params.id },
     include: {
       people: {

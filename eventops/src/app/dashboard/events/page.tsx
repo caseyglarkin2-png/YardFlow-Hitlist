@@ -1,14 +1,14 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
-import type { Event } from '@prisma/client';
+import type { events as EventType } from '@prisma/client';
 
 export default async function EventsPage() {
   const session = await auth();
   
   const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
-    include: { activeEvent: true },
+    include: { events: true },
   });
 
   const events = await prisma.events.findMany({
@@ -32,7 +32,7 @@ export default async function EventsPage() {
         </Link>
       </div>
 
-      {user?.activeEvent && (
+      {user?.events && (
         <div className="rounded-lg bg-blue-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -52,7 +52,7 @@ export default async function EventsPage() {
               <h3 className="text-sm font-medium text-blue-800">Active Event</h3>
               <div className="mt-2 text-sm text-blue-700">
                 <p>
-                  Currently working on: <strong>{user.activeEvent.name}</strong>
+                  Currently working on: <strong>{user.events.name}</strong>
                 </p>
               </div>
             </div>
@@ -94,7 +94,7 @@ export default async function EventsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {events.map((event: Event) => (
+            {events.map((event: EventType) => (
               <tr key={event.id} className={event.id === user?.activeEventId ? 'bg-blue-50' : ''}>
                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                   {event.name}

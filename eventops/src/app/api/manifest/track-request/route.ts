@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
   // Create outreach record tracking the Manifest request
   const outreach = await prisma.outreach.create({
     data: {
+      id: crypto.randomUUID(),
       personId,
       channel: 'LINKEDIN', // Closest analog - Manifest is networking platform
       status: 'SENT',
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
       sentAt: new Date(requestedAt || new Date()),
       sentBy: session.user.id,
       notes: `Manifest meeting request sent at ${requestedAt || new Date().toISOString()}`,
+      updatedAt: new Date(),
     },
   });
 

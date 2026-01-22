@@ -16,12 +16,12 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const notification = await prisma.notification.update({
+  const notification = await prisma.notifications.update({
     where: {
       id: params.id,
       userId: session.user.id,
     },
-    data: { read: true, readAt: new Date() },
+    data: { read: true },
   });
 
   return NextResponse.json(notification);
@@ -39,7 +39,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  await prisma.notification.delete({
+  await prisma.notifications.delete({
     where: {
       id: params.id,
       userId: session.user.id,

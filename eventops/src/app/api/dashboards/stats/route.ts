@@ -104,11 +104,11 @@ export async function GET(request: NextRequest) {
     }));
 
     // Get recent activity (last 10 actions)
-    const recentActivity = await prisma.auditLog.findMany({
+    const recentActivity = await prisma.activities.findMany({
       take: 10,
       orderBy: { createdAt: 'desc' },
       include: {
-        user: {
+        users: {
           select: {
             name: true,
             email: true,
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
       type: log.action,
       description: `${log.action} ${log.entityType}`,
       timestamp: log.createdAt.toISOString(),
-      user: log.user.name || log.user.email,
+      user: log.users.name || log.users.email,
     }));
 
     return NextResponse.json({

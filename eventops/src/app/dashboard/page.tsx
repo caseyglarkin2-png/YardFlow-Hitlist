@@ -9,7 +9,7 @@ export default async function DashboardPage() {
   const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
     include: {
-      activeEvent: true,
+      events: true,
     },
   });
 
@@ -35,17 +35,17 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {user?.activeEvent ? (
+      {user?.events ? (
         <>
           <div className="rounded-lg bg-white p-6 shadow">
             <h2 className="text-lg font-medium text-gray-900">Active Event</h2>
             <p className="mt-2 text-3xl font-bold text-blue-600">
-              {user.activeEvent.name}
+              {user.events.name}
             </p>
             <p className="mt-1 text-sm text-gray-600">
-              {user.activeEvent.location} •{' '}
-              {new Date(user.activeEvent.startDate).toLocaleDateString()} -{' '}
-              {new Date(user.activeEvent.endDate).toLocaleDateString()}
+              {user.events.location} •{' '}
+              {new Date(user.events.startDate).toLocaleDateString()} -{' '}
+              {new Date(user.events.endDate).toLocaleDateString()}
             </p>
           </div>
 

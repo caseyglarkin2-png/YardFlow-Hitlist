@@ -20,6 +20,7 @@ interface Meeting {
     name: string;
     title?: string;
     email?: string;
+    accountId: string;
     target_accounts: {
       name: string;
       icpScore?: number;
@@ -286,7 +287,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
             <div>
               <p className="text-sm text-gray-500">Company</p>
               <a
-                href={`/dashboard/accounts/${meeting.people.account}`}
+                href={`/dashboard/accounts/${meeting.people.accountId}`}
                 className="font-medium text-blue-600 hover:underline"
               >
                 {meeting.people.target_accounts.name}

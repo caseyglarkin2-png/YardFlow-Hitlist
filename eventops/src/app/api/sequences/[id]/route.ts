@@ -24,7 +24,7 @@ export async function GET(
       );
     }
 
-    const sequence = await prisma.sequence.findFirst({
+    const sequence = await prisma.sequences.findFirst({
       where: {
         id: params.id,
         campaigns: { eventId: user.activeEventId },
@@ -64,7 +64,7 @@ export async function PATCH(
     if (steps !== undefined) updateData.steps = steps;
     if (isActive !== undefined) updateData.isActive = isActive;
 
-    const sequence = await prisma.sequence.update({
+    const sequence = await prisma.sequences.update({
       where: { id: params.id },
       data: updateData,
     });
@@ -86,7 +86,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await prisma.sequence.delete({
+    await prisma.sequences.delete({
       where: { id: params.id },
     });
 

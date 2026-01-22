@@ -13,14 +13,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const result = await prisma.notification.updateMany({
+  const result = await prisma.notifications.updateMany({
     where: {
       userId: session.user.id,
       read: false,
     },
     data: {
       read: true,
-      readAt: new Date(),
     },
   });
 

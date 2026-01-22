@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const campaignId = searchParams.get('campaignId');
 
-    const sequences = await prisma.sequence.findMany({
+    const sequences = await prisma.sequences.findMany({
       where: {
         campaigns: { eventId: user.activeEventId },
         ...(campaignId && { campaignId }),
@@ -82,12 +82,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const sequence = await prisma.sequence.create({
+    const sequence = await prisma.sequences.create({
       data: {
+        id: crypto.randomUUID(),
         name,
         description,
         campaignId,
         steps: JSON.stringify(steps),
+        updatedAt: new Date(),
       },
     });
 

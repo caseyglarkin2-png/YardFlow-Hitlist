@@ -42,7 +42,7 @@ export default function PersonDetailPage() {
       // Try to fetch ROI data
       if (data.person?.accountId) {
         try {
-          const roiRes = await fetch(`/api/roi/calculate?accountId=${data.people.accountId}`);
+          const roiRes = await fetch(`/api/roi/calculate?accountId=${data.person.accountId}`);
           if (roiRes.ok) {
             const roiResult = await roiRes.json();
             setRoiData(roiResult.roiCalculation);

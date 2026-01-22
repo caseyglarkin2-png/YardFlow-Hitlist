@@ -36,7 +36,7 @@ export async function POST(
     include: {
       target_accounts: {
         include: {
-          dossier: true,
+          company_dossiers: true,
         },
       },
     },
@@ -65,12 +65,12 @@ Persona: ${primaryPersona}
 Company: ${person.target_accounts.name}
 Industry: ${person.target_accounts.industry || 'Unknown'}
 
-${person.target_accounts.dossier ? `
+${person.target_accounts.company_dossiers ? `
 Company Context:
-- Overview: ${person.target_accounts.dossier.companyOverview || 'Unknown'}
-- Facility Count: ${person.target_accounts.dossier.facilityCount || 'Unknown'}
-- Operational Scale: ${person.target_accounts.dossier.operationalScale || 'Unknown'}
-- Key Pain Points: ${person.target_accounts.dossier.keyPainPoints || 'Unknown'}
+- Overview: ${person.target_accounts.company_dossiers.companyOverview || 'Unknown'}
+- Facility Count: ${person.target_accounts.company_dossiers.facilityCount || 'Unknown'}
+- Operational Scale: ${person.target_accounts.company_dossiers.operationalScale || 'Unknown'}
+- Key Pain Points: ${person.target_accounts.company_dossiers.keyPainPoints || 'Unknown'}
 ` : 'No company research available.'}
 
 Provide insights in JSON format:
@@ -104,6 +104,7 @@ Provide insights in JSON format:
     const insights = await prisma.contact_insights.upsert({
       where: { personId: params.personId },
       create: {
+        id: crypto.randomUUID(),
         personId: params.personId,
         roleContext: insightsData.roleContext,
         likelyPainPoints: JSON.stringify(insightsData.likelyPainPoints),

@@ -11,7 +11,7 @@ interface WebhookPayload {
 export async function sendWebhook(event: string, data: unknown) {
   try {
     // Get active webhooks for this event
-    const webhooks = await prisma.webhook.findMany({
+    const webhooks = await prisma.webhooks.findMany({
       where: {
         active: true,
         events: {

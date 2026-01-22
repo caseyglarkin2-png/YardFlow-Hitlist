@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
       where: { target_accounts: { eventId: user.activeEventId } },
     });
 
-    const meetings = await prisma.Meeting.count({
+    const meetings = await prisma.meeting.count({
       where: { 
-        person: { 
+        people: { 
           target_accounts: { eventId: user.activeEventId } 
         } 
       },
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     const outreach = await prisma.outreach.groupBy({
       by: ['status'],
       where: {
-        person: {
+        people: {
           target_accounts: { eventId: user.activeEventId },
         },
       },

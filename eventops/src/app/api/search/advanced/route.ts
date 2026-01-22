@@ -24,13 +24,7 @@ export async function POST(req: NextRequest) {
 
   const { entityType, filters } = await req.json();
   
-  const where = {
-    ...buildPrismaWhere(filters),
-    ...(entityType === 'accounts' ? { eventId: user.activeEventId } : {}),
-    ...(entityType === 'people' ? { target_accounts: { eventId: user.activeEventId } } : {}),
-    ...(entityType === 'outreach' ? { person: { target_accounts: { eventId: user.activeEventId } } } : {}),
-    ...(entityType === 'meetings' ? { account: { eventId: user.activeEventId } } : {}),
-  };
+  const baseWhere = buildPrismaWhere(filters);
 
   let data: any[] = [];
 
@@ -38,7 +32,10 @@ export async function POST(req: NextRequest) {
     switch (entityType) {
       case 'accounts':
         data = await prisma.target_accounts.findMany({
-          where,
+          where: {
+            ...baseWhere,
+            eventId: user.activeEventId,
+          },
           include: {
             people: { select: { id: true } },
           },
@@ -48,9 +45,12 @@ export async function POST(req: NextRequest) {
 
       case 'people':
         data = await prisma.people.findMany({
-          where,
+          where: {
+            ...baseWhere,
+            target_accounts: { eventId: user.activeEventId },
+          },
           include: {
-            account: { select: { name: true } },
+            target_accounts: { select: { name: true } },
           },
           take: 100,
         });
@@ -58,11 +58,14 @@ export async function POST(req: NextRequest) {
 
       case 'outreach':
         data = await prisma.outreach.findMany({
-          where,
+          where: {
+            ...baseWhere,
+            people: { target_accounts: { eventId: user.activeEventId } },
+          },
           include: {
-            person: {
+            people: {
               include: {
-                account: { select: { name: true } },
+                target_accounts: { select: { name: true } },
               },
             },
           },
@@ -71,11 +74,13 @@ export async function POST(req: NextRequest) {
         break;
 
       case 'meetings':
-        data = await prisma.meetings.findMany({
-          where,
+        data = await prisma.meeting.findMany({
+          where: {
+            ...baseWhere,
+            people: { target_accounts: { eventId: user.activeEventId } },
+          },
           include: {
-            person: { select: { name: true } },
-            account: { select: { name: true } },
+            people: { select: { name: true, target_accounts: { select: { name: true } } } },
           },
           take: 100,
         });

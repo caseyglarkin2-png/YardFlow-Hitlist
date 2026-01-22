@@ -42,16 +42,16 @@ export async function GET(request: NextRequest) {
         // Log the activity
         await prisma.activities.create({
           data: {
-            id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            personId: outreach.personId,
-            type: 'EMAIL_OPENED',
-            timestamp: new Date(),
-            metadata: JSON.stringify({
+            userId: outreach.sentBy || 'system',
+            entityType: 'outreach',
+            entityId: outreachId,
+            action: 'EMAIL_OPENED',
+            description: 'Email opened by recipient',
+            metadata: {
               outreachId,
+              personId: outreach.personId,
               subject: outreach.subject,
-            }),
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            },
           },
         });
       }

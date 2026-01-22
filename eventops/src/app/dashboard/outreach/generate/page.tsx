@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { GenerateAIOutreachForm } from "@/components/generate-ai-outreach-form";
 
 export default async function GenerateOutreachPage() {
@@ -9,7 +9,7 @@ export default async function GenerateOutreachPage() {
     redirect("/");
   }
 
-  const user = await db.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email! },
     select: { activeEventId: true },
   });
@@ -27,7 +27,7 @@ export default async function GenerateOutreachPage() {
     );
   }
 
-  const accounts = await db.target_accounts.findMany({
+  const accounts = await prisma.target_accounts.findMany({
     where: { eventId: user.activeEventId },
     include: {
       people: true,

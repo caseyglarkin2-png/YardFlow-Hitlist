@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { generateContactInsights, getPersonaLabel } from "@/lib/ai-contact-insights";
 
 export const dynamic = 'force-dynamic';
@@ -18,15 +18,15 @@ export async function POST(
     const personId = params.id;
 
     // Get person with account and dossier
-    const person = await db.people.findUnique({
+    const person = await prisma.people.findUnique({
       where: { id: personId },
       include: {
         target_accounts: {
           include: {
-            dossier: true,
+            company_dossiers: true,
           },
         },
-        insights: true,
+        contact_insights: true,
       },
     });
 
@@ -35,20 +35,20 @@ export async function POST(
     }
 
     // Check if insights exist and are recent (less than 30 days old)
-    if (person.insights) {
+    if (person.contact_insights) {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      if (person.insights.generatedAt > thirtyDaysAgo) {
+      if (person.contact_insights.generatedAt > thirtyDaysAgo) {
         return NextResponse.json({
           cached: true,
-          insights: person.insights,
+          insights: person.contact_insights,
         });
       }
     }
 
     // Get company dossier (or create if missing)
-    const dossier = person.target_accounts.dossier;
+    const dossier = person.target_accounts.company_dossiers;
     if (!dossier) {
       return NextResponse.json(
         { error: "Company dossier not found. Please generate company research first." },
@@ -76,9 +76,10 @@ export async function POST(
     );
 
     // Upsert insights
-    const insights = await db.contactInsights.upsert({
+    const insights = await prisma.contact_insights.upsert({
       where: { personId: person.id },
       create: {
+        id: `insight_${person.id}_${Date.now()}`,
         personId: person.id,
         roleContext: insightsData.roleContext,
         likelyPainPoints: JSON.stringify(insightsData.likelyPainPoints),
@@ -126,7 +127,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const insights = await db.contactInsights.findUnique({
+    const insights = await prisma.contact_insights.findUnique({
       where: { personId: params.id },
     });
 

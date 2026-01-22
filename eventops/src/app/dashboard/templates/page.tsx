@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Mail, Send } from "lucide-react";
@@ -12,7 +12,7 @@ export default async function TemplatesPage() {
     redirect("/");
   }
 
-  const templates = await db.messageTemplate.findMany({
+  const templates = await prisma.message_templates.findMany({
     orderBy: { updatedAt: "desc" },
   });
 

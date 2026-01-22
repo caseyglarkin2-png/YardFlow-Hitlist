@@ -26,10 +26,10 @@ export async function GET(
         include: {
           target_accounts: {
             include: {
-              dossier: true,
+              company_dossiers: true,
             },
           },
-          insights: true,
+          contact_insights: true,
         },
       },
     },
@@ -115,14 +115,14 @@ export async function POST(
         include: {
           target_accounts: {
             include: {
-              dossier: true,
-              roiCalculations: {
+              company_dossiers: true,
+              roi_calculations: {
                 orderBy: { calculatedAt: 'desc' },
                 take: 1,
               },
             },
           },
-          insights: true,
+          contact_insights: true,
         },
       },
     },
@@ -140,30 +140,30 @@ Title: ${meeting.people.title || 'Unknown'}
 Company: ${meeting.people.target_accounts.name}
 Industry: ${meeting.people.target_accounts.industry || 'Unknown'}
 
-${meeting.people.target_accounts.dossier ? `
+${meeting.people.target_accounts.company_dossiers ? `
 Company Context:
-${meeting.people.target_accounts.dossier.companyOverview}
+${meeting.people.target_accounts.company_dossiers.companyOverview}
 
 Key Pain Points:
-${meeting.people.target_accounts.dossier.keyPainPoints}
+${meeting.people.target_accounts.company_dossiers.keyPainPoints}
 
 Operational Scale:
-${meeting.people.target_accounts.dossier.operationalScale}
+${meeting.people.target_accounts.company_dossiers.operationalScale}
 ` : ''}
 
-${meeting.people.insights ? `
+${meeting.people.contact_insights ? `
 Contact Insights:
-- Role Context: ${meeting.people.insights.roleContext}
-- Pain Points: ${meeting.people.insights.likelyPainPoints}
-- Suggested Approach: ${meeting.people.insights.suggestedApproach}
-- ROI Opportunity: ${meeting.people.insights.roiOpportunity}
+- Role Context: ${meeting.people.contact_insights.roleContext}
+- Pain Points: ${meeting.people.contact_insights.likelyPainPoints}
+- Suggested Approach: ${meeting.people.contact_insights.suggestedApproach}
+- ROI Opportunity: ${meeting.people.contact_insights.roiOpportunity}
 ` : ''}
 
-${meeting.people.target_accounts.roiCalculations?.[0] ? `
+${meeting.people.target_accounts.roi_calculations?.[0] ? `
 ROI Estimate:
-- Annual Savings: $${meeting.people.target_accounts.roiCalculations[0].annualSavings?.toLocaleString()}
-- Payback Period: ${meeting.people.target_accounts.roiCalculations[0].paybackPeriod} months
-- Facilities: ${meeting.people.target_accounts.roiCalculations[0].facilityCount}
+- Annual Savings: $${meeting.people.target_accounts.roi_calculations[0].annualSavings?.toLocaleString()}
+- Payback Period: ${meeting.people.target_accounts.roi_calculations[0].paybackPeriod} months
+- Facilities: ${meeting.people.target_accounts.roi_calculations[0].facilityCount}
 ` : ''}
 
 Generate a 1-page meeting prep document with:

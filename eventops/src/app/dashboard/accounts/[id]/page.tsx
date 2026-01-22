@@ -34,7 +34,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{account.name}</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Event: <strong>{account.event.name}</strong>
+            Event: <strong>{account.events.name}</strong>
           </p>
         </div>
         <div className="flex gap-2">

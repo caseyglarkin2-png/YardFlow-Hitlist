@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const templates = await db.messageTemplate.findMany({
+    const templates = await prisma.message_templates.findMany({
       orderBy: { updatedAt: "desc" },
     });
 
@@ -33,14 +33,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, description, channel, subject, template, isActive } = body;
 
-    const newTemplate = await db.messageTemplate.create({
+    const newTemplate = await prisma.message_templates.create({
       data: {
+        id: crypto.randomUUID(),
         name,
         description: description || null,
         channel,
         subject: subject || null,
         template,
         isActive: isActive !== false,
+        updatedAt: new Date(),
       },
     });
 

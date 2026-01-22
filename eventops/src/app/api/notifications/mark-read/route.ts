@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const { notificationIds, markAll } = body;
 
     if (markAll) {
-      await prisma.notification.updateMany({
+      await prisma.notifications.updateMany({
         where: {
           userId: session.user.id,
           read: false,
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await prisma.notification.updateMany({
+    await prisma.notifications.updateMany({
       where: {
         id: { in: notificationIds },
         userId: session.user.id,

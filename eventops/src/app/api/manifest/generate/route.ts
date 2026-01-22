@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { generateManifestMeetingRequest, generateSimpleManifestRequest } from "@/lib/manifest-generator";
 import { getPersonaLabel } from "@/lib/ai-contact-insights";
 
@@ -24,19 +24,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Get people with all context
-    const people = await db.people.findMany({
+    const people = await prisma.people.findMany({
       where: { id: { in: personIds } },
       include: {
         target_accounts: {
           include: {
-            dossier: true,
-            roiCalculations: {
+            company_dossiers: true,
+            roi_calculations: {
               orderBy: { calculatedAt: 'desc' },
               take: 1,
             },
           },
         },
-        insights: true,
+        contact_insights: true,
       },
     });
 
@@ -49,12 +49,12 @@ export async function POST(req: NextRequest) {
 
         if (useAI) {
           // Get company dossier
-          const dossierData = person.target_accounts.dossier?.rawData 
-            ? JSON.parse(person.target_accounts.dossier.rawData)
+          const dossierData = person.target_accounts.company_dossiers?.rawData 
+            ? JSON.parse(person.target_accounts.company_dossiers.rawData)
             : undefined;
 
           // Get ROI opportunity from insights
-          const roiOpportunity = person.insights?.roiOpportunity || undefined;
+          const roiOpportunity = person.contact_insights?.roiOpportunity || undefined;
 
           requestData = await generateManifestMeetingRequest(
             person.name,

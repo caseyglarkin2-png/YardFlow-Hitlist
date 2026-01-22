@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 function fillTemplate(
   template: string,
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get template
-    const template = await db.messageTemplate.findUnique({
+    const template = await prisma.message_templates.findUnique({
       where: { id: templateId },
     });
 
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get event
-    const event = await db.event.findUnique({
+    const event = await prisma.events.findUnique({
       where: { id: eventId },
     });
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get people with accounts
-    const people = await db.people.findMany({
+    const people = await prisma.people.findMany({
       where: { id: { in: personIds } },
       include: { target_accounts: true },
     });
@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
         : null;
 
       return {
+        id: crypto.randomUUID(),
         personId: person.id,
         channel: template.channel,
         status: "DRAFT" as const,
@@ -100,11 +101,12 @@ export async function POST(req: NextRequest) {
         message,
         templateId: template.id,
         sentBy: session.user.email,
+        updatedAt: new Date(),
       };
     });
 
     // Bulk create outreach
-    const result = await db.outreach.createMany({
+    const result = await prisma.outreach.createMany({
       data: outreachData,
     });
 

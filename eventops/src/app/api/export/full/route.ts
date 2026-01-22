@@ -33,28 +33,28 @@ export async function GET(req: NextRequest) {
 
     const people = await prisma.people.findMany({
       where: { target_accounts: { eventId: user.activeEventId } },
-      include: { account: true, outreach: true, Meeting: true },
+      include: { target_accounts: true, outreach: true, meetings: true },
     });
 
     const outreach = await prisma.outreach.findMany({
       where: {
-        person: {
+        people: {
           target_accounts: { eventId: user.activeEventId },
         },
       },
       include: {
-        people: { include: { account: true } },
+        people: { include: { target_accounts: true } },
       },
     });
 
-    const meetings = await prisma.Meeting.findMany({
+    const meetings = await prisma.meeting.findMany({
       where: {
-        person: {
+        people: {
           target_accounts: { eventId: user.activeEventId },
         },
       },
       include: {
-        people: { include: { account: true } },
+        people: { include: { target_accounts: true } },
       },
     });
 
@@ -79,12 +79,11 @@ export async function GET(req: NextRequest) {
         id: a.id,
         name: a.name,
         industry: a.industry,
+        headquarters: a.headquarters,
         icpScore: a.icpScore,
-        tier: a.tier,
         website: a.website,
-        location: a.location,
-        revenue: a.revenue,
-        employeeCount: a.employeeCount,
+        notes: a.notes,
+        assignedTo: a.assignedTo,
         peopleCount: a.people.length,
       })));
 
@@ -94,20 +93,22 @@ export async function GET(req: NextRequest) {
         email: p.email,
         title: p.title,
         phone: p.phone,
-        accountName: p.account.name,
-        icpScore: p.icpScore,
+        accountName: p.target_accounts.name,
         linkedin: p.linkedin,
         isExecOps: p.isExecOps,
-        isSupplyChain: p.isSupplyChain,
-        isITTech: p.isITTech,
-        isProcurement: p.isProcurement,
-        isFacilities: p.isFacilities,
+        isOps: p.isOps,
+        isProc: p.isProc,
+        isSales: p.isSales,
+        isTech: p.isTech,
+        isNonOps: p.isNonOps,
+        notes: p.notes,
+        assignedTo: p.assignedTo,
       })));
 
       const outreachCsv = jsonToCSV(outreach.map(o => ({
         id: o.id,
         personName: o.people.name,
-        accountName: o.people.account.name,
+        accountName: o.people.target_accounts.name,
         channel: o.channel,
         status: o.status,
         subject: o.subject,
@@ -119,7 +120,7 @@ export async function GET(req: NextRequest) {
       const meetingsCsv = jsonToCSV(meetings.map(m => ({
         id: m.id,
         personName: m.people.name,
-        accountName: m.people.account.name,
+        accountName: m.people.target_accounts.name,
         scheduledAt: m.scheduledAt,
         status: m.status,
         outcome: m.outcome,

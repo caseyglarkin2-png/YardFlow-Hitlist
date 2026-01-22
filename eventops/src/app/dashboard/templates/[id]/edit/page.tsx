@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { TemplateForm } from "@/components/template-form";
 import { notFound } from "next/navigation";
 
@@ -14,7 +14,7 @@ export default async function EditTemplatePage({
     redirect("/");
   }
 
-  const template = await db.messageTemplate.findUnique({
+  const template = await prisma.message_templates.findUnique({
     where: { id: params.id },
   });
 

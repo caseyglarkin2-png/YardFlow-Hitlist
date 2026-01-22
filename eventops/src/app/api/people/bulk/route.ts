@@ -40,69 +40,20 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'add-to-sequence':
-        const { sequenceTemplateId } = body;
-        if (!sequenceTemplateId) {
-          return NextResponse.json(
-            { error: 'Missing sequenceTemplateId' },
-            { status: 400 }
-          );
-        }
-
-        // Get the sequence template
-        const template = await prisma.sequenceTemplates.findUnique({
-          where: { id: sequenceTemplateId },
-        });
-
-        if (!template) {
-          return NextResponse.json(
-            { error: 'Sequence template not found' },
-            { status: 404 }
-          );
-        }
-
-        // Create sequences for each person
-        const sequences = [];
-        for (const personId of personIds) {
-          const sequence = await prisma.sequences.create({
-            data: {
-              id: `seq-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              personId,
-              eventId: user.activeEventId,
-              name: template.name,
-              steps: template.steps,
-              isActive: true,
-              status: 'ACTIVE',
-              currentStep: 0,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          });
-          sequences.push(sequence);
-        }
-
+        // TODO: Implement sequences - requires personId and eventId fields in sequences table
         return NextResponse.json({
-          success: true,
-          count: sequences.length,
+          success: false,
+          error: 'Sequence feature not yet implemented',
           action: 'add-to-sequence',
-        });
+        }, { status: 501 });
 
       case 'update-status':
-        const { status } = body;
-        if (!status) {
-          return NextResponse.json({ error: 'Missing status' }, { status: 400 });
-        }
-
-        result = await prisma.people.updateMany({
-          where: {
-            id: { in: personIds },
-            target_accounts: { eventId: user.activeEventId },
-          },
-          data: {
-            status,
-            updatedAt: new Date(),
-          },
-        });
-        break;
+        // TODO: Add status field to people schema
+        return NextResponse.json({
+          success: false,
+          error: 'Status field not yet implemented in people model',
+          action: 'update-status',
+        }, { status: 501 });
 
       case 'assign-owner':
         const { ownerId } = body;

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // Get domain from account
-    const domain = person.account?.website || person.account?.name.toLowerCase().replace(/\s+/g, '') + '.com';
+    const domain = person.target_accounts?.website || person.target_accounts?.name.toLowerCase().replace(/\s+/g, '') + '.com';
 
     // Call Hunter.io API
     const result = await findEmail(firstName, lastName, domain);
@@ -125,7 +125,7 @@ export async function PUT(req: NextRequest) {
       const nameParts = person.name.trim().split(/\s+/);
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
-      const domain = person.account?.website || person.account?.name.toLowerCase().replace(/\s+/g, '') + '.com';
+      const domain = person.target_accounts?.website || person.target_accounts?.name.toLowerCase().replace(/\s+/g, '') + '.com';
 
       const result = await findEmail(firstName, lastName, domain);
 

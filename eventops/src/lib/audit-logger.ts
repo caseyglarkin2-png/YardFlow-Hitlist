@@ -13,16 +13,19 @@ interface AuditLogData {
 
 export async function createAuditLog(data: AuditLogData) {
   try {
-    const log = await prisma.auditLog.create({
+    const log = await prisma.activities.create({
       data: {
         userId: data.userId,
         action: data.action,
         entityType: data.entityType,
-        entityId: data.entityId || null,
-        changes: (data.changes || {}) as any,
-        metadata: (data.metadata || {}) as any,
-        ipAddress: data.ipAddress || null,
-        userAgent: data.userAgent || null,
+        entityId: data.entityId || '',
+        description: `${data.action} ${data.entityType}`,
+        metadata: { 
+          changes: data.changes,
+          ipAddress: data.ipAddress,
+          userAgent: data.userAgent,
+          ...data.metadata 
+        } as any,
       },
     });
 

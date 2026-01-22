@@ -59,7 +59,7 @@ class ResearchQueue {
     try {
       const account = await prisma.target_accounts.findUnique({
         where: { id: item.accountId },
-        include: { dossier: true },
+        include: { company_dossiers: true },
       });
 
       if (!account) {
@@ -73,8 +73,8 @@ class ResearchQueue {
       }
 
       // Check if recent dossier exists
-      const daysSince = account.dossier
-        ? Math.floor((Date.now() - account.dossier.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
+      const daysSince = account.company_dossiers
+        ? Math.floor((Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
         : 999;
 
       if (!forceRefresh && daysSince < 7) {

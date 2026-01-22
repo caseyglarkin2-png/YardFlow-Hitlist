@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
         const { data } = row;
         await prisma.target_accounts.create({
           data: {
+            id: crypto.randomUUID(),
             name: data.name,
             website: data.website || null,
             industry: data.industry || null,
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
             icpScore: data.icpScore ? Number(data.icpScore) : null,
             notes: data.notes || null,
             eventId: user.activeEventId,
+            updatedAt: new Date(),
           },
         });
         created++;
@@ -61,8 +63,10 @@ export async function POST(request: NextRequest) {
         if (!account) {
           account = await prisma.target_accounts.create({
             data: {
+              id: crypto.randomUUID(),
               name: data.accountName,
               eventId: user.activeEventId,
+              updatedAt: new Date(),
             },
           });
         }
@@ -70,6 +74,7 @@ export async function POST(request: NextRequest) {
         // Create person
         await prisma.people.create({
           data: {
+            id: crypto.randomUUID(),
             accountId: account.id,
             name: data.name,
             title: data.title || null,
@@ -83,6 +88,7 @@ export async function POST(request: NextRequest) {
             isSales: data.isSales === 'TRUE' || data.isSales === true || data.isSales === '1',
             isTech: data.isTech === 'TRUE' || data.isTech === true || data.isTech === '1',
             isNonOps: data.isNonOps === 'TRUE' || data.isNonOps === true || data.isNonOps === '1',
+            updatedAt: new Date(),
           },
         });
         created++;

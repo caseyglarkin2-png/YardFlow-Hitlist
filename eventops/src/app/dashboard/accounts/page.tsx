@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
-import type { TargetAccount } from '@prisma/client';
+import type { target_accounts } from '@prisma/client';
 import { AccountsFilters } from '@/components/accounts-filters';
 
 export default async function AccountsPage({
@@ -13,7 +13,7 @@ export default async function AccountsPage({
   
   const user = await prisma.users.findUnique({
     where: { id: session!.user.id },
-    include: { activeEvent: true },
+    select: { activeEventId: true },
   });
 
   if (!user?.activeEventId) {
@@ -73,7 +73,7 @@ export default async function AccountsPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Target Accounts</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Managing {accounts.length} account{accounts.length !== 1 ? 's' : ''} for <strong>{user.activeEvent?.name || 'No Event'}</strong>
+            Managing {accounts.length} account{accounts.length !== 1 ? 's' : ''}
           </p>
         </div>
         <Link
@@ -87,7 +87,7 @@ export default async function AccountsPage({
       <AccountsFilters />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {accounts.map((account: TargetAccount & { _count: { people: number } }) => (
+        {accounts.map((account: target_accounts & { _count: { people: number } }) => (
           <div
             key={account.id}
             className="relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"

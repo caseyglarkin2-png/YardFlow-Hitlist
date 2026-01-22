@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { calculateRoi } from "@/lib/roi-calculator";
 import { getPersonaLabel } from "@/lib/ai-contact-insights";
 
@@ -24,10 +24,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get account with dossier
-    const account = await db.target_accounts.findUnique({
+    const account = await prisma.target_accounts.findUnique({
       where: { id: accountId },
       include: {
-        dossier: true,
+        company_dossiers: true,
         people: true,
       },
     });
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract data from dossier
-    const dossier = account.dossier;
+    const dossier = account.company_dossiers;
     let facilityCount: number | undefined;
     let operationalScale: string | undefined;
     let companySize: string | undefined;
@@ -71,8 +71,9 @@ export async function POST(req: NextRequest) {
     });
 
     // Save calculation to database
-    const roiCalculation = await db.roiCalculation.create({
+    const roiCalculation = await prisma.roi_calculations.create({
       data: {
+        id: crypto.randomUUID(),
         accountId: account.id,
         facilityCount,
         operationalScale,
@@ -118,7 +119,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get most recent ROI calculation for this account
-    const roiCalculation = await db.roiCalculation.findFirst({
+    const roiCalculation = await prisma.roi_calculations.findFirst({
       where: { accountId },
       orderBy: { calculatedAt: 'desc' },
     });

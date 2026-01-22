@@ -35,10 +35,10 @@ export async function GET(
       include: {
         target_accounts: {
           include: {
-            dossier: true,
+            company_dossiers: true,
           },
         },
-        insights: true,
+        contact_insights: true,
       },
     });
 
