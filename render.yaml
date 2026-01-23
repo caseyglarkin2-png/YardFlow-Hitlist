@@ -16,6 +16,7 @@ services:
     plan: free
     maxmemoryPolicy: noeviction
     region: oregon
+    ipAllowList: []  # Empty list allows all IPs (internal services)
 
   # Main Next.js Application
   - type: web
@@ -45,8 +46,6 @@ services:
         sync: false  # Set manually in Render dashboard
       - key: NEXTAUTH_URL
         value: https://yardflow-app.onrender.com
-    buildCommand: npm ci && npx prisma generate && npm run build
-    startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
 
@@ -76,5 +75,4 @@ services:
         sync: false  # Set manually in Render dashboard
       - key: SENDGRID_API_KEY
         sync: false  # Set manually in Render dashboard
-    buildCommand: echo "Building worker..."
     autoDeploy: true
