@@ -5,7 +5,16 @@
 
 ---
 
-## 🔍 PRODUCTION STATUS ASSESSMENT
+## � Quick Reference Documents
+
+**Deployment Guides**:
+- [DEPLOY_WORKER_NOW.md](../../DEPLOY_WORKER_NOW.md) - Step-by-step Railway worker deployment  
+- [QUICK_STATUS.md](../../QUICK_STATUS.md) - Session summary and progress tracking  
+- [railway-worker.json](../../railway-worker.json) - Worker service configuration
+
+---
+
+## �🔍 PRODUCTION STATUS ASSESSMENT
 
 ### ✅ What's Actually WORKING
 
