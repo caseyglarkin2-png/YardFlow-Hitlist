@@ -40,7 +40,7 @@ export async function checkEmailReplies(userId: string): Promise<{
   }
 
   const limit = pLimit(5);
-  const updated = [];
+  const updated: Array<{ outreachId: string; personName: string; respondedAt: Date }> = [];
 
   await Promise.all(
     outreachToCheck.map(outreach =>
