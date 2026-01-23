@@ -12,6 +12,10 @@ COPY package*.json ./
 # Copy eventops directory (needed for postinstall script)
 COPY eventops ./eventops/
 
+# Copy startup script
+COPY start-worker.sh ./start-worker.sh
+RUN chmod +x ./start-worker.sh
+
 # Install all dependencies (root + eventops, triggers postinstall)
 RUN npm ci
 
@@ -25,5 +29,5 @@ WORKDIR /app
 # Expose health check port
 EXPOSE 8080
 
-# Start worker - use absolute node path to avoid PATH issues
-CMD ["/usr/local/bin/node", "eventops/node_modules/tsx/dist/cli.mjs", "eventops/src/lib/queue/workers.ts"]
+# Use shell script to start - this can't be overridden by Railway start command
+CMD ["./start-worker.sh"]
