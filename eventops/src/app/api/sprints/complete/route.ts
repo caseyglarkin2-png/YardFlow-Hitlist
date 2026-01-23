@@ -70,7 +70,6 @@ export async function POST(request: Request) {
           commitHash: metrics.commitHash,
           emailSent: emailResult.success,
         },
-        updatedAt: new Date(),
       },
     });
 
