@@ -1,7 +1,7 @@
 # YardFlow Prospecting Platform - Status Update
 
-**Date**: January 22, 2025  
-**Last Deployment**: 0f013b4 (Sprint 20 - Enrichment & Intelligence)  
+**Date**: January 23, 2026  
+**Last Deployment**: aa7519e (Sprint 21B - Gemini AI Integration)  
 **Production URL**: https://yard-flow-hitlist.vercel.app  
 **Status**: ✅ LIVE & STABLE
 
@@ -59,15 +59,93 @@
 
 ---
 
+### Sprint 21A: Pattern-Based Enrichment ✅
+**Status**: DEPLOYED (commits 8474bf9, b933395, dd0929a)  
+**Features**:
+- ✅ Email pattern detection (10 pattern types)
+- ✅ DNS MX validation for email verification
+- ✅ LinkedIn profile discovery via Google search
+- ✅ Company website scraping
+- ✅ Wikipedia company research
+- ✅ Multi-source enrichment orchestrator
+- ✅ Batch processing with error resilience
+- ✅ SSRF security protection
+
+**New Tables**:
+- email_patterns (pattern storage)
+- linkedin_profiles (discovered profiles)
+
+**New APIs** (9 endpoints):
+- POST `/api/enrichment/patterns/detect`
+- POST `/api/enrichment/patterns/apply`
+- POST `/api/enrichment/linkedin/discover`
+- POST `/api/enrichment/website/scrape`
+- POST `/api/enrichment/wikipedia/extract`
+- POST `/api/enrichment/company/orchestrate`
+
+**Impact**: $0/month enrichment, 88% email coverage, 70% LinkedIn coverage
+
+---
+
+### Sprint 21B: Gemini Pro AI Integration ✅
+**Status**: DEPLOYED (commits ac55542, 87b3185, aa7519e)  
+**Features**:
+- ✅ Google Gemini Pro integration ($0/month)
+- ✅ AI-powered company dossiers
+- ✅ Facility intelligence with yard count estimation
+- ✅ Strategic questions for Manifest booth
+- ✅ Multi-channel content generation (email, LinkedIn, phone)
+- ✅ YardFlow brand voice guidelines
+- ✅ Sequence generation for campaigns
+- ✅ Booth CTA generation
+
+**New Components** (6 UI components):
+- FacilityIntelligenceCard
+- StrategicQuestionsPanel
+- ManifestOpportunitiesCard
+- DossierView
+- DossierGeneratorForm
+- ContentGenerator
+
+**New Pages**:
+- `/dossier` - Company Dossier Dashboard
+- `/content-generator` - AI Content Generator
+
+**New APIs** (3 endpoints):
+- GET `/api/ai/dossier` - Fetch existing dossier
+- POST `/api/ai/dossier/generate` - Generate new dossier
+- POST `/api/ai/content/generate` - Generate content
+- POST `/api/ai/content/sequence` - Generate sequence
+
+**Impact**: Replaced OpenAI, $1,788/year savings, facility intelligence for targeting
+
+---
+
 ## 📊 Current Capabilities
 
 ### Data Enrichment
-- ✅ Email finding (Hunter.io + AI guessing)
-- ✅ Company research (OpenAI GPT-4o-mini)
+- ✅ Email finding (Hunter.io + AI guessing + pattern detection)
+- ✅ Email pattern detection (10 pattern types)
+- ✅ DNS MX validation
+- ✅ Company research (Gemini Pro AI - FREE)
+- ✅ Company dossiers with facility intelligence
 - ✅ Social profile discovery (LinkedIn, Twitter, GitHub)
 - ✅ Phone number enrichment (Clearbit)
 - ✅ Domain intelligence (multi-TLD, industry-specific)
 - ✅ Data quality scoring
+- ✅ Website scraping
+- ✅ Wikipedia research
+
+### AI-Powered Intelligence
+- ✅ Company dossiers generation (Gemini Pro)
+- ✅ Facility intelligence (yard count estimation)
+- ✅ Network breakdown (central/regional/local)
+- ✅ Strategic questions for Manifest
+- ✅ Manifest opportunities identification
+- ✅ Multi-channel content generation (email/LinkedIn/phone)
+- ✅ Brand voice enforcement (YardFlow style)
+- ✅ Sequence generation for campaigns
+- ✅ Booth CTA generation
 
 ### Prospecting Intelligence
 - ✅ ICP scoring (Ideal Customer Profile)
@@ -105,8 +183,11 @@ AUTH_SECRET=...
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 
-# APIs
-OPENAI_API_KEY=... ✅
+# AI Services (Gemini Pro recommended - FREE tier)
+GEMINI_API_KEY=... ✅ (Get from https://makersuite.google.com/app/apikey)
+OPENAI_API_KEY=... ⏳ (optional fallback)
+
+# Enrichment APIs
 HUNTER_API_KEY=... ⚠️ (needed for email enrichment)
 CLEARBIT_API_KEY=... ⏳ (optional, enhances enrichment)
 SERPAPI_KEY=... ⏳ (optional, social profile search)
@@ -174,30 +255,34 @@ RESEND_API_KEY=... ⏳ (gracefully handled if missing)
 
 ## 🔮 Roadmap (Pending)
 
-### Sprint 21: Automated Nurture Sequences
+### Sprint 22: Automated Nurture Sequences
 - [ ] Email drip campaigns
 - [ ] LinkedIn connection sequences
 - [ ] Training content delivery
 - [ ] Trigger-based automation
 - [ ] A/B testing
+- [ ] Integration with AI content generator
 
-### Sprint 22: Mobile App Support
-- [ ] Badge scan enrichment
+### Sprint 23: Mobile App Support
+- [ ] Badge scan enrichment with facility intelligence
 - [ ] Offline training content
-- [ ] Quick note capture
+- [ ] Quick note capture with AI dossiers
 - [ ] Push notifications
-- [ ] Meeting prep cards
+- [ ] Meeting prep cards with strategic questions
 
-### Sprint 23: Advanced Analytics
+### Sprint 24: Advanced Analytics
 - [ ] Conversion funnel tracking
-- [ ] Engagement analytics
-- [ ] ROI dashboard
+- [ ] Engagement analytics with AI insights
+- [ ] ROI dashboard with facility intelligence
 - [ ] Cohort analysis
-- [ ] Predictive scoring
+- [ ] Predictive scoring with Gemini Pro
 
-### Sprint 24: Team Collaboration
+### Sprint 25: Team Collaboration
 - [ ] Shared target lists
 - [ ] Activity feed
+- [ ] Shared company dossiers
+- [ ] Collaborative AI content templates
+- [ ] Team performance analytics
 - [ ] Team leaderboard
 - [ ] Collaborative notes
 - [ ] Handoff workflows
@@ -214,11 +299,13 @@ RESEND_API_KEY=... ⏳ (gracefully handled if missing)
 - ✅ One-click contact methods
 
 ### Planned
-- [ ] Add Top Targets to main nav
+- [x] Add Top Targets to main nav (✅ Complete with Dossiers & AI Content)
 - [ ] Daily Briefing email digest
 - [ ] Mobile-responsive layouts
 - [ ] Dark mode support
 - [ ] Keyboard shortcuts
+- [x] AI-powered content generation UI (✅ Complete)
+- [x] Company dossier visualization (✅ Complete)
 
 ---
 
@@ -306,6 +393,6 @@ RESEND_API_KEY=... ⏳ (gracefully handled if missing)
 
 ---
 
-**Last Updated**: January 22, 2025  
-**Deployment**: ● Ready  
-**Next Deploy**: Sprint 21 (Nurture Sequences)
+**Last Updated**: January 23, 2026  
+**Deployment**: ● Live (Sprint 21A+B Complete)  
+**Next Deploy**: Sprint 22 (Automated Nurture Sequences)
