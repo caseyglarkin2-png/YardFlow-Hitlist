@@ -66,18 +66,19 @@ model contact_insights {
 }
 
 model events {
-  id              String            @id
-  name            String
-  location        String?
-  startDate       DateTime
-  endDate         DateTime
-  status          EventStatus       @default(PLANNING)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime
-  campaigns       campaigns[]
-  target_accounts target_accounts[]
-  users           users[]
-  ab_tests        ab_tests[]
+  id               String            @id
+  name             String
+  location         String?
+  startDate        DateTime
+  endDate          DateTime
+  status           EventStatus       @default(PLANNING)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime
+  campaigns        campaigns[]
+  target_accounts  target_accounts[]
+  users            users[]
+  ab_tests         ab_tests[]
+  training_content training_content[]
 }
 
 model Meeting {
@@ -275,6 +276,8 @@ model users {
   notifications      notifications[]
   accountAssignments target_accounts[] @relation("AccountAssignments")
   personAssignments  people[]          @relation("PersonAssignments")
+  training_content   training_content[]
+  training_shares    training_shares[]
 }
 
 model activities {
@@ -393,4 +396,65 @@ model google_sync_locks {
 
   @@index([userId, lockType])
   @@index([expiresAt])
+}
+
+model training_content {
+  id           String   @id
+  eventId      String
+  userId       String
+  source       String
+  type         String
+  title        String
+  description  String?
+  url          String
+  downloadUrl  String?
+  thumbnailUrl String?
+  metadata     Json     @default("{}")
+  fileSize     BigInt?
+  duration     Int?
+  mimeType     String?
+  sourceId     String?
+  sourceLink   String?
+  tags         String[] @default([])
+  status       String   @default("pending")
+  processedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  event        events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  creator      users    @relation(fields: [userId], references: [id])
+  modules      training_module_content[]
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([source])
+  @@index([status])
+}
+
+model training_module_content {
+  id         String   @id
+  moduleId   String
+  contentId  String
+  order      Int      @default(0)
+  required   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  
+  content    training_content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  @@unique([moduleId, contentId])
+  @@index([moduleId])
+}
+
+model training_shares {
+  id         String    @id
+  contentIds String[]
+  shareCode  String    @unique
+  createdBy  String
+  expiresAt  DateTime?
+  viewCount  Int       @default(0)
+  createdAt  DateTime  @default(now())
+  
+  creator    users     @relation(fields: [createdBy], references: [id])
+  
+  @@index([shareCode])
 }
