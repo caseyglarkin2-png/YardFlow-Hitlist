@@ -4,6 +4,7 @@ import { prisma } from './db';
 import { verifyPassword } from './password';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true, // Required for Railway deployment
   session: {
     strategy: 'jwt',
   },
