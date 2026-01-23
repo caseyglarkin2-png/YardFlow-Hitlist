@@ -129,19 +129,34 @@ Only hold deployment if:
 
 ## 🛠️ Environment Strategy
 
+### Primary: Railway (Production)
+```bash
+# Railway handles the build better for our stack
+# Production: https://yardflow-hitlist-production.up.railway.app
+
+# Deploy:
+railway up --detach
+
+# Check status:
+railway status
+
+# View logs:
+railway logs
+```
+
+### Backup: Vercel (Static/Edge)
+```bash
+# Vercel for static pages if needed
+# Currently having build issues with full Next.js app
+```
+
 ### Development (.env.local)
 ```bash
 DATABASE_URL="local postgres"
 GEMINI_API_KEY="dev key"
 ```
 
-### Production (Vercel Environment)
-```bash
-DATABASE_URL="production postgres"
-GEMINI_API_KEY="production key"
-```
-
-**Key Point**: Same code, different config. No "production branches."
+**Key Point**: Railway > Vercel for full-stack Next.js with Prisma + large builds.
 
 ---
 
@@ -181,29 +196,34 @@ GEMINI_API_KEY="production key"
 - Production is single source of truth
 
 ---
+to Railway (Primary):
+```bash
+cd /workspaces/YardFlow-Hitlist
+railway up --detach
 
-## 🔮 Future Enhancements
+# Check deployment:
+railway status
+railway logs
 
-As we scale:
-- [ ] A/B testing infrastructure
-- [ ] Canary deploys (1% → 10% → 100%)
-- [ ] Automated performance regression testing
-- [ ] Real-time error alerting (Sentry/DataDog)
+# Production URL:
+# https://yardflow-hitlist-production.up.railway.app
+```
 
-But today: **Just push to production.** It works.
-
----
-
-## 📝 Quick Commands
-
-### Deploy Now:
+### Git Push (Auto-deploys):
 ```bash
 git add -A
 git commit -m "feat: your feature"
-git push  # Auto-deploys to Vercel
+git push  # Railway watches main branch
 ```
 
-### Verify Deploy:
+### Emergency Rollback:
+```bash
+# Railway: Redeploy previous version from dashboard
+# https://railway.com/project/ccb7c86f-1bc7-4040-8703-832846c5883b
+
+# Or revert commit:
+git revert HEAD
+git push
 ```bash
 # Check Vercel dashboard
 open https://vercel.com/caseyglarkin2-png/yard-flow-hitlist
