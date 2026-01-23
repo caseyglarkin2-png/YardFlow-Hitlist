@@ -156,28 +156,29 @@ model outreach {
 }
 
 model people {
-  id               String            @id
-  accountId        String
-  name             String
-  title            String?
-  email            String?
-  phone            String?
-  linkedin         String?
-  notes            String?
-  isExecOps        Boolean           @default(false)
-  isOps            Boolean           @default(false)
-  isProc           Boolean           @default(false)
-  isSales          Boolean           @default(false)
-  isTech           Boolean           @default(false)
-  isNonOps         Boolean           @default(false)
-  assignedTo       String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime
-  contact_insights contact_insights?
-  meetings         Meeting[]
-  outreach         outreach[]
-  target_accounts  target_accounts   @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  assignedUser     users?            @relation("PersonAssignments", fields: [assignedTo], references: [id])
+  id                String              @id
+  accountId         String
+  name              String
+  title             String?
+  email             String?
+  phone             String?
+  linkedin          String?
+  notes             String?
+  isExecOps         Boolean             @default(false)
+  isOps             Boolean             @default(false)
+  isProc            Boolean             @default(false)
+  isSales           Boolean             @default(false)
+  isTech            Boolean             @default(false)
+  isNonOps          Boolean             @default(false)
+  assignedTo        String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime
+  contact_insights  contact_insights?
+  meetings          Meeting[]
+  outreach          outreach[]
+  target_accounts   target_accounts     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  assignedUser      users?              @relation("PersonAssignments", fields: [assignedTo], references: [id])
+  linkedin_profiles linkedin_profiles?
 
   @@index([accountId])
   @@index([assignedTo])
@@ -242,6 +243,7 @@ model target_accounts {
   people           people[]
   roi_calculations roi_calculations[]
   score_history    score_history[]
+  email_patterns   email_patterns[]
   events           events             @relation(fields: [eventId], references: [id], onDelete: Cascade)
   assignedUser     users?             @relation("AccountAssignments", fields: [assignedTo], references: [id])
 
@@ -457,4 +459,43 @@ model training_shares {
   creator    users     @relation(fields: [createdBy], references: [id])
   
   @@index([shareCode])
+}
+
+model email_patterns {
+  id              String          @id @default(cuid())
+  accountId       String
+  companyDomain   String
+  patternType     String
+  confidence      Float
+  sampleSize      Int
+  examples        String[]
+  verifiedCount   Int             @default(0)
+  bouncedCount    Int             @default(0)
+  lastDetectedAt  DateTime        @default(now())
+  lastVerifiedAt  DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  target_accounts target_accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  
+  @@unique([accountId, patternType])
+  @@index([accountId])
+  @@index([companyDomain])
+  @@index([confidence])
+}
+
+model linkedin_profiles {
+  id          String   @id @default(cuid())
+  personId    String   @unique
+  profileUrl  String
+  confidence  Float
+  foundVia    String   @default("google_search")
+  verifiedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  people      people   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  
+  @@index([personId])
+  @@index([confidence])
 }
