@@ -14,12 +14,11 @@ COPY eventops ./eventops/
 # Install all dependencies (root + eventops, triggers postinstall)
 RUN npm ci
 
-# Generate Prisma in eventops directory
-WORKDIR /app/eventops
-RUN npx prisma generate
+# Generate Prisma client explicitly
+RUN cd eventops && npx prisma generate
 
 # Expose health check port
 EXPOSE 8080
 
-# Start worker (use npx to ensure tsx is available)
-CMD ["npx", "tsx", "src/lib/queue/workers.ts"]
+# Start worker from /app directory using direct node_modules path
+CMD ["node_modules/.bin/tsx", "eventops/src/lib/queue/workers.ts"]
