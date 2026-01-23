@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import {
   Upload,
   Link as LinkIcon,
@@ -16,7 +17,6 @@ import {
   ExternalLink,
   Search,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -44,6 +44,7 @@ export default function TrainingPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSource, setSelectedSource] = useState<string>('all');
+  const { toast } = useToast();
 
   // Import dialogs state
   const [showDriveDialog, setShowDriveDialog] = useState(false);
@@ -61,7 +62,7 @@ export default function TrainingPage() {
       const data = await res.json();
       setContent(data.content || []);
     } catch (error) {
-      toast.error('Failed to load content');
+      toast({ title: 'Failed to load content' });
     } finally {
       setLoading(false);
     }
@@ -106,10 +107,10 @@ export default function TrainingPage() {
 
     try {
       await fetch(`/api/training/content/${id}`, { method: 'DELETE' });
-      toast.success('Content deleted');
+      toast({ title: 'Content deleted' });
       loadContent();
     } catch (error) {
-      toast.error('Failed to delete');
+      toast({ title: 'Failed to delete' });
     }
   }
 
@@ -302,7 +303,7 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
       const data = await res.json();
       setFiles(data.files || []);
     } catch (error) {
-      toast.error('Failed to load files');
+      toast({ title: 'Failed to load files' });
     } finally {
       setLoading(false);
     }
@@ -321,10 +322,10 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
       });
 
       const data = await res.json();
-      toast.success(`Imported ${data.count} files`);
+      toast({ title: `Imported ${data.count} files` });
       onSuccess();
     } catch (error) {
-      toast.error('Import failed');
+      toast({ title: 'Import failed' });
     } finally {
       setLoading(false);
     }
@@ -390,10 +391,10 @@ function YouTubeImportDialog({ onSuccess }: { onSuccess: () => void }) {
 
       if (!res.ok) throw new Error('Import failed');
 
-      toast.success('YouTube video imported');
+      toast({ title: 'YouTube video imported' });
       onSuccess();
     } catch (error) {
-      toast.error('Failed to import video');
+      toast({ title: 'Failed to import video' });
     } finally {
       setLoading(false);
     }
@@ -435,10 +436,10 @@ function HubSpotImportDialog({ onSuccess }: { onSuccess: () => void }) {
       });
 
       const data = await res.json();
-      toast.success(`Imported ${data.count} call recordings`);
+      toast({ title: `Imported ${data.count} call recordings` });
       onSuccess();
     } catch (error) {
-      toast.error('Import failed');
+      toast({ title: 'Import failed' });
     } finally {
       setLoading(false);
     }
