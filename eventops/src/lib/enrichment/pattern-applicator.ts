@@ -127,8 +127,10 @@ export class PatternApplicator {
       where: {
         people: {
           some: {
-            email: { not: null },
-            name: { not: null }
+            AND: [
+              { email: { not: null } },
+              { name: { not: null } }
+            ]
           }
         }
       },

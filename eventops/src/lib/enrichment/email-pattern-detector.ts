@@ -15,8 +15,10 @@ export class EmailPatternDetector {
     const contacts = await prisma.people.findMany({
       where: { 
         accountId,
-        email: { not: null },
-        name: { not: null }
+        AND: [
+          { email: { not: null } },
+          { name: { not: null } }
+        ]
       },
       include: { target_accounts: true },
       orderBy: { createdAt: 'asc' }

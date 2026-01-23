@@ -7,7 +7,7 @@ import { WikipediaExtractor } from '../wikipedia-extractor';
 global.fetch = jest.fn();
 
 describe('WikipediaExtractor', () => {
-  let extractor: WikipediaExtractor();
+  let extractor: WikipediaExtractor;
 
   beforeEach(() => {
     extractor = new WikipediaExtractor();
