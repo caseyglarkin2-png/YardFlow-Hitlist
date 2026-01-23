@@ -179,7 +179,7 @@ export class GeminiProClient {
     });
 
     // Extract JSON from response (handles markdown code blocks)
-    const jsonMatch = text.match(/```json\n?(.*?)\n?```/s) || text.match(/\{.*\}/s);
+    const jsonMatch = text.match(/```json[\n\r]?([\s\S]*?)[\n\r]?```/) || text.match(/\{[\s\S]*\}/);
     const jsonText = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
 
     try {
