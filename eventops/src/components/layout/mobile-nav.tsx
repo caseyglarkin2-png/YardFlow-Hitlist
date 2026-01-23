@@ -24,6 +24,8 @@ const allNavItems = [
   { href: '/dashboard/campaigns', label: 'Campaigns' },
   { href: '/dashboard/sequences', label: 'Sequences' },
   { href: '/dashboard/templates', label: 'Templates' },
+  { href: '/dossier', label: 'Dossiers' },
+  { href: '/content-generator', label: 'AI Content' },
   { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/dashboard/activity', label: 'Activity' },
   { href: '/dashboard/settings', label: 'Settings' },

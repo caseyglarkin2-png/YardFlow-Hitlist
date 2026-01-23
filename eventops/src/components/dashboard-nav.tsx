@@ -23,6 +23,8 @@ export function DashboardNav() {
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
     { name: 'Research', href: '/dashboard/research/bulk' },
+    { name: 'Dossiers', href: '/dossier' },
+    { name: 'AI Content', href: '/content-generator' },
     { name: 'Workflows', href: '/dashboard/workflows' },
     { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Team', href: '/dashboard/team' },
