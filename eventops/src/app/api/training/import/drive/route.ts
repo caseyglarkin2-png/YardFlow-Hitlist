@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'eventId required' }, { status: 400 });
     }
 
-    const auth = await getGoogleClient(session.user.id);
-    const drive = google.drive({ version: 'v3', auth });
+    const googleClient = await getGoogleClient(session.user.id);
+    const drive = google.drive({ version: 'v3', auth: googleClient });
 
     const imported = [];
 

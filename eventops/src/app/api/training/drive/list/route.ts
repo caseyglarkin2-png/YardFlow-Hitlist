@@ -13,8 +13,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const fileType = searchParams.get('type') || 'all';
 
-    const auth = await getGoogleClient(session.user.id);
-    const drive = google.drive({ version: 'v3', auth });
+    const googleClient = await getGoogleClient(session.user.id);
+    const drive = google.drive({ version: 'v3', auth: googleClient });
 
     // Build query based on file type
     let query = "trashed = false and (";

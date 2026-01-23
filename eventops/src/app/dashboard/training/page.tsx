@@ -291,6 +291,7 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
   const [files, setFiles] = useState<any[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadFiles();
@@ -375,6 +376,7 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
 function YouTubeImportDialog({ onSuccess }: { onSuccess: () => void }) {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   async function handleImport() {
     if (!url) return;
@@ -423,6 +425,7 @@ function YouTubeImportDialog({ onSuccess }: { onSuccess: () => void }) {
 function HubSpotImportDialog({ onSuccess }: { onSuccess: () => void }) {
   const [limit, setLimit] = useState(50);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   async function handleImport() {
     setLoading(true);

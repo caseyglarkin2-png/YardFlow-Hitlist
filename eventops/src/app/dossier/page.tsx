@@ -6,12 +6,12 @@ import { DossierGeneratorForm } from '@/components/ai/DossierGeneratorForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
-interface CompanyDossierPageProps {
-  accountId?: string;
-}
-
-export default function CompanyDossierPage({ accountId }: CompanyDossierPageProps) {
+export default function CompanyDossierPage() {
+  const searchParams = useSearchParams();
+  const accountId = searchParams.get('accountId') || undefined;
+  
   const [dossier, setDossier] = useState<any>(null);
   const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);

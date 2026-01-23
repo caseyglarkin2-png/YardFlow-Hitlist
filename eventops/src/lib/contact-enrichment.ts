@@ -307,9 +307,9 @@ async function findSocialProfiles(name: string, companyName: string): Promise<{
   found: boolean;
 }> {
   const result = {
-    linkedin: null,
-    twitter: null,
-    github: null,
+    linkedin: null as string | null,
+    twitter: null as string | null,
+    github: null as string | null,
     found: false,
   };
 
