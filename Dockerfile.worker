@@ -14,8 +14,12 @@ COPY eventops ./eventops/
 # Install all dependencies (root + eventops, triggers postinstall)
 RUN npm ci
 
-# Generate Prisma client explicitly
-RUN cd eventops && npx prisma generate
+# Generate Prisma client explicitly in eventops subdirectory
+WORKDIR /app/eventops
+RUN npx prisma generate
+
+# Return to /app for CMD
+WORKDIR /app
 
 # Expose health check port
 EXPOSE 8080
