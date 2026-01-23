@@ -83,15 +83,15 @@ export async function POST(req: NextRequest) {
       const step = steps[i];
       
       if (!step.subject || !step.subject.trim()) {
-        errors.push(\`Step \${i + 1}: Subject is required\`);
+        errors.push(`Step ${i + 1}: Subject is required`);
       }
       
       if (!step.emailBody || !step.emailBody.trim()) {
-        errors.push(\`Step \${i + 1}: Email body is required\`);
+        errors.push(`Step ${i + 1}: Email body is required`);
       }
       
       if (step.delayHours === undefined || step.delayHours < 0) {
-        errors.push(\`Step \${i + 1}: Delay must be >= 0\`);
+        errors.push(`Step ${i + 1}: Delay must be >= 0`);
       }
 
       // Check CAN-SPAM compliance for each step
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
 
       if (!complianceResult.compliant) {
         complianceResult.errors.forEach(e => {
-          errors.push(\`Step \${i + 1}: \${e.message}\`);
+          errors.push(`Step ${i + 1}: ${e.message}`);
         });
       }
     }
