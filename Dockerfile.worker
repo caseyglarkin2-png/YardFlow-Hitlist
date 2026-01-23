@@ -25,5 +25,5 @@ WORKDIR /app
 # Expose health check port
 EXPOSE 8080
 
-# Start worker - tsx is in eventops/node_modules since that's where npm ci ran
-CMD ["eventops/node_modules/.bin/tsx", "eventops/src/lib/queue/workers.ts"]
+# Start worker - use absolute node path to avoid PATH issues
+CMD ["/usr/local/bin/node", "eventops/node_modules/tsx/dist/cli.mjs", "eventops/src/lib/queue/workers.ts"]
