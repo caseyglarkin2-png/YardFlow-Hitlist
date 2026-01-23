@@ -5,6 +5,7 @@ import { processEmailPattern } from './jobs/email-pattern';
 import { processLinkedInEnrichment } from './jobs/linkedin-enrichment';
 import { processGenerateEmails } from './jobs/generate-emails';
 import { processSequenceStepJob } from './jobs/sequence-step';
+import http from 'http';
 import type {
   EmailPatternJobData,
   LinkedInEnrichmentJobData,
@@ -104,9 +105,33 @@ sequenceWorker.on('error', (err) => {
   logger.error('Sequence worker error', { error: err });
 });
 
+// Health check server for Railway monitoring
+const healthServer = http.createServer((req, res) => {
+  if (req.url === '/health' || req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      status: 'healthy',
+      workers: {
+        enrichment: enrichmentWorker.isRunning() ? 'running' : 'stopped',
+        sequence: sequenceWorker.isRunning() ? 'running' : 'stopped',
+      },
+      timestamp: new Date().toISOString(),
+    }));
+  } else {
+    res.writeHead(404);
+    res.end('Not Found');
+  }
+});
+
+const PORT = process.env.PORT || 8080;
+healthServer.listen(PORT, () => {
+  logger.info(`Worker health check server listening on port ${PORT}`);
+});
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, closing workers gracefully');
+  healthServer.close();
   await enrichmentWorker.close();
   await sequenceWorker.close();
   process.exit(0);
@@ -114,6 +139,7 @@ process.on('SIGTERM', async () => {
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, closing workers gracefully');
+  healthServer.close();
   await enrichmentWorker.close();
   await sequenceWorker.close();
   process.exit(0);
