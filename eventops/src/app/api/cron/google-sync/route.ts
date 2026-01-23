@@ -57,7 +57,9 @@ export async function GET(request: Request) {
           email: user.email,
           success: true,
           dryRun: result.dryRun,
-          ...result,
+          imported: result.imported,
+          updated: result.updated,
+          skipped: result.skipped,
         });
         
         successCount++;
