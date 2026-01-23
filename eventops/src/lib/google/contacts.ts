@@ -62,12 +62,12 @@ export async function importGoogleContacts(
     const phone = contact.phoneNumbers?.[0]?.value;
 
     if (!name || !email) {
-      skipped.push({ email, reason: 'Missing name or email' });
+      skipped.push({ email: email || undefined, reason: 'Missing name or email' });
       continue;
     }
 
     if (!company) {
-      skipped.push({ email, reason: 'No company information' });
+      skipped.push({ email: email || undefined, reason: 'No company information' });
       continue;
     }
 
@@ -78,7 +78,7 @@ export async function importGoogleContacts(
     });
 
     if (existing) {
-      skipped.push({ email, reason: 'Person already exists' });
+      skipped.push({ email: email || undefined, reason: 'Person already exists' });
       continue;
     }
 
@@ -126,7 +126,7 @@ export async function importGoogleContacts(
     }
 
     if (!accountId) {
-      skipped.push({ email, reason: 'Failed to create account' });
+      skipped.push({ email: email || undefined, reason: 'Failed to create account' });
       continue;
     }
 
