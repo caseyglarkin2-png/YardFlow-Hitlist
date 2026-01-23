@@ -27,6 +27,7 @@ export function DashboardNav() {
     { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Team', href: '/dashboard/team' },
     { name: 'Analytics', href: '/dashboard/analytics' },
+    { name: 'Settings', href: '/dashboard/settings/integrations' },
     { name: 'Help', href: '/dashboard/help' },
   ];
 
