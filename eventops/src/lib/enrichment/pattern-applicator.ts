@@ -58,7 +58,9 @@ export class PatternApplicator {
       where: {
         accountId: companyId,
         ...(force ? {} : { email: null }),
-        name: { not: null }
+        AND: [
+          { name: { not: null } }
+        ]
       },
       orderBy: { createdAt: 'asc' }
     });
