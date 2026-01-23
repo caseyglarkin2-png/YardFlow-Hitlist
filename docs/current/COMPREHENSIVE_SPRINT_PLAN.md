@@ -57,47 +57,212 @@
 **Builds On**: Existing Sprint 24/29 queue and sequence infrastructure  
 **Duration**: 2-3 days
 
-### Task 30.1: Deploy Worker Service ✅
+### Task 30.1: Deploy Worker Service
 **Type**: DevOps  
-**Status**: IN PROGRESS (7th deployment attempt)  
+**Status**: IN PROGRESS (10+ deployment attempts)  
 **Priority**: P0 - Blocks all background job processing
 
-**Description**:
-Deploy BullMQ worker service to Railway as separate containerized service. Worker must:
-- Connect to shared Postgres and Redis instances
-- Process enrichment and sequence-step queues
-- Expose health check on port 8080
-- Auto-restart on failure
+**Root Cause Identified**: Railway service has a service-level `startCommand` override that executes `cd eventops && npm run worker` regardless of Dockerfile CMD. This causes "The executable `cd` could not be found" error because `cd` is not in PATH in minimal containers.
 
+**Lessons Learned**:
+- Platform configuration can override container configuration
+- Always validate service-level settings, not just code/Dockerfile
+- Railway CLI doesn't expose all service settings - need dashboard access
+
+**Split into Atomic Subtasks**:
+
+#### Task 30.1a: Create Worker Dockerfile ✅ COMPLETE
+**Description**: Build Dockerfile that runs worker service
 **Acceptance Criteria**:
-- [ ] Worker container starts successfully (no "cd not found" error)
-- [ ] Worker logs show "Queue workers started successfully"
-- [ ] Health endpoint `/health` returns HTTP 200 with JSON status
-- [ ] Worker appears connected to Postgres/Redis in Railway architecture diagram
-- [ ] Environment variables (DATABASE_URL, REDIS_URL) correctly configured
+- [x] Dockerfile.worker created
+- [x] Uses Node 20-slim base image
+- [x] Installs OpenSSL for Prisma
+- [x] Copies eventops directory before npm ci (for postinstall)
+- [x] Generates Prisma client
+- [x] Exposes port 8080 for health checks
 
 **Validation**:
 ```bash
-# Manual deployment verification
-railway logs --service yardflow-worker | grep "Queue workers started"
-
-# Health check
-curl https://yardflow-worker-production.up.railway.app:8080/health | jq
-
-# Job processing test
-# 1. Enqueue test job via main app API
-# 2. Check worker logs for processing message
-# 3. Verify job completion in database
+docker build -f Dockerfile.worker -t yardflow-worker .
+# Expected: Build succeeds without errors
 ```
 
-**Files Modified**:
-- `Dockerfile.worker` - Container build configuration
-- `.dockerignore` - Exclude unnecessary files from build context
+**Effort**: S (30 minutes) | **Actual**: 45 minutes (Node version troubleshooting)
 
-**Current Issue**:
-Latest Dockerfile (commit c892822) uses WORKDIR instead of `cd` command, but Railway still showing old build. Possible cache issue or deployment delay.
+---
 
-**Next Step**:
+#### Task 30.1b: Test Worker Locally with Docker ⏸️ PENDING
+**Description**: Run worker container locally to verify it works before Railway deployment
+**Acceptance Criteria**:
+- [ ] Container builds locally
+- [ ] Container starts without errors
+- [ ] Worker logs show "Queue workers started successfully"
+- [ ] Health endpoint accessible on localhost:8080
+- [ ] Worker can connect to local Redis and Postgres
+
+**Validation**:
+```bash
+# Build
+docker build -f Dockerfile.worker -t yardflow-worker .
+
+# Run with local environment
+docker run -p 8080:8080 \
+  -e DATABASE_URL=$DATABASE_URL \
+  -e REDIS_URL=redis://localhost:6379 \
+  yardflow-worker
+
+# Check health
+curl http://localhost:8080/health | jq
+
+# Check logs
+docker logs <container-id>
+# Expected: "Queue workers started successfully"
+```
+
+**Effort**: S (30 minutes)
+
+---
+
+#### Task 30.1c: Create Railway Worker Service ✅ COMPLETE
+**Description**: Create Railway service via CLI
+**Acceptance Criteria**:
+- [x] Service "yardflow-worker" exists in Railway dashboard
+- [x] Service connected to production environment
+- [x] Service linked to GitHub repository
+
+**Validation**:
+```bash
+railway services | grep yardflow-worker
+# Expected: yardflow-worker service listed
+```
+
+**Effort**: XS (10 minutes) | **Actual**: 15 minutes
+
+---
+
+#### Task 30.1d: Configure Worker Environment Variables ✅ COMPLETE
+**Description**: Set required environment variables on Railway service
+**Acceptance Criteria**:
+- [x] DATABASE_URL set (reference to Railway Postgres)
+- [x] REDIS_URL set (reference to Railway Redis)
+- [x] AUTH_SECRET set
+- [x] SENDGRID_API_KEY set
+- [x] OPENAI_API_KEY set
+- [x] RAILWAY_DOCKERFILE_PATH=Dockerfile.worker
+
+**Validation**:
+```bash
+railway variables --service yardflow-worker | grep -E "DATABASE_URL|REDIS_URL|RAILWAY_DOCKERFILE"
+# Expected: All variables present
+```
+
+**Effort**: S (15 minutes) | **Actual**: 10 minutes
+
+---
+
+#### Task 30.1e: Validate Railway Service Configuration 🚨 NEW - CRITICAL
+**Description**: Verify Railway service configuration doesn't override Dockerfile CMD
+**Priority**: P0 - **This was the root cause of 10+ failed deployments**
+**Acceptance Criteria**:
+- [ ] Railway service `startCommand` field is NULL or EMPTY
+- [ ] No `NIXPACKS_START_CMD` environment variable
+- [ ] No `NIXPACKS_BUILD_CMD` environment variable (or use Dockerfile instead)
+- [ ] `railway-worker.json` has `startCommand: null` explicitly
+- [ ] Service settings inspected via Railway dashboard
+
+**Validation**:
+```bash
+# Check environment variables for Nixpacks overrides
+railway variables --service yardflow-worker | grep NIXPACKS
+# Expected: NO NIXPACKS_START_CMD or _BUILD_CMD
+
+# Check railway-worker.json
+cat railway-worker.json | jq '.deploy.startCommand'
+# Expected: null
+
+# MANUAL: Check Railway Dashboard
+# Navigate to: Project > yardflow-worker > Settings > Deploy
+# Verify: "Start Command" field is BLANK (not filled in)
+# If it contains anything, DELETE it and save
+```
+
+**How to Fix If Override Exists**:
+```bash
+# Option 1: Delete Nixpacks variables
+railway variables delete NIXPACKS_START_CMD --service yardflow-worker
+railway variables delete NIXPACKS_BUILD_CMD --service yardflow-worker
+
+# Option 2: Update railway-worker.json to explicitly null it
+# See railway-worker.json with startCommand: null
+
+# Option 3: Use Railway dashboard to clear Start Command field
+```
+
+**Effort**: XS (5-10 minutes) | **Impact**: CRITICAL - Prevents deployment loops
+
+---
+
+#### Task 30.1f: Deploy Worker to Railway ⏸️ IN PROGRESS
+**Description**: Trigger Railway deployment and verify success
+**Acceptance Criteria**:
+- [ ] Deployment triggered via `railway up --service yardflow-worker`
+- [ ] Build completes in < 2 minutes
+- [ ] Container starts successfully (no "cd not found" error)
+- [ ] Deployment status shows "Success" in Railway dashboard
+- [ ] No error logs in first 60 seconds of runtime
+
+**Validation**:
+```bash
+# Deploy
+railway up --service yardflow-worker
+
+# Check build logs
+railway logs --service yardflow-worker | tail -50
+# Expected: "Build time: XX seconds"
+# Expected: NO "The executable `cd` could not be found"
+# Expected: NO "Container failed to start"
+
+# Check deployment status (wait 2 minutes)
+# Expected: Service shows "Running" (green) in Railway dashboard
+```
+
+**Effort**: M (30-60 minutes including validation)
+
+---
+
+#### Task 30.1g: Validate Worker Processes Job End-to-End ⏸️ PENDING
+**Description**: Full integration test of worker functionality
+**Acceptance Criteria**:
+- [ ] Worker health endpoint returns HTTP 200
+- [ ] Worker connected to Postgres (visible in Railway architecture)
+- [ ] Worker connected to Redis (visible in Railway architecture)
+- [ ] Test job enqueued via main app
+- [ ] Worker logs show job processing
+- [ ] Job marked complete in database
+- [ ] Worker uptime > 5 minutes without crashes
+
+**Validation**:
+```bash
+# Test 1: Health check
+WORKER_URL=$(railway service --service yardflow-worker --json | jq -r '.url')
+curl https://${WORKER_URL}:8080/health | jq
+# Expected: {"status":"healthy","workers":{"enrichment":"running","sequence":"running"}}
+
+# Test 2: Enqueue test job
+curl -X POST https://yardflow-production.up.railway.app/api/test-enqueue \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"test","data":{"message":"hello"}}'
+
+# Test 3: Check worker logs for processing
+railway logs --service yardflow-worker | grep "Processing.*job"
+# Expected: Log line showing job processing
+
+# Test 4: Verify job completion
+# Check database for job status = "completed"
+```
+
+**Effort**: M (30-45 minutes)
 - Wait for Railway build to complete (~2 minutes)
 - If still fails, investigate Railway cache or force rebuild
 - If succeeds, validate all acceptance criteria
@@ -946,16 +1111,519 @@ chmod +x eventops/scripts/e2e-production-test.sh
 
 ---
 
-## Sprint 30 Completion Criteria
+### Task 30.9: Document Deployment Rollback Procedure 🚨 NEW - CRITICAL
+**Type**: Operations  
+**Status**: NOT STARTED  
+**Priority**: P1 - Required for production safety
+
+**Description**:
+Create runbook for rolling back failed deployments. After 10+ failed worker deployments, we need a clear, tested procedure to quickly recover.
+
+**Acceptance Criteria**:
+- [ ] Runbook document created at `docs/operations/ROLLBACK_PROCEDURE.md`
+- [ ] Railway rollback tested (to previous commit)
+- [ ] Recovery time < 5 minutes documented
+- [ ] Health check validates rollback success
+- [ ] Procedure includes communication template
+- [ ] Tested with actual rollback (to safe commit)
+
+**Implementation**:
+```markdown
+# ROLLBACK_PROCEDURE.md
+
+## When to Rollback
+- Deployment shows "failed" status for > 5 minutes
+- Error rate exceeds 5% in first 10 minutes
+- Critical feature broken (login, health check)
+- Database migration failure
+
+## Rollback Steps
+
+### 1. Identify Last Known Good Commit
+```bash
+# Check Railway deployment history
+railway status
+
+# Find last successful deployment commit
+git log --oneline -10
+```
+
+### 2. Trigger Rollback
+```bash
+# Option A: Via Railway CLI (if available)
+railway rollback
+
+# Option B: Via Git
+git checkout <last-good-commit-sha>
+railway up --service <service-name>
+```
+
+### 3. Verify Rollback
+```bash
+# Check health endpoint
+curl https://yardflow-production.up.railway.app/api/health | jq
+
+# Check build ID matches
+# Expected: buildId from last good deployment
+
+# Monitor for 5 minutes
+railway logs | grep -i "error"
+```
+
+### 4. Communicate
+Template:
+```
+🚨 DEPLOYMENT ROLLBACK
+Service: [service-name]
+Reason: [brief description]
+Rolled back to: [commit SHA]
+Status: [Investigating|Resolved]
+ETA for fix: [time estimate]
+```
+```
+
+**Validation**:
+```bash
+# Practice rollback (use safe commit)
+cd /workspaces/YardFlow-Hitlist
+CURRENT_COMMIT=$(git rev-parse HEAD)
+git checkout HEAD~1
+railway up --service yardflow-worker
+sleep 120
+curl https://yardflow-worker.railway.app:8080/health
+git checkout $CURRENT_COMMIT
+
+# Expected: Rollback completes in < 5 minutes
+# Expected: Health check passes after rollback
+```
+
+**Files Created**:
+- `docs/operations/ROLLBACK_PROCEDURE.md` - Rollback runbook
+
+**Effort**: S (30 minutes)
+
+---
+
+### Task 30.10: Infrastructure as Code Validation 🚨 NEW - CRITICAL
+**Type**: DevOps  
+**Status**: NOT STARTED  
+**Priority**: P1 - Prevents config drift
+
+**Description**:
+Railway service configuration can be changed via UI, causing deployment failures even when code is correct. This task creates validation to detect config drift.
+
+**Problem We're Solving**:
+- Railway service had `startCommand` override (not in code)
+- `NIXPACKS_START_CMD` variable was set (not in code)
+- 10+ deployments failed because platform config != code config
+
+**Acceptance Criteria**:
+- [ ] `.railway.toml` captures expected configuration
+- [ ] Script validates actual Railway config matches expected
+- [ ] Alerts on config drift detection
+- [ ] Runs in CI/CD pipeline (optional)
+- [ ] Documents how to fix drift
+
+**Implementation**:
+```bash
+# scripts/validate-railway-config.sh
+#!/bin/bash
+
+set -e
+
+echo "🔍 Validating Railway configuration..."
+
+SERVICE="yardflow-worker"
+
+# Check 1: No startCommand override
+echo "Check 1: Railway service startCommand..."
+START_CMD=$(railway variables --service $SERVICE 2>&1 | grep -i "NIXPACKS_START" || echo "")
+if [ ! -z "$START_CMD" ]; then
+  echo "❌ FAIL: NIXPACKS_START_CMD is set (should be empty)"
+  echo "  Found: $START_CMD"
+  echo "  Fix: railway variables delete NIXPACKS_START_CMD --service $SERVICE"
+  exit 1
+fi
+echo "✅ PASS: No startCommand override"
+
+# Check 2: Dockerfile path set correctly
+echo "Check 2: Dockerfile path..."
+DOCKERFILE_PATH=$(railway variables --service $SERVICE 2>&1 | grep "RAILWAY_DOCKERFILE_PATH" | awk '{print $3}')
+EXPECTED_PATH="Dockerfile.worker"
+if [ "$DOCKERFILE_PATH" != "$EXPECTED_PATH" ]; then
+  echo "❌ FAIL: Dockerfile path incorrect"
+  echo "  Expected: $EXPECTED_PATH"
+  echo "  Found: $DOCKERFILE_PATH"
+  exit 1
+fi
+echo "✅ PASS: Dockerfile path correct"
+
+# Check 3: Required environment variables
+echo "Check 3: Required environment variables..."
+REQUIRED_VARS=("DATABASE_URL" "REDIS_URL" "AUTH_SECRET")
+for VAR in "${REQUIRED_VARS[@]}"; do
+  if ! railway variables --service $SERVICE 2>&1 | grep -q "$VAR"; then
+    echo "❌ FAIL: Missing required variable: $VAR"
+    exit 1
+  fi
+done
+echo "✅ PASS: All required variables present"
+
+echo "🎉 All checks passed!"
+```
+
+**Validation**:
+```bash
+chmod +x scripts/validate-railway-config.sh
+./scripts/validate-railway-config.sh
+
+# Expected: All checks pass
+# If fails: Script shows exact fix command
+```
+
+**Files Created**:
+- `scripts/validate-railway-config.sh` - Config validation script
+- `.railway.toml` - Expected Railway configuration
+- `docs/operations/RAILWAY_CONFIG.md` - Configuration documentation
+
+**Effort**: M (1 hour)
+
+---
+
+### Task 30.11: Deployment Pre-Flight Checklist 🚨 NEW - CRITICAL
+**Type**: Operations  
+**Status**: NOT STARTED  
+**Priority**: P1 - Prevents bad deployments
+
+**Description**:
+Automated checklist that runs before Railway deployment to catch issues early. Would have prevented the 10+ deployment failures we experienced.
+
+**Checks to Implement**:
+1. All tests passing locally
+2. Build succeeds locally
+3. Dockerfile builds successfully
+4. Environment variables match production (non-secret)
+5. No uncommitted changes
+6. Railway service config validated (Task 30.10)
+7. No blocking warnings (< 10 total)
+
+**Acceptance Criteria**:
+- [ ] Script `./scripts/pre-deploy-check.sh` created
+- [ ] Runs in < 2 minutes
+- [ ] Exits with error code 1 if any check fails
+- [ ] Prints clear error messages with fix instructions
+- [ ] Can be integrated into git pre-push hook
+
+**Implementation**:
+```bash
+#!/bin/bash
+# scripts/pre-deploy-check.sh
+
+set -e
+
+echo "🚀 Pre-Deployment Checklist"
+echo "=========================="
+
+FAILED=0
+
+# Check 1: Git status
+echo "1. Checking git status..."
+if [ -n "$(git status --porcelain)" ]; then
+  echo "❌ FAIL: Uncommitted changes detected"
+  echo "  Run: git status"
+  FAILED=1
+else
+  echo "✅ PASS: No uncommitted changes"
+fi
+
+# Check 2: Tests pass
+echo "2. Running tests..."
+if npm test 2>&1 | grep -q "FAIL"; then
+  echo "❌ FAIL: Tests failing"
+  echo "  Run: npm test"
+  FAILED=1
+else
+  echo "✅ PASS: All tests passing"
+fi
+
+# Check 3: Build succeeds
+echo "3. Testing build..."
+if ! npm run build > /dev/null 2>&1; then
+  echo "❌ FAIL: Build failing"
+  echo "  Run: npm run build"
+  FAILED=1
+else
+  echo "✅ PASS: Build succeeds"
+fi
+
+# Check 4: Dockerfile builds
+echo "4. Testing Dockerfile..."
+if ! docker build -f Dockerfile.worker -t test-worker . > /dev/null 2>&1; then
+  echo "❌ FAIL: Dockerfile build failing"
+  echo "  Run: docker build -f Dockerfile.worker -t test-worker ."
+  FAILED=1
+else
+  echo "✅ PASS: Dockerfile builds"
+fi
+
+# Check 5: Railway config validation
+echo "5. Validating Railway config..."
+if ! ./scripts/validate-railway-config.sh > /dev/null 2>&1; then
+  echo "❌ FAIL: Railway config invalid"
+  echo "  Run: ./scripts/validate-railway-config.sh"
+  FAILED=1
+else
+  echo "✅ PASS: Railway config valid"
+fi
+
+# Check 6: Warning count
+echo "6. Checking warning count..."
+WARNING_COUNT=$(npm run build 2>&1 | grep -c "warn" || echo "0")
+if [ "$WARNING_COUNT" -gt 10 ]; then
+  echo "❌ FAIL: Too many warnings ($WARNING_COUNT > 10)"
+  echo "  Run: npm run build 2>&1 | grep warn"
+  FAILED=1
+else
+  echo "✅ PASS: Warning count acceptable ($WARNING_COUNT)"
+fi
+
+echo "=========================="
+if [ $FAILED -eq 1 ]; then
+  echo "❌ PRE-FLIGHT CHECKS FAILED"
+  echo "Fix issues above before deploying"
+  exit 1
+else
+  echo "✅ ALL CHECKS PASSED - Ready to deploy!"
+  exit 0
+fi
+```
+
+**Validation**:
+```bash
+# Test with failing conditions
+git add .
+./scripts/pre-deploy-check.sh
+# Expected: Fails with clear error
+
+# Test with passing conditions
+git reset
+./scripts/pre-deploy-check.sh
+# Expected: All checks pass
+```
+
+**Optional: Git Pre-Push Hook**:
+```bash
+# .git/hooks/pre-push
+#!/bin/bash
+./scripts/pre-deploy-check.sh
+```
+
+**Files Created**:
+- `scripts/pre-deploy-check.sh` - Pre-flight checklist
+
+**Effort**: M (1 hour)
+
+---
+
+### Task 30.12: Post-Deployment Smoke Tests 🚨 NEW - CRITICAL
+**Type**: Testing  
+**Status**: NOT STARTED  
+**Priority**: P1 - Fast feedback on deployment health
+
+**Description**:
+Automated smoke tests that run immediately after Railway deployment to catch failures within 30 seconds instead of hours.
+
+**Tests to Implement**:
+1. Health endpoint returns 200
+2. Authentication flow works (login)
+3. Database queries succeed
+4. Redis connectivity (if applicable)
+5. Critical API endpoints respond
+6. Worker service responding
+
+**Acceptance Criteria**:
+- [ ] Script runs in < 30 seconds
+- [ ] Tests actual production deployment
+- [ ] Fails loudly if critical path broken
+- [ ] Can integrate with Railway deploy hooks
+- [ ] Sends notification on failure (optional)
+
+**Implementation**:
+```bash
+#!/bin/bash
+# scripts/smoke-test-production.sh
+
+set -e
+
+PROD_URL="${1:-https://yardflow-production.up.railway.app}"
+WORKER_URL="${2:-https://yardflow-worker.railway.app}"
+
+echo "🧪 Post-Deployment Smoke Tests"
+echo "Testing: $PROD_URL"
+echo "=============================="
+
+FAILED=0
+
+# Test 1: Main app health
+echo "1. Main app health check..."
+HEALTH=$(curl -s -o /dev/null -w "%{http_code}" $PROD_URL/api/health)
+if [ "$HEALTH" != "200" ]; then
+  echo "❌ FAIL: Health check returned $HEALTH"
+  FAILED=1
+else
+  echo "✅ PASS: Health check OK"
+fi
+
+# Test 2: Worker health
+echo "2. Worker health check..."
+WORKER_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" $WORKER_URL:8080/health)
+if [ "$WORKER_HEALTH" != "200" ]; then
+  echo "❌ FAIL: Worker health returned $WORKER_HEALTH"
+  FAILED=1
+else
+  echo "✅ PASS: Worker health OK"
+fi
+
+# Test 3: Login page accessible
+echo "3. Login page accessible..."
+LOGIN=$(curl -s -o /dev/null -w "%{http_code}" $PROD_URL/login)
+if [ "$LOGIN" != "200" ]; then
+  echo "❌ FAIL: Login page returned $LOGIN"
+  FAILED=1
+else
+  echo "✅ PASS: Login page OK"
+fi
+
+# Test 4: Database connectivity (via health endpoint)
+echo "4. Database connectivity..."
+DB_STATUS=$(curl -s $PROD_URL/api/health | jq -r '.checks.database.status')
+if [ "$DB_STATUS" != "healthy" ]; then
+  echo "❌ FAIL: Database unhealthy"
+  FAILED=1
+else
+  echo "✅ PASS: Database connected"
+fi
+
+# Test 5: Response time check
+echo "5. Response time check..."
+RESPONSE_TIME=$(curl -s -w "%{time_total}" -o /dev/null $PROD_URL/api/health)
+THRESHOLD="1.0"
+if (( $(echo "$RESPONSE_TIME > $THRESHOLD" | bc -l) )); then
+  echo "⚠️  WARN: Slow response (${RESPONSE_TIME}s > ${THRESHOLD}s)"
+else
+  echo "✅ PASS: Response time OK (${RESPONSE_TIME}s)"
+fi
+
+echo "=============================="
+if [ $FAILED -eq 1 ]; then
+  echo "❌ SMOKE TESTS FAILED"
+  echo "ROLLBACK RECOMMENDED"
+  exit 1
+else
+  echo "✅ ALL SMOKE TESTS PASSED"
+  echo "Deployment looks good!"
+  exit 0
+fi
+```
+
+**Validation**:
+```bash
+chmod +x scripts/smoke-test-production.sh
+./scripts/smoke-test-production.sh
+
+# Expected: All tests pass in < 30 seconds
+```
+
+**Integration with Railway**:
+```bash
+# Add to package.json
+{
+  "scripts": {
+    "postdeploy": "./scripts/smoke-test-production.sh"
+  }
+}
+```
+
+**Files Created**:
+- `scripts/smoke-test-production.sh` - Smoke test suite
+
+**Effort**: M (1-2 hours)
+
+---
+
+## Sprint 30 Completion Criteria (UPDATED)
 
 ### Definition of Done
-- [ ] All P0 tasks complete (30.1-30.4)
-- [ ] All P1 tasks complete (30.5-30.6, 30.8)
+- [ ] All P0 tasks complete (30.1a-g, 30.2, 30.3, 30.4)
+- [ ] All P1 tasks complete (30.5, 30.6, 30.8, 30.9, 30.10, 30.11, 30.12)
 - [ ] P2 task investigated and plan created (30.7)
 - [ ] E2E test passes (30.8)
+- [ ] Smoke tests pass (30.12)
 - [ ] All acceptance criteria validated
 - [ ] No P0/P1 bugs remaining
 - [ ] Documentation updated
+- [ ] Sprint Health Gate passed (see below)
+
+### Sprint 30 Health Gate 🚨 NEW
+
+**Before declaring Sprint 30 complete, verify**:
+- [ ] All task acceptance criteria validated (not just marked "complete")
+- [ ] No P0/P1 bugs in production
+- [ ] Production uptime > 99% for 24 hours post-deployment
+- [ ] All tests passing (unit + integration + E2E + smoke)
+- [ ] Documentation updated (README, runbooks, sprint docs)
+- [ ] Demo script rehearsed successfully
+- [ ] Rollback procedure tested
+- [ ] Pre-flight checklist tested
+
+**Health Metrics** (measured over 24 hours post-completion):
+- Build time: < 90 seconds ✅ Target: ~60 seconds
+- Deployment success rate: 100% (last 3 deployments) ✅ Target: 3/3
+- Health endpoint response time: < 500ms ✅ Target: ~200ms
+- Error rate: < 0.1% ✅ Target: 0%
+- Worker uptime: > 99% ✅ Target: 100%
+- Database query response time (p95): < 100ms
+
+**Sign-off Required**:
+- [ ] Technical lead review
+- [ ] Production deployment verified
+- [ ] Monitoring shows healthy metrics
+
+### Task Time Tracking (NEW)
+
+| Task | Estimated | Actual | Variance | Notes |
+|------|-----------|--------|----------|-------|
+| 30.1a | 30 min | 45 min | +15 min | Node version troubleshooting |
+| 30.1b | 30 min | - | - | Pending |
+| 30.1c | 15 min | 15 min | 0 | ✅ On time |
+| 30.1d | 15 min | 10 min | -5 min | ✅ Faster than expected |
+| 30.1e | 10 min | - | - | **CRITICAL - Do this now!** |
+| 30.1f | 60 min | 240+ min | +180+ min | 🚨 Railway config override debugging |
+| 30.1g | 45 min | - | - | Pending |
+| 30.2 | 30 min | - | - | Pending |
+| 30.3 | 60 min | - | - | Pending |
+| 30.4 | 45 min | - | - | Pending |
+| 30.5 | 90 min | - | - | Pending |
+| 30.6 | 120 min | - | - | Pending |
+| 30.7 | 120 min | - | - | Pending |
+| 30.8 | 90 min | - | - | Pending |
+| 30.9 | 30 min | - | - | **NEW - Do after first deployment** |
+| 30.10 | 60 min | - | - | **NEW - Do now!** |
+| 30.11 | 60 min | - | - | **NEW - Do before next deployment** |
+| 30.12 | 90 min | - | - | **NEW - Do after deployment succeeds** |
+
+**Sprint 30 Velocity**:
+- **Planned Story Points**: 42 (12 tasks + 4 new operational tasks)
+- **Actual Story Points**: TBD
+- **Blocker**: Task 30.1f Railway config debugging (10+ deployment attempts)
+
+**Key Learnings from Sprint 30**:
+1. **Platform configuration can override code**: Always validate infrastructure settings
+2. **Local Docker testing is critical**: Test 30.1b would have caught many issues early
+3. **Operational tasks are not optional**: Rollback, smoke tests, pre-flight checks prevent multi-hour debugging sessions
+4. **Task granularity matters**: Large tasks (old 30.1) hide complexity and blockers - splitting into 30.1a-g improves visibility
+
+---
 
 ### Demo Script
 1. Show Railway dashboard: All services green (main app, worker, Postgres, Redis)
