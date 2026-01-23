@@ -123,29 +123,35 @@ model message_templates {
 }
 
 model outreach {
-  id          String          @id
-  personId    String
-  channel     OutreachChannel
-  status      OutreachStatus  @default(DRAFT)
-  subject     String?
-  message     String
-  templateId  String?
-  sentBy      String?
-  sentAt      DateTime?
-  respondedAt DateTime?
-  notes       String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime
-  bouncedAt   DateTime?
-  campaignId  String?
-  openedAt    DateTime?
-  sequenceId  String?
-  campaigns   campaigns?      @relation(fields: [campaignId], references: [id])
-  people      people          @relation(fields: [personId], references: [id], onDelete: Cascade)
+  id             String          @id
+  personId       String
+  channel        OutreachChannel
+  status         OutreachStatus  @default(DRAFT)
+  subject        String?
+  message        String
+  templateId     String?
+  sentBy         String?
+  sentAt         DateTime?
+  respondedAt    DateTime?
+  notes          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime
+  bouncedAt      DateTime?
+  campaignId     String?
+  openedAt       DateTime?
+  sequenceId     String?
+  gmailMessageId String?
+  gmailThreadId  String?
+  lastChecked    DateTime?
+  campaigns      campaigns?      @relation(fields: [campaignId], references: [id])
+  people         people          @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
   @@index([personId])
   @@index([status])
+  @@index([gmailThreadId])
+  @@index([lastChecked])
+  @@index([status, lastChecked])
 }
 
 model people {
@@ -253,6 +259,16 @@ model users {
   activeEventId      String?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime
+  // Google OAuth & Sync
+  googleAccessToken  String?
+  googleRefreshToken String?
+  googleTokenExpiry  DateTime?
+  googleSyncEnabled  Boolean           @default(false)
+  googleSyncPaused   Boolean           @default(false)
+  googleSyncDryRun   Boolean           @default(true)
+  googleRateLimit    Int               @default(10)
+  googleSyncAuditLog Json              @default("[]")
+  lastGoogleSync     DateTime?
   events             events?           @relation(fields: [activeEventId], references: [id])
   activities         activities[]
   saved_searches     saved_searches[]
@@ -366,4 +382,15 @@ enum OutreachStatus {
 enum Role {
   ADMIN
   MEMBER
+}
+
+model google_sync_locks {
+  id        String   @id
+  userId    String
+  lockType  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, lockType])
+  @@index([expiresAt])
 }
