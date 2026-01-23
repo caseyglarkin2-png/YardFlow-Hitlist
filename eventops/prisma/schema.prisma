@@ -156,28 +156,32 @@ model outreach {
 }
 
 model people {
-  id                String              @id
-  accountId         String
-  name              String
-  title             String?
-  email             String?
-  phone             String?
-  linkedin          String?
-  notes             String?
-  isExecOps         Boolean             @default(false)
-  isOps             Boolean             @default(false)
-  isProc            Boolean             @default(false)
-  isSales           Boolean             @default(false)
-  isTech            Boolean             @default(false)
-  isNonOps          Boolean             @default(false)
-  assignedTo        String?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime
-  contact_insights  contact_insights?
-  meetings          Meeting[]
-  outreach          outreach[]
-  target_accounts   target_accounts     @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  assignedUser      users?              @relation("PersonAssignments", fields: [assignedTo], references: [id])
+  id                  String               @id
+  accountId           String
+  name                String
+  title               String?
+  email               String?
+  phone               String?
+  linkedin            String?
+  notes               String?
+  isExecOps           Boolean              @default(false)
+  isOps               Boolean              @default(false)
+  isProc              Boolean              @default(false)
+  isSales             Boolean              @default(false)
+  isTech              Boolean              @default(false)
+  isNonOps            Boolean              @default(false)
+  assignedTo          String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  emailStatus         String?
+  unsubscribed        Boolean              @default(false)
+  gdprConsent         Boolean              @default(false)
+  contact_insights    contact_insights?
+  meetings            Meeting[]
+  outreach            outreach[]
+  target_accounts     target_accounts      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  assignedUser        users?               @relation("PersonAssignments", fields: [assignedTo], references: [id])
+  sequenceEnrollments SequenceEnrollment[]
   linkedin_profiles linkedin_profiles?
 
   @@index([accountId])
@@ -228,24 +232,25 @@ model sequences {
 }
 
 model target_accounts {
-  id               String             @id
-  eventId          String
-  name             String
-  website          String?
-  industry         String?
-  headquarters     String?
-  icpScore         Int?
-  notes            String?
-  assignedTo       String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime
-  company_dossiers company_dossiers?
-  people           people[]
-  roi_calculations roi_calculations[]
-  score_history    score_history[]
-  email_patterns   email_patterns[]
-  events           events             @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  assignedUser     users?             @relation("AccountAssignments", fields: [assignedTo], references: [id])
+  id                  String               @id
+  eventId             String
+  name                String
+  website             String?
+  industry            String?
+  headquarters        String?
+  icpScore            Int?
+  notes               String?
+  assignedTo          String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime
+  company_dossiers    company_dossiers?
+  people              people[]
+  roi_calculations    roi_calculations[]
+  score_history       score_history[]
+  email_patterns      email_patterns[]
+  events              events               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  assignedUser        users?               @relation("AccountAssignments", fields: [assignedTo], references: [id])
+  sequenceEnrollments SequenceEnrollment[]
 
   @@index([eventId])
   @@index([assignedTo])
@@ -498,4 +503,70 @@ model linkedin_profiles {
   
   @@index([personId])
   @@index([confidence])
+}
+
+model OutreachSequence {
+  id              String               @id @default(cuid())
+  name            String
+  description     String?
+  steps           Json
+  status          String               @default("draft")
+  createdBy       String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  totalEnrolled   Int                  @default(0)
+  totalCompleted  Int                  @default(0)
+  totalActive     Int                  @default(0)
+  
+  enrollments     SequenceEnrollment[]
+  
+  @@index([createdBy])
+  @@index([status])
+}
+
+model SequenceEnrollment {
+  id              String           @id @default(cuid())
+  sequenceId      String
+  personId        String?
+  accountId       String?
+  currentStep     Int              @default(0)
+  status          String           @default("active")
+  startedAt       DateTime         @default(now())
+  completedAt     DateTime?
+  pauseReason     String?
+  
+  sequence        OutreachSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  person          people?          @relation(fields: [personId], references: [id], onDelete: Cascade)
+  account         target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  emailActivities EmailActivity[]
+  
+  @@index([sequenceId])
+  @@index([personId])
+  @@index([accountId])
+  @@index([status])
+}
+
+model EmailActivity {
+  id              String             @id @default(cuid())
+  enrollmentId    String
+  stepNumber      Int
+  sentAt          DateTime           @default(now())
+  openedAt        DateTime?
+  clickedAt       DateTime?
+  repliedAt       DateTime?
+  bouncedAt       DateTime?
+  unsubscribedAt  DateTime?
+  spamReportAt    DateTime?
+  status          String             @default("sent")
+  messageId       String?            @unique
+  subject         String
+  body            String             @db.Text
+  errorMessage    String?            @db.Text
+  
+  enrollment      SequenceEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  
+  @@index([enrollmentId])
+  @@index([messageId])
+  @@index([status])
+  @@index([sentAt])
 }
