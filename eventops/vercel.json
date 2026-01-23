@@ -1,6 +1,9 @@
 {
   "framework": "nextjs",
   "buildCommand": "npx prisma generate && npx next build",
+  "git": {
+    "deploymentEnabled": false
+  },
   "crons": [
     {
       "path": "/api/cron/sequences",
