@@ -32,27 +32,41 @@ function getRedisConfig() {
 
 export const redisConfig = getRedisConfig();
 
-/**
- * Redis connection for BullMQ
- */
-export const redisConnection = new Redis(redisConfig);
+// ✅ Lazy initialization - connection only created when needed
+let redisConnection: Redis | null = null;
 
-// Event handlers
-redisConnection.on('connect', () => {
-  logger.info('Redis connection established', {
-    host: redisConfig.host,
-    port: redisConfig.port,
-  });
-});
+export function getRedisConnection(): Redis {
+  if (!redisConnection) {
+    redisConnection = new Redis(redisConfig);
 
-redisConnection.on('ready', () => {
-  logger.info('Redis client ready');
-});
+    // Event handlers
+    redisConnection.on('connect', () => {
+      logger.info('Redis connection established', {
+        host: redisConfig.host,
+        port: redisConfig.port,
+      });
+    });
 
-redisConnection.on('error', (error) => {
-  logger.error('Redis connection error', { error });
-});
+    redisConnection.on('ready', () => {
+      logger.info('Redis client ready');
+    });
 
-redisConnection.on('close', () => {
-  logger.warn('Redis connection closed');
-});
+    redisConnection.on('error', (error) => {
+      logger.error('Redis connection error', { error });
+    });
+
+    redisConnection.on('close', () => {
+      logger.warn('Redis connection closed');
+    });
+  }
+
+  return redisConnection;
+}
+
+// Graceful shutdown
+export async function closeRedis() {
+  if (redisConnection) {
+    await redisConnection.quit();
+    redisConnection = null;
+  }
+}

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib/queue/queues';
 import { logger } from '@/lib/logger';
 
 export async function GET(
@@ -15,6 +14,9 @@ export async function GET(
     }
 
     const { jobId } = params;
+
+    // Import queues dynamically to avoid Redis connection during build
+    const { enrichmentQueue, outreachQueue, sequenceQueue } = await import('@/lib/queue/queues');
 
     // Try to find job in all queues
     let job = await enrichmentQueue.getJob(jobId);

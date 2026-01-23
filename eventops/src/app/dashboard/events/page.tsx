@@ -5,9 +5,13 @@ import type { events as EventType } from '@prisma/client';
 
 export default async function EventsPage() {
   const session = await auth();
-  
+
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
   const user = await prisma.users.findUnique({
-    where: { id: session!.user.id },
+    where: { id: session.user.id },
     include: { events: true },
   });
 

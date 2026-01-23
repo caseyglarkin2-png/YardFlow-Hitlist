@@ -1,5 +1,5 @@
 import { Worker, Job } from 'bullmq';
-import { redisConnection } from './client';
+import { getRedisConnection } from './client';
 import { logger } from '@/lib/logger';
 import { processEmailPattern } from './jobs/email-pattern';
 import { processLinkedInEnrichment } from './jobs/linkedin-enrichment';
@@ -13,7 +13,7 @@ import type {
 } from './queues';
 
 const workerOptions = {
-  connection: redisConnection,
+  connection: getRedisConnection(),
   concurrency: 5, // Process 5 jobs simultaneously
   limiter: {
     max: 10, // 10 jobs

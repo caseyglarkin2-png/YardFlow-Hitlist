@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { addEnrichmentJob } from '@/lib/queue/queues';
 import { logger } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
@@ -29,6 +28,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Import queue function dynamically to avoid Redis connection during build
+    const { addEnrichmentJob } = await import('@/lib/queue/queues');
 
     let job;
     switch (jobType) {

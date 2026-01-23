@@ -10,9 +10,13 @@ export default async function AccountsPage({
   searchParams: { search?: string; icpMin?: string; sort?: string };
 }) {
   const session = await auth();
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+
   
   const user = await prisma.users.findUnique({
-    where: { id: session!.user.id },
+    where: { id: session.user.id },
     select: { activeEventId: true },
   });
 

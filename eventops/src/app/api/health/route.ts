@@ -3,26 +3,30 @@ import { prisma } from '@/lib/db';
 import { auth } from '@/auth';
 
 interface HealthCheck {
-  status: 'healthy' | 'unhealthy';
+  status: 'healthy' | 'unhealthy' | 'not-configured';
   message?: string;
 }
 
 interface HealthResponse {
-  status: 'healthy' | 'unhealthy';
+  status: 'healthy' | 'unhealthy' | 'degraded';
   timestamp: string;
   checks: {
     database: HealthCheck;
     auth: HealthCheck;
     env: HealthCheck;
+    redis: HealthCheck;
   };
+  responseTime: number;
 }
 
 export async function GET() {
+  const startTime = Date.now();
   const timestamp = new Date().toISOString();
   const checks: HealthResponse['checks'] = {
     database: { status: 'unhealthy' },
     auth: { status: 'unhealthy' },
     env: { status: 'unhealthy' },
+    redis: { status: 'not-configured' },
   };
 
   // Check database connectivity
@@ -83,18 +87,47 @@ export async function GET() {
     };
   }
 
+  // Check Redis connection (if configured)
+  if (process.env.REDIS_URL) {
+    try {
+      const { getRedisConnection } = await import('@/lib/queue/client');
+      const redis = getRedisConnection();
+      await redis.ping();
+      checks.redis = {
+        status: 'healthy',
+        message: 'Redis connection successful',
+      };
+    } catch (error) {
+      checks.redis = {
+        status: 'unhealthy',
+        message: error instanceof Error ? error.message : 'Redis connection failed',
+      };
+    }
+  } else {
+    checks.redis = {
+      status: 'not-configured',
+      message: 'Redis not configured (optional)',
+    };
+  }
+
   // Determine overall health status
   const allHealthy = Object.values(checks).every(
-    (check) => check.status === 'healthy'
+    (check) => check.status === 'healthy' || check.status === 'not-configured'
   );
+  
+  const hasCriticalFailure = checks.database.status === 'unhealthy' || 
+                             checks.auth.status === 'unhealthy' ||
+                             checks.env.status === 'unhealthy';
 
   const response: HealthResponse = {
-    status: allHealthy ? 'healthy' : 'unhealthy',
+    status: hasCriticalFailure ? 'unhealthy' : allHealthy ? 'healthy' : 'degraded',
     timestamp,
     checks,
+    responseTime: Date.now() - startTime,
   };
 
-  const statusCode = allHealthy ? 200 : 503;
+  const statusCode = response.status === 'healthy' ? 200 : 
+                     response.status === 'degraded' ? 200 : 503;
 
   return NextResponse.json(response, { status: statusCode });
 }

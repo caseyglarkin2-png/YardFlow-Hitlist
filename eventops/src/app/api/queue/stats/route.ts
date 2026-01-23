@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { enrichmentQueue, outreachQueue, emailQueue, sequenceQueue } from '@/lib/queue/queues';
 import { logger } from '@/lib/logger';
 
 export async function GET(req: NextRequest) {
@@ -10,6 +9,9 @@ export async function GET(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Import queues dynamically to avoid Redis connection during build
+    const { enrichmentQueue, outreachQueue, emailQueue, sequenceQueue } = await import('@/lib/queue/queues');
 
     // Get counts for all queues
     const [enrichmentCounts, outreachCounts, emailCounts, sequenceCounts] = await Promise.all([

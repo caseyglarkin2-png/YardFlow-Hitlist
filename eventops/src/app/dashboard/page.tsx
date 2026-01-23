@@ -5,9 +5,14 @@ import { QuickActions } from '@/components/quick-actions';
 export default async function DashboardPage() {
   const session = await auth();
   
+  // Type guard - middleware should prevent this, but be defensive
+  if (!session?.user?.id) {
+    redirect('/login');
+  }
+  
   // Get active event for user
   const user = await prisma.users.findUnique({
-    where: { id: session!.user.id },
+    where: { id: session.user.id },
     include: {
       events: true,
     },
@@ -31,7 +36,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-600">
-          Welcome back, {session!.user.name || session!.user.email}
+          Welcome back, {session.user.name || session.user.email}
         </p>
       </div>
 

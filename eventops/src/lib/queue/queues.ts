@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import { redisConnection } from './client';
+import { getRedisConnection } from './client';
 import { logger } from '@/lib/logger';
 
 // Job Data Interfaces
@@ -32,39 +32,126 @@ export interface SequenceStepJobData {
 }
 
 // Default queue options
-const defaultQueueOptions = {
-  connection: redisConnection,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'exponential' as const,
-      delay: 2000, // Start with 2 seconds
-    },
-    timeout: 300000, // 5 minutes
-    removeOnComplete: {
-      count: 100,
-      age: 86400, // 24 hours
-    },
-    removeOnFail: {
-      count: 500,
-    },
+const defaultJobOptions = {
+  attempts: 3,
+  backoff: {
+    type: 'exponential' as const,
+    delay: 2000, // Start with 2 seconds
+  },
+  timeout: 300000, // 5 minutes
+  removeOnComplete: {
+    count: 100,
+    age: 86400, // 24 hours
+  },
+  removeOnFail: {
+    count: 500,
   },
 };
 
-// Create queues
-export const enrichmentQueue = new Queue('enrichment', defaultQueueOptions);
+// Lazy queue initialization to avoid connecting during build
+let _enrichmentQueue: Queue | null = null;
+let _outreachQueue: Queue | null = null;
+let _emailQueue: Queue | null = null;
+let _sequenceQueue: Queue | null = null;
 
-export const outreachQueue = new Queue('outreach', defaultQueueOptions);
-
-export const emailQueue = new Queue('emails', {
-  ...defaultQueueOptions,
-  defaultJobOptions: {
-    ...defaultQueueOptions.defaultJobOptions,
-    attempts: 5, // More retries for email sending
+export const enrichmentQueue = {
+  get queue(): Queue {
+    if (!_enrichmentQueue) {
+      _enrichmentQueue = new Queue('enrichment', {
+        connection: getRedisConnection(),
+        defaultJobOptions,
+      });
+    }
+    return _enrichmentQueue;
   },
-});
+  add(...args: Parameters<Queue['add']>) {
+    return this.queue.add(...args);
+  },
+  getJob(...args: Parameters<Queue['getJob']>) {
+    return this.queue.getJob(...args);
+  },
+  getJobCounts(...args: Parameters<Queue['getJobCounts']>) {
+    return this.queue.getJobCounts(...args);
+  },
+  getFailed(...args: Parameters<Queue['getFailed']>) {
+    return this.queue.getFailed(...args);
+  },
+};
 
-export const sequenceQueue = new Queue('sequence-steps', defaultQueueOptions);
+export const outreachQueue = {
+  get queue(): Queue {
+    if (!_outreachQueue) {
+      _outreachQueue = new Queue('outreach', {
+        connection: getRedisConnection(),
+        defaultJobOptions,
+      });
+    }
+    return _outreachQueue;
+  },
+  add(...args: Parameters<Queue['add']>) {
+    return this.queue.add(...args);
+  },
+  getJob(...args: Parameters<Queue['getJob']>) {
+    return this.queue.getJob(...args);
+  },
+  getJobCounts(...args: Parameters<Queue['getJobCounts']>) {
+    return this.queue.getJobCounts(...args);
+  },
+  getFailed(...args: Parameters<Queue['getFailed']>) {
+    return this.queue.getFailed(...args);
+  },
+};
+
+export const emailQueue = {
+  get queue(): Queue {
+    if (!_emailQueue) {
+      _emailQueue = new Queue('emails', {
+        connection: getRedisConnection(),
+        defaultJobOptions: {
+          ...defaultJobOptions,
+          attempts: 5, // More retries for email sending
+        },
+      });
+    }
+    return _emailQueue;
+  },
+  add(...args: Parameters<Queue['add']>) {
+    return this.queue.add(...args);
+  },
+  getJob(...args: Parameters<Queue['getJob']>) {
+    return this.queue.getJob(...args);
+  },
+  getJobCounts(...args: Parameters<Queue['getJobCounts']>) {
+    return this.queue.getJobCounts(...args);
+  },
+  getFailed(...args: Parameters<Queue['getFailed']>) {
+    return this.queue.getFailed(...args);
+  },
+};
+
+export const sequenceQueue = {
+  get queue(): Queue {
+    if (!_sequenceQueue) {
+      _sequenceQueue = new Queue('sequence-steps', {
+        connection: getRedisConnection(),
+        defaultJobOptions,
+      });
+    }
+    return _sequenceQueue;
+  },
+  add(...args: Parameters<Queue['add']>) {
+    return this.queue.add(...args);
+  },
+  getJob(...args: Parameters<Queue['getJob']>) {
+    return this.queue.getJob(...args);
+  },
+  getJobCounts(...args: Parameters<Queue['getJobCounts']>) {
+    return this.queue.getJobCounts(...args);
+  },
+  getFailed(...args: Parameters<Queue['getFailed']>) {
+    return this.queue.getFailed(...args);
+  },
+};
 
 // Helper functions
 export async function addEnrichmentJob(
