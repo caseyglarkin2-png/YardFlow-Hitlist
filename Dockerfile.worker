@@ -1,5 +1,6 @@
 FROM node:20-slim
 
+# Cache bust: 2026-01-23-v7
 WORKDIR /app
 
 # Install OpenSSL for Prisma
