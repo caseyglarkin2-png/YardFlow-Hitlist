@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
             id: job.id,
             name: job.name,
             error: job.failedReason,
-            timestamp: job.failedOn,
+            timestamp: job.finishedOn,
           })),
         },
         outreach: {
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
             id: job.id,
             name: job.name,
             error: job.failedReason,
-            timestamp: job.failedOn,
+            timestamp: job.finishedOn,
           })),
         },
         emails: {
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
             id: job.id,
             name: job.name,
             error: job.failedReason,
-            timestamp: job.failedOn,
+            timestamp: job.finishedOn,
           })),
         },
         sequences: {
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
             id: job.id,
             name: job.name,
             error: job.failedReason,
-            timestamp: job.failedOn,
+            timestamp: job.finishedOn,
           })),
         },
       },

@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import type { target_accounts } from '@prisma/client';
 import { AccountsFilters } from '@/components/accounts-filters';
 

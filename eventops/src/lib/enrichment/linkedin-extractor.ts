@@ -153,9 +153,7 @@ export class LinkedInExtractor {
       where: {
         accountId,
         linkedin: null,
-        AND: [
-          { name: { not: null } }
-        ]
+        name: { not: '' }
       },
       include: { target_accounts: true },
       take: limit,
@@ -201,9 +199,7 @@ export class LinkedInExtractor {
         people: {
           some: {
             linkedin: null,
-            AND: [
-              { name: { not: null } }
-            ]
+            name: { not: '' }
           },
         },
       },

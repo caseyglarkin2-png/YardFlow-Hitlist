@@ -15,10 +15,8 @@ export class EmailPatternDetector {
     const contacts = await prisma.people.findMany({
       where: { 
         accountId,
-        AND: [
-          { email: { not: null } },
-          { name: { not: null } }
-        ]
+        email: { not: '' },
+        name: { not: '' }
       },
       include: { target_accounts: true },
       orderBy: { createdAt: 'asc' }
@@ -68,7 +66,7 @@ export class EmailPatternDetector {
       const confidence = (count / contacts.length) * 100;
       
       detectedPatterns.push({
-        companyId,
+        companyId: accountId,
         companyDomain: domain,
         patternType,
         confidence,

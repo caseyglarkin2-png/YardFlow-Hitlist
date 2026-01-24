@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         email: true,
-        firstName: true,
+        name: true,
         unsubscribed: true,
       },
     });

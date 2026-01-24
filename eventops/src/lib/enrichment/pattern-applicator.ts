@@ -58,9 +58,7 @@ export class PatternApplicator {
       where: {
         accountId: companyId,
         ...(force ? {} : { email: null }),
-        AND: [
-          { name: { not: null } }
-        ]
+        name: { not: '' }
       },
       orderBy: { createdAt: 'asc' }
     });
@@ -129,10 +127,8 @@ export class PatternApplicator {
       where: {
         people: {
           some: {
-            AND: [
-              { email: { not: null } },
-              { name: { not: null } }
-            ]
+            email: { not: '' },
+            name: { not: '' }
           }
         }
       },

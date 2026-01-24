@@ -31,11 +31,11 @@ export async function processEmailPattern(
       accountId,
       domain: result.domain,
       totalEmails: result.totalEmails,
-      patternsDetected: result.patterns.length,
-      primaryPattern: result.patterns.length > 0
+      patternsDetected: result.detectedPatterns.length,
+      primaryPattern: result.detectedPatterns.length > 0
         ? {
-            type: result.patterns[0].type,
-            confidence: result.patterns[0].confidence,
+            type: result.detectedPatterns[0].patternType,
+            confidence: result.detectedPatterns[0].confidence,
           }
         : null,
     };

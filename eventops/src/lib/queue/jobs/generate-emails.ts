@@ -28,16 +28,16 @@ export async function processGenerateEmails(
 
     logger.info('Email generation completed', {
       accountId,
-      emailsGenerated: result.updated,
+      emailsGenerated: result.applied,
       skipped: result.skipped,
     });
 
     return {
       success: true,
       accountId,
-      emailsGenerated: result.updated,
+      emailsGenerated: result.applied,
       skipped: result.skipped,
-      pattern: result.pattern,
+      pattern: result.pattern ?? null,
     };
   } catch (error: any) {
     logger.error('Generate emails job failed', { accountId, error });

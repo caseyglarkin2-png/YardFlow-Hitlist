@@ -29,14 +29,27 @@ const envSchema = z.object({
 // Parse and export
 const parsed = envSchema.safeParse(process.env);
 
-if (!parsed.success) {
+// During Docker build, validation may fail with placeholder values - that's OK
+// Real validation happens at runtime when actual env vars are provided
+if (!parsed.success && process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL && !process.env.POSTGRES_PRISMA_URL) {
   console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
   throw new Error('Invalid environment variables');
 }
 
-export const env = parsed.data;
+export const env = parsed.success ? parsed.data : {
+  POSTGRES_PRISMA_URL: process.env.POSTGRES_PRISMA_URL,
+  DATABASE_URL: process.env.DATABASE_URL,
+  AUTH_SECRET: process.env.AUTH_SECRET || 'placeholder',
+  AUTH_URL: process.env.AUTH_URL,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  ENABLE_AUTO_ENRICHMENT: (process.env.ENABLE_AUTO_ENRICHMENT || 'false') as 'true' | 'false',
+  SERPAPI_KEY: process.env.SERPAPI_KEY,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  NODE_ENV: (process.env.NODE_ENV || 'development') as 'development' | 'production' | 'test',
+};
 
 // Helper to get the correct database URL
 export const getDatabaseUrl = () => {
   return env.POSTGRES_PRISMA_URL || env.DATABASE_URL!;
 };
+

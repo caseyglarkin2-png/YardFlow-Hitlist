@@ -38,7 +38,7 @@ export async function enrollContact(
       select: {
         id: true,
         email: true,
-        firstName: true,
+        name: true,
         accountId: true,
         gdprConsent: true,
         unsubscribed: true,
@@ -64,7 +64,7 @@ export async function enrollContact(
     }
 
     // Get first step for compliance check
-    const steps = sequence.steps as SequenceStep[];
+    const steps = sequence.steps as unknown as SequenceStep[];
     if (!steps || steps.length === 0) {
       return { success: false, error: 'Sequence has no steps' };
     }
@@ -129,30 +129,38 @@ export async function processStep(enrollmentId: string): Promise<{ success: bool
     // Get enrollment with related data
     const enrollment = await prisma.sequenceEnrollment.findUnique({
       where: { id: enrollmentId },
-      include: {
-        sequence: true,
-        person: {
-          include: {
-            account: true,
-          },
-        },
-      },
     });
 
+    // Get related data separately
     if (!enrollment) {
       return { success: false, error: 'Enrollment not found' };
     }
+
+    const sequence = await prisma.outreachSequence.findUnique({
+      where: { id: enrollment.sequenceId },
+    });
+
+    const person = enrollment.personId 
+      ? await prisma.people.findUnique({
+          where: { id: enrollment.personId },
+          include: { target_accounts: true },
+        })
+      : null;
 
     if (enrollment.status !== 'active') {
       return { success: false, error: `Enrollment is ${enrollment.status}` };
     }
 
-    if (!enrollment.person) {
+    if (!person) {
       return { success: false, error: 'Person not found' };
     }
 
+    if (!sequence) {
+      return { success: false, error: 'Sequence not found' };
+    }
+
     // Get current step
-    const steps = enrollment.sequence.steps as SequenceStep[];
+    const steps = sequence.steps as unknown as SequenceStep[];
     const currentStep = steps[enrollment.currentStep];
 
     if (!currentStep) {
@@ -162,7 +170,7 @@ export async function processStep(enrollmentId: string): Promise<{ success: bool
     }
 
     // Check compliance before sending
-    const complianceResult = await checkCompliance(enrollment.person.id, {
+    const complianceResult = await checkCompliance(person.id, {
       subject: currentStep.subject,
       body: currentStep.emailBody,
     });
@@ -180,12 +188,17 @@ export async function processStep(enrollmentId: string): Promise<{ success: bool
       return { success: false, error: `Compliance check failed: ${errorMessages}` };
     }
 
+    // Split name into first and last
+    const nameParts = (person.name || '').split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
     // Prepare recipient data
     const recipient: EmailRecipient = {
-      email: enrollment.person.email || '',
-      firstName: enrollment.person.firstName || '',
-      lastName: enrollment.person.lastName || '',
-      company: enrollment.person.account?.name || '',
+      email: person.email || '',
+      firstName,
+      lastName,
+      company: person.target_accounts?.name || '',
     };
 
     // Send email
@@ -233,16 +246,21 @@ export async function advanceEnrollment(enrollmentId: string): Promise<void> {
   try {
     const enrollment = await prisma.sequenceEnrollment.findUnique({
       where: { id: enrollmentId },
-      include: {
-        sequence: true,
-      },
     });
 
     if (!enrollment) {
       throw new Error('Enrollment not found');
     }
 
-    const steps = enrollment.sequence.steps as SequenceStep[];
+    const sequence = await prisma.outreachSequence.findUnique({
+      where: { id: enrollment.sequenceId },
+    });
+
+    if (!sequence) {
+      throw new Error('Sequence not found');
+    }
+
+    const steps = sequence.steps as unknown as SequenceStep[];
     const nextStepNumber = enrollment.currentStep + 1;
 
     if (nextStepNumber >= steps.length) {

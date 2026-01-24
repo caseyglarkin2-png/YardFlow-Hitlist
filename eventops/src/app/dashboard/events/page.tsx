@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import type { events as EventType } from '@prisma/client';
 
 export default async function EventsPage() {

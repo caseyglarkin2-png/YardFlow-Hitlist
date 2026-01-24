@@ -24,11 +24,9 @@ export async function processLinkedInEnrichment(
     // Get people without LinkedIn URLs
     const people = await prisma.people.findMany({
       where: {
-        AND: [
-          { accountId },
-          { linkedinUrl: null },
-          { name: { not: null } },
-        ],
+        accountId,
+        linkedin: null,
+        name: { not: '' },
       },
       take: limit,
       select: {
@@ -47,7 +45,7 @@ export async function processLinkedInEnrichment(
       try {
         const result = await extractor.discoverProfile(person.id);
         
-        if (result.linkedinUrl) {
+        if (result.profileUrl) {
           enriched++;
         } else {
           notFound++;

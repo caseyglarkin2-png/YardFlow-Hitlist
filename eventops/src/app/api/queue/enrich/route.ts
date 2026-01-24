@@ -57,6 +57,13 @@ export async function POST(req: NextRequest) {
         break;
     }
 
+    if (!job) {
+      return NextResponse.json(
+        { error: 'Failed to create job' },
+        { status: 500 }
+      );
+    }
+
     logger.info('Enrichment job queued', {
       jobType,
       accountId,

@@ -208,7 +208,6 @@ export async function sendEmail(
       fullName: `${recipient.firstName || ''} ${recipient.lastName || ''}`.trim(),
       company: recipient.company || '',
       email: recipient.email,
-      ...recipient,
     };
     
     // Substitute variables in subject

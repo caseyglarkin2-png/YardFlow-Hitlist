@@ -252,7 +252,7 @@ async function processContact(
         id: accountId,
         name: props.company || 'Unknown Company',
         industry: null,
-        location: null,
+        headquarters: null,
         icpScore: 0,
         eventId: await getDefaultEventId(),
         updatedAt: new Date(),
