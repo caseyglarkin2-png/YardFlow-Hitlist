@@ -181,4 +181,27 @@ export class ContentPurposingAgent {
     // TODO: Add industry-specific hashtags and context
     return JSON.stringify({ ...original, industry });
   }
+
+  // Default fallback content when external API unavailable
+  private getDefaultCaseStudy(): any {
+    return {
+      title: 'Logistics Efficiency Case Study',
+      content: 'Sample case study content',
+      industry: 'logistics',
+    };
+  }
+
+  private getDefaultMessaging(): any {
+    return {
+      subject: 'Improve Your Operations',
+      body: 'Sample messaging content',
+    };
+  }
+
+  private getDefaultSocialTemplate(): any {
+    return {
+      platform: 'linkedin',
+      content: 'Sample social post template',
+    };
+  }
 }

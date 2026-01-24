@@ -54,6 +54,30 @@ export class AgentOrchestrator {
   }
 
   /**
+   * Execute workflow (wrapper for runFullCampaign)
+   * Used by API routes for consistency
+   */
+  async executeWorkflow(params: {
+    type: string;
+    accountId: string;
+    contactIds?: string[];
+    config?: Record<string, unknown>;
+  }): Promise<CampaignWorkflow> {
+    // Map workflow type to campaign type
+    const campaignTypeMap: Record<string, 'booth-outreach' | 'pre-event' | 'post-event'> = {
+      'full-campaign': 'pre-event',
+      'quick-outreach': 'booth-outreach',
+      'research-only': 'post-event',
+    };
+
+    return this.runFullCampaign({
+      eventId: params.accountId, // TODO: Get proper eventId
+      targetAccounts: [params.accountId],
+      campaignType: campaignTypeMap[params.type] || 'pre-event',
+    });
+  }
+
+  /**
    * Run full campaign: Prospecting → Research → Sequences → Outreach
    */
   async runFullCampaign(params: {
@@ -81,13 +105,14 @@ export class AgentOrchestrator {
           status: 'pending',
         });
         workflow.tasks.push(prospectingTask);
-        
+
         // Use discovered leads as target accounts
         params.targetAccounts = prospectingTask.output?.accountIds || [];
       }
 
       // Step 2: Research each account
-      for (const accountId of params.targetAccounts) {
+      const targetAccounts = params.targetAccounts || [];
+      for (const accountId of targetAccounts) {
         const researchTask = await this.executeTask({
           id: crypto.randomUUID(),
           agentType: 'research',
@@ -178,9 +203,19 @@ export class AgentOrchestrator {
   /**
    * Get workflow status
    */
-  async getWorkflowStatus(workflowId: string): Promise<CampaignWorkflow | null> {
+  async getWorkflowStatus(_workflowId: string): Promise<CampaignWorkflow | null> {
     // TODO: Fetch from database
     // For now, return null
     return null;
   }
+}
+
+// Export singleton getter for lazy initialization
+let orchestratorInstance: AgentOrchestrator | null = null;
+
+export function getAgentOrchestrator(): AgentOrchestrator {
+  if (!orchestratorInstance) {
+    orchestratorInstance = new AgentOrchestrator();
+  }
+  return orchestratorInstance;
 }

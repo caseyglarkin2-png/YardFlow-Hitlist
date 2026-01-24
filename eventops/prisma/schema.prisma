@@ -66,13 +66,13 @@ model contact_insights {
 }
 
 model events {
-  id               String            @id
+  id               String             @id
   name             String
   location         String?
   startDate        DateTime
   endDate          DateTime
-  status           EventStatus       @default(PLANNING)
-  createdAt        DateTime          @default(now())
+  status           EventStatus        @default(PLANNING)
+  createdAt        DateTime           @default(now())
   updatedAt        DateTime
   campaigns        campaigns[]
   target_accounts  target_accounts[]
@@ -156,35 +156,35 @@ model outreach {
 }
 
 model people {
-  id                  String               @id
-  accountId           String
-  name                String
-  title               String?
-  email               String?
-  phone               String?
-  linkedin            String?
-  notes               String?
-  isExecOps           Boolean              @default(false)
-  isOps               Boolean              @default(false)
-  isProc              Boolean              @default(false)
-  isSales             Boolean              @default(false)
-  isTech              Boolean              @default(false)
-  isNonOps            Boolean              @default(false)
-  assignedTo          String?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime
-  emailStatus         String?
-  unsubscribed        Boolean              @default(false)
-  gdprConsent         Boolean              @default(false)
-  contact_insights    contact_insights?
-  meetings            Meeting[]
-  outreach            outreach[]
-  target_accounts     target_accounts      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  assignedUser        users?                @relation("PersonAssignments", fields: [assignedTo], references: [id])
-  sequenceEnrollments SequenceEnrollment[]
-  linkedin_profiles   linkedin_profiles?
-  agentTasks          agent_tasks[]
-  abTestResults       ab_test_results[]
+  id                   String                 @id
+  accountId            String
+  name                 String
+  title                String?
+  email                String?
+  phone                String?
+  linkedin             String?
+  notes                String?
+  isExecOps            Boolean                @default(false)
+  isOps                Boolean                @default(false)
+  isProc               Boolean                @default(false)
+  isSales              Boolean                @default(false)
+  isTech               Boolean                @default(false)
+  isNonOps             Boolean                @default(false)
+  assignedTo           String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  emailStatus          String?
+  unsubscribed         Boolean                @default(false)
+  gdprConsent          Boolean                @default(false)
+  contact_insights     contact_insights?
+  meetings             Meeting[]
+  outreach             outreach[]
+  target_accounts      target_accounts        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  assignedUser         users?                 @relation("PersonAssignments", fields: [assignedTo], references: [id])
+  sequenceEnrollments  SequenceEnrollment[]
+  linkedin_profiles    linkedin_profiles?
+  agentTasks           agent_tasks[]
+  abTestResults        ab_test_results[]
   sequence_enrollments sequence_enrollments[]
 
   @@index([accountId])
@@ -221,63 +221,63 @@ model score_history {
 }
 
 model sequences {
-  id                   String                @id
+  id                   String                 @id
   campaignId           String?
   name                 String
   description          String?
   steps                String
-  isActive             Boolean               @default(true)
-  createdAt            DateTime              @default(now())
+  isActive             Boolean                @default(true)
+  createdAt            DateTime               @default(now())
   updatedAt            DateTime
-  campaigns            campaigns?            @relation(fields: [campaignId], references: [id])
+  campaigns            campaigns?             @relation(fields: [campaignId], references: [id])
   sequence_enrollments sequence_enrollments[]
 
   @@index([campaignId])
 }
 
 model sequence_enrollments {
-  id             String           @id @default(cuid())
-  sequence_id    String
-  contact_id     String
-  status         String           @default("ACTIVE") // 'ACTIVE' | 'COMPLETED' | 'EXITED' | 'FAILED'
-  current_step   Int              @default(0)
-  enrolled_at    DateTime         @default(now())
-  completed_at   DateTime?
-  exited_at      DateTime?
-  exit_reason    String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  
+  id           String    @id @default(cuid())
+  sequence_id  String
+  contact_id   String
+  status       String    @default("ACTIVE") // 'ACTIVE' | 'COMPLETED' | 'EXITED' | 'FAILED'
+  current_step Int       @default(0)
+  enrolled_at  DateTime  @default(now())
+  completed_at DateTime?
+  exited_at    DateTime?
+  exit_reason  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
   sequence       sequences        @relation(fields: [sequence_id], references: [id], onDelete: Cascade)
   people         people           @relation(fields: [contact_id], references: [id], onDelete: Cascade)
   sequence_steps sequence_steps[]
-  
+
   @@index([sequence_id])
   @@index([contact_id])
   @@index([status])
 }
 
 model sequence_steps {
-  id                  String                @id @default(cuid())
-  enrollment_id       String
-  step_number         Int
-  channel             String                @default("EMAIL") // 'EMAIL' | 'LINKEDIN' | 'PHONE' | 'MANIFEST'
-  template_type       String
-  scheduled_at        DateTime
-  sent_at             DateTime?
-  opened_at           DateTime?
-  clicked_at          DateTime?
-  replied_at          DateTime?
-  engagement_score    Int                   @default(0)
-  status              String                @default("PENDING") // 'PENDING' | 'SENT' | 'OPENED' | 'CLICKED' | 'REPLIED' | 'FAILED'
-  error_message       String?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  
-  enrollment          sequence_enrollments  @relation(fields: [enrollment_id], references: [id], onDelete: Cascade)
-  email_engagement    email_engagement[]
-  ab_test_results     ab_test_results[]
-  
+  id               String    @id @default(cuid())
+  enrollment_id    String
+  step_number      Int
+  channel          String    @default("EMAIL") // 'EMAIL' | 'LINKEDIN' | 'PHONE' | 'MANIFEST'
+  template_type    String
+  scheduled_at     DateTime
+  sent_at          DateTime?
+  opened_at        DateTime?
+  clicked_at       DateTime?
+  replied_at       DateTime?
+  engagement_score Int       @default(0)
+  status           String    @default("PENDING") // 'PENDING' | 'SENT' | 'OPENED' | 'CLICKED' | 'REPLIED' | 'FAILED'
+  error_message    String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  enrollment       sequence_enrollments @relation(fields: [enrollment_id], references: [id], onDelete: Cascade)
+  email_engagement email_engagement[]
+  ab_test_results  ab_test_results[]
+
   @@index([enrollment_id])
   @@index([status])
   @@index([scheduled_at])
@@ -310,32 +310,32 @@ model target_accounts {
 }
 
 model users {
-  id                 String            @id
+  id                 String             @id
   name               String?
-  email              String            @unique
+  email              String             @unique
   emailVerified      DateTime?
   password           String?
   image              String?
-  role               Role              @default(MEMBER)
+  role               Role               @default(MEMBER)
   activeEventId      String?
-  createdAt          DateTime          @default(now())
+  createdAt          DateTime           @default(now())
   updatedAt          DateTime
   // Google OAuth & Sync
   googleAccessToken  String?
   googleRefreshToken String?
   googleTokenExpiry  DateTime?
-  googleSyncEnabled  Boolean           @default(false)
-  googleSyncPaused   Boolean           @default(false)
-  googleSyncDryRun   Boolean           @default(true)
-  googleRateLimit    Int               @default(10)
-  googleSyncAuditLog Json              @default("[]")
+  googleSyncEnabled  Boolean            @default(false)
+  googleSyncPaused   Boolean            @default(false)
+  googleSyncDryRun   Boolean            @default(true)
+  googleRateLimit    Int                @default(10)
+  googleSyncAuditLog Json               @default("[]")
   lastGoogleSync     DateTime?
-  events             events?           @relation(fields: [activeEventId], references: [id])
+  events             events?            @relation(fields: [activeEventId], references: [id])
   activities         activities[]
   saved_searches     saved_searches[]
   notifications      notifications[]
-  accountAssignments target_accounts[] @relation("AccountAssignments")
-  personAssignments  people[]          @relation("PersonAssignments")
+  accountAssignments target_accounts[]  @relation("AccountAssignments")
+  personAssignments  people[]           @relation("PersonAssignments")
   training_content   training_content[]
   training_shares    training_shares[]
 }
@@ -389,25 +389,25 @@ model notifications {
 }
 
 model ab_tests {
-  id              String    @id @default(cuid())
+  id              String            @id @default(cuid())
   name            String
   description     String?
-  testType        String    @default("TEMPLATE") @map("test_type") // 'SUBJECT' | 'TEMPLATE' | 'TIMING' | 'FULL'
-  variants        Json      @default("[]") // Array of ABTestVariant objects
-  status          String    @default("RUNNING") // RUNNING, COMPLETED, STOPPED
+  testType        String            @default("TEMPLATE") @map("test_type") // 'SUBJECT' | 'TEMPLATE' | 'TIMING' | 'FULL'
+  variants        Json              @default("[]") // Array of ABTestVariant objects
+  status          String            @default("RUNNING") // RUNNING, COMPLETED, STOPPED
   templateAId     String?
   templateBId     String?
-  sampleSize      Int       @default(100)
-  winnerThreshold Float     @default(0.05) // 95% confidence
-  startedAt       DateTime  @default(now())
+  sampleSize      Int               @default(100)
+  winnerThreshold Float             @default(0.05) // 95% confidence
+  startedAt       DateTime          @default(now())
   completedAt     DateTime?
   winnerId        String?
   results         Json? // {variantA: {sent, opened, clicked, replied}, variantB: {...}}
   createdBy       String
   eventId         String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  events          events    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  events          events            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   abTestResults   ab_test_results[]
 
   @@index([eventId])
@@ -463,7 +463,7 @@ model google_sync_locks {
 }
 
 model training_content {
-  id           String   @id
+  id           String    @id
   eventId      String
   userId       String
   source       String
@@ -473,21 +473,21 @@ model training_content {
   url          String
   downloadUrl  String?
   thumbnailUrl String?
-  metadata     Json     @default("{}")
+  metadata     Json      @default("{}")
   fileSize     BigInt?
   duration     Int?
   mimeType     String?
   sourceId     String?
   sourceLink   String?
-  tags         String[] @default([])
-  status       String   @default("pending")
+  tags         String[]  @default([])
+  status       String    @default("pending")
   processedAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  event        events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  creator      users    @relation(fields: [userId], references: [id])
-  modules      training_module_content[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  event   events                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  creator users                     @relation(fields: [userId], references: [id])
+  modules training_module_content[]
 
   @@index([eventId])
   @@index([userId])
@@ -496,15 +496,15 @@ model training_content {
 }
 
 model training_module_content {
-  id         String   @id
-  moduleId   String
-  contentId  String
-  order      Int      @default(0)
-  required   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  
-  content    training_content @relation(fields: [contentId], references: [id], onDelete: Cascade)
-  
+  id        String   @id
+  moduleId  String
+  contentId String
+  order     Int      @default(0)
+  required  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  content training_content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
   @@unique([moduleId, contentId])
   @@index([moduleId])
 }
@@ -517,29 +517,29 @@ model training_shares {
   expiresAt  DateTime?
   viewCount  Int       @default(0)
   createdAt  DateTime  @default(now())
-  
-  creator    users     @relation(fields: [createdBy], references: [id])
-  
+
+  creator users @relation(fields: [createdBy], references: [id])
+
   @@index([shareCode])
 }
 
 model email_patterns {
-  id              String          @id @default(cuid())
-  accountId       String
-  companyDomain   String
-  patternType     String
-  confidence      Float
-  sampleSize      Int
-  examples        String[]
-  verifiedCount   Int             @default(0)
-  bouncedCount    Int             @default(0)
-  lastDetectedAt  DateTime        @default(now())
-  lastVerifiedAt  DateTime?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  
+  id             String    @id @default(cuid())
+  accountId      String
+  companyDomain  String
+  patternType    String
+  confidence     Float
+  sampleSize     Int
+  examples       String[]
+  verifiedCount  Int       @default(0)
+  bouncedCount   Int       @default(0)
+  lastDetectedAt DateTime  @default(now())
+  lastVerifiedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
   target_accounts target_accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  
+
   @@unique([accountId, patternType])
   @@index([accountId])
   @@index([companyDomain])
@@ -547,56 +547,56 @@ model email_patterns {
 }
 
 model linkedin_profiles {
-  id          String   @id @default(cuid())
-  personId    String   @unique
-  profileUrl  String
-  confidence  Float
-  foundVia    String   @default("google_search")
-  verifiedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  people      people   @relation(fields: [personId], references: [id], onDelete: Cascade)
-  
+  id         String    @id @default(cuid())
+  personId   String    @unique
+  profileUrl String
+  confidence Float
+  foundVia   String    @default("google_search")
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  people people @relation(fields: [personId], references: [id], onDelete: Cascade)
+
   @@index([personId])
   @@index([confidence])
 }
 
 model OutreachSequence {
-  id              String               @id @default(cuid())
-  name            String
-  description     String?
-  steps           Json
-  status          String               @default("draft")
-  createdBy       String
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  totalEnrolled   Int                  @default(0)
-  totalCompleted  Int                  @default(0)
-  totalActive     Int                  @default(0)
-  
-  enrollments     SequenceEnrollment[]
-  
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  steps          Json
+  status         String   @default("draft")
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  totalEnrolled  Int      @default(0)
+  totalCompleted Int      @default(0)
+  totalActive    Int      @default(0)
+
+  enrollments SequenceEnrollment[]
+
   @@index([createdBy])
   @@index([status])
 }
 
 model SequenceEnrollment {
-  id              String           @id @default(cuid())
-  sequenceId      String
-  personId        String?
-  accountId       String?
-  currentStep     Int              @default(0)
-  status          String           @default("active")
-  startedAt       DateTime         @default(now())
-  completedAt     DateTime?
-  pauseReason     String?
-  
+  id          String    @id @default(cuid())
+  sequenceId  String
+  personId    String?
+  accountId   String?
+  currentStep Int       @default(0)
+  status      String    @default("active")
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  pauseReason String?
+
   sequence        OutreachSequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
   person          people?          @relation(fields: [personId], references: [id], onDelete: Cascade)
   account         target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
   emailActivities EmailActivity[]
-  
+
   @@index([sequenceId])
   @@index([personId])
   @@index([accountId])
@@ -604,24 +604,24 @@ model SequenceEnrollment {
 }
 
 model EmailActivity {
-  id              String             @id @default(cuid())
-  enrollmentId    String
-  stepNumber      Int
-  sentAt          DateTime           @default(now())
-  openedAt        DateTime?
-  clickedAt       DateTime?
-  repliedAt       DateTime?
-  bouncedAt       DateTime?
-  unsubscribedAt  DateTime?
-  spamReportAt    DateTime?
-  status          String             @default("sent")
-  messageId       String?            @unique
-  subject         String
-  body            String             @db.Text
-  errorMessage    String?            @db.Text
-  
-  enrollment      SequenceEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  
+  id             String    @id @default(cuid())
+  enrollmentId   String
+  stepNumber     Int
+  sentAt         DateTime  @default(now())
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  repliedAt      DateTime?
+  bouncedAt      DateTime?
+  unsubscribedAt DateTime?
+  spamReportAt   DateTime?
+  status         String    @default("sent")
+  messageId      String?   @unique
+  subject        String
+  body           String    @db.Text
+  errorMessage   String?   @db.Text
+
+  enrollment SequenceEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
   @@index([enrollmentId])
   @@index([messageId])
   @@index([status])
@@ -629,25 +629,25 @@ model EmailActivity {
 }
 
 model agent_tasks {
-  id              String    @id @default(cuid())
-  agentType       String    // 'prospecting' | 'research' | 'sequence' | 'content' | 'graphics' | 'socials' | 'contracting'
-  status          String    @default("pending") // 'pending' | 'in_progress' | 'completed' | 'failed'
-  inputData       Json      // Agent-specific input parameters
-  outputData      Json?     // Results from agent execution
-  errorMessage    String?   @db.Text
-  accountId       String?
-  contactId       String?
-  parentTaskId    String?   // For chained workflows
-  retryCount      Int       @default(0)
-  maxRetries      Int       @default(3)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  startedAt       DateTime?
-  completedAt     DateTime?
-  
-  targetAccount   target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  contact         people?          @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  
+  id           String    @id @default(cuid())
+  agentType    String // 'prospecting' | 'research' | 'sequence' | 'content' | 'graphics' | 'socials' | 'contracting'
+  status       String    @default("pending") // 'pending' | 'in_progress' | 'completed' | 'failed'
+  inputData    Json // Agent-specific input parameters
+  outputData   Json? // Results from agent execution
+  errorMessage String?   @db.Text
+  accountId    String?
+  contactId    String?
+  parentTaskId String? // For chained workflows
+  retryCount   Int       @default(0)
+  maxRetries   Int       @default(3)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  startedAt    DateTime?
+  completedAt  DateTime?
+
+  targetAccount target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contact       people?          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
   @@index([agentType, status])
   @@index([accountId])
   @@index([contactId])
@@ -657,33 +657,33 @@ model agent_tasks {
 }
 
 model email_engagement {
-  id                String    @id @default(cuid())
-  sequenceStepId    String    @map("sequence_step_id")
-  eventType         String    @map("event_type") // 'DELIVERED' | 'OPEN' | 'CLICK' | 'BOUNCE' | 'DROPPED' | 'SPAMREPORT' | 'UNSUBSCRIBE'
-  recipientEmail    String    @map("recipient_email")
-  timestamp         DateTime
-  metadata          Json?
-  createdAt         DateTime  @default(now())
-  
-  sequenceStep      sequence_steps @relation(fields: [sequenceStepId], references: [id], onDelete: Cascade)
-  
+  id             String   @id @default(cuid())
+  sequenceStepId String   @map("sequence_step_id")
+  eventType      String   @map("event_type") // 'DELIVERED' | 'OPEN' | 'CLICK' | 'BOUNCE' | 'DROPPED' | 'SPAMREPORT' | 'UNSUBSCRIBE'
+  recipientEmail String   @map("recipient_email")
+  timestamp      DateTime
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  sequenceStep sequence_steps @relation(fields: [sequenceStepId], references: [id], onDelete: Cascade)
+
   @@index([sequenceStepId])
   @@index([eventType])
   @@index([timestamp])
 }
 
 model ab_test_results {
-  id              String    @id @default(cuid())
-  testId          String    @map("test_id")
-  variantId       String    @map("variant_id")
-  sequenceStepId  String    @map("sequence_step_id")
-  contactId       String    @map("contact_id")
-  createdAt       DateTime  @default(now())
-  
-  test            ab_tests       @relation(fields: [testId], references: [id], onDelete: Cascade)
-  sequenceStep    sequence_steps @relation(fields: [sequenceStepId], references: [id], onDelete: Cascade)
-  contact         people         @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  
+  id             String   @id @default(cuid())
+  testId         String   @map("test_id")
+  variantId      String   @map("variant_id")
+  sequenceStepId String   @map("sequence_step_id")
+  contactId      String   @map("contact_id")
+  createdAt      DateTime @default(now())
+
+  test         ab_tests       @relation(fields: [testId], references: [id], onDelete: Cascade)
+  sequenceStep sequence_steps @relation(fields: [sequenceStepId], references: [id], onDelete: Cascade)
+  contact      people         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
   @@index([testId])
   @@index([variantId])
   @@index([sequenceStepId])

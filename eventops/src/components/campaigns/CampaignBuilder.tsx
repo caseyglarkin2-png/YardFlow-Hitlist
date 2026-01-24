@@ -11,7 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 
@@ -176,21 +182,19 @@ export function CampaignBuilder() {
               <CardDescription>Build your multi-channel sequence</CardDescription>
             </div>
             <Button onClick={addStep} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Add Step
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {steps.map((step, index) => (
-            <div key={step.id} className="border rounded-lg p-4 space-y-4">
+            <div key={step.id} className="space-y-4 rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Badge>Step {step.stepNumber}</Badge>
                   {step.stepNumber > 1 && (
-                    <span className="text-sm text-muted-foreground">
-                      +{step.delayDays} days
-                    </span>
+                    <span className="text-sm text-muted-foreground">+{step.delayDays} days</span>
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -200,7 +204,7 @@ export function CampaignBuilder() {
                     onClick={() => moveStep(index, 'up')}
                     disabled={index === 0}
                   >
-                    <MoveUp className="w-4 h-4" />
+                    <MoveUp className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="outline"
@@ -208,7 +212,7 @@ export function CampaignBuilder() {
                     onClick={() => moveStep(index, 'down')}
                     disabled={index === steps.length - 1}
                   >
-                    <MoveDown className="w-4 h-4" />
+                    <MoveDown className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
@@ -216,7 +220,7 @@ export function CampaignBuilder() {
                     onClick={() => removeStep(step.id)}
                     disabled={steps.length === 1}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

@@ -211,13 +211,9 @@ class PerformanceAnalytics {
 
     const metrics = sequences.map((seq) => {
       const enrollments = seq.sequence_enrollments || [];
-      const totalSteps = enrollments.reduce(
-        (sum, e) => sum + (e.sequence_steps?.length || 0),
-        0
-      );
+      const totalSteps = enrollments.reduce((sum, e) => sum + (e.sequence_steps?.length || 0), 0);
       const repliedSteps = enrollments.reduce(
-        (sum, e) =>
-          sum + (e.sequence_steps?.filter((s) => s.replied_at).length || 0),
+        (sum, e) => sum + (e.sequence_steps?.filter((s) => s.replied_at).length || 0),
         0
       );
 

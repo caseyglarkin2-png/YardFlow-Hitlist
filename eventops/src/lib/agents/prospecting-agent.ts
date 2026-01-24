@@ -55,16 +55,15 @@ export class ProspectingAgent {
     // 1. Estimate ICP score based on available data
     // 2. Filter by minimum score threshold
     // 3. Prioritize by persona match
-    
-    return leads.filter(lead => 
-      lead.estimatedIcpScore && lead.estimatedIcpScore >= 50
-    );
+
+    return leads.filter((lead) => lead.estimatedIcpScore && lead.estimatedIcpScore >= 50);
   }
 
   /**
    * Import qualified leads into database
    */
   async importLeads(leads: DiscoveredLead[]): Promise<{ imported: number; skipped: number }> {
+    // eslint-disable-next-line prefer-const
     let imported = 0;
     let skipped = 0;
 

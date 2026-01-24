@@ -1,7 +1,7 @@
 /**
  * Sequence Engineer Agent - Dynamic Multi-Channel Campaigns
  * Sprint 32.4: Intelligent sequence blueprint generation
- * 
+ *
  * Builds optimized outreach sequences based on:
  * - Persona type (ExecOps, Ops, Procurement, Sales)
  * - ICP score (determines sequence intensity)

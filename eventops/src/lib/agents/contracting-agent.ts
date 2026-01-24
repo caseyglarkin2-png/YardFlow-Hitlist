@@ -104,7 +104,7 @@ export class ContractingAgent {
   /**
    * Generate SOW from closed deal
    */
-  async generateSOW(dealId: string): Promise<GeneratedContract> {
+  async generateSOW(_dealId: string): Promise<GeneratedContract> {
     // TODO: Fetch deal details from CRM/database
     // 1. Get agreed-upon services and SLAs
     // 2. Define deliverables and milestones

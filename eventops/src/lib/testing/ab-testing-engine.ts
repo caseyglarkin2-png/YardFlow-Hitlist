@@ -85,9 +85,7 @@ class ABTestingEngine {
 
     // Calculate metrics for each variant
     for (const variant of variants) {
-      const variantResults = test.ab_test_results.filter(
-        (r) => r.variant_id === variant.id
-      );
+      const variantResults = test.ab_test_results.filter((r) => r.variant_id === variant.id);
 
       const sent = variantResults.length;
       let opened = 0;
@@ -127,10 +125,7 @@ class ABTestingEngine {
     // Calculate confidence using chi-square test (simplified)
     // In production, use proper statistical library
     const minSampleSize = 30;
-    const totalSent = Object.values(results).reduce(
-      (sum: number, r: any) => sum + r.sent,
-      0
-    );
+    const totalSent = Object.values(results).reduce((sum: number, r: any) => sum + r.sent, 0);
     const confidence =
       totalSent >= minSampleSize * variants.length
         ? Math.min(95, (totalSent / (minSampleSize * variants.length)) * 95)

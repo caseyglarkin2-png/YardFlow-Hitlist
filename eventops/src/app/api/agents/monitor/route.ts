@@ -1,7 +1,7 @@
 /**
  * Agent Monitoring Dashboard API - Sprint 32.6
  * Provides telemetry and observability for AI agent operations
- * 
+ *
  * GET /api/agents/monitor?timeRange=24h
  * - Overall agent performance metrics
  * - Success/failure rates per agent type
@@ -31,8 +31,8 @@ export async function GET(request: Request) {
 
     // Base query filters
     const where = {
-      created_at: { gte: since },
-      ...(agentType && { agent_type: agentType }),
+      createdAt: { gte: since },
+      ...(agentType && { agentType }),
     };
 
     // Fetch metrics
@@ -56,17 +56,17 @@ export async function GET(request: Request) {
           where: {
             ...where,
             status: 'completed',
-            completed_at: { not: null },
+            completedAt: { not: null },
           },
           select: {
-            created_at: true,
-            completed_at: true,
+            createdAt: true,
+            completedAt: true,
           },
         }),
 
         // Tasks by agent type
         prisma.agent_tasks.groupBy({
-          by: ['agent_type', 'status'],
+          by: ['agentType', 'status'],
           where,
           _count: true,
         }),
@@ -74,17 +74,17 @@ export async function GET(request: Request) {
         // Recent task history (last 20)
         prisma.agent_tasks.findMany({
           where,
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
           take: 20,
           select: {
             id: true,
-            agent_type: true,
+            agentType: true,
             status: true,
-            created_at: true,
-            completed_at: true,
-            error_message: true,
-            account_id: true,
-            contact_id: true,
+            createdAt: true,
+            completedAt: true,
+            errorMessage: true,
+            accountId: true,
+            contactId: true,
           },
         }),
       ]);
@@ -92,8 +92,8 @@ export async function GET(request: Request) {
     // Calculate average duration in seconds
     const durations = avgDuration
       .map((task) => {
-        if (!task.completed_at) return 0;
-        return (task.completed_at.getTime() - task.created_at.getTime()) / 1000;
+        if (!task.completedAt) return 0;
+        return (task.completedAt.getTime() - task.createdAt.getTime()) / 1000;
       })
       .filter((d) => d > 0);
 
@@ -103,8 +103,8 @@ export async function GET(request: Request) {
     // Build agent type breakdown
     const agentMetrics = tasksByType.reduce(
       (acc, item) => {
-        if (!acc[item.agent_type]) {
-          acc[item.agent_type] = {
+        if (!acc[item.agentType]) {
+          acc[item.agentType] = {
             total: 0,
             completed: 0,
             failed: 0,
@@ -112,8 +112,8 @@ export async function GET(request: Request) {
             pending: 0,
           };
         }
-        acc[item.agent_type].total += item._count;
-        acc[item.agent_type][item.status as keyof typeof acc[string]] = item._count;
+        acc[item.agentType].total += item._count;
+        acc[item.agentType][item.status as keyof (typeof acc)[string]] = item._count;
         return acc;
       },
       {} as Record<string, Record<string, number>>
@@ -142,9 +142,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     logger.error('Agent monitoring failed', { error });
-    return NextResponse.json(
-      { error: 'Failed to fetch monitoring data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch monitoring data' }, { status: 500 });
   }
 }

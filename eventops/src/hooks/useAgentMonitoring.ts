@@ -36,10 +36,7 @@ export interface AgentMonitoringData {
   }>;
 }
 
-export function useAgentMonitoring(
-  timeRange: '24h' | '7d' | '30d' = '24h',
-  agentType?: string
-) {
+export function useAgentMonitoring(timeRange: '24h' | '7d' | '30d' = '24h', agentType?: string) {
   const [data, setData] = useState<AgentMonitoringData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -81,7 +81,7 @@ export class SocialsAgent {
 
     const posts: SocialPost[] = [];
     const totalPosts = Math.ceil((params.duration / 7) * params.postsPerWeek);
-    
+
     // TODO: Implement campaign planning
     // 1. Distribute posts evenly across duration
     // 2. Vary content themes
@@ -107,7 +107,7 @@ export class SocialsAgent {
   /**
    * Track engagement metrics for attribution
    */
-  async trackEngagement(postId: string): Promise<{
+  async trackEngagement(_postId: string): Promise<{
     likes: number;
     comments: number;
     shares: number;

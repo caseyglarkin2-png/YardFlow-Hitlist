@@ -1,7 +1,7 @@
 /**
  * Research Agent - Enhanced Multi-Source Intelligence
  * Sprint 32.3: Research Agent Enhancement
- * 
+ *
  * Generates comprehensive company dossiers from multiple sources:
  * - Gemini AI analysis
  * - YardFlow Content Hub (case studies, industry context)
@@ -55,8 +55,10 @@ export class ResearchAgent {
     const task = await agentStateManager.createTask({
       agentType: 'research',
       accountId: input.accountId,
-      inputData: input,
-      metadata: { sources: input.sources || ['gemini', 'content-hub', 'database'] },
+      inputData: {
+        ...input,
+        sources: input.sources || ['gemini', 'content-hub', 'database'],
+      },
     });
 
     try {
@@ -104,7 +106,7 @@ export class ResearchAgent {
           if (caseStudies && caseStudies.length > 0) {
             caseStudyContext = `\n\nIndustry Case Studies:\n${caseStudies
               .slice(0, 2)
-              .map((cs) => `- ${cs.title}: ${cs.summary}`)
+              .map((cs) => `- ${cs.title}: ${cs.challenge}`)
               .join('\n')}`;
           }
         } catch (error) {

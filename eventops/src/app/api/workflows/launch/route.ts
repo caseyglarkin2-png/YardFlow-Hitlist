@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { agentOrchestrator } from '@/lib/agents/orchestrator';
+import { getAgentOrchestrator } from '@/lib/agents/orchestrator';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
@@ -19,10 +19,7 @@ export async function POST(request: Request) {
     const { type, accountId, contactIds, config } = body;
 
     if (!type || !accountId) {
-      return NextResponse.json(
-        { error: 'type and accountId required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'type and accountId required' }, { status: 400 });
     }
 
     logger.info('Launching workflow via API', {
@@ -31,7 +28,8 @@ export async function POST(request: Request) {
       accountId,
     });
 
-    const result = await agentOrchestrator.executeWorkflow({
+    const orchestrator = getAgentOrchestrator();
+    const result = await orchestrator.executeWorkflow({
       type,
       accountId,
       contactIds: contactIds || [],
@@ -41,9 +39,6 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch (error) {
     logger.error('Workflow launch failed', { error });
-    return NextResponse.json(
-      { error: 'Workflow launch failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Workflow launch failed' }, { status: 500 });
   }
 }

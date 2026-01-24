@@ -9,10 +9,7 @@ import { auth } from '@/auth';
 import { performanceAnalytics } from '@/lib/analytics/performance-analytics';
 import { logger } from '@/lib/logger';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { sequenceId: string } }
-) {
+export async function GET(request: Request, { params }: { params: { sequenceId: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -33,10 +30,7 @@ export async function GET(
           }
         : undefined;
 
-    const metrics = await performanceAnalytics.getCampaignMetrics(
-      sequenceId,
-      timeRange
-    );
+    const metrics = await performanceAnalytics.getCampaignMetrics(sequenceId, timeRange);
 
     return NextResponse.json(metrics);
   } catch (error) {

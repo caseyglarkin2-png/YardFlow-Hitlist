@@ -9,8 +9,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
 export function WorkflowLauncher() {
@@ -56,46 +61,46 @@ export function WorkflowLauncher() {
     <Card>
       <CardHeader>
         <CardTitle>Launch Agent Workflow</CardTitle>
-        <CardDescription>
-          Orchestrate multi-agent campaigns for selected accounts
-        </CardDescription>
+        <CardDescription>Orchestrate multi-agent campaigns for selected accounts</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Workflow Type */}
         <div className="space-y-3">
           <Label>Workflow Type</Label>
-          <RadioGroup
+          <Select
             value={workflowType}
             onValueChange={(v) => setWorkflowType(v as typeof workflowType)}
           >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="full-campaign" id="full" />
-              <Label htmlFor="full" className="font-normal">
-                <div>Full Campaign</div>
-                <div className="text-xs text-muted-foreground">
-                  Research → Sequence → Content → Launch
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="full-campaign">
+                <div>
+                  <div className="font-medium">Full Campaign</div>
+                  <div className="text-xs text-muted-foreground">
+                    Research → Sequence → Content → Launch
+                  </div>
                 </div>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="quick-outreach" id="quick" />
-              <Label htmlFor="quick" className="font-normal">
-                <div>Quick Outreach</div>
-                <div className="text-xs text-muted-foreground">
-                  Sequence → Launch (skip research)
+              </SelectItem>
+              <SelectItem value="quick-outreach">
+                <div>
+                  <div className="font-medium">Quick Outreach</div>
+                  <div className="text-xs text-muted-foreground">
+                    Sequence → Launch (skip research)
+                  </div>
                 </div>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="research-only" id="research" />
-              <Label htmlFor="research" className="font-normal">
-                <div>Research Only</div>
-                <div className="text-xs text-muted-foreground">
-                  Generate dossiers without launching sequences
+              </SelectItem>
+              <SelectItem value="research-only">
+                <div>
+                  <div className="font-medium">Research Only</div>
+                  <div className="text-xs text-muted-foreground">
+                    Generate dossiers without launching sequences
+                  </div>
                 </div>
-              </Label>
-            </div>
-          </RadioGroup>
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Campaign Goal */}
@@ -131,18 +136,13 @@ export function WorkflowLauncher() {
         </div>
 
         {/* Launch Button */}
-        <Button
-          onClick={handleLaunch}
-          disabled={launching}
-          className="w-full"
-          size="lg"
-        >
+        <Button onClick={handleLaunch} disabled={launching} className="w-full" size="lg">
           {launching ? 'Launching Agents...' : 'Launch Workflow'}
         </Button>
 
         {/* Result */}
         {result && (
-          <div className="rounded-lg border p-4 space-y-2">
+          <div className="space-y-2 rounded-lg border p-4">
             <div className="flex items-center gap-2">
               <Badge variant={result.status === 'completed' ? 'default' : 'secondary'}>
                 {result.status}

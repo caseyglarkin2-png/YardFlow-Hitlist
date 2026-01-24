@@ -8,7 +8,7 @@
 import { useState } from 'react';
 import { useAgentMonitoring } from '@/hooks/useAgentMonitoring';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
 export default function AgentsDashboardPage() {
@@ -17,7 +17,7 @@ export default function AgentsDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex h-64 items-center justify-center">
         <div className="text-muted-foreground">Loading agent metrics...</div>
       </div>
     );
@@ -66,9 +66,7 @@ export default function AgentsDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Completed</CardDescription>
-            <CardTitle className="text-3xl text-green-600">
-              {summary.completedTasks}
-            </CardTitle>
+            <CardTitle className="text-3xl text-green-600">{summary.completedTasks}</CardTitle>
           </CardHeader>
         </Card>
 
@@ -106,13 +104,11 @@ export default function AgentsDashboardPage() {
               <div key={agentType} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="font-medium capitalize">{agentType.replace('_', ' ')}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {metrics.total} tasks
-                  </div>
+                  <div className="text-sm text-muted-foreground">{metrics.total} tasks</div>
                 </div>
                 <div className="flex gap-2">
                   <div className="flex-1">
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-2 overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full bg-green-500"
                         style={{
@@ -154,7 +150,7 @@ export default function AgentsDashboardPage() {
             {recentTasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex items-center justify-between rounded-lg border p-3"
               >
                 <div className="flex items-center gap-3">
                   <Badge

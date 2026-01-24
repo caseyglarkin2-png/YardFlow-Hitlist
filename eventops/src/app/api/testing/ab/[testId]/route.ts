@@ -9,10 +9,7 @@ import { auth } from '@/auth';
 import { abTestingEngine } from '@/lib/testing/ab-testing-engine';
 import { logger } from '@/lib/logger';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { testId: string } }
-) {
+export async function GET(request: Request, { params }: { params: { testId: string } }) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
