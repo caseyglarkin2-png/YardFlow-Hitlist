@@ -16,7 +16,11 @@
     "metrics:baseline": "npx tsx scripts/collect-baseline-metrics.ts",
     "test:smoke": "chmod +x tests/smoke/smoke-test.sh && ./tests/smoke/smoke-test.sh",
     "test:smoke:prod": "npm run test:smoke https://yard-flow-hitlist.vercel.app",
-    "test:smoke:local": "npm run test:smoke http://localhost:3000"
+    "test:smoke:local": "npm run test:smoke http://localhost:3000",
+    "db:seed:prod": "npx tsx prisma/seed-production.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed-production.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
