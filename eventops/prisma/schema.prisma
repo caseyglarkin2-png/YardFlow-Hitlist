@@ -180,10 +180,12 @@ model people {
   meetings            Meeting[]
   outreach            outreach[]
   target_accounts     target_accounts      @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  assignedUser        users?               @relation("PersonAssignments", fields: [assignedTo], references: [id])
+  assignedUser        users?                @relation("PersonAssignments", fields: [assignedTo], references: [id])
   sequenceEnrollments SequenceEnrollment[]
-  linkedin_profiles linkedin_profiles?
+  linkedin_profiles   linkedin_profiles?
   agentTasks          agent_tasks[]
+  abTestResults       ab_test_results[]
+  sequence_enrollments sequence_enrollments[]
 
   @@index([accountId])
   @@index([assignedTo])
@@ -219,17 +221,66 @@ model score_history {
 }
 
 model sequences {
-  id          String     @id
-  campaignId  String?
-  name        String
-  description String?
-  steps       String
-  isActive    Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime
-  campaigns   campaigns? @relation(fields: [campaignId], references: [id])
+  id                   String                @id
+  campaignId           String?
+  name                 String
+  description          String?
+  steps                String
+  isActive             Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime
+  campaigns            campaigns?            @relation(fields: [campaignId], references: [id])
+  sequence_enrollments sequence_enrollments[]
 
   @@index([campaignId])
+}
+
+model sequence_enrollments {
+  id             String           @id @default(cuid())
+  sequence_id    String
+  contact_id     String
+  status         String           @default("ACTIVE") // 'ACTIVE' | 'COMPLETED' | 'EXITED' | 'FAILED'
+  current_step   Int              @default(0)
+  enrolled_at    DateTime         @default(now())
+  completed_at   DateTime?
+  exited_at      DateTime?
+  exit_reason    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  
+  sequence       sequences        @relation(fields: [sequence_id], references: [id], onDelete: Cascade)
+  people         people           @relation(fields: [contact_id], references: [id], onDelete: Cascade)
+  sequence_steps sequence_steps[]
+  
+  @@index([sequence_id])
+  @@index([contact_id])
+  @@index([status])
+}
+
+model sequence_steps {
+  id                  String                @id @default(cuid())
+  enrollment_id       String
+  step_number         Int
+  channel             String                @default("EMAIL") // 'EMAIL' | 'LINKEDIN' | 'PHONE' | 'MANIFEST'
+  template_type       String
+  scheduled_at        DateTime
+  sent_at             DateTime?
+  opened_at           DateTime?
+  clicked_at          DateTime?
+  replied_at          DateTime?
+  engagement_score    Int                   @default(0)
+  status              String                @default("PENDING") // 'PENDING' | 'SENT' | 'OPENED' | 'CLICKED' | 'REPLIED' | 'FAILED'
+  error_message       String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  
+  enrollment          sequence_enrollments  @relation(fields: [enrollment_id], references: [id], onDelete: Cascade)
+  email_engagement    email_engagement[]
+  ab_test_results     ab_test_results[]
+  
+  @@index([enrollment_id])
+  @@index([status])
+  @@index([scheduled_at])
 }
 
 model target_accounts {
@@ -341,9 +392,11 @@ model ab_tests {
   id              String    @id @default(cuid())
   name            String
   description     String?
+  testType        String    @default("TEMPLATE") @map("test_type") // 'SUBJECT' | 'TEMPLATE' | 'TIMING' | 'FULL'
+  variants        Json      @default("[]") // Array of ABTestVariant objects
   status          String    @default("RUNNING") // RUNNING, COMPLETED, STOPPED
-  templateAId     String
-  templateBId     String
+  templateAId     String?
+  templateBId     String?
   sampleSize      Int       @default(100)
   winnerThreshold Float     @default(0.05) // 95% confidence
   startedAt       DateTime  @default(now())
@@ -355,9 +408,11 @@ model ab_tests {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   events          events    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  abTestResults   ab_test_results[]
 
   @@index([eventId])
   @@index([status])
+  @@index([testType])
 }
 
 enum CampaignStatus {
@@ -599,4 +654,38 @@ model agent_tasks {
   @@index([parentTaskId])
   @@index([status])
   @@index([createdAt])
+}
+
+model email_engagement {
+  id                String    @id @default(cuid())
+  sequenceStepId    String    @map("sequence_step_id")
+  eventType         String    @map("event_type") // 'DELIVERED' | 'OPEN' | 'CLICK' | 'BOUNCE' | 'DROPPED' | 'SPAMREPORT' | 'UNSUBSCRIBE'
+  recipientEmail    String    @map("recipient_email")
+  timestamp         DateTime
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  
+  sequenceStep      sequence_steps @relation(fields: [sequenceStepId], references: [id], onDelete: Cascade)
+  
+  @@index([sequenceStepId])
+  @@index([eventType])
+  @@index([timestamp])
+}
+
+model ab_test_results {
+  id              String    @id @default(cuid())
+  testId          String    @map("test_id")
+  variantId       String    @map("variant_id")
+  sequenceStepId  String    @map("sequence_step_id")
+  contactId       String    @map("contact_id")
+  createdAt       DateTime  @default(now())
+  
+  test            ab_tests       @relation(fields: [testId], references: [id], onDelete: Cascade)
+  sequenceStep    sequence_steps @relation(fields: [sequenceStepId], references: [id], onDelete: Cascade)
+  contact         people         @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  
+  @@index([testId])
+  @@index([variantId])
+  @@index([sequenceStepId])
+  @@index([contactId])
 }
