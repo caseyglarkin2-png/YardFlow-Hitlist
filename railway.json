@@ -2,7 +2,7 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "cd eventops && npm ci && npx prisma generate && echo 'Cache bust: 2026-01-24T23:30' && npm run build"
+    "buildCommand": "cd eventops && npm ci && npx prisma generate && echo 'Cache bust: 2026-01-25T00:15' && npm run build"
   },
   "deploy": {
     "startCommand": "cd eventops && npx prisma migrate deploy && npm start",
