@@ -3,9 +3,7 @@
  * Auto-discovers and qualifies leads from event attendee lists and web scraping
  */
 
-import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { calculateICPScore } from '@/lib/icp-calculator';
 
 export interface ProspectingCriteria {
   eventUrl?: string;

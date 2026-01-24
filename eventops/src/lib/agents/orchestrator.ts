@@ -26,8 +26,8 @@ export interface CampaignWorkflow {
 export interface AgentTask {
   id: string;
   agentType: string;
-  input: any;
-  output?: any;
+  input: unknown;
+  output?: unknown;
   status: 'pending' | 'in-progress' | 'completed' | 'failed';
   startedAt?: Date;
   completedAt?: Date;

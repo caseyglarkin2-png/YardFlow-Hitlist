@@ -9,7 +9,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import { contentHubClient, type CaseStudy, type MessagingGuide } from '@/lib/yardflow-content-hub';
+import { contentHubClient } from '@/lib/yardflow-content-hub';
 import { agentStateManager } from './state-manager';
 
 const CONTENT_HUB_BASE = 'https://flow-state-klbt.vercel.app/api';

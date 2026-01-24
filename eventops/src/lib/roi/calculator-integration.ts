@@ -42,7 +42,13 @@ export async function calculateRoiUnified(input: UnifiedRoiInput): Promise<Unifi
   const externalRoi = await tryExternalRoi(input);
   if (externalRoi) {
     const result: UnifiedRoiResult = {
-      ...externalRoi,
+      annualSavings: externalRoi.annualSavings,
+      paybackPeriod: externalRoi.paybackPeriod,
+      confidence: externalRoi.confidence,
+      assumptions: {
+        ...externalRoi.breakdown,
+      },
+      methodology: 'YardFlow Content Hub ROI Calculator',
       source: 'content_hub',
       timestamp: new Date().toISOString(),
     };
@@ -58,7 +64,7 @@ export async function calculateRoiUnified(input: UnifiedRoiInput): Promise<Unifi
 
   // Fall back to local calculation
   logger.info('Using local ROI calculation as fallback');
-  const localRoi = calculateRoi(input);
+  const localRoi = await calculateRoi(input);
   const result: UnifiedRoiResult = {
     ...localRoi,
     source: 'local_calculation',
@@ -80,13 +86,33 @@ export async function calculateRoiUnified(input: UnifiedRoiInput): Promise<Unifi
  */
 async function tryExternalRoi(input: UnifiedRoiInput): Promise<RoiData | null> {
   try {
+    // Map operational scale to expected enum values
+    let operationalScale: 'small' | 'medium' | 'large' = 'medium';
+    const scale = input.operationalScale?.toLowerCase() || '';
+    if (scale.includes('local') || scale.includes('regional')) {
+      operationalScale = 'small';
+    } else if (scale.includes('global') || scale.includes('international')) {
+      operationalScale = 'large';
+    }
+
+    // Map company size string to number (employees)
+    let companySize = 100; // default
+    const size = input.companySize?.toLowerCase() || '';
+    if (size.includes('small') || size.includes('startup')) {
+      companySize = 50;
+    } else if (size.includes('large') || size.includes('enterprise')) {
+      companySize = 1000;
+    } else if (size.includes('medium')) {
+      companySize = 250;
+    }
+
     // Map local input to content hub API format
     const hubParams: RoiParams = {
       facilityCount: input.facilityCount || 1,
-      operationalScale: input.operationalScale,
-      companySize: input.companySize,
-      persona: input.persona,
-      industry: input.industry,
+      operationalScale,
+      companySize,
+      persona: input.persona || 'Ops',
+      industry: input.industry || 'logistics',
     };
 
     const roiData = await contentHubClient.getRoiCalculation(hubParams);

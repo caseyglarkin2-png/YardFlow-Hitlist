@@ -66,9 +66,9 @@ class ABTestingEngine {
     const test = await prisma.ab_tests.findUnique({
       where: { id: testId },
       include: {
-        ab_test_results: {
+        abTestResults: {
           include: {
-            sequence_steps: {
+            sequenceStep: {
               include: {
                 email_engagement: true,
               },

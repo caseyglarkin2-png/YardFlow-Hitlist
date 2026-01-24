@@ -127,8 +127,8 @@ export class SequenceEngineerAgent {
    * Create sequence in database from blueprint
    */
   async createSequenceFromBlueprint(
-    blueprint: SequenceBlueprint,
-    campaignId?: string
+    _blueprint: SequenceBlueprint,
+    _campaignId?: string
   ): Promise<string> {
     // TODO: Implement sequence creation
     // 1. Create outreachSequence record

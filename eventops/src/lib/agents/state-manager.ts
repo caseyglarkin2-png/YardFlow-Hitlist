@@ -118,7 +118,7 @@ export class AgentStateManager {
     }
 
     if (output) {
-      updateData.outputData = output as any;
+      updateData.outputData = output as object;
     }
 
     if (error) {

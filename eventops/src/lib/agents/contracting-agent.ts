@@ -158,7 +158,7 @@ export class ContractingAgent {
     return sectionMap[type] || [];
   }
 
-  private getCustomizations(account: any, terms: ContractRequest['dealTerms']): string[] {
+  private getCustomizations(account: unknown, terms: ContractRequest['dealTerms']): string[] {
     const customizations: string[] = [];
 
     if (account.name) customizations.push('company_name');

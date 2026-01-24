@@ -19,14 +19,14 @@ export interface QuestionGenerationResult {
 
 /**
  * Generates strategic questions for booth conversations at Manifest 2026.
- * 
+ *
  * Questions are designed to:
  * - Be open-ended (not yes/no)
  * - Reference specific company context
  * - Focus on YardFlow value props
  * - Take 15-30 seconds to answer
  * - Lead naturally to product demo conversation
- * 
+ *
  * @param accountId - Target account ID
  * @returns 5-7 strategic questions with follow-ups
  */
@@ -53,10 +53,10 @@ export async function generateStrategicQuestions(
 
   // Build context from dossier or basic data
   const context = buildQuestionContext(account);
-  
+
   // Generate questions via AI
   const questions = await generateQuestionsWithAI(account.name, context);
-  
+
   // Note: Strategic questions are generated on-demand, not stored in database
   // This allows fresh questions based on latest account data
 
@@ -77,7 +77,7 @@ export async function generateStrategicQuestions(
 /**
  * Builds question generation context from account data.
  */
-function buildQuestionContext(account: any): string {
+function buildQuestionContext(account: { name: string; industry?: string; website?: string; notes?: string; people?: Array<{ name: string; title?: string }> }): string {
   const parts: string[] = [];
 
   // Company basics
@@ -111,9 +111,7 @@ function buildQuestionContext(account: any): string {
 
   // Key contacts
   if (account.people && account.people.length > 0) {
-    const contacts = account.people
-      .map((p: any) => `${p.name} (${p.title})`)
-      .join(', ');
+    const contacts = account.people.map((p) => `${p.name} (${p.title || 'N/A'})`).join(', ');
     parts.push(`\nKey Contacts: ${contacts}`);
   }
 
@@ -165,30 +163,30 @@ Output ONLY valid JSON, no additional text or markdown formatting.
 
   try {
     const response = await geminiClient.generateContent(prompt);
-    const text = response.text().trim();
-    
+    const text = response.trim(); // geminiClient returns string directly
+
     // Remove markdown code blocks if present
     const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-    
+
     const questions = JSON.parse(cleanText) as StrategicQuestion[];
-    
+
     // Validate structure
     if (!Array.isArray(questions) || questions.length === 0) {
       throw new Error('Invalid question format from AI');
     }
 
-    logger.info('AI generated strategic questions', { 
+    logger.info('AI generated strategic questions', {
       count: questions.length,
-      companyName 
+      companyName,
     });
-    
+
     return questions;
   } catch (error) {
-    logger.error('Failed to generate questions with AI', { 
+    logger.error('Failed to generate questions with AI', {
       error,
-      companyName 
+      companyName,
     });
-    
+
     // Return fallback questions
     return getFallbackQuestions(companyName, context);
   }
@@ -197,14 +195,11 @@ Output ONLY valid JSON, no additional text or markdown formatting.
 /**
  * Fallback questions if AI generation fails.
  */
-function getFallbackQuestions(
-  companyName: string,
-  context: string
-): StrategicQuestion[] {
+function getFallbackQuestions(companyName: string, context: string): StrategicQuestion[] {
   const hasFacilities = context.includes('Facilities:');
-  const hasDistribution = context.toLowerCase().includes('distribution') || 
-                         context.toLowerCase().includes('logistics');
-  
+  const hasDistribution =
+    context.toLowerCase().includes('distribution') || context.toLowerCase().includes('logistics');
+
   const questions: StrategicQuestion[] = [
     {
       question: `How does ${companyName} currently manage yard operations across your facilities?`,

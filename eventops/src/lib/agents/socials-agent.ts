@@ -4,7 +4,6 @@
  */
 
 import { logger } from '@/lib/logger';
-import { prisma } from '@/lib/db';
 
 export interface SocialPost {
   platform: 'linkedin' | 'twitter';
