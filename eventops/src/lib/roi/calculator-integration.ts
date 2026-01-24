@@ -12,9 +12,8 @@ import { logger } from '@/lib/logger';
  * 3. Cache results in memory (future: Redis)
  */
 
-interface UnifiedRoiInput extends RoiInput {
-  // RoiInput from local calculator includes all needed fields
-}
+// Use local calculator's RoiInput type directly
+type UnifiedRoiInput = RoiInput;
 
 interface UnifiedRoiResult extends RoiResult {
   source: 'content_hub' | 'local_calculation';

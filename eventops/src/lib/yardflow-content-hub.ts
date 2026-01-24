@@ -140,7 +140,10 @@ class YardFlowContentHubClient {
       return null;
     }
   }
- Cached for 24 hours.
+
+  /**
+   * Get case studies filtered by industry and company size.
+   * Cached for 24 hours.
    */
   async getCaseStudies(
     industry: string, 
@@ -155,9 +158,6 @@ class YardFlowContentHubClient {
       return cached;
     }
     
-    industry: string, 
-    companySize?: string
-  ): Promise<CaseStudy[]> {
     try {
       const params = new URLSearchParams({ industry });
       if (companySize) params.append('companySize', companySize);
@@ -173,14 +173,15 @@ class YardFlowContentHubClient {
       if (!response.ok) {
         logger.warn('Content hub case studies API error', { 
           status: response.status 
-      // Cache the result
-      await cacheSet(cacheKey, data, 86400); // 24 hours
-      
         });
         return [];
       }
 
       const data = await response.json();
+      
+      // Cache the result
+      await cacheSet(cacheKey, data, 86400); // 24 hours
+      
       logger.info('Case studies fetched from content hub', { 
         count: data.length,
         industry 

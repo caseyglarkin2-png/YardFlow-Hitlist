@@ -27,7 +27,16 @@ export interface PurposedContent {
   metadata: {
     source: string;
     adaptations: string[];
-     Now uses content hub client with Redis caching
+  };
+}
+
+/**
+ * Content Purposing Agent - Adapts marketing assets for personalized outreach
+ * Now uses content hub client with Redis caching
+ */
+export class ContentPurposingAgent {
+  /**
+   * Purpose content from YardFlow hub for specific use case
    */
   async purposeContent(
     request: ContentRequest,
