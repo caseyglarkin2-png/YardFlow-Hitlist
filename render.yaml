@@ -50,7 +50,7 @@ services:
     autoDeploy: true
 
   # Background Worker Service
-  - type: worker
+  - type: web
     name: yardflow-worker
     runtime: docker
     region: oregon
