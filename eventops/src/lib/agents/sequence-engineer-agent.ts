@@ -45,8 +45,10 @@ export class SequenceEngineerAgent {
     const task = await agentStateManager.createTask({
       agentType: 'sequence',
       contactId: input.personId,
-      inputData: input,
-      metadata: { goal: input.campaignGoal },
+      inputData: {
+        ...input,
+        goal: input.campaignGoal,
+      },
     });
 
     try {
@@ -62,10 +64,6 @@ export class SequenceEngineerAgent {
             },
           },
           contact_insights: true,
-          activities: {
-            orderBy: { created_at: 'desc' },
-            take: 10,
-          },
         },
       });
 
@@ -86,9 +84,16 @@ export class SequenceEngineerAgent {
       }
 
       // Check engagement history to avoid over-contacting
-      const recentContacts = person.activities.filter(
-        (a) => a.type === 'EMAIL_SENT' || a.type === 'LINKEDIN_MESSAGE'
-      );
+      // Query activities separately since it's not a direct relation
+      const recentContactsCount = await prisma.activities.count({
+        where: {
+          entityType: 'person',
+          entityId: input.personId,
+          action: {
+            in: ['EMAIL_SENT', 'LINKEDIN_MESSAGE'],
+          },
+        },
+      });
 
       // Build dynamic blueprint
       const blueprint = this.buildDynamicBlueprint(
@@ -96,7 +101,7 @@ export class SequenceEngineerAgent {
         input.campaignGoal,
         icpScore,
         input.urgency || 'medium',
-        recentContacts.length,
+        recentContactsCount,
         industryMessaging
       );
 
@@ -183,7 +188,7 @@ export class SequenceEngineerAgent {
       steps.push({
         stepNumber: stepNumber++,
         delayHours: Math.round(96 * timingMultiplier),
-        channel: 'MANIFEST',
+        channel: 'EMAIL', // Manifest requests sent via email
         templateType: 'meeting-request',
         personalizationLevel: 'high',
       });

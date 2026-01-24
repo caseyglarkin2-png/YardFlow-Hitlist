@@ -41,8 +41,8 @@ export async function generateStrategicQuestions(
     include: {
       company_dossiers: true,
       people: {
-        where: { is_primary: true },
         take: 5,
+        orderBy: { createdAt: 'asc' }, // Get first contacts added
       },
     },
   });
@@ -57,14 +57,8 @@ export async function generateStrategicQuestions(
   // Generate questions via AI
   const questions = await generateQuestionsWithAI(account.name, context);
   
-  // Store in database
-  await prisma.target_accounts.update({
-    where: { id: accountId },
-    data: {
-      strategic_questions: JSON.stringify(questions),
-      updated_at: new Date(),
-    },
-  });
+  // Note: Strategic questions are generated on-demand, not stored in database
+  // This allows fresh questions based on latest account data
 
   logger.info('Strategic questions generated', {
     accountId,

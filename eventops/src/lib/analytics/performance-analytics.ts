@@ -99,7 +99,13 @@ class PerformanceAnalytics {
 
     for (const enrollment of enrollments) {
       const steps = enrollment.sequence_steps || [];
-      const persona = enrollment.people?.persona || 'unknown';
+      // Determine persona from boolean flags
+      const person = enrollment.people;
+      let persona = 'unknown';
+      if (person?.isExecOps) persona = 'ExecOps';
+      else if (person?.isOps) persona = 'Ops';
+      else if (person?.isProc) persona = 'Procurement';
+      else if (person?.isSales) persona = 'Sales';
 
       // Initialize persona tracking
       if (!personaPerformance[persona]) {

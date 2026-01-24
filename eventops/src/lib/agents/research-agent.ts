@@ -117,9 +117,8 @@ export class ResearchAgent {
       // Source 3: Database historical data
       const activityCount = await prisma.activities.count({
         where: {
-          person: {
-            account_id: input.accountId,
-          },
+          entityType: 'account',
+          entityId: input.accountId,
         },
       });
 
