@@ -1,7 +1,8 @@
-# Sprint 30 Progress - Quick Reference
+# Production Status - Quick Reference
 
-**Last Updated**: January 23, 2026 18:41 UTC  
-**Session Status**: Code complete, awaiting manual Railway deployment
+**Last Updated**: January 24, 2026 02:00 UTC  
+**Platform**: Railway (Railway-only deployment)  
+**Production URL**: https://yardflow-hitlist-production.up.railway.app/
 
 ---
 
@@ -45,9 +46,16 @@
 
 ---
 
-## 🎯 Production Status
+## 🎯 Deployment Status
 
-**Main App**: ✅ Stable and running  
+**Railway Platform**: ✅ Live and operational  
+**Production URL**: https://yardflow-hitlist-production.up.railway.app/  
+**Services**: Web (yardflow-app) + Worker (pending) + PostgreSQL + Redis  
+**Auto-Deploy**: Enabled on push to main branch  
+
+**Recent Sprints**:
+- ✅ Sprint 31 (100%): Manifest 2026 features deployed
+- 🔄 Sprint 32 (28%): Agent infrastructure in progress  
 - URL: https://yardflow-hitlist-production.up.railway.app
 - Status: HTTP 307 redirect to /login
 - Database: Connected

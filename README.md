@@ -23,12 +23,14 @@ Visit `http://localhost:3000`
 ## 📋 Current Status
 
 **Production**: https://yardflow-hitlist-production.up.railway.app  
-**Environment**: Railway (PostgreSQL + Redis)  
-**Current Sprint**: Sprint 30 - Production Hardening
-
-### Recent Updates (Jan 23, 2026)
-- ✅ Fixed Redis build issues (lazy initialization)
-- ✅ Fixed dashboard session crashes (type guards)
+**Platform**: Railway (Auto-deploy from main branch)  
+**Database**: PostgreSQL on Railway  
+**Cache**: Redis on Railway  
+**Current Sprint**: Sprin4, 2026)
+- ✅ **Sprint 31 COMPLETE**: Manifest 2026 integration (meeting requests, ROI, strategic questions)
+- ✅ **Sprint 32.1-32.2**: Agent infrastructure (state management, content hub caching)
+- ✅ Railway deployment: Live and stable
+- ✅ Removed Render deployment (Railway-only strategy)crashes (type guards)
 - ✅ Enhanced health endpoint (/api/health)
 - 🔄 Deploying to production
 

@@ -120,16 +120,6 @@ export class ContentPurposingAgent {
       }
       throw error;
     }
-
-    return {
-      original: '', // TODO: Store original content
-      personalized,
-      metadata: {
-        source: CONTENT_HUB_BASE,
-        adaptations,
-        confidence: 0.85, // TODO: Calculate based on adaptations made
-      },
-    };
   }
 
   private async fetchCaseStudy(industry: string): Promise<any> {

@@ -103,5 +103,6 @@
   "tailwindCSS.includeLanguages": {
     "typescript": "javascript",
     "typescriptreact": "javascript"
-  }
+  },
+  "prisma.pinToPrisma6": true
 }
