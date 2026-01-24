@@ -3,7 +3,7 @@ import { logger } from '@/lib/logger';
 
 /**
  * Agent State Manager
- * 
+ *
  * Manages persistent state for AI agent tasks across workflow executions.
  * Enables:
  * - Task tracking and history
@@ -12,20 +12,16 @@ import { logger } from '@/lib/logger';
  * - Performance monitoring
  */
 
-export type AgentType = 
-  | 'prospecting' 
-  | 'research' 
-  | 'sequence' 
-  | 'content' 
-  | 'graphics' 
-  | 'socials' 
+export type AgentType =
+  | 'prospecting'
+  | 'research'
+  | 'sequence'
+  | 'content'
+  | 'graphics'
+  | 'socials'
   | 'contracting';
 
-export type AgentTaskStatus = 
-  | 'pending' 
-  | 'in_progress' 
-  | 'completed' 
-  | 'failed';
+export type AgentTaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
 
 export interface AgentTaskInput {
   agentType: AgentType;
@@ -70,7 +66,7 @@ export class AgentStateManager {
    * Create a new agent task.
    */
   async createTask(input: AgentTaskInput): Promise<AgentTaskResult> {
-    logger.info('Creating agent task', { 
+    logger.info('Creating agent task', {
       agentType: input.agentType,
       accountId: input.accountId,
       parentTaskId: input.parentTaskId,
@@ -181,10 +177,7 @@ export class AgentStateManager {
   /**
    * Get task history for an account.
    */
-  async getTaskHistory(
-    accountId: string,
-    limit: number = 50
-  ): Promise<AgentTaskResult[]> {
+  async getTaskHistory(accountId: string, limit: number = 50): Promise<AgentTaskResult[]> {
     const tasks = await prisma.agent_tasks.findMany({
       where: { accountId },
       orderBy: { createdAt: 'desc' },
@@ -200,10 +193,7 @@ export class AgentStateManager {
   async getWorkflowTasks(parentTaskId: string): Promise<AgentTaskResult[]> {
     const tasks = await prisma.agent_tasks.findMany({
       where: {
-        OR: [
-          { id: parentTaskId },
-          { parentTaskId },
-        ],
+        OR: [{ id: parentTaskId }, { parentTaskId }],
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -226,7 +216,7 @@ export class AgentStateManager {
     );
 
     let overallStatus: WorkflowStatus['overallStatus'] = 'pending';
-    
+
     if (statusCounts.failed > 0 && statusCounts.completed === 0) {
       overallStatus = 'failed';
     } else if (statusCounts.failed > 0 && statusCounts.completed > 0) {
@@ -259,15 +249,11 @@ export class AgentStateManager {
       select: { parentTaskId: true },
     });
 
-    const parentTaskIds = [...new Set(
-      inProgressTasks
-        .map(t => t.parentTaskId)
-        .filter(Boolean) as string[]
-    )];
+    const parentTaskIds = [
+      ...new Set(inProgressTasks.map((t) => t.parentTaskId).filter(Boolean) as string[]),
+    ];
 
-    return Promise.all(
-      parentTaskIds.map(id => this.getWorkflowStatus(id))
-    );
+    return Promise.all(parentTaskIds.map((id) => this.getWorkflowStatus(id)));
   }
 
   /**
@@ -284,10 +270,7 @@ export class AgentStateManager {
   /**
    * Get pending tasks for a specific agent type.
    */
-  async getPendingTasks(
-    agentType: AgentType,
-    limit: number = 10
-  ): Promise<AgentTaskResult[]> {
+  async getPendingTasks(agentType: AgentType, limit: number = 10): Promise<AgentTaskResult[]> {
     const tasks = await prisma.agent_tasks.findMany({
       where: {
         agentType,
@@ -315,23 +298,24 @@ export class AgentStateManager {
     });
 
     const total = tasks.length;
-    const completed = tasks.filter(t => t.status === 'completed').length;
-    const failed = tasks.filter(t => t.status === 'failed').length;
-    const pending = tasks.filter(t => t.status === 'pending').length;
-    const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+    const completed = tasks.filter((t) => t.status === 'completed').length;
+    const failed = tasks.filter((t) => t.status === 'failed').length;
+    const pending = tasks.filter((t) => t.status === 'pending').length;
+    const inProgress = tasks.filter((t) => t.status === 'in_progress').length;
 
     const successRate = total > 0 ? (completed / total) * 100 : 0;
 
     const completedTasks = tasks.filter(
-      t => t.status === 'completed' && t.startedAt && t.completedAt
+      (t) => t.status === 'completed' && t.startedAt && t.completedAt
     );
 
-    const avgDuration = completedTasks.length > 0
-      ? completedTasks.reduce((sum, t) => {
-          const duration = t.completedAt!.getTime() - t.startedAt!.getTime();
-          return sum + duration;
-        }, 0) / completedTasks.length
-      : 0;
+    const avgDuration =
+      completedTasks.length > 0
+        ? completedTasks.reduce((sum, t) => {
+            const duration = t.completedAt!.getTime() - t.startedAt!.getTime();
+            return sum + duration;
+          }, 0) / completedTasks.length
+        : 0;
 
     return {
       agentType,

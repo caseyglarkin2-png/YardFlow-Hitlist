@@ -77,7 +77,13 @@ export async function generateStrategicQuestions(
 /**
  * Builds question generation context from account data.
  */
-function buildQuestionContext(account: { name: string; industry?: string; website?: string; notes?: string; people?: Array<{ name: string; title?: string }> }): string {
+function buildQuestionContext(account: {
+  name: string;
+  industry?: string;
+  website?: string;
+  notes?: string;
+  people?: Array<{ name: string; title?: string }>;
+}): string {
   const parts: string[] = [];
 
   // Company basics

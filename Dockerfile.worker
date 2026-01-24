@@ -3,6 +3,7 @@ FROM node:20-slim
 WORKDIR /app
 
 # Install OpenSSL for Prisma
+# Cache bust: 2026-01-24T21:30:00Z
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Copy eventops package files first
