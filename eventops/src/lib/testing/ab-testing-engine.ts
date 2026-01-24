@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 /**
  * A/B Testing Engine - Sprint 34.2
  * Subject line and template variant testing

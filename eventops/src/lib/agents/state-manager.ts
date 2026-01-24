@@ -95,7 +95,7 @@ export class AgentStateManager {
   async updateTaskStatus(
     taskId: string,
     status: AgentTaskStatus,
-    output?: Record<string, unknown>,
+    output?: object,
     error?: string
   ): Promise<AgentTaskResult> {
     logger.info('Updating agent task status', { taskId, status });

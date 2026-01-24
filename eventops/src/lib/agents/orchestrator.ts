@@ -107,7 +107,8 @@ export class AgentOrchestrator {
         workflow.tasks.push(prospectingTask);
 
         // Use discovered leads as target accounts
-        params.targetAccounts = prospectingTask.output?.accountIds || [];
+        const prospectOutput = prospectingTask.output as { accountIds?: string[] } | undefined;
+        params.targetAccounts = prospectOutput?.accountIds || [];
       }
 
       // Step 2: Research each account
@@ -157,31 +158,45 @@ export class AgentOrchestrator {
     try {
       switch (task.agentType) {
         case 'prospecting':
-          task.output = await this.prospecting.discoverLeads(task.input);
+          task.output = await this.prospecting.discoverLeads(
+            task.input as Parameters<typeof this.prospecting.discoverLeads>[0]
+          );
           break;
 
         case 'research':
-          task.output = await this.research.generateDossier(task.input);
+          task.output = await this.research.generateDossier(
+            task.input as Parameters<typeof this.research.generateDossier>[0]
+          );
           break;
 
         case 'sequence-engineer':
-          task.output = await this.sequenceEngineer.designSequence(task.input);
+          task.output = await this.sequenceEngineer.designSequence(
+            task.input as Parameters<typeof this.sequenceEngineer.designSequence>[0]
+          );
           break;
 
         case 'content-purposing':
-          task.output = await this.contentPurposing.purposeContent(task.input);
+          task.output = await this.contentPurposing.purposeContent(
+            task.input as Parameters<typeof this.contentPurposing.purposeContent>[0]
+          );
           break;
 
         case 'graphics':
-          task.output = await this.graphics.generateGraphic(task.input);
+          task.output = await this.graphics.generateGraphic(
+            task.input as Parameters<typeof this.graphics.generateGraphic>[0]
+          );
           break;
 
         case 'socials':
-          task.output = await this.socials.schedulePost(task.input);
+          task.output = await this.socials.schedulePost(
+            task.input as Parameters<typeof this.socials.schedulePost>[0]
+          );
           break;
 
         case 'contracting':
-          task.output = await this.contracting.generateContract(task.input);
+          task.output = await this.contracting.generateContract(
+            task.input as Parameters<typeof this.contracting.generateContract>[0]
+          );
           break;
 
         default:

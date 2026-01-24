@@ -120,45 +120,6 @@ function getSequenceWorker(): Worker {
   return sequenceWorker;
 }
 
-// Event handlers
-enrichmentWorker.on('completed', (job) => {
-  logger.info('Enrichment job completed', {
-    jobId: job.id,
-    name: job.name,
-  });
-});
-
-enrichmentWorker.on('failed', (job, err) => {
-  logger.error('Enrichment job failed', {
-    jobId: job?.id,
-    name: job?.name,
-    error: err,
-  });
-});
-
-enrichmentWorker.on('error', (err) => {
-  logger.error('Enrichment worker error', { error: err });
-});
-
-sequenceWorker.on('completed', (job) => {
-  logger.info('Sequence job completed', {
-    jobId: job.id,
-    enrollmentId: job.data.enrollmentId,
-  });
-});
-
-sequenceWorker.on('failed', (job, err) => {
-  logger.error('Sequence job failed', {
-    jobId: job?.id,
-    enrollmentId: job?.data.enrollmentId,
-    error: err,
-  });
-});
-
-sequenceWorker.on('error', (err) => {
-  logger.error('Sequence worker error', { error: err });
-});
-
 // Health check server for Railway monitoring
 const healthServer = http.createServer((req, res) => {
   if (req.url === '/health' || req.url === '/') {
