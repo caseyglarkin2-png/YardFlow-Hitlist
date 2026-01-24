@@ -18,6 +18,13 @@ RUN npx prisma generate
 # Copy application code
 COPY . .
 
+# Set required environment variables for build-time validation
+# These are dummy values only used for build; real values come from Render
+ENV AUTH_SECRET="this-is-a-build-time-placeholder-secret-thats-long-enough-32-chars"
+ENV POSTGRES_PRISMA_URL="postgresql://placeholder:placeholder@localhost:5432/build"
+ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/build"
+ENV NODE_ENV=production
+
 # Build Next.js app (requires devDependencies)
 RUN npm run build
 
