@@ -1,9 +1,16 @@
 /**
  * Content Purposing Agent
  * Adapts YardFlow marketing assets to personalized outreach campaigns
+ * 
+ * Enhanced with:
+ * - YardFlow Content Hub integration
+ * - Redis caching for performance
+ * - Fallback to local templates
  */
 
 import { logger } from '@/lib/logger';
+import { contentHubClient, type CaseStudy, type MessagingGuide } from '@/lib/yardflow-content-hub';
+import { agentStateManager } from './state-manager';
 
 const CONTENT_HUB_BASE = 'https://flow-state-klbt.vercel.app/api';
 
@@ -20,52 +27,90 @@ export interface PurposedContent {
   metadata: {
     source: string;
     adaptations: string[];
-    confidence: number;
-  };
-}
-
-export class ContentPurposingAgent {
-  /**
-   * Fetch and adapt content from YardFlow marketing hub
+     Now uses content hub client with Redis caching
    */
-  async purposeContent(request: ContentRequest): Promise<PurposedContent> {
-    logger.info('Content purposing agent started', { request });
+  async purposeContent(
+    request: ContentRequest,
+    accountId?: string
+  ): Promise<PurposedContent> {
+    logger.info('Content purposing agent started', { request, accountId });
 
-    let original: any;
-    let personalized: string;
-    const adaptations: string[] = [];
+    // Create agent task for tracking
+    const task = accountId 
+      ? await agentStateManager.createTask({
+          agentType: 'content',
+          inputData: request,
+          accountId,
+        })
+      : null;
 
-    switch (request.contentType) {
-      case 'case-study':
-        original = await this.fetchCaseStudy(request.industry || 'logistics');
-        personalized = this.adaptCaseStudy(original, request.persona);
-        adaptations.push('persona-specific pain points', 'industry terminology');
-        break;
+    try {
+      if (task) {
+        await agentStateManager.updateTaskStatus(task.id, 'in_progress');
+      }
 
-      case 'roi-calculator':
-        original = await this.fetchROITemplate();
-        personalized = this.adaptROICalculator(original, request.persona);
-        adaptations.push('persona-specific assumptions', 'value prop framing');
-        break;
+      let original: any;
+      let personalized: string;
+      const adaptations: string[] = [];
 
-      case 'email-template':
-        original = await this.fetchEmailTemplate(request.persona);
-        personalized = this.adaptEmailTemplate(original, request.campaignGoal);
-        adaptations.push('campaign goal alignment', 'CTA optimization');
-        break;
+      switch (request.contentType) {
+        case 'case-study':
+          const caseStudies = await contentHubClient.getCaseStudies(
+            request.industry || 'logistics'
+          );
+          original = caseStudies[0] || this.getDefaultCaseStudy();
+          personalized = this.adaptCaseStudy(original, request.persona);
+          adaptations.push('persona-specific pain points', 'industry terminology');
+          break;
 
-      case 'social-post':
-        original = await this.fetchSocialTemplate(request.persona);
-        personalized = this.adaptSocialPost(original, request.industry);
-        adaptations.push('industry hashtags', 'platform optimization');
-        break;
+        case 'roi-calculator':
+          original = await this.fetchROITemplate();
+          personalized = this.adaptROICalculator(original, request.persona);
+          adaptations.push('persona-specific assumptions', 'value prop framing');
+          break;
 
-      default:
-        throw new Error(`Unknown content type: ${request.contentType}`);
-    }
+        case 'email-template':
+          const messaging = await contentHubClient.getBrandMessaging(request.persona);
+          original = messaging || this.getDefaultMessaging();
+          personalized = this.adaptEmailTemplate(original, request.campaignGoal);
+          adaptations.push('campaign goal alignment', 'CTA optimization');
+          break;
 
-    return {
-      original,
+        case 'social-post':
+          const socialTemplates = await contentHubClient.getSocialTemplates('linkedin');
+          original = socialTemplates[0] || this.getDefaultSocialTemplate();
+          personalized = this.adaptSocialPost(original, request.industry);
+          adaptations.push('industry hashtags', 'platform optimization');
+          break;
+
+        default:
+          throw new Error(`Unknown content type: ${request.contentType}`);
+      }
+
+      const result = {
+        original,
+        personalized,
+        metadata: {
+          source: CONTENT_HUB_BASE,
+          adaptations,
+          confidence: 0.85,
+        },
+      };
+
+      if (task) {
+        await agentStateManager.updateTaskStatus(task.id, 'completed', result);
+      }
+
+      return result;
+    } catch (error) {
+      if (task) {
+        await agentStateManager.failTask(
+          task.id,
+          error instanceof Error ? error.message : 'Unknown error'
+        );
+      }
+      throw error;
+    }original,
       personalized,
       metadata: {
         source: CONTENT_HUB_BASE,

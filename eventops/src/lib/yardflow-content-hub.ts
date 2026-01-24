@@ -1,4 +1,5 @@
 import { logger } from '@/lib/logger';
+import { cacheGet, cacheSet, generateCacheKey } from '@/lib/redis-cache';
 
 /**
  * YardFlow Content Hub API Client
@@ -10,6 +11,8 @@ import { logger } from '@/lib/logger';
  * - Visual assets for campaigns
  * - Social media templates
  * - Contract/proposal templates
+ * 
+ * Features Redis caching with 24hr TTL for all responses.
  */
 
 const CONTENT_HUB_URL = process.env.YARDFLOW_CONTENT_HUB_URL || 'https://flow-state-klbt.vercel.app';
@@ -95,8 +98,18 @@ class YardFlowContentHubClient {
   /**
    * Fetch ROI calculation from external calculator.
    * Falls back to local calculation if unavailable.
+   * Cached for 24 hours.
    */
   async getRoiCalculation(params: RoiParams): Promise<RoiData | null> {
+    const cacheKey = generateCacheKey('roi', params);
+    
+    // Check cache first
+    const cached = await cacheGet<RoiData>(cacheKey);
+    if (cached) {
+      logger.info('ROI data from cache', { params });
+      return cached;
+    }
+    
     try {
       const response = await fetch(`${this.baseUrl}/api/roi/calculate`, {
         method: 'POST',
@@ -118,17 +131,30 @@ class YardFlowContentHubClient {
         annualSavings: data.annualSavings 
       });
       
+      // Cache the result
+      await cacheSet(cacheKey, data, 86400); // 24 hours
+      
       return data;
     } catch (error) {
       logger.error('Failed to fetch ROI from content hub', { error });
       return null;
     }
   }
-
-  /**
-   * Get case studies filtered by industry and company size.
+ Cached for 24 hours.
    */
   async getCaseStudies(
+    industry: string, 
+    companySize?: string
+  ): Promise<CaseStudy[]> {
+    const cacheKey = generateCacheKey('case_studies', { industry, companySize });
+    
+    // Check cache first
+    const cached = await cacheGet<CaseStudy[]>(cacheKey);
+    if (cached) {
+      logger.info('Case studies from cache', { industry, count: cached.length });
+      return cached;
+    }
+    
     industry: string, 
     companySize?: string
   ): Promise<CaseStudy[]> {
@@ -147,6 +173,9 @@ class YardFlowContentHubClient {
       if (!response.ok) {
         logger.warn('Content hub case studies API error', { 
           status: response.status 
+      // Cache the result
+      await cacheSet(cacheKey, data, 86400); // 24 hours
+      
         });
         return [];
       }
