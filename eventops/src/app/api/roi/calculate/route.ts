@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { calculateRoi } from "@/lib/roi-calculator";
+import { calculateRoiUnified, getRoiCacheStats } from "@/lib/roi/calculator-integration";
 import { getPersonaLabel } from "@/lib/ai-contact-insights";
 
 export const dynamic = 'force-dynamic';
@@ -61,8 +62,8 @@ export async function POST(req: NextRequest) {
       companySize = dossier.companySize || undefined;
     }
 
-    // Calculate ROI
-    const roiResult = await calculateRoi({
+    // Calculate ROI using unified approach (content hub → local fallback)
+    const roiResult = await calculateRoiUnified({
       facilityCount,
       operationalScale,
       companySize,
@@ -79,7 +80,11 @@ export async function POST(req: NextRequest) {
         operationalScale,
         annualSavings: roiResult.annualSavings,
         paybackPeriod: roiResult.paybackPeriod,
-        assumptions: JSON.stringify(roiResult.assumptions),
+        assumptions: JSON.stringify({
+          ...roiResult.assumptions,
+          source: roiResult.source,
+          timestamp: roiResult.timestamp,
+        }),
         calculatedBy: session.user.email,
       },
     });
