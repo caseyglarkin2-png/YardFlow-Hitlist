@@ -47,12 +47,7 @@ export class GeminiProClient {
       topK?: number;
     } = {}
   ): Promise<string> {
-    const {
-      temperature = 0.7,
-      maxOutputTokens = 2048,
-      topP = 0.95,
-      topK = 40,
-    } = options;
+    const { temperature = 0.7, maxOutputTokens = 2048, topP = 0.95, topK = 40 } = options;
 
     try {
       const response = await fetch(
@@ -126,10 +121,7 @@ export class GeminiProClient {
       maxOutputTokens?: number;
     } = {}
   ): Promise<string> {
-    const {
-      temperature = 0.7,
-      maxOutputTokens = 2048,
-    } = options;
+    const { temperature = 0.7, maxOutputTokens = 2048 } = options;
 
     try {
       const response = await fetch(
@@ -166,10 +158,7 @@ export class GeminiProClient {
   /**
    * Generate structured JSON output
    */
-  async generateJSON<T = any>(
-    prompt: string,
-    schema?: string
-  ): Promise<T> {
+  async generateJSON<T = any>(prompt: string, schema?: string): Promise<T> {
     const systemPrompt = schema
       ? `${prompt}\n\nRespond ONLY with valid JSON matching this schema:\n${schema}`
       : `${prompt}\n\nRespond ONLY with valid JSON.`;
@@ -196,4 +185,3 @@ export const geminiPro = new GeminiProClient();
 
 // Export as geminiClient for backward compatibility
 export const geminiClient = geminiPro;
-

@@ -1,17 +1,28 @@
 /**
- * Research Agent
- * Generates comprehensive company dossiers and competitive intelligence
+ * Research Agent - Enhanced Multi-Source Intelligence
+ * Sprint 32.3: Research Agent Enhancement
+ * 
+ * Generates comprehensive company dossiers from multiple sources:
+ * - Gemini AI analysis
+ * - YardFlow Content Hub (case studies, industry context)
+ * - LinkedIn company pages (future)
+ * - News sources (future)
+ * - Database historical data
  */
 
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { generateCompanyResearch } from '@/lib/ai-research';
 import { GeminiProClient } from '@/lib/ai/gemini-client';
+import { contentHubClient } from '@/lib/yardflow-content-hub';
+import { agentStateManager } from '@/lib/agents/state-manager';
+import { cacheGet, cacheSet } from '@/lib/redis-cache';
 
 export interface ResearchInput {
   accountId: string;
   deepDive?: boolean; // If true, fetch additional sources
-  sources?: ('gemini' | 'linkedin' | 'wikipedia' | 'web')[];
+  sources?: ('gemini' | 'content-hub' | 'linkedin' | 'news' | 'database')[];
+  refreshCache?: boolean; // Force refresh even if cached
 }
 
 export interface CompanyDossier {
@@ -37,50 +48,129 @@ export class ResearchAgent {
 
   /**
    * Generate comprehensive research dossier for an account
+   * Enhanced with multi-source data aggregation
    */
   async generateDossier(input: ResearchInput): Promise<CompanyDossier> {
-    logger.info('Research agent started', { accountId: input.accountId });
-
-    // Get account details
-    const account = await prisma.target_accounts.findUnique({
-      where: { id: input.accountId },
-      include: { people: true },
+    // Create agent task for tracking
+    const task = await agentStateManager.createTask({
+      agentType: 'research',
+      accountId: input.accountId,
+      inputData: input,
+      metadata: { sources: input.sources || ['gemini', 'content-hub', 'database'] },
     });
 
-    if (!account) {
-      throw new Error('Account not found');
-    }
-
-    // Use existing AI research function as base
-    const baseResearch = await generateCompanyResearch(
-      account.name,
-      account.website || undefined
-    );
-
-    // TODO: If deepDive enabled, fetch additional sources
-    // 1. LinkedIn company page scraping
-    // 2. Wikipedia for public companies
-    // 3. News articles via SerpAPI
-    // 4. Competitive intelligence
-
-    // Save to database
-    await prisma.company_dossiers.upsert({
-      where: { accountId: input.accountId },
-      create: {
-        id: crypto.randomUUID(),
+    try {
+      logger.info('Research agent started (enhanced)', {
         accountId: input.accountId,
-        ...baseResearch,
-        rawData: JSON.stringify(baseResearch),
-      },
-      update: {
-        ...baseResearch,
-        rawData: JSON.stringify(baseResearch),
-        researchedAt: new Date(),
-      },
-    });
+        deepDive: input.deepDive,
+      });
 
-    logger.info('Research dossier generated', { accountId: input.accountId });
-    return baseResearch as CompanyDossier;
+      // Check cache first (unless refresh requested)
+      if (!input.refreshCache) {
+        const cached = await cacheGet<CompanyDossier>(`dossier:${input.accountId}`);
+        if (cached) {
+          logger.info('Returning cached dossier', { accountId: input.accountId });
+          await agentStateManager.updateTaskStatus(task.id, 'completed', { cached: true });
+          return cached;
+        }
+      }
+
+      // Get account details
+      const account = await prisma.target_accounts.findUnique({
+        where: { id: input.accountId },
+        include: {
+          people: true,
+          company_dossiers: true,
+        },
+      });
+
+      if (!account) {
+        throw new Error('Account not found');
+      }
+
+      // Source 1: Gemini AI analysis (base research)
+      const baseResearch = await generateCompanyResearch(
+        account.name,
+        account.website || undefined
+      );
+
+      // Source 2: YardFlow Content Hub - Industry case studies
+      let caseStudyContext = '';
+      if (input.sources?.includes('content-hub') || input.deepDive) {
+        try {
+          const caseStudies = await contentHubClient.getCaseStudies(
+            account.industry || 'logistics'
+          );
+          if (caseStudies && caseStudies.length > 0) {
+            caseStudyContext = `\n\nIndustry Case Studies:\n${caseStudies
+              .slice(0, 2)
+              .map((cs) => `- ${cs.title}: ${cs.summary}`)
+              .join('\n')}`;
+          }
+        } catch (error) {
+          logger.warn('Failed to fetch case studies', { error });
+        }
+      }
+
+      // Source 3: Database historical data
+      const activityCount = await prisma.activities.count({
+        where: {
+          person: {
+            account_id: input.accountId,
+          },
+        },
+      });
+
+      const engagementHistory =
+        activityCount > 0 ? `\n\nEngagement History: ${activityCount} interactions` : '';
+
+      // Source 4: Deep dive enhancements (future)
+      if (input.deepDive) {
+        // TODO: LinkedIn scraping, news articles, competitive intel
+        logger.info('Deep dive requested (future feature)', { accountId: input.accountId });
+      }
+
+      // Combine all sources into enriched dossier
+      const enrichedDossier: CompanyDossier = {
+        ...baseResearch,
+        industryContext: baseResearch.industryContext + caseStudyContext,
+        keyPainPoints: baseResearch.keyPainPoints + engagementHistory,
+      };
+
+      // Save to database
+      await prisma.company_dossiers.upsert({
+        where: { accountId: input.accountId },
+        create: {
+          id: crypto.randomUUID(),
+          accountId: input.accountId,
+          ...enrichedDossier,
+          rawData: JSON.stringify({ ...enrichedDossier, sources: input.sources }),
+        },
+        update: {
+          ...enrichedDossier,
+          rawData: JSON.stringify({ ...enrichedDossier, sources: input.sources }),
+          researchedAt: new Date(),
+        },
+      });
+
+      // Cache for 24 hours
+      await cacheSet(`dossier:${input.accountId}`, enrichedDossier, 86400);
+
+      await agentStateManager.updateTaskStatus(task.id, 'completed', enrichedDossier);
+
+      logger.info('Research dossier generated (enhanced)', {
+        accountId: input.accountId,
+        sources: input.sources?.length || 3,
+      });
+
+      return enrichedDossier;
+    } catch (error) {
+      await agentStateManager.failTask(
+        task.id,
+        error instanceof Error ? error.message : 'Research failed'
+      );
+      throw error;
+    }
   }
 
   /**
