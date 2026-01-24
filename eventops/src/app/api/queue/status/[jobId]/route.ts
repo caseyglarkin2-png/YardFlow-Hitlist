@@ -38,23 +38,25 @@ export async function GET(
       );
     }
 
-    const state = await job.getState();
-    const progress = job.progress;
+    // At this point job is guaranteed to exist
+    const jobFound = job!;
+    const state = await jobFound.getState();
+    const progress = jobFound.progress;
 
     return NextResponse.json({
-      jobId: job.id,
-      name: job.name,
+      jobId: jobFound.id,
+      name: jobFound.name,
       queue: queueName,
       state,
       progress,
-      data: job.data,
-      result: job.returnvalue,
-      error: job.failedReason,
-      attempts: job.attemptsMade,
+      data: jobFound.data,
+      result: jobFound.returnvalue,
+      error: jobFound.failedReason,
+      attempts: jobFound.attemptsMade,
       timestamp: {
-        created: job.timestamp,
-        processed: job.processedOn,
-        finished: job.finishedOn,
+        created: jobFound.timestamp,
+        processed: jobFound.processedOn,
+        finished: jobFound.finishedOn,
       },
     });
   } catch (error: any) {
