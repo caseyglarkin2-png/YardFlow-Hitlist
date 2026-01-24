@@ -183,6 +183,7 @@ model people {
   assignedUser        users?               @relation("PersonAssignments", fields: [assignedTo], references: [id])
   sequenceEnrollments SequenceEnrollment[]
   linkedin_profiles linkedin_profiles?
+  agentTasks          agent_tasks[]
 
   @@index([accountId])
   @@index([assignedTo])
@@ -251,6 +252,7 @@ model target_accounts {
   events              events               @relation(fields: [eventId], references: [id], onDelete: Cascade)
   assignedUser        users?               @relation("AccountAssignments", fields: [assignedTo], references: [id])
   sequenceEnrollments SequenceEnrollment[]
+  agentTasks          agent_tasks[]
 
   @@index([eventId])
   @@index([assignedTo])
@@ -569,4 +571,32 @@ model EmailActivity {
   @@index([messageId])
   @@index([status])
   @@index([sentAt])
+}
+
+model agent_tasks {
+  id              String    @id @default(cuid())
+  agentType       String    // 'prospecting' | 'research' | 'sequence' | 'content' | 'graphics' | 'socials' | 'contracting'
+  status          String    @default("pending") // 'pending' | 'in_progress' | 'completed' | 'failed'
+  inputData       Json      // Agent-specific input parameters
+  outputData      Json?     // Results from agent execution
+  errorMessage    String?   @db.Text
+  accountId       String?
+  contactId       String?
+  parentTaskId    String?   // For chained workflows
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(3)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  startedAt       DateTime?
+  completedAt     DateTime?
+  
+  targetAccount   target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contact         people?          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  
+  @@index([agentType, status])
+  @@index([accountId])
+  @@index([contactId])
+  @@index([parentTaskId])
+  @@index([status])
+  @@index([createdAt])
 }
