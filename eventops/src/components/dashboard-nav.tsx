@@ -25,6 +25,7 @@ export function DashboardNav() {
     { name: 'Research', href: '/dashboard/research/bulk' },
     { name: 'Dossiers', href: '/dossier' },
     { name: 'AI Content', href: '/content-generator' },
+    { name: 'Agents', href: '/dashboard/agents' },
     { name: 'Workflows', href: '/dashboard/workflows' },
     { name: 'Activity', href: '/dashboard/activity' },
     { name: 'Team', href: '/dashboard/team' },
