@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const agentType = searchParams.get('agentType') as any;
+    const agentType = searchParams.get('agentType') as AgentType | null;
     const accountId = searchParams.get('accountId');
     const sinceDays = parseInt(searchParams.get('sinceDays') || '7', 10);
 
@@ -30,9 +30,7 @@ export async function GET(request: Request) {
     ] as const;
 
     const metrics = await Promise.all(
-      agentTypes.map(type => 
-        agentStateManager.getAgentMetrics(type, sinceDays)
-      )
+      agentTypes.map((type) => agentStateManager.getAgentMetrics(type, sinceDays))
     );
 
     // Get account-specific task history if requested
@@ -67,9 +65,6 @@ export async function GET(request: Request) {
       userId: session.user?.id,
     });
 
-    return NextResponse.json(
-      { error: 'Failed to retrieve agent status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to retrieve agent status' }, { status: 500 });
   }
 }

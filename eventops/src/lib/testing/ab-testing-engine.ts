@@ -81,7 +81,10 @@ class ABTestingEngine {
     if (!test) throw new Error('Test not found');
 
     const variants = JSON.parse(test.variants as string) as ABTestVariant[];
-    const results: Record<string, any> = {};
+    const results: Record<
+      string,
+      { sent: number; opened: number; clicked: number; replied: number }
+    > = {};
 
     // Calculate metrics for each variant
     for (const variant of variants) {
@@ -125,7 +128,7 @@ class ABTestingEngine {
     // Calculate confidence using chi-square test (simplified)
     // In production, use proper statistical library
     const minSampleSize = 30;
-    const totalSent = Object.values(results).reduce((sum: number, r: any) => sum + r.sent, 0);
+    const totalSent = Object.values(results).reduce((sum: number, r) => sum + r.sent, 0);
     const confidence =
       totalSent >= minSampleSize * variants.length
         ? Math.min(95, (totalSent / (minSampleSize * variants.length)) * 95)

@@ -163,7 +163,7 @@ export class ContractingAgent {
 
     // Type guard for account object
     const acc = account as { name?: string; headquarters?: string };
-    
+
     if (acc.name) customizations.push('company_name');
     if (acc.headquarters) customizations.push('jurisdiction');
     if (terms.facilities) customizations.push('facility_count');

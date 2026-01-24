@@ -3,7 +3,7 @@ import { logger } from '@/lib/logger';
 
 /**
  * Redis Client for Content Hub Caching
- * 
+ *
  * Uses lazy initialization to prevent Railway build hangs.
  * Implements 24-hour TTL for content hub responses.
  */
@@ -53,7 +53,7 @@ export function getRedisClient(): Redis | null {
  */
 export async function cacheSet(
   key: string,
-  value: any,
+  value: unknown,
   ttlSeconds: number = 86400 // 24 hours
 ): Promise<void> {
   const redis = getRedisClient();
@@ -124,7 +124,7 @@ export async function cacheClear(pattern: string = 'content_hub:*'): Promise<voi
 /**
  * Generate cache key for content hub requests.
  */
-export function generateCacheKey(type: string, params: any): string {
+export function generateCacheKey(type: string, params: Record<string, unknown>): string {
   const paramsString = JSON.stringify(params);
   return `content_hub:${type}:${Buffer.from(paramsString).toString('base64')}`;
 }

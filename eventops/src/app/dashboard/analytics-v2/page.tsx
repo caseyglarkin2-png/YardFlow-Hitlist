@@ -5,12 +5,11 @@
  * Combines existing analytics with new visualization components
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   EngagementChart,
   PersonaPerformanceChart,
   ChannelBreakdownChart,
-  TimelineChart,
 } from '@/components/analytics/Charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -52,11 +51,7 @@ export default function EnhancedAnalyticsPage() {
   const [timeRange, setTimeRange] = useState('7d');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [timeRange]);
-
-  async function fetchAnalytics() {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const res = await fetch(`/api/analytics?timeRange=${timeRange}`);
       const data = await res.json();
@@ -66,7 +61,11 @@ export default function EnhancedAnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const exportToCsv = () => {
     if (!analytics) return;

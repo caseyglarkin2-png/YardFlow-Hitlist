@@ -1,9 +1,9 @@
 import { AdvancedFilters, FilterCondition } from '@/components/search/advanced-filters';
 
 export interface PrismaFilter {
-  AND?: any[];
-  OR?: any[];
-  [key: string]: any;
+  AND?: PrismaFilter[];
+  OR?: PrismaFilter[];
+  [key: string]: unknown;
 }
 
 export function buildPrismaWhere(filters: AdvancedFilters): PrismaFilter {

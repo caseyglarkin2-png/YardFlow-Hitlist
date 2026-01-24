@@ -1,12 +1,3 @@
-import crypto from 'crypto';
-import { prisma } from '@/lib/db';
-
-interface WebhookPayload {
-  event: string;
-  data: unknown;
-  timestamp: string;
-  [key: string]: unknown; // Add index signature for Prisma JSON compatibility
-}
 
 export async function sendWebhook(event: string, data: unknown) {
   // TODO: Implement webhooks when schema is ready

@@ -22,7 +22,7 @@ export interface ContentRequest {
 }
 
 export interface PurposedContent {
-  original: any;
+  original: unknown;
   personalized: string;
   metadata: {
     source: string;

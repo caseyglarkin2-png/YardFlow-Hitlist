@@ -71,11 +71,12 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
       success: true,
       messageId: response.headers['x-message-id'] as string,
     };
-  } catch (error: any) {
-    console.error('SendGrid error:', error.response?.body || error.message);
+  } catch (error: unknown) {
+    const err = error as { response?: { body?: { errors?: Array<{ message: string }> } }; message?: string };
+    console.error('SendGrid error:', err.response?.body || err.message);
     return {
       success: false,
-      error: error.response?.body?.errors?.[0]?.message || error.message,
+      error: err.response?.body?.errors?.[0]?.message || err.message || 'Unknown error',
     };
   }
 }
@@ -143,11 +144,12 @@ export async function sendBulkEmails(
 
       await sgMail.send(messages);
       results.sent += batch.length;
-    } catch (error: any) {
-      console.error('Batch send error:', error.response?.body || error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { body?: { errors?: Array<{ message: string }> } }; message?: string };
+      console.error('Batch send error:', err.response?.body || err.message);
       results.failed += batch.length;
       results.errors.push(
-        error.response?.body?.errors?.[0]?.message || error.message
+        err.response?.body?.errors?.[0]?.message || err.message || 'Unknown error'
       );
     }
   }
@@ -179,7 +181,7 @@ export function isValidEmail(email: string): boolean {
 /**
  * Template variable substitution
  */
-export function renderTemplate(template: string, variables: Record<string, any>): string {
+export function renderTemplate(template: string, variables: Record<string, unknown>): string {
   let rendered = template;
   
   Object.entries(variables).forEach(([key, value]) => {

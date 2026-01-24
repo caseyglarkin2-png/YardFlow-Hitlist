@@ -78,7 +78,7 @@ export function CampaignBuilder() {
     setSteps(newSteps);
   };
 
-  const updateStep = (id: string, field: keyof CampaignStep, value: any) => {
+  const updateStep = (id: string, field: keyof CampaignStep, value: string | number) => {
     setSteps(steps.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
   };
 

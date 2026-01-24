@@ -25,7 +25,7 @@ export type AgentTaskStatus = 'pending' | 'in_progress' | 'completed' | 'failed'
 
 export interface AgentTaskInput {
   agentType: AgentType;
-  inputData: Record<string, any>;
+  inputData: Record<string, unknown>;
   accountId?: string;
   contactId?: string;
   parentTaskId?: string;
@@ -36,8 +36,8 @@ export interface AgentTaskResult {
   id: string;
   agentType: AgentType;
   status: AgentTaskStatus;
-  inputData: Record<string, any>;
-  outputData?: Record<string, any>;
+  inputData: Record<string, unknown>;
+  outputData?: Record<string, unknown>;
   errorMessage?: string;
   accountId?: string;
   contactId?: string;

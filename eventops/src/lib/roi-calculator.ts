@@ -14,7 +14,7 @@ interface RoiCalculationResult {
     avgCostPerShipment?: number;
     savingsPercentage?: number;
     implementationCost?: number;
-    [key: string]: any;
+    [key: string]: number | string | undefined;
   };
   confidence: 'LOW' | 'MEDIUM' | 'HIGH';
   methodology: string;
@@ -34,7 +34,6 @@ export async function calculateRoi(input: RoiCalculationInput): Promise<RoiCalcu
     operationalScale = 'REGIONAL',
     companySize = 'MEDIUM',
     persona,
-    industry,
   } = input;
 
   // Base assumptions based on operational scale

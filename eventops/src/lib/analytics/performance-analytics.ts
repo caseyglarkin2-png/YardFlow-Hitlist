@@ -59,7 +59,7 @@ class PerformanceAnalytics {
     sequenceId: string,
     timeRange?: { start: Date; end: Date }
   ): Promise<CampaignMetrics> {
-    const whereClause: any = { sequence_id: sequenceId };
+    const whereClause: { sequence_id: string; created_at?: { gte: Date; lte: Date } } = { sequence_id: sequenceId };
 
     if (timeRange) {
       whereClause.created_at = {
@@ -94,8 +94,11 @@ class PerformanceAnalytics {
     let emailsOpened = 0;
     let emailsClicked = 0;
     let repliesReceived = 0;
-    const channelBreakdown: Record<string, any> = {};
-    const personaPerformance: Record<string, any> = {};
+    const channelBreakdown: Record<string, { sent: number; opened: number; clicked: number }> = {};
+    const personaPerformance: Record<
+      string,
+      { sent: number; opened: number; clicked: number; replied: number }
+    > = {};
 
     for (const enrollment of enrollments) {
       const steps = enrollment.sequence_steps || [];
