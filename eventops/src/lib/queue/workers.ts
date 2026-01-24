@@ -165,14 +165,16 @@ const healthServer = http.createServer((req, res) => {
     const enrichment = enrichmentWorker;
     const sequence = sequenceWorker;
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'healthy',
-      workers: {
-        enrichment: enrichment?.isRunning() ? 'running' : 'stopped',
-        sequence: sequence?.isRunning() ? 'running' : 'stopped',
-      },
-      timestamp: new Date().toISOString(),
-    }));
+    res.end(
+      JSON.stringify({
+        status: 'healthy',
+        workers: {
+          enrichment: enrichment?.isRunning() ? 'running' : 'stopped',
+          sequence: sequence?.isRunning() ? 'running' : 'stopped',
+        },
+        timestamp: new Date().toISOString(),
+      })
+    );
   } else {
     res.writeHead(404);
     res.end('Not Found');

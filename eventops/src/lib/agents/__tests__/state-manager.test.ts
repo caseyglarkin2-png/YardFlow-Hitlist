@@ -35,7 +35,7 @@ describe('AgentStateManager', () => {
   describe('createTask', () => {
     it('should create a new agent task', async () => {
       const { prisma } = await import('@/lib/db');
-      
+
       const mockTask = {
         id: 'task_123',
         agentType: 'research',
@@ -78,7 +78,7 @@ describe('AgentStateManager', () => {
   describe('updateTaskStatus', () => {
     it('should update task to in_progress and set startedAt', async () => {
       const { prisma } = await import('@/lib/db');
-      
+
       const mockTask = {
         id: 'task_123',
         agentType: 'research',
@@ -108,7 +108,7 @@ describe('AgentStateManager', () => {
 
     it('should update task to completed and set completedAt', async () => {
       const { prisma } = await import('@/lib/db');
-      
+
       const mockTask = {
         id: 'task_123',
         agentType: 'research',
@@ -125,11 +125,7 @@ describe('AgentStateManager', () => {
 
       (prisma.agent_tasks.update as Mock).mockResolvedValue(mockTask);
 
-      const result = await manager.updateTaskStatus(
-        'task_123',
-        'completed',
-        { result: 'success' }
-      );
+      const result = await manager.updateTaskStatus('task_123', 'completed', { result: 'success' });
 
       expect(result.status).toBe('completed');
       expect(result.outputData).toEqual({ result: 'success' });
@@ -139,7 +135,7 @@ describe('AgentStateManager', () => {
   describe('failTask', () => {
     it('should retry task if under max retries', async () => {
       const { prisma } = await import('@/lib/db');
-      
+
       const existingTask = {
         id: 'task_123',
         retryCount: 1,
@@ -170,7 +166,7 @@ describe('AgentStateManager', () => {
 
     it('should mark as failed if max retries exceeded', async () => {
       const { prisma } = await import('@/lib/db');
-      
+
       const existingTask = {
         id: 'task_123',
         retryCount: 2,
@@ -203,7 +199,7 @@ describe('AgentStateManager', () => {
   describe('getAgentMetrics', () => {
     it('should calculate success rate and average duration', async () => {
       const { prisma } = await import('@/lib/db');
-      
+
       const now = new Date();
       const mockTasks = [
         {

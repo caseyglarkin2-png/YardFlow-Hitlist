@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { agentStateManager } from '@/lib/agents/state-manager';
+import { agentStateManager, AgentType } from '@/lib/agents/state-manager';
 import { logger } from '@/lib/logger';
 
 export async function GET(request: Request) {
