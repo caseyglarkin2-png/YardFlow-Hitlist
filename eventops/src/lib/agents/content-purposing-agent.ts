@@ -119,7 +119,10 @@ export class ContentPurposingAgent {
         );
       }
       throw error;
-    }original,
+    }
+
+    return {
+      original: '', // TODO: Store original content
       personalized,
       metadata: {
         source: CONTENT_HUB_BASE,
