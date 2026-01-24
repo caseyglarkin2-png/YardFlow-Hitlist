@@ -1,0 +1,85 @@
+{
+  "$schema": "https://aka.ms/vscode-copilot-workspace-schema",
+  "name": "YardFlow Hitlist",
+  "description": "Event-driven ABM platform for Manifest 2026. Ship fast, ship often - production deploys every 60-120 min.",
+  "instructions": [
+    "This is a monorepo with the Next.js app in /eventops subdirectory",
+    "All npm commands must run from /eventops directory",
+    "Never initialize external services (Redis, databases, APIs) at module load time - use lazy initialization",
+    "Always use @/lib/db for Prisma access - never create new PrismaClient instances",
+    "This codebase uses API routes exclusively - no Next.js Server Actions",
+    "Always check session with await auth() and null-check before accessing session.user.id",
+    "Use structured JSON logging via @/lib/logger for all operations",
+    "Railway has 5-min build timeout - keep tasks atomic and check for module-level connections if builds hang"
+  ],
+  "conventions": {
+    "database": "Always use lazy initialization for connections. Import { prisma } from '@/lib/db' - singleton pattern with globalThis caching",
+    "authentication": "NextAuth v5 with JWT strategy. trustHost: true required for Railway. Always null-check session before access",
+    "api_routes": "Located in app/api/{domain}/{action}/route.ts. Protect with session checks. Include error handling with logger",
+    "pagination": "Use @/lib/pagination helpers: parsePaginationParams() and buildPaginatedResponse(). Cursor-based for large datasets",
+    "logging": "Use logger.info(), logger.error(), logger.warn() with structured context objects",
+    "testing": "Vitest for unit tests, Playwright for E2E. Tests in __tests__/ directories. Mock Prisma client for unit tests",
+    "deployment": "Railway auto-deploys on push. Verify /api/health after deploy. Worker service deployed separately"
+  },
+  "patterns": {
+    "lazy_initialization": {
+      "description": "CRITICAL: Prevents Railway build hangs. Never initialize connections at module load",
+      "example": "let client = null; export function getClient() { if (!client) { client = new Client(); } return client; }"
+    },
+    "queue_architecture": {
+      "description": "BullMQ with separate worker process. Web adds jobs, worker consumes. Both need DB + Redis",
+      "files": ["src/lib/queue/queues.ts", "src/lib/queue/workers.ts"]
+    },
+    "icp_scoring": {
+      "description": "0-100 score: Persona(40) + Executives(20) + Contacts(20) + Completeness(20)",
+      "file": "src/lib/icp-calculator.ts"
+    }
+  },
+  "codebase": {
+    "primaryLanguage": "TypeScript",
+    "framework": "Next.js 14.2 App Router",
+    "database": "PostgreSQL with Prisma ORM",
+    "queue": "Redis + BullMQ",
+    "auth": "NextAuth v5",
+    "deployment": "Railway (web + worker services)",
+    "ai": "Google Gemini Pro (free tier)"
+  },
+  "domains": {
+    "manifest_2026": {
+      "description": "Supply chain & logistics conference in Las Vegas",
+      "personas": ["ExecOps (10pts)", "Ops (5pts)", "Procurement (3pts)", "Sales (2pts)"],
+      "features": ["250-char meeting requests", "Facility intelligence", "ROI calculations", "Strategic questions"]
+    },
+    "yardflow_brand": {
+      "description": "YardFlow by FreightRoll - Yard Network System for waste management and logistics",
+      "content_hub": "https://flow-state-klbt.vercel.app/",
+      "assets": ["ROI calculators", "Case studies", "Messaging templates", "Social graphics", "Contracts"]
+    }
+  },
+  "agents": {
+    "location": "src/lib/agents/",
+    "architecture": "Independent agents communicate via BullMQ job chains. All pull from YardFlow content hub",
+    "agents": [
+      "prospecting-agent.ts - Lead discovery and qualification",
+      "research-agent.ts - Company dossier generation",
+      "sequence-engineer-agent.ts - Multi-step campaign builder",
+      "content-purposing-agent.ts - Marketing asset adaptation",
+      "graphics-agent.ts - Visual content generation",
+      "socials-agent.ts - Social media coordination",
+      "contracting-agent.ts - Deal documentation",
+      "orchestrator.ts - Multi-agent workflow coordination"
+    ]
+  },
+  "workflows": {
+    "development": "cd eventops && npm install && npx prisma migrate dev && npm run dev",
+    "test": "cd eventops && npm test",
+    "deploy": "git commit -m 'Task X.Y: Description' && git push origin main",
+    "backup": "cd eventops && npm run backup:create",
+    "worker": "cd eventops && npm run worker"
+  },
+  "documentation": {
+    "primary": "docs/current/SPRINT_30_PRODUCTION_HARDENING.md",
+    "principles": "docs/current/PROJECT_PRINCIPLES.md",
+    "archive": "docs/archive/sprints/SPRINT_*.md"
+  }
+}

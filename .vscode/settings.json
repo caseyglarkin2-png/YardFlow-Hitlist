@@ -1,0 +1,107 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "plaintext": true,
+    "markdown": true,
+    "typescript": true,
+    "javascript": true
+  },
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "Always use lazy initialization for external services (Redis, database, APIs)"
+    },
+    {
+      "text": "Import { prisma } from '@/lib/db' for database access, never create new PrismaClient"
+    },
+    {
+      "text": "Use structured JSON logging via @/lib/logger for all operations"
+    },
+    {
+      "text": "Protect API routes with NextAuth session checks and null-check session.user.id"
+    },
+    {
+      "text": "Use API routes in app/api/, not Server Actions"
+    },
+    {
+      "text": "All npm commands run from /eventops directory"
+    }
+  ],
+  "github.copilot.chat.useProjectTemplates": true,
+  "github.copilot.advanced": {
+    "debug.overrideEngine": "",
+    "debug.testOverrideProxyUrl": "",
+    "length": 500
+  },
+  
+  "typescript.tsdk": "eventops/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  
+  "files.exclude": {
+    "**/.git": true,
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/.env.local": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true
+  },
+  
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/backups": true
+  },
+  
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.wordWrap": "on"
+  },
+  
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  
+  "extensions.ignoreRecommendations": false,
+  
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.cwd": "${workspaceFolder}/eventops",
+  
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  
+  "vitest.enable": true,
+  "vitest.commandLine": "npm test",
+  
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  }
+}

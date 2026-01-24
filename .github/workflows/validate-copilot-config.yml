@@ -1,0 +1,114 @@
+name: Validate Copilot Configuration
+
+on:
+  push:
+    paths:
+      - '.github/copilot-*.md'
+      - '.github/copilot-workspace.json'
+      - '.vscode/settings.json'
+  pull_request:
+    paths:
+      - '.github/copilot-*.md'
+      - '.github/copilot-workspace.json'
+      - '.vscode/settings.json'
+
+jobs:
+  validate-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check required files exist
+        run: |
+          echo "Validating Copilot configuration files..."
+          
+          # Required files
+          [ -f .github/copilot-instructions.md ] || exit 1
+          [ -f .github/copilot-chat-instructions.md ] || exit 1
+          [ -f .github/copilot-prompts.md ] || exit 1
+          [ -f .github/copilot-workspace.json ] || exit 1
+          [ -f .vscode/settings.json ] || exit 1
+          [ -f .vscode/extensions.json ] || exit 1
+          
+          echo "✅ All required files exist"
+      
+      - name: Validate JSON syntax
+        run: |
+          echo "Validating JSON files..."
+          
+          # Validate copilot-workspace.json
+          jq empty .github/copilot-workspace.json || exit 1
+          
+          # Validate VS Code settings
+          jq empty .vscode/settings.json || exit 1
+          jq empty .vscode/extensions.json || exit 1
+          
+          echo "✅ All JSON files are valid"
+      
+      - name: Check for required patterns in instructions
+        run: |
+          echo "Checking for critical patterns in copilot-instructions.md..."
+          
+          # Must mention lazy initialization
+          grep -q "lazy initialization" .github/copilot-instructions.md || exit 1
+          
+          # Must mention prisma singleton
+          grep -q "import { prisma } from '@/lib/db'" .github/copilot-instructions.md || exit 1
+          
+          # Must mention NextAuth session checks
+          grep -q "await auth()" .github/copilot-instructions.md || exit 1
+          
+          # Must mention /eventops directory
+          grep -q "/eventops" .github/copilot-instructions.md || exit 1
+          
+          # Must mention Railway deployment
+          grep -q "Railway" .github/copilot-instructions.md || exit 1
+          
+          echo "✅ All critical patterns found"
+      
+      - name: Validate workspace.json schema
+        run: |
+          echo "Validating copilot-workspace.json schema..."
+          
+          # Check required top-level fields
+          jq -e '.name' .github/copilot-workspace.json || exit 1
+          jq -e '.version' .github/copilot-workspace.json || exit 1
+          jq -e '.tech_stack' .github/copilot-workspace.json || exit 1
+          jq -e '.conventions' .github/copilot-workspace.json || exit 1
+          
+          echo "✅ Workspace JSON schema valid"
+      
+      - name: Check VS Code Copilot settings
+        run: |
+          echo "Validating VS Code Copilot settings..."
+          
+          # Check Copilot is enabled
+          jq -e '.["github.copilot.enable"]' .vscode/settings.json || exit 1
+          
+          # Check chat instructions are set
+          jq -e '.["github.copilot.chat.codeGeneration.instructions"]' .vscode/settings.json || exit 1
+          
+          echo "✅ VS Code Copilot settings configured"
+      
+      - name: Summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 Copilot Configuration Validation Complete"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Files Validated:"
+          echo "  ✅ .github/copilot-instructions.md"
+          echo "  ✅ .github/copilot-chat-instructions.md"
+          echo "  ✅ .github/copilot-prompts.md"
+          echo "  ✅ .github/copilot-workspace.json"
+          echo "  ✅ .vscode/settings.json"
+          echo "  ✅ .vscode/extensions.json"
+          echo ""
+          echo "Critical Patterns Verified:"
+          echo "  ✅ Lazy initialization pattern"
+          echo "  ✅ Prisma singleton import"
+          echo "  ✅ NextAuth session checks"
+          echo "  ✅ /eventops monorepo structure"
+          echo "  ✅ Railway deployment config"
+          echo ""
+          echo "🎉 Ready to ship ship ship!"
