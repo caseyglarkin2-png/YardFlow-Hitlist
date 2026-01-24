@@ -8,13 +8,13 @@
 
 ## ✅ Completed (6/8 tasks)
 
-| Task | Status | Commit | Notes |
-|------|--------|--------|-------|
-| 30.1 | ✅ Done | `b60a066` | Redis lazy init - builds work |
-| 30.2 | ✅ Done | `b60a066` | Dashboard session guards |
-| 30.3 | ✅ Done | `b60a066` | Health endpoint code (404 issue) |
-| 30.4 | ✅ Done | `4ae1b85` | Seed data script ready |
-| 30.5 | ✅ Done | verified | Redis provisioned on Railway |
+| Task | Status        | Commit    | Notes                                   |
+| ---- | ------------- | --------- | --------------------------------------- |
+| 30.1 | ✅ Done       | `b60a066` | Redis lazy init - builds work           |
+| 30.2 | ✅ Done       | `b60a066` | Dashboard session guards                |
+| 30.3 | ✅ Done       | `b60a066` | Health endpoint code (404 issue)        |
+| 30.4 | ✅ Done       | `4ae1b85` | Seed data script ready                  |
+| 30.5 | ✅ Done       | verified  | Redis provisioned on Railway            |
 | 30.6 | ✅ Code Ready | `fe27208` | Worker config created, needs deployment |
 
 ---
@@ -25,6 +25,7 @@
 📄 See: `DEPLOY_WORKER_NOW.md` for step-by-step guide
 
 **Quick Steps**:
+
 1. Go to https://railway.app/dashboard
 2. Project: `airy-vibrancy` → Environment: `production`
 3. Click "+ New" → "Empty Service" → "GitHub Repo"
@@ -39,10 +40,10 @@
 
 ## 🔲 Pending (2/8 tasks)
 
-| Task | Status | Depends On | Estimate |
-|------|--------|------------|----------|
-| 30.7 | Pending | Worker deployed | 15 min |
-| 30.8 | Pending | 30.7 complete | 60 min |
+| Task | Status  | Depends On      | Estimate |
+| ---- | ------- | --------------- | -------- |
+| 30.7 | Pending | Worker deployed | 15 min   |
+| 30.8 | Pending | 30.7 complete   | 60 min   |
 
 ---
 
@@ -51,28 +52,32 @@
 **Railway Platform**: ✅ Live and operational  
 **Production URL**: https://yardflow-hitlist-production.up.railway.app/  
 **Services**: Web (yardflow-app) + Worker (pending) + PostgreSQL + Redis  
-**Auto-Deploy**: Enabled on push to main branch  
+**Auto-Deploy**: Enabled on push to main branch
 
 **Recent Sprints**:
+
 - ✅ Sprint 31 (100%): Manifest 2026 features deployed
-- 🔄 Sprint 32 (28%): Agent infrastructure in progress  
+- 🔄 Sprint 32 (28%): Agent infrastructure in progress
 - URL: https://yardflow-hitlist-production.up.railway.app
 - Status: HTTP 307 redirect to /login
 - Database: Connected
 - Auth: Working
 - Latest Deploy: `ade1dfd`
 
-**Redis**: ✅ Provisioned  
+**Redis**: ✅ Provisioned
+
 - URL: `redis://...@redis.railway.internal:6379`
 - Status: Connected
 - Health: Unknown (health endpoint 404)
 
-**Worker**: ⏸️ Code ready, not deployed  
+**Worker**: ⏸️ Code ready, not deployed
+
 - Config: `railway-worker.json` ✅
 - Code: `workers.ts` with health server ✅
 - Awaiting: Manual Railway service creation
 
-**Database Seed**: ✅ Script ready  
+**Database Seed**: ✅ Script ready
+
 - Script: `eventops/prisma/seed.ts`
 - Users: 2 (casey@freightroll.com / password)
 - Data: Events, accounts, people, campaign
@@ -107,6 +112,7 @@
 6. ✅ Update Sprint 30 doc execution log
 
 **Files to Reference**:
+
 - `docs/current/SPRINT_30_PRODUCTION_HARDENING.md` - Full plan + execution log
 - `DEPLOY_WORKER_NOW.md` - Worker deployment guide
 - `README.md` - Project overview

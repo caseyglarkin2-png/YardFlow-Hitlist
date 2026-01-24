@@ -190,3 +190,10 @@ export class GeminiProClient {
     }
   }
 }
+
+// Export singleton instance
+export const geminiPro = new GeminiProClient();
+
+// Export as geminiClient for backward compatibility
+export const geminiClient = geminiPro;
+

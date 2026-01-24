@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 /**
  * Unified ROI calculator that tries external content hub first,
  * then falls back to local calculation.
- * 
+ *
  * Implements hybrid approach:
  * 1. Try YardFlow content hub API (flow-state-klbt.vercel.app)
  * 2. Fall back to local calculation (src/lib/roi-calculator.ts)
@@ -27,12 +27,10 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 /**
  * Calculate ROI with hybrid approach: external API → local fallback.
  */
-export async function calculateRoiUnified(
-  input: UnifiedRoiInput
-): Promise<UnifiedRoiResult> {
+export async function calculateRoiUnified(input: UnifiedRoiInput): Promise<UnifiedRoiResult> {
   // Generate cache key
   const cacheKey = JSON.stringify(input);
-  
+
   // Check cache first
   const cached = roiCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
@@ -48,13 +46,13 @@ export async function calculateRoiUnified(
       source: 'content_hub',
       timestamp: new Date().toISOString(),
     };
-    
+
     // Cache the result
     roiCache.set(cacheKey, {
       result,
       expiresAt: Date.now() + CACHE_TTL_MS,
     });
-    
+
     return result;
   }
 
@@ -66,13 +64,13 @@ export async function calculateRoiUnified(
     source: 'local_calculation',
     timestamp: new Date().toISOString(),
   };
-  
+
   // Cache local result too
   roiCache.set(cacheKey, {
     result,
     expiresAt: Date.now() + CACHE_TTL_MS,
   });
-  
+
   return result;
 }
 
@@ -92,11 +90,11 @@ async function tryExternalRoi(input: UnifiedRoiInput): Promise<RoiData | null> {
     };
 
     const roiData = await contentHubClient.getRoiCalculation(hubParams);
-    
+
     if (roiData) {
-      logger.info('Successfully fetched ROI from content hub', { 
+      logger.info('Successfully fetched ROI from content hub', {
         annualSavings: roiData.annualSavings,
-        confidence: roiData.confidence 
+        confidence: roiData.confidence,
       });
       return roiData;
     }

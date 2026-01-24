@@ -1,7 +1,7 @@
 /**
  * Content Purposing Agent
  * Adapts YardFlow marketing assets to personalized outreach campaigns
- * 
+ *
  * Enhanced with:
  * - YardFlow Content Hub integration
  * - Redis caching for performance
@@ -38,14 +38,11 @@ export class ContentPurposingAgent {
   /**
    * Purpose content from YardFlow hub for specific use case
    */
-  async purposeContent(
-    request: ContentRequest,
-    accountId?: string
-  ): Promise<PurposedContent> {
+  async purposeContent(request: ContentRequest, accountId?: string): Promise<PurposedContent> {
     logger.info('Content purposing agent started', { request, accountId });
 
     // Create agent task for tracking
-    const task = accountId 
+    const task = accountId
       ? await agentStateManager.createTask({
           agentType: 'content',
           inputData: request,
