@@ -161,8 +161,11 @@ export class ContractingAgent {
   private getCustomizations(account: unknown, terms: ContractRequest['dealTerms']): string[] {
     const customizations: string[] = [];
 
-    if (account.name) customizations.push('company_name');
-    if (account.headquarters) customizations.push('jurisdiction');
+    // Type guard for account object
+    const acc = account as { name?: string; headquarters?: string };
+    
+    if (acc.name) customizations.push('company_name');
+    if (acc.headquarters) customizations.push('jurisdiction');
     if (terms.facilities) customizations.push('facility_count');
     if (terms.value) customizations.push('deal_value');
 
