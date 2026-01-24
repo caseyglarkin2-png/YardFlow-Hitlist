@@ -35,7 +35,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
 
   try {
     let htmlBody = options.htmlBody;
-    
+
     // Add tracking if outreachId provided
     if (options.outreachId) {
       htmlBody = injectTrackingPixel(htmlBody, options.outreachId);
@@ -72,7 +72,10 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
       messageId: response.headers['x-message-id'] as string,
     };
   } catch (error: unknown) {
-    const err = error as { response?: { body?: { errors?: Array<{ message: string }> } }; message?: string };
+    const err = error as {
+      response?: { body?: { errors?: Array<{ message: string }> } };
+      message?: string;
+    };
     console.error('SendGrid error:', err.response?.body || err.message);
     return {
       success: false,
@@ -84,9 +87,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<{
 /**
  * Send bulk emails (uses SendGrid's batch sending)
  */
-export async function sendBulkEmails(
-  emails: SendEmailOptions[]
-): Promise<{
+export async function sendBulkEmails(emails: SendEmailOptions[]): Promise<{
   success: boolean;
   sent: number;
   failed: number;
@@ -112,11 +113,11 @@ export async function sendBulkEmails(
   const batchSize = 100;
   for (let i = 0; i < emails.length; i += batchSize) {
     const batch = emails.slice(i, i + batchSize);
-    
+
     try {
-      const messages = batch.map(options => {
+      const messages = batch.map((options) => {
         let htmlBody = options.htmlBody;
-        
+
         if (options.outreachId) {
           htmlBody = injectTrackingPixel(htmlBody, options.outreachId);
           htmlBody = wrapLinksWithTracking(htmlBody, options.outreachId);
@@ -145,7 +146,10 @@ export async function sendBulkEmails(
       await sgMail.send(messages);
       results.sent += batch.length;
     } catch (error: unknown) {
-      const err = error as { response?: { body?: { errors?: Array<{ message: string }> } }; message?: string };
+      const err = error as {
+        response?: { body?: { errors?: Array<{ message: string }> } };
+        message?: string;
+      };
       console.error('Batch send error:', err.response?.body || err.message);
       results.failed += batch.length;
       results.errors.push(
@@ -183,11 +187,11 @@ export function isValidEmail(email: string): boolean {
  */
 export function renderTemplate(template: string, variables: Record<string, unknown>): string {
   let rendered = template;
-  
+
   Object.entries(variables).forEach(([key, value]) => {
     const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
     rendered = rendered.replace(regex, value?.toString() || '');
   });
-  
+
   return rendered;
 }

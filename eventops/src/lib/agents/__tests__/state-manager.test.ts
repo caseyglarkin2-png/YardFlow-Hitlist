@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
 import { AgentStateManager } from '../state-manager';
 
 // Mock Prisma
@@ -54,7 +54,7 @@ describe('AgentStateManager', () => {
         completedAt: null,
       };
 
-      (prisma.agent_tasks.create as any).mockResolvedValue(mockTask);
+      (prisma.agent_tasks.create as Mock).mockResolvedValue(mockTask);
 
       const result = await manager.createTask({
         agentType: 'research',
@@ -92,7 +92,7 @@ describe('AgentStateManager', () => {
         completedAt: null,
       };
 
-      (prisma.agent_tasks.update as any).mockResolvedValue(mockTask);
+      (prisma.agent_tasks.update as Mock).mockResolvedValue(mockTask);
 
       const result = await manager.updateTaskStatus('task_123', 'in_progress');
 
@@ -123,7 +123,7 @@ describe('AgentStateManager', () => {
         completedAt: new Date(),
       };
 
-      (prisma.agent_tasks.update as any).mockResolvedValue(mockTask);
+      (prisma.agent_tasks.update as Mock).mockResolvedValue(mockTask);
 
       const result = await manager.updateTaskStatus(
         'task_123',
@@ -158,8 +158,8 @@ describe('AgentStateManager', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent_tasks.findUnique as any).mockResolvedValue(existingTask);
-      (prisma.agent_tasks.update as any).mockResolvedValue(updatedTask);
+      (prisma.agent_tasks.findUnique as Mock).mockResolvedValue(existingTask);
+      (prisma.agent_tasks.update as Mock).mockResolvedValue(updatedTask);
 
       const result = await manager.failTask('task_123', 'API timeout');
 
@@ -190,8 +190,8 @@ describe('AgentStateManager', () => {
         completedAt: new Date(),
       };
 
-      (prisma.agent_tasks.findUnique as any).mockResolvedValue(existingTask);
-      (prisma.agent_tasks.update as any).mockResolvedValue(updatedTask);
+      (prisma.agent_tasks.findUnique as Mock).mockResolvedValue(existingTask);
+      (prisma.agent_tasks.update as Mock).mockResolvedValue(updatedTask);
 
       const result = await manager.failTask('task_123', 'API timeout');
 
@@ -227,7 +227,7 @@ describe('AgentStateManager', () => {
         },
       ];
 
-      (prisma.agent_tasks.findMany as any).mockResolvedValue(mockTasks);
+      (prisma.agent_tasks.findMany as Mock).mockResolvedValue(mockTasks);
 
       const metrics = await manager.getAgentMetrics('research', 7);
 

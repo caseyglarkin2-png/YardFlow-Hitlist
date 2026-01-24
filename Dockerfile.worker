@@ -21,18 +21,14 @@ RUN npx prisma generate
 COPY eventops/src ./src
 COPY eventops/tsconfig.json ./tsconfig.json
 
-# Copy startup script
-COPY start-worker.sh /app/start-worker.sh
-RUN chmod +x /app/start-worker.sh
-
-# Return to app directory
-WORKDIR /app
-
 # Set environment
 ENV NODE_ENV=production
+
+# Stay in eventops directory for proper module resolution
+# WORKDIR is already /app/eventops from the install step
 
 # Expose health check port
 EXPOSE 8080
 
-# Start worker
-CMD ["./start-worker.sh"]
+# Start worker directly with tsx (no shell script needed)
+CMD ["./node_modules/.bin/tsx", "./src/lib/queue/workers.ts"]

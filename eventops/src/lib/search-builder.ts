@@ -7,9 +7,7 @@ export interface PrismaFilter {
 }
 
 export function buildPrismaWhere(filters: AdvancedFilters): PrismaFilter {
-  const conditions = filters.conditions.map((condition) =>
-    conditionToPrisma(condition)
-  );
+  const conditions = filters.conditions.map((condition) => conditionToPrisma(condition));
 
   if (filters.logic === 'AND') {
     return { AND: conditions };
@@ -26,20 +24,20 @@ function conditionToPrisma(condition: FilterCondition): any {
       // Try to parse as number for numeric fields
       const numValue = Number(value);
       return { [field]: isNaN(numValue) ? value : numValue };
-    
+
     case 'contains':
       return { [field]: { contains: value, mode: 'insensitive' } };
-    
+
     case 'greaterThan':
       return { [field]: { gt: Number(value) } };
-    
+
     case 'lessThan':
       return { [field]: { lt: Number(value) } };
-    
+
     case 'in':
       const values = value.split(',').map((v) => v.trim());
       return { [field]: { in: values } };
-    
+
     default:
       return { [field]: value };
   }
@@ -50,19 +48,21 @@ export function exportToCSV(data: any[], filename: string) {
 
   // Get headers from first object
   const headers = Object.keys(data[0]);
-  
+
   // Build CSV content
   const csvContent = [
     headers.join(','),
     ...data.map((row) =>
-      headers.map((header) => {
-        const value = row[header];
-        // Escape values with commas or quotes
-        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value ?? '';
-      }).join(',')
+      headers
+        .map((header) => {
+          const value = row[header];
+          // Escape values with commas or quotes
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value ?? '';
+        })
+        .join(',')
     ),
   ].join('\n');
 

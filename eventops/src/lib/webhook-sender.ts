@@ -1,9 +1,8 @@
-
 export async function sendWebhook(event: string, data: unknown) {
   // TODO: Implement webhooks when schema is ready
   console.log('Webhook stubbed:', event, data);
   return { sent: 0, failed: 0 };
-  
+
   /* ORIGINAL CODE - DISABLED (webhooks table doesn't exist)
   try {
     // Get active webhooks for this event

@@ -22,12 +22,25 @@ export interface ContentRequest {
 }
 
 export interface PurposedContent {
-  original: unknown;
+  original: ContentData;
   personalized: string;
   metadata: {
     source: string;
     adaptations: string[];
   };
+}
+
+// Generic content data structure from external APIs
+interface ContentData {
+  title?: string;
+  content?: string;
+  body?: string;
+  subject?: string;
+  platform?: string;
+  industry?: string;
+  placeholder?: boolean;
+  persona?: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -55,7 +68,7 @@ export class ContentPurposingAgent {
         await agentStateManager.updateTaskStatus(task.id, 'in_progress');
       }
 
-      let original: any;
+      let original: ContentData;
       let personalized: string;
       const adaptations: string[] = [];
 
@@ -119,7 +132,7 @@ export class ContentPurposingAgent {
     }
   }
 
-  private async fetchCaseStudy(industry: string): Promise<any> {
+  private async fetchCaseStudy(industry: string): Promise<ContentData> {
     try {
       const response = await fetch(`${CONTENT_HUB_BASE}/case-studies?industry=${industry}`);
       return await response.json();
@@ -129,7 +142,7 @@ export class ContentPurposingAgent {
     }
   }
 
-  private async fetchROITemplate(): Promise<any> {
+  private async fetchROITemplate(): Promise<ContentData> {
     try {
       const response = await fetch(`${CONTENT_HUB_BASE}/roi/template`);
       return await response.json();
@@ -139,7 +152,7 @@ export class ContentPurposingAgent {
     }
   }
 
-  private async fetchEmailTemplate(persona: string): Promise<any> {
+  private async fetchEmailTemplate(persona: string): Promise<ContentData> {
     try {
       const response = await fetch(`${CONTENT_HUB_BASE}/messaging/${persona}`);
       return await response.json();
@@ -149,7 +162,7 @@ export class ContentPurposingAgent {
     }
   }
 
-  private async fetchSocialTemplate(persona: string): Promise<any> {
+  private async fetchSocialTemplate(persona: string): Promise<ContentData> {
     try {
       const response = await fetch(`${CONTENT_HUB_BASE}/social/${persona}`);
       return await response.json();
@@ -159,7 +172,7 @@ export class ContentPurposingAgent {
     }
   }
 
-  private adaptCaseStudy(original: any, persona: string): string {
+  private adaptCaseStudy(original: ContentData, persona: string): string {
     // TODO: Implement AI-powered adaptation
     // 1. Extract key metrics relevant to persona
     // 2. Reframe pain points in persona's language
@@ -167,23 +180,23 @@ export class ContentPurposingAgent {
     return JSON.stringify({ ...original, adaptedFor: persona });
   }
 
-  private adaptROICalculator(original: any, persona: string): string {
+  private adaptROICalculator(original: ContentData, persona: string): string {
     // TODO: Adjust assumptions and multipliers based on persona
     return JSON.stringify({ ...original, personaMultiplier: persona });
   }
 
-  private adaptEmailTemplate(original: any, goal: string): string {
+  private adaptEmailTemplate(original: ContentData, goal: string): string {
     // TODO: Adjust CTA and urgency based on campaign goal
     return JSON.stringify({ ...original, optimizedFor: goal });
   }
 
-  private adaptSocialPost(original: any, industry?: string): string {
+  private adaptSocialPost(original: ContentData, industry?: string): string {
     // TODO: Add industry-specific hashtags and context
     return JSON.stringify({ ...original, industry });
   }
 
   // Default fallback content when external API unavailable
-  private getDefaultCaseStudy(): any {
+  private getDefaultCaseStudy(): ContentData {
     return {
       title: 'Logistics Efficiency Case Study',
       content: 'Sample case study content',
@@ -191,14 +204,14 @@ export class ContentPurposingAgent {
     };
   }
 
-  private getDefaultMessaging(): any {
+  private getDefaultMessaging(): ContentData {
     return {
       subject: 'Improve Your Operations',
       body: 'Sample messaging content',
     };
   }
 
-  private getDefaultSocialTemplate(): any {
+  private getDefaultSocialTemplate(): ContentData {
     return {
       platform: 'linkedin',
       content: 'Sample social post template',

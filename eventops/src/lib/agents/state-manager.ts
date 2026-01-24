@@ -75,7 +75,7 @@ export class AgentStateManager {
     const task = await prisma.agent_tasks.create({
       data: {
         agentType: input.agentType,
-        inputData: input.inputData as any,
+        inputData: input.inputData as object,
         accountId: input.accountId,
         contactId: input.contactId,
         parentTaskId: input.parentTaskId,
@@ -95,12 +95,12 @@ export class AgentStateManager {
   async updateTaskStatus(
     taskId: string,
     status: AgentTaskStatus,
-    output?: Record<string, any>,
+    output?: Record<string, unknown>,
     error?: string
   ): Promise<AgentTaskResult> {
     logger.info('Updating agent task status', { taskId, status });
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       status,
       updatedAt: new Date(),
     };
@@ -356,13 +356,29 @@ export class AgentStateManager {
   /**
    * Map database task to result type.
    */
-  private mapTaskToResult(task: any): AgentTaskResult {
+  private mapTaskToResult(task: {
+    id: string;
+    agentType: string;
+    status: string;
+    inputData: unknown;
+    outputData: unknown;
+    errorMessage: string | null;
+    accountId: string | null;
+    contactId: string | null;
+    parentTaskId: string | null;
+    retryCount: number;
+    maxRetries: number;
+    createdAt: Date;
+    updatedAt: Date;
+    startedAt: Date | null;
+    completedAt: Date | null;
+  }): AgentTaskResult {
     return {
       id: task.id,
       agentType: task.agentType as AgentType,
       status: task.status as AgentTaskStatus,
-      inputData: task.inputData as Record<string, any>,
-      outputData: task.outputData as Record<string, any> | undefined,
+      inputData: task.inputData as Record<string, unknown>,
+      outputData: task.outputData as Record<string, unknown> | undefined,
       errorMessage: task.errorMessage || undefined,
       accountId: task.accountId || undefined,
       contactId: task.contactId || undefined,

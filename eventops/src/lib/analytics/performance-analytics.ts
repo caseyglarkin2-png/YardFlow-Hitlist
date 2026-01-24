@@ -59,7 +59,9 @@ class PerformanceAnalytics {
     sequenceId: string,
     timeRange?: { start: Date; end: Date }
   ): Promise<CampaignMetrics> {
-    const whereClause: { sequence_id: string; created_at?: { gte: Date; lte: Date } } = { sequence_id: sequenceId };
+    const whereClause: { sequence_id: string; created_at?: { gte: Date; lte: Date } } = {
+      sequence_id: sequenceId,
+    };
 
     if (timeRange) {
       whereClause.created_at = {
