@@ -34,10 +34,12 @@ set -e # Re-enable exit-on-error
 
 # 2. Start Application
 # Ensure we bind to all interfaces for Docker/Railway
+# Railway requires 0.0.0.0 to accept external traffic
 export HOST=0.0.0.0
+export HOSTNAME="0.0.0.0" 
 export PORT=${PORT:-3000}
 
-log_info "Starting Next.js standalone server on $HOST:$PORT"
+log_info "Starting Next.js standalone server on $HOSTNAME:$PORT"
 
 # Check if standalone server exists
 if [ ! -f ".next/standalone/server.js" ]; then

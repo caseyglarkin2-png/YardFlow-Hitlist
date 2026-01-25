@@ -8,16 +8,20 @@ function getRedisConfig() {
   const redisUrl = process.env.REDIS_URL;
   
   if (redisUrl) {
-    // Railway provides REDIS_URL in the format: redis://default:password@host:port
-    const url = new URL(redisUrl);
-    
-    return {
-      host: url.hostname,
-      port: parseInt(url.port || '6379', 10),
-      password: url.password || undefined,
-      maxRetriesPerRequest: null, // Required for BullMQ
-      enableReadyCheck: false,
-    };
+    try {
+      // Railway provides REDIS_URL in the format: redis://default:password@host:port
+      const url = new URL(redisUrl);
+      
+      return {
+        host: url.hostname,
+        port: parseInt(url.port || '6379', 10),
+        password: url.password || undefined,
+        maxRetriesPerRequest: null, // Required for BullMQ
+        enableReadyCheck: false,
+      };
+    } catch (error) {
+       logger.warn('Invalid REDIS_URL environment variable, falling back to components', { error });
+    }
   }
   
   // Fallback to individual environment variables
@@ -30,20 +34,19 @@ function getRedisConfig() {
   };
 }
 
-export const redisConfig = getRedisConfig();
-
 // ✅ Lazy initialization - connection only created when needed
 let redisConnection: Redis | null = null;
 
 export function getRedisConnection(): Redis {
   if (!redisConnection) {
-    redisConnection = new Redis(redisConfig);
+    const config = getRedisConfig();
+    redisConnection = new Redis(config);
 
     // Event handlers
     redisConnection.on('connect', () => {
       logger.info('Redis connection established', {
-        host: redisConfig.host,
-        port: redisConfig.port,
+        host: config.host,
+        port: config.port,
       });
     });
 

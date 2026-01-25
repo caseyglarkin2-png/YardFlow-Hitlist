@@ -1,9 +1,30 @@
 import { Client } from '@hubspot/api-client';
 import { logger } from '@/lib/logger';
 
-// Initialize HubSpot client
-const hubspotClient = new Client({
-  accessToken: process.env.HUBSPOT_API_KEY,
+// Lazy Initialize HubSpot client (Singleton)
+let hubspotClientInstance: Client | null = null;
+
+function getHubSpotClient(): Client {
+  if (!hubspotClientInstance) {
+    if (!process.env.HUBSPOT_API_KEY) {
+      logger.warn('⚠️ HUBSPOT_API_KEY missing - HubSpot integration will fail');
+    }
+    hubspotClientInstance = new Client({
+      accessToken: process.env.HUBSPOT_API_KEY,
+    });
+  }
+  return hubspotClientInstance;
+}
+
+// Export for direct access if needed, utilizing the lazy getter
+export const hubspotClient = new Proxy({} as Client, {
+  get: (_target, prop) => {
+    // Determine the target client instance
+    const instance = getHubSpotClient();
+    // Reflect onto that instance
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (instance as any)[prop];
+  },
 });
 
 /**
