@@ -14,6 +14,33 @@
 
 ---
 
+## Sprint 31: Production Recovery & Observability (proposed)
+**Goal**: Restore externally reachable web app, lock in health/smoke checks, and make worker/web deploys observable and rollback-ready.
+
+### P0 (must ship)
+- **31.1 Web 502 fix** — Ensure `railway.json` start command is `cd eventops && npx prisma migrate deploy && node .next/standalone/server.js -p 8080` with `HOST=0.0.0.0`; verify `NEXTAUTH_URL`, `AUTH_SECRET`, `DATABASE_URL`, `REDIS_URL`. Validation: `curl /api/ping` and `curl /api/health` return 200 in Railway deploy logs.
+- **31.2 Runtime env gate** — Add script to fail build if required env names are missing (no values). Validation: CI step `npm run config:check` fails when a required name is absent; Railway build passes when present.
+- **31.3 Health endpoints split** — Add `/api/ping` (no deps) and keep `/api/health` (DB+Redis+auth). Validation: smoke script hits both; `/api/health` returns 200/503 with JSON checks.
+- **31.4 Post-deploy smoke** — Add `npm run smoke:prod` curling `/api/ping`, `/api/health`, `/api/login` redirect, `/api/queue/status` (auth). Wire into GitHub Actions + Railway post-deploy hook. Validation: CI/Hook fails on non-200.
+- **31.5 Worker healthcheck** — Worker HTTP `/healthz` doing Redis ping + queue depth sample; set healthcheck path in `railway-worker.json`. Validation: `curl localhost:<port>/healthz` in deploy log shows 200 and counts.
+- **31.6 Queue status endpoint** — `/api/queue/status` (auth required) returns queue counts/failures. Validation: 200 with metrics when authed; 401 when not.
+
+### P1 (should ship)
+- **31.7 Structured logging & trace IDs** — Wrap API routes and worker jobs to emit `request_id`, status, latency. Validation: unit test middleware injects IDs; log sample in README.
+- **31.8 Error boundaries** — Next.js `error.tsx` logs via `@/lib/logger` with non-PII session/user metadata. Validation: simulated throw renders error page and logs once.
+- **31.9 Seed/fixtures safety** — Gate seeds with `ENABLE_SEED_SMOKE`; add staging/demo seed if DB empty. Validation: unit test guard; manual run shows demo account created once.
+- **31.10 Auth hardening** — Enforce `trustHost: true`, validate `NEXTAUTH_URL` host against request host, reject unknown callback URLs. Validation: unit test callback validator.
+- **31.11 Config drift check** — `npm run config:check` ensures `railway*.json` start/health commands match expected values. Validation: CI fails on drift.
+- **31.12 Security headers** — Add HSTS + CSP (report-only first) + secure cookies via middleware/next.config. Validation: integration test asserts headers on `/` and `/login`.
+
+### Demo criteria
+- Web domain responds 200 on `/api/ping` and `/api/health` from outside Railway.
+- Worker healthcheck returns 200 with Redis/queue stats.
+- Smoke job wired to CI + Railway and fails on regressions.
+- Logs include request IDs and latency for at least one API route.
+
+---
+
 ## �🔍 PRODUCTION STATUS ASSESSMENT
 
 ### ✅ What's Actually WORKING
