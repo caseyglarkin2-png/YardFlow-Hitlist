@@ -3,7 +3,18 @@ import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Lazy initialization to avoid build-time API key validation
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is not set');
+    }
+    openaiClient = new OpenAI({ apiKey });
+  }
+  return openaiClient;
+}
 
 export async function GET(
   request: NextRequest,
@@ -83,7 +94,7 @@ Provide insights in JSON format:
 }`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: 'gpt-4',
       messages: [
         {
