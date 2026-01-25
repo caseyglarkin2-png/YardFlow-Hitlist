@@ -66,6 +66,13 @@ Independent AI workers coordinated via `agent_tasks` table and `BullMQ`.
 
 ## Critical Workflows
 
+## Deployment Critical Warnings
+
+### Duplicate Services Warning
+**CRITICAL**: Ensure there is only **ONE** web service running the main application (`YardFlow-Hitlist`).
+Delete any duplicate services (e.g., `YardFlow-Web`) completely.
+**Reason**: Multiple services booting simultaneously create race conditions during Prisma Migrations (`npx prisma migrate deploy`), causing database locks and boot crashes.
+
 ### Queue System (BullMQ)
 - **Queues**: `enrichment`, `outreach`, `sequence-steps`, `agents`
 - **Workers**: All defined in `src/lib/queue/workers.ts`
