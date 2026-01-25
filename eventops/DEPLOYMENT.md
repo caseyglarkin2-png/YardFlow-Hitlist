@@ -121,7 +121,7 @@ jobs:
 
 ### 7. Test Your Deployment
 
-1. Visit your Vercel URL (e.g., `https://eventops.vercel.app`)
+1. Visit your Vercel URL (e.g., `https://yardflow-hitlist-production-2f41.up.railway.app`)
 2. Should see the EventOps landing page
 3. Login with:
    - **Admin:** casey@eventops.com / password

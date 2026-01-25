@@ -85,7 +85,7 @@ curl -X POST http://localhost:3000/api/sprints/complete \
         "validation": "OAuth flow tested, tokens stored"
       }
     ],
-    "productionUrl": "https://yard-flow-hitlist.vercel.app",
+    "productionUrl": "https://yardflow-hitlist-production-2f41.up.railway.app",
     "commitHash": "8b906ce",
     "deploymentStatus": "live",
     "nextSprint": {
@@ -231,7 +231,7 @@ Demo: User connects Google account, meetings auto-import
 
 📊 Performance: Build -12.5%, API -8.2%, Coverage +5.2%
 ✅ Tasks: 6/6 completed
-🚀 Deployed: https://yard-flow-hitlist.vercel.app
+🚀 Deployed: https://yardflow-hitlist-production-2f41.up.railway.app
 ```
 
 ---
