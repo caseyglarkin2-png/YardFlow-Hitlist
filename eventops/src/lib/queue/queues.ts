@@ -93,7 +93,6 @@ export const agentQueue = {
         connection: getRedisConnection(),
         defaultJobOptions: {
           ...defaultJobOptions,
-          timeout: 3600000, // 1 hour for agent tasks
         },
       });
     }
