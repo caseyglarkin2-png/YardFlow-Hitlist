@@ -45,7 +45,7 @@ export function useAgentMonitoring(timeRange: '24h' | '7d' | '30d' = '24h', agen
     try {
       // Don't set global loading on refresh to avoid UI flicker
       if (!data) setLoading(true);
-      
+
       const params = new URLSearchParams({ timeRange });
       if (agentType) params.append('agentType', agentType);
 

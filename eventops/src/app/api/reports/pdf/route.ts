@@ -268,7 +268,7 @@ function generateReportHTML(data: any): string {
 
   <div class="footer">
     <p>EventOps - Event Intelligence Platform</p>
-    <p>https://yard-flow-hitlist.vercel.app</p>
+    <p>https://yardflow-hitlist-production-2f41.up.railway.app</p>
     <p class="no-print">
       <button onclick="window.print()" style="margin-top: 10px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">
         Print / Save as PDF

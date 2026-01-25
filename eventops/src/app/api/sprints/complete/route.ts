@@ -122,7 +122,7 @@ export async function POST(request: Request) {
  *         "validation": "100 events imported successfully"
  *       }
  *     ],
- *     "productionUrl": "https://yard-flow-hitlist.vercel.app",
+ *     "productionUrl": "https://yardflow-hitlist-production-2f41.up.railway.app",
  *     "commitHash": "8b906ce",
  *     "deploymentStatus": "live",
  *     "nextSprint": {

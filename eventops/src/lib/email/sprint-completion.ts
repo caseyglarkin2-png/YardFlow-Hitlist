@@ -430,7 +430,7 @@ export async function sendSprintCompletionEmail(
  *     { id: '18.1', name: 'Google OAuth Setup', validation: 'OAuth flow tested, tokens stored' },
  *     { id: '18.2', name: 'Calendar Sync', validation: '100 events imported successfully' },
  *   ],
- *   productionUrl: 'https://yard-flow-hitlist.vercel.app',
+ *   productionUrl: 'https://yardflow-hitlist-production-2f41.up.railway.app',
  *   commitHash: '8b906ce',
  *   deploymentStatus: 'live',
  *   recommendations: ['Consider rate limiting for calendar API', 'Add retry logic for Gmail sync'],

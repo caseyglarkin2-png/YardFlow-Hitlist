@@ -3,7 +3,7 @@
 
 set -e
 
-PROD_URL="https://yard-flow-hitlist.vercel.app"
+PROD_URL="https://yardflow-hitlist-production-2f41.up.railway.app"
 
 echo "🎯 Sprint 18 - Google Integration Verification"
 echo "==============================================="

@@ -51,7 +51,7 @@ export default function AgentsDashboardPage() {
 
   if (loading && !data) {
     return (
-      <div className="flex h-64 items-center justify-center flex-col gap-4">
+      <div className="flex h-64 flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <div className="text-muted-foreground">Loading squad status...</div>
       </div>

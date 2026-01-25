@@ -53,7 +53,7 @@ echo "Run: vercel deploy --prod"
 echo ""
 
 echo "✨ Next steps:"
-echo "  1. Navigate to: https://yard-flow-hitlist.vercel.app/dashboard/settings/integrations"
+echo "  1. Navigate to: https://yardflow-hitlist-production-2f41.up.railway.app/dashboard/settings/integrations"
 echo "  2. Click 'Connect Google Account'"
 echo "  3. Complete OAuth flow"
 echo "  4. Toggle dry-run mode off when ready for live sync"

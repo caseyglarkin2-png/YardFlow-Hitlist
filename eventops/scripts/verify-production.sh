@@ -7,7 +7,7 @@ echo ""
 
 # Check if deployed
 echo "1️⃣  Checking production deployment..."
-PROD_URL="https://yard-flow-hitlist.vercel.app"
+PROD_URL="https://yardflow-hitlist-production-2f41.up.railway.app"
 
 # Test main app
 if curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" | grep -q "200"; then

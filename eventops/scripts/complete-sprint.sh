@@ -85,7 +85,7 @@ echo ""
 echo "🚀 Deployment Status:"
 echo "   Production URL (or press Enter for default):"
 read PROD_URL
-PROD_URL=${PROD_URL:-"https://yard-flow-hitlist.vercel.app"}
+PROD_URL=${PROD_URL:-"https://yardflow-hitlist-production-2f41.up.railway.app"}
 
 echo "   Deployment status (live/failed/pending):"
 read DEPLOY_STATUS
