@@ -54,6 +54,8 @@ else
 fi
 
 test_endpoint "Login page" "$BASE_URL/login" 200
+test_endpoint "Ping" "$BASE_URL/api/ping" 200
+test_endpoint "Health" "$BASE_URL/api/health" 200
 
 echo ""
 echo "═══════════════════════════════════════"

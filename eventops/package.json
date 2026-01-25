@@ -14,6 +14,7 @@
     "postinstall": "prisma generate",
     "backup:create": "chmod +x scripts/backup-database.sh && cd \"$PWD\" && ./scripts/backup-database.sh",
     "metrics:baseline": "npx tsx scripts/collect-baseline-metrics.ts",
+    "config:check": "tsx scripts/config-check.ts",
     "test:smoke": "chmod +x tests/smoke/smoke-test.sh && ./tests/smoke/smoke-test.sh",
     "test:smoke:prod": "npm run test:smoke https://yard-flow-hitlist.vercel.app",
     "test:smoke:local": "npm run test:smoke http://localhost:3000",

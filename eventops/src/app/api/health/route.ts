@@ -1,135 +1,85 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { auth } from '@/auth';
+import { getRedisConnection } from '@/lib/queue/client';
+import { emailQueue, enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib/queue/queues';
 
-// Force dynamic rendering - never statically generate this route
 export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
 
-interface HealthCheck {
-  status: 'healthy' | 'unhealthy' | 'not-configured';
-  message?: string;
+const REQUIRED_ENV_VARS = [
+  'DATABASE_URL',
+  'AUTH_SECRET',
+  'REDIS_URL',
+  'GEMINI_API_KEY',
+  'GOOGLE_CLIENT_ID',
+  'GOOGLE_CLIENT_SECRET',
+  'SENDGRID_API_KEY',
+  'CRON_SECRET',
+];
+
+async function checkDatabase() {
+  const start = Date.now();
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return { status: 'ok', latencyMs: Date.now() - start };
+  } catch (error) {
+    return { status: 'error', error: (error as Error).message, latencyMs: Date.now() - start };
+  }
 }
 
-interface HealthResponse {
-  status: 'healthy' | 'unhealthy' | 'degraded';
-  timestamp: string;
-  checks: {
-    database: HealthCheck;
-    auth: HealthCheck;
-    env: HealthCheck;
-    redis: HealthCheck;
-  };
-  responseTime: number;
+async function checkRedis() {
+  const start = Date.now();
+  try {
+    const redis = getRedisConnection();
+    await redis.ping();
+    return { status: 'ok', latencyMs: Date.now() - start };
+  } catch (error) {
+    return { status: 'error', error: (error as Error).message, latencyMs: Date.now() - start };
+  }
+}
+
+async function getQueueCounts() {
+  try {
+    const [enrichment, outreach, emails, sequence] = await Promise.all([
+      enrichmentQueue.getJobCounts(),
+      outreachQueue.getJobCounts(),
+      emailQueue.getJobCounts(),
+      sequenceQueue.getJobCounts(),
+    ]);
+
+    return {
+      status: 'ok',
+      queues: {
+        enrichment,
+        outreach,
+        emails,
+        sequence,
+      },
+    };
+  } catch (error) {
+    return { status: 'error', error: (error as Error).message };
+  }
 }
 
 export async function GET() {
-  const startTime = Date.now();
-  const timestamp = new Date().toISOString();
-  const checks: HealthResponse['checks'] = {
-    database: { status: 'unhealthy' },
-    auth: { status: 'unhealthy' },
-    env: { status: 'unhealthy' },
-    redis: { status: 'not-configured' },
+  const envMissing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
+  const [db, redis, queueCounts] = await Promise.all([checkDatabase(), checkRedis(), getQueueCounts()]);
+
+  const healthy =
+    db.status === 'ok' && redis.status === 'ok' && envMissing.length === 0 && queueCounts.status === 'ok';
+
+  const response = {
+    status: healthy ? 'ok' : 'degraded',
+    checks: {
+      environment: {
+        status: envMissing.length === 0 ? 'ok' : 'missing',
+        missing: envMissing,
+      },
+      database: db,
+      redis,
+      queues: queueCounts,
+      timestamp: new Date().toISOString(),
+    },
   };
 
-  // Check database connectivity
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    checks.database = {
-      status: 'healthy',
-      message: 'Database connection successful',
-    };
-  } catch (error) {
-    checks.database = {
-      status: 'unhealthy',
-      message: error instanceof Error ? error.message : 'Database connection failed',
-    };
-  }
-
-  // Check auth system
-  try {
-    // Test that auth module can be called without errors
-    const session = await auth();
-    checks.auth = {
-      status: 'healthy',
-      message: session
-        ? 'Auth system operational (session found)'
-        : 'Auth system operational (no session)',
-    };
-  } catch (error) {
-    checks.auth = {
-      status: 'unhealthy',
-      message: error instanceof Error ? error.message : 'Auth system failed',
-    };
-  }
-
-  // Check environment variables
-  try {
-    const requiredEnvVars = ['DATABASE_URL', 'AUTH_SECRET'];
-
-    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
-
-    if (missingVars.length > 0) {
-      checks.env = {
-        status: 'unhealthy',
-        message: `Missing environment variables: ${missingVars.join(', ')}`,
-      };
-    } else {
-      checks.env = {
-        status: 'healthy',
-        message: 'All required environment variables present',
-      };
-    }
-  } catch (error) {
-    checks.env = {
-      status: 'unhealthy',
-      message: error instanceof Error ? error.message : 'Environment check failed',
-    };
-  }
-
-  // Check Redis connection (if configured)
-  if (process.env.REDIS_URL) {
-    try {
-      const { getRedisConnection } = await import('@/lib/queue/client');
-      const redis = getRedisConnection();
-      await redis.ping();
-      checks.redis = {
-        status: 'healthy',
-        message: 'Redis connection successful',
-      };
-    } catch (error) {
-      checks.redis = {
-        status: 'unhealthy',
-        message: error instanceof Error ? error.message : 'Redis connection failed',
-      };
-    }
-  } else {
-    checks.redis = {
-      status: 'not-configured',
-      message: 'Redis not configured (optional)',
-    };
-  }
-
-  // Determine overall health status
-  const allHealthy = Object.values(checks).every(
-    (check) => check.status === 'healthy' || check.status === 'not-configured'
-  );
-
-  const hasCriticalFailure =
-    checks.database.status === 'unhealthy' ||
-    checks.auth.status === 'unhealthy' ||
-    checks.env.status === 'unhealthy';
-
-  const response: HealthResponse = {
-    status: hasCriticalFailure ? 'unhealthy' : allHealthy ? 'healthy' : 'degraded',
-    timestamp,
-    checks,
-    responseTime: Date.now() - startTime,
-  };
-
-  const statusCode =
-    response.status === 'healthy' ? 200 : response.status === 'degraded' ? 200 : 503;
-
-  return NextResponse.json(response, { status: statusCode });
+  return NextResponse.json(response, { status: healthy ? 200 : 503 });
 }

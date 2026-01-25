@@ -122,7 +122,7 @@ function getSequenceWorker(): Worker {
 
 // Health check server for Railway monitoring
 const healthServer = http.createServer((req, res) => {
-  if (req.url === '/health' || req.url === '/') {
+  if (req.url === '/health' || req.url === '/healthz' || req.url === '/') {
     const enrichment = enrichmentWorker;
     const sequence = sequenceWorker;
     res.writeHead(200, { 'Content-Type': 'application/json' });

@@ -12,6 +12,7 @@ Event-driven Account-Based Marketing (ABM) platform built for targeting high-val
 - Root `/` contains Railway deployment configs (`railway.json`, `Dockerfile.worker`)
 - Application lives in `/eventops` subdirectory (Next.js app)
 - **Critical**: All `npm` commands run from `/eventops`, Railway build commands use `cd eventops && ...`
+- **Web Start Command**: MUST use explicit host/port: `HOST=0.0.0.0 PORT=8080 node .next/standalone/server.js`
 
 ### Database Access Pattern
 ```typescript
@@ -25,7 +26,7 @@ import { prisma } from '@/lib/db';
 **Import inconsistency exists**: Some files use `import { db as prisma }` - both work but prefer `{ prisma }` for new code.
 
 ### Lazy Initialization for External Services
-**CRITICAL**: Never initialize Redis, database connections, or external API clients at module load time:
+**CRITICAL - RAILWAY BUILD RULE**: Never initialize Redis, database connections, or external API clients at module load time. The Nixpacks builder will hang if these try to connect during the build phase.
 
 ```typescript
 // ✅ CORRECT - Lazy initialization
@@ -41,7 +42,11 @@ export function getRedisConnection(): Redis {
 export const redis = new Redis(config); // Runs at import time!
 ```
 
-**Why**: Railway Nixpacks analyzes imports during build, causing hangs if connections attempt during static analysis.
+### UI Development Standards
+- **Component Library**: Use **Shadcn UI** components from `@/components/ui/*`.
+- **Styling**: Tailwind CSS only. No CSS modules.
+- **Icons**: Use `lucide-react`.
+- **Pages**: Follow `dashboard/{feature}` structure.
 
 ### API Routes & Data Flow
 - **API Routes**: `/eventops/src/app/api/*/route.ts` - REST endpoints
