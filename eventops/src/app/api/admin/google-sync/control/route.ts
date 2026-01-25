@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { setGlobalSyncEnabled, getGlobalSyncEnabled } from '@/app/api/cron/google-sync/route';
+import { setGlobalSyncEnabled, getGlobalSyncEnabled } from '@/lib/google/sync-state';
 
 export async function POST(request: Request) {
   const session = await auth();

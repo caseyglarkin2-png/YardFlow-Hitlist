@@ -2,16 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { syncCalendarEvents } from '@/lib/google/calendar';
 import { logGoogleAPICall } from '@/lib/google/telemetry';
-
-let GLOBAL_SYNC_ENABLED = true;
-
-export function setGlobalSyncEnabled(enabled: boolean) {
-  GLOBAL_SYNC_ENABLED = enabled;
-}
-
-export function getGlobalSyncEnabled() {
-  return GLOBAL_SYNC_ENABLED;
-}
+import { getGlobalSyncEnabled } from '@/lib/google/sync-state';
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -19,7 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!GLOBAL_SYNC_ENABLED) {
+  if (!getGlobalSyncEnabled()) {
     return NextResponse.json({
       success: true,
       message: 'Global sync disabled',
