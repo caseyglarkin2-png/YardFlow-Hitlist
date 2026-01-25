@@ -6,6 +6,7 @@ try {
   require('./src/lib/db');
   console.log('Success: Imported db.ts without env vars');
 } catch (e) {
-  console.error('Crash: ' + e.message);
+  const message = e instanceof Error ? e.message : String(e);
+  console.error('Crash: ' + message);
   process.exit(1);
 }

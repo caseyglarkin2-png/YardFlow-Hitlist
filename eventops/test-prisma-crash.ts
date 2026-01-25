@@ -6,6 +6,7 @@ try {
   require('./src/lib/prisma');
   console.log('Success: Imported prisma.ts without env vars');
 } catch (e) {
-  console.error('Crash: ' + e.message);
+  const message = e instanceof Error ? e.message : String(e);
+  console.error('Crash: ' + message);
   process.exit(1);
 }
