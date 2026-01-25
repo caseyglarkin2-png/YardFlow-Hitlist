@@ -162,7 +162,10 @@ CTA: Can we schedule 15 minutes at Manifest Booth 247 to show you a live demo?
 
       mockGeminiClient.generateContent.mockResolvedValue(mockCTAs);
 
-      const result = await generator.generateBoothCTAs('Acme Waste', ['Route optimization', 'Fleet management']);
+      const result = await generator.generateBoothCTAs('Acme Waste', [
+        'Route optimization',
+        'Fleet management',
+      ]);
 
       expect(result).toHaveLength(5);
       expect(result[0]).toContain('demo');

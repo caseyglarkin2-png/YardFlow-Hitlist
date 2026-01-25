@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { DossierView } from '@/components/ai/DossierView';
 import { DossierGeneratorForm } from '@/components/ai/DossierGeneratorForm';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
-export default function CompanyDossierPage() {
+function DossierPageContent() {
   const searchParams = useSearchParams();
   const accountId = searchParams.get('accountId') || undefined;
   
@@ -149,5 +149,26 @@ export default function CompanyDossierPage() {
         />
       )}
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function DossierPageLoading() {
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+        <span className="ml-2 text-gray-600">Loading...</span>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Main component wrapped in Suspense for useSearchParams
+export default function CompanyDossierPage() {
+  return (
+    <Suspense fallback={<DossierPageLoading />}>
+      <DossierPageContent />
+    </Suspense>
   );
 }

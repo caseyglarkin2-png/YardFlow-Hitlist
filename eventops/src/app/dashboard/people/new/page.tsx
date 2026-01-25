@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 
-export default function NewPersonPage() {
+function NewPersonForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accountIdParam = searchParams.get('accountId');
@@ -311,5 +311,26 @@ export default function NewPersonPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function NewPersonLoading() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Add Person</h1>
+        <p className="mt-1 text-sm text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main component wrapped in Suspense for useSearchParams
+export default function NewPersonPage() {
+  return (
+    <Suspense fallback={<NewPersonLoading />}>
+      <NewPersonForm />
+    </Suspense>
   );
 }

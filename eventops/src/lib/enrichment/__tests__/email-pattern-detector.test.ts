@@ -164,8 +164,22 @@ describe('EmailPatternDetector', () => {
 
     it('should provide moderate recommendation for 50-80% confidence', async () => {
       const mockContacts = [
-        { id: '1', accountId: 'account-1', name: 'John Doe', email: 'john.doe@acme.com', target_accounts: {}, createdAt: new Date() },
-        { id: '2', accountId: 'account-1', name: 'Jane Smith', email: 'jsmith@acme.com', target_accounts: {}, createdAt: new Date() },
+        {
+          id: '1',
+          accountId: 'account-1',
+          name: 'John Doe',
+          email: 'john.doe@acme.com',
+          target_accounts: {},
+          createdAt: new Date(),
+        },
+        {
+          id: '2',
+          accountId: 'account-1',
+          name: 'Jane Smith',
+          email: 'jsmith@acme.com',
+          target_accounts: {},
+          createdAt: new Date(),
+        },
       ];
 
       (prisma.people.findMany as vi.Mock).mockResolvedValue(mockContacts);

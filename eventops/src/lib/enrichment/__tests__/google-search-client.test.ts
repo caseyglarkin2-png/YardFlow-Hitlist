@@ -47,11 +47,11 @@ describe('GoogleSearchClient', () => {
       await client.search('test 3');
 
       const calls = (global.fetch as vi.Mock).mock.calls;
-      const userAgents = calls.map(call => call[1]?.headers?.['User-Agent']);
+      const userAgents = calls.map((call) => call[1]?.headers?.['User-Agent']);
 
       // Should have different user agents (at least sometimes)
       expect(userAgents.length).toBe(3);
-      expect(userAgents.some(ua => ua?.includes('Mozilla'))).toBe(true);
+      expect(userAgents.some((ua) => ua?.includes('Mozilla'))).toBe(true);
     });
   });
 

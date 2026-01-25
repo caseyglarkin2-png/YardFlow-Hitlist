@@ -94,12 +94,14 @@ describe('WikipediaExtractor', () => {
               '12345': {
                 title: 'Acme Corp',
                 extract: 'Acme Corporation is a tech company.',
-                revisions: [{
-                  '*': '{{Infobox company\n| industry = Technology\n| founded = 2000\n| headquarters = San Francisco\n}}'
-                }]
-              }
-            }
-          }
+                revisions: [
+                  {
+                    '*': '{{Infobox company\n| industry = Technology\n| founded = 2000\n| headquarters = San Francisco\n}}',
+                  },
+                ],
+              },
+            },
+          },
         }),
       });
 
@@ -122,9 +124,9 @@ describe('WikipediaExtractor', () => {
         json: async () => ({
           query: {
             pages: {
-              '-1': { missing: true }
-            }
-          }
+              '-1': { missing: true },
+            },
+          },
         }),
       });
 

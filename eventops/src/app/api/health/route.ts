@@ -53,7 +53,9 @@ export async function GET() {
     const session = await auth();
     checks.auth = {
       status: 'healthy',
-      message: session ? 'Auth system operational (session found)' : 'Auth system operational (no session)',
+      message: session
+        ? 'Auth system operational (session found)'
+        : 'Auth system operational (no session)',
     };
   } catch (error) {
     checks.auth = {
@@ -64,14 +66,9 @@ export async function GET() {
 
   // Check environment variables
   try {
-    const requiredEnvVars = [
-      'DATABASE_URL',
-      'AUTH_SECRET',
-    ];
+    const requiredEnvVars = ['DATABASE_URL', 'AUTH_SECRET'];
 
-    const missingVars = requiredEnvVars.filter(
-      (varName) => !process.env[varName]
-    );
+    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
     if (missingVars.length > 0) {
       checks.env = {
@@ -118,10 +115,11 @@ export async function GET() {
   const allHealthy = Object.values(checks).every(
     (check) => check.status === 'healthy' || check.status === 'not-configured'
   );
-  
-  const hasCriticalFailure = checks.database.status === 'unhealthy' || 
-                             checks.auth.status === 'unhealthy' ||
-                             checks.env.status === 'unhealthy';
+
+  const hasCriticalFailure =
+    checks.database.status === 'unhealthy' ||
+    checks.auth.status === 'unhealthy' ||
+    checks.env.status === 'unhealthy';
 
   const response: HealthResponse = {
     status: hasCriticalFailure ? 'unhealthy' : allHealthy ? 'healthy' : 'degraded',
@@ -130,8 +128,8 @@ export async function GET() {
     responseTime: Date.now() - startTime,
   };
 
-  const statusCode = response.status === 'healthy' ? 200 : 
-                     response.status === 'degraded' ? 200 : 503;
+  const statusCode =
+    response.status === 'healthy' ? 200 : response.status === 'degraded' ? 200 : 503;
 
   return NextResponse.json(response, { status: statusCode });
 }

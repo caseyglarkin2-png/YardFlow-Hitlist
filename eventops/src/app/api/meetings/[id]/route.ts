@@ -21,10 +21,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Get meeting details
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -56,10 +53,7 @@ export async function GET(
 /**
  * Update meeting
  */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -85,10 +79,7 @@ export async function PATCH(
 /**
  * Delete meeting
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -104,10 +95,7 @@ export async function DELETE(
 /**
  * Generate meeting prep document
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -151,7 +139,9 @@ Title: ${meeting.people.title || 'Unknown'}
 Company: ${meeting.people.target_accounts.name}
 Industry: ${meeting.people.target_accounts.industry || 'Unknown'}
 
-${meeting.people.target_accounts.company_dossiers ? `
+${
+  meeting.people.target_accounts.company_dossiers
+    ? `
 Company Context:
 ${meeting.people.target_accounts.company_dossiers.companyOverview}
 
@@ -160,22 +150,32 @@ ${meeting.people.target_accounts.company_dossiers.keyPainPoints}
 
 Operational Scale:
 ${meeting.people.target_accounts.company_dossiers.operationalScale}
-` : ''}
+`
+    : ''
+}
 
-${meeting.people.contact_insights ? `
+${
+  meeting.people.contact_insights
+    ? `
 Contact Insights:
 - Role Context: ${meeting.people.contact_insights.roleContext}
 - Pain Points: ${meeting.people.contact_insights.likelyPainPoints}
 - Suggested Approach: ${meeting.people.contact_insights.suggestedApproach}
 - ROI Opportunity: ${meeting.people.contact_insights.roiOpportunity}
-` : ''}
+`
+    : ''
+}
 
-${meeting.people.target_accounts.roi_calculations?.[0] ? `
+${
+  meeting.people.target_accounts.roi_calculations?.[0]
+    ? `
 ROI Estimate:
 - Annual Savings: $${meeting.people.target_accounts.roi_calculations[0].annualSavings?.toLocaleString()}
 - Payback Period: ${meeting.people.target_accounts.roi_calculations[0].paybackPeriod} months
 - Facilities: ${meeting.people.target_accounts.roi_calculations[0].facilityCount}
-` : ''}
+`
+    : ''
+}
 
 Generate a 1-page meeting prep document with:
 1. Quick Facts (2-3 key points about company)
@@ -191,7 +191,8 @@ Keep it concise and actionable.`;
       messages: [
         {
           role: 'system',
-          content: 'You are a sales meeting preparation assistant. Generate concise, actionable prep documents.',
+          content:
+            'You are a sales meeting preparation assistant. Generate concise, actionable prep documents.',
         },
         { role: 'user', content: prompt },
       ],

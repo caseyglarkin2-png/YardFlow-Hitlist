@@ -28,10 +28,7 @@ describe('EmailValidator', () => {
     it('should accept valid email with MX records', async () => {
       (global.fetch as vi.Mock).mockResolvedValue({
         json: async () => ({
-          Answer: [
-            { data: '10 mx1.google.com' },
-            { data: '20 mx2.google.com' },
-          ],
+          Answer: [{ data: '10 mx1.google.com' }, { data: '20 mx2.google.com' }],
         }),
       });
 
@@ -106,11 +103,7 @@ describe('EmailValidator', () => {
         json: async () => ({ Answer: [{ data: '10 mx.example.com' }] }),
       });
 
-      const emails = [
-        'john@example.com',
-        'jane@example.com',
-        'invalidemail',
-      ];
+      const emails = ['john@example.com', 'jane@example.com', 'invalidemail'];
 
       const results = await validator.validateBatch(emails);
 

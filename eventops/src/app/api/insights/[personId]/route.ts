@@ -16,10 +16,7 @@ function getOpenAI(): OpenAI {
   return openaiClient;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { personId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { personId: string } }) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -32,10 +29,7 @@ export async function GET(
   return NextResponse.json(insights);
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { personId: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { personId: string } }) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -76,13 +70,17 @@ Persona: ${primaryPersona}
 Company: ${person.target_accounts.name}
 Industry: ${person.target_accounts.industry || 'Unknown'}
 
-${person.target_accounts.company_dossiers ? `
+${
+  person.target_accounts.company_dossiers
+    ? `
 Company Context:
 - Overview: ${person.target_accounts.company_dossiers.companyOverview || 'Unknown'}
 - Facility Count: ${person.target_accounts.company_dossiers.facilityCount || 'Unknown'}
 - Operational Scale: ${person.target_accounts.company_dossiers.operationalScale || 'Unknown'}
 - Key Pain Points: ${person.target_accounts.company_dossiers.keyPainPoints || 'Unknown'}
-` : 'No company research available.'}
+`
+    : 'No company research available.'
+}
 
 Provide insights in JSON format:
 {
@@ -107,9 +105,7 @@ Provide insights in JSON format:
       response_format: { type: 'json_object' },
     });
 
-    const insightsData = JSON.parse(
-      completion.choices[0].message.content || '{}'
-    );
+    const insightsData = JSON.parse(completion.choices[0].message.content || '{}');
 
     // Save insights to database
     const insights = await prisma.contact_insights.upsert({

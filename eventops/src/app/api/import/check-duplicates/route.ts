@@ -18,10 +18,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json(
-        { error: 'No active event selected' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No active event selected' }, { status: 400 });
     }
 
     const { type, data } = await request.json();
@@ -99,9 +96,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ results });
   } catch (error) {
     console.error('Error checking duplicates:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

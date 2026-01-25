@@ -105,7 +105,8 @@ describe('PatternApplicator', () => {
         { id: '2', accountId: 'account-1', name: 'Alice Johnson', email: null },
       ]);
 
-      mockDetector.generateEmail.mockReturnValueOnce('bob.wilson@acme.com')
+      mockDetector.generateEmail
+        .mockReturnValueOnce('bob.wilson@acme.com')
         .mockReturnValueOnce('alice.johnson@acme.com');
 
       const result = await applicator.enrichCompanyContacts('account-1', {

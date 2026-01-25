@@ -205,7 +205,7 @@ const createLazyProxy = (): GeminiProClient => {
         return value.bind(client);
       }
       return value;
-    }
+    },
   });
 };
 

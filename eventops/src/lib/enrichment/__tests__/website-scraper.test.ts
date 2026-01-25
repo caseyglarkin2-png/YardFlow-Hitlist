@@ -17,25 +17,34 @@ describe('WebsiteScraper', () => {
 
   describe('URL Validation', () => {
     it('should reject file:// protocol', async () => {
-      await expect(scraper.scrapeCompanyWebsite('Test', 'file:///etc/passwd')).rejects.toThrow('Invalid protocol');
+      await expect(scraper.scrapeCompanyWebsite('Test', 'file:///etc/passwd')).rejects.toThrow(
+        'Invalid protocol'
+      );
     });
 
     it('should reject localhost', async () => {
-      await expect(scraper.scrapeCompanyWebsite('Test', 'http://localhost:3000')).rejects.toThrow('internal URLs');
+      await expect(scraper.scrapeCompanyWebsite('Test', 'http://localhost:3000')).rejects.toThrow(
+        'internal URLs'
+      );
     });
 
     it('should reject 127.0.0.1', async () => {
-      await expect(scraper.scrapeCompanyWebsite('Test', 'http://127.0.0.1')).rejects.toThrow('internal URLs');
+      await expect(scraper.scrapeCompanyWebsite('Test', 'http://127.0.0.1')).rejects.toThrow(
+        'internal URLs'
+      );
     });
 
     it('should reject private IP 192.168.x.x', async () => {
-      await expect(scraper.scrapeCompanyWebsite('Test', 'http://192.168.1.1')).rejects.toThrow('private IP');
+      await expect(scraper.scrapeCompanyWebsite('Test', 'http://192.168.1.1')).rejects.toThrow(
+        'private IP'
+      );
     });
 
     it('should accept valid https URL', async () => {
       (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
-        text: async () => '<html><head><meta name="description" content="Test company"/></head></html>',
+        text: async () =>
+          '<html><head><meta name="description" content="Test company"/></head></html>',
       });
 
       const result = await scraper.scrapeCompanyWebsite('Test', 'https://example.com');
@@ -45,7 +54,8 @@ describe('WebsiteScraper', () => {
 
   describe('HTML Parsing', () => {
     it('should extract meta description', async () => {
-      const html = '<html><head><meta name="description" content="A great company" /></head></html>';
+      const html =
+        '<html><head><meta name="description" content="A great company" /></head></html>';
       (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
@@ -115,7 +125,9 @@ describe('WebsiteScraper', () => {
     it('should handle fetch timeout', async () => {
       (global.fetch as vi.Mock).mockRejectedValue(new Error('Timeout'));
 
-      await expect(scraper.scrapeCompanyWebsite('Test', 'https://slow-website.com')).rejects.toThrow();
+      await expect(
+        scraper.scrapeCompanyWebsite('Test', 'https://slow-website.com')
+      ).rejects.toThrow();
     });
 
     it('should handle HTTP errors', async () => {
@@ -124,7 +136,9 @@ describe('WebsiteScraper', () => {
         status: 404,
       });
 
-      await expect(scraper.scrapeCompanyWebsite('Test', 'https://example.com')).rejects.toThrow('HTTP 404');
+      await expect(scraper.scrapeCompanyWebsite('Test', 'https://example.com')).rejects.toThrow(
+        'HTTP 404'
+      );
     });
   });
 });
