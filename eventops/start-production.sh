@@ -36,5 +36,10 @@ if [ ! -f ".next/standalone/server.js" ]; then
   exit 1
 fi
 
+log_info "BINDING TO PORT: $PORT"
+
+# Navigate to standalone directory to ensure correct module resolution
+cd .next/standalone
+
 # exec replaces the shell with the node process (good for signal propagation/Docker)
-exec node .next/standalone/server.js
+exec node server.js
