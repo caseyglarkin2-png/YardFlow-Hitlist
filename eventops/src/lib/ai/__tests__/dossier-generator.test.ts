@@ -1,17 +1,17 @@
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { AIDossierGenerator } from '../dossier-generator';
 import { GeminiProClient } from '../gemini-client';
 
 // Mock GeminiProClient
-jest.mock('../gemini-client');
+vi.mock('../gemini-client');
 
 describe('AIDossierGenerator', () => {
   let generator: AIDossierGenerator;
-  let mockGeminiClient: jest.Mocked<GeminiProClient>;
+  let mockGeminiClient: vi.Mocked<GeminiProClient>;
 
   beforeEach(() => {
     mockGeminiClient = {
-      generateJSON: jest.fn(),
+      generateJSON: vi.fn(),
     } as any;
 
     generator = new AIDossierGenerator();
@@ -60,7 +60,7 @@ describe('AIDossierGenerator', () => {
       mockGeminiClient.generateJSON.mockResolvedValue(mockDossierData);
 
       // Mock database fetch
-      global.fetch = jest.fn().mockResolvedValue({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: mockCompanyData }),
       }) as any;
@@ -108,7 +108,7 @@ describe('AIDossierGenerator', () => {
 
       mockGeminiClient.generateJSON.mockResolvedValue(mockDossierData);
 
-      global.fetch = jest.fn().mockResolvedValue({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: mockCompanyData }),
       }) as any;
@@ -122,7 +122,7 @@ describe('AIDossierGenerator', () => {
     test('throws error when Gemini API fails', async () => {
       mockGeminiClient.generateJSON.mockRejectedValue(new Error('Gemini API error'));
 
-      global.fetch = jest.fn().mockResolvedValue({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: { company_name: 'Test' } }),
       }) as any;
@@ -152,7 +152,7 @@ describe('AIDossierGenerator', () => {
 
       mockGeminiClient.generateJSON.mockResolvedValue(mockDossierData);
 
-      global.fetch = jest.fn().mockResolvedValue({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: { company_name: 'Test' } }),
       }) as any;
@@ -189,7 +189,7 @@ describe('AIDossierGenerator', () => {
         };
       });
 
-      global.fetch = jest.fn().mockResolvedValue({
+      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: { company_name: 'Test' } }),
       }) as any;

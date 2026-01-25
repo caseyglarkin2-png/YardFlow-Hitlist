@@ -1,17 +1,17 @@
-import { describe, test, expect, beforeEach, jest } from '@jest/globals';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { BrandVoiceContentGenerator } from '../brand-voice-generator';
 import { GeminiProClient } from '../gemini-client';
 
 // Mock GeminiProClient
-jest.mock('../gemini-client');
+vi.mock('../gemini-client');
 
 describe('BrandVoiceContentGenerator', () => {
   let generator: BrandVoiceContentGenerator;
-  let mockGeminiClient: jest.Mocked<GeminiProClient>;
+  let mockGeminiClient: vi.Mocked<GeminiProClient>;
 
   beforeEach(() => {
     mockGeminiClient = {
-      generateContent: jest.fn(),
+      generateContent: vi.fn(),
     } as any;
 
     generator = new BrandVoiceContentGenerator();

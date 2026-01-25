@@ -2,16 +2,17 @@
  * Tests for Website Scraper
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WebsiteScraper } from '../website-scraper';
 
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('WebsiteScraper', () => {
   let scraper: WebsiteScraper;
 
   beforeEach(() => {
     scraper = new WebsiteScraper();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('URL Validation', () => {
@@ -32,7 +33,7 @@ describe('WebsiteScraper', () => {
     });
 
     it('should accept valid https URL', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => '<html><head><meta name="description" content="Test company"/></head></html>',
       });
@@ -45,7 +46,7 @@ describe('WebsiteScraper', () => {
   describe('HTML Parsing', () => {
     it('should extract meta description', async () => {
       const html = '<html><head><meta name="description" content="A great company" /></head></html>';
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
       });
@@ -56,7 +57,7 @@ describe('WebsiteScraper', () => {
 
     it('should handle malformed HTML gracefully', async () => {
       const html = '<html><head><meta name="description" content="Unclosed tag';
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
       });
@@ -67,7 +68,7 @@ describe('WebsiteScraper', () => {
 
     it('should extract founded year correctly', async () => {
       const html = '<p>Founded in 2005</p>';
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
       });
@@ -78,7 +79,7 @@ describe('WebsiteScraper', () => {
 
     it('should reject invalid founded years', async () => {
       const html = '<p>Founded in 1700</p>'; // Too old
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
       });
@@ -89,7 +90,7 @@ describe('WebsiteScraper', () => {
 
     it('should extract email addresses', async () => {
       const html = '<p>Contact: hello@example.com</p>';
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
       });
@@ -100,7 +101,7 @@ describe('WebsiteScraper', () => {
 
     it('should skip example emails', async () => {
       const html = '<p>Contact: email@example.com</p>';
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => html,
       });
@@ -112,13 +113,13 @@ describe('WebsiteScraper', () => {
 
   describe('Error Handling', () => {
     it('should handle fetch timeout', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Timeout'));
+      (global.fetch as vi.Mock).mockRejectedValue(new Error('Timeout'));
 
       await expect(scraper.scrapeCompanyWebsite('Test', 'https://slow-website.com')).rejects.toThrow();
     });
 
     it('should handle HTTP errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 404,
       });

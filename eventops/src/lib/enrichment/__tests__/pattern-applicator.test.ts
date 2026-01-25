@@ -2,38 +2,39 @@
  * Tests for Pattern Applicator
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PatternApplicator } from '../pattern-applicator';
 import { EmailPatternDetector } from '../email-pattern-detector';
 import { prisma } from '@/lib/db';
 
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   prisma: {
     target_accounts: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
     },
     people: {
-      findMany: jest.fn(),
-      update: jest.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
 
-jest.mock('../email-pattern-detector');
+vi.mock('../email-pattern-detector');
 
 describe('PatternApplicator', () => {
   let applicator: PatternApplicator;
-  let mockDetector: jest.Mocked<EmailPatternDetector>;
+  let mockDetector: vi.Mocked<EmailPatternDetector>;
 
   beforeEach(() => {
     applicator = new PatternApplicator();
     mockDetector = (applicator as any).detector;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('enrichCompanyContacts', () => {
     it('should return error when company not found', async () => {
-      (prisma.target_accounts.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.target_accounts.findUnique as vi.Mock).mockResolvedValue(null);
 
       const result = await applicator.enrichCompanyContacts('account-1');
 
@@ -42,7 +43,7 @@ describe('PatternApplicator', () => {
     });
 
     it('should return error when pattern confidence too low', async () => {
-      (prisma.target_accounts.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.target_accounts.findUnique as vi.Mock).mockResolvedValue({
         id: 'account-1',
         name: 'Acme Corp',
       });
@@ -75,7 +76,7 @@ describe('PatternApplicator', () => {
     });
 
     it('should apply patterns in dry run mode', async () => {
-      (prisma.target_accounts.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.target_accounts.findUnique as vi.Mock).mockResolvedValue({
         id: 'account-1',
         name: 'Acme Corp',
       });
@@ -99,7 +100,7 @@ describe('PatternApplicator', () => {
         recommendation: 'Strong pattern',
       });
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([
         { id: '1', accountId: 'account-1', name: 'Bob Wilson', email: null },
         { id: '2', accountId: 'account-1', name: 'Alice Johnson', email: null },
       ]);
@@ -119,7 +120,7 @@ describe('PatternApplicator', () => {
     });
 
     it('should actually update emails when dryRun=false', async () => {
-      (prisma.target_accounts.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.target_accounts.findUnique as vi.Mock).mockResolvedValue({
         id: 'account-1',
         name: 'Acme Corp',
       });
@@ -143,7 +144,7 @@ describe('PatternApplicator', () => {
         recommendation: 'Strong pattern',
       });
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([
         { id: '1', accountId: 'account-1', name: 'Bob Wilson', email: null },
       ]);
 
@@ -165,7 +166,7 @@ describe('PatternApplicator', () => {
     });
 
     it('should respect force option', async () => {
-      (prisma.target_accounts.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.target_accounts.findUnique as vi.Mock).mockResolvedValue({
         id: 'account-1',
         name: 'Acme Corp',
       });
@@ -189,7 +190,7 @@ describe('PatternApplicator', () => {
         recommendation: 'Strong pattern',
       });
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([
         { id: '1', accountId: 'account-1', name: 'Bob Wilson', email: 'old@email.com' },
       ]);
 
@@ -213,12 +214,12 @@ describe('PatternApplicator', () => {
 
   describe('enrichAllCompanies', () => {
     it('should process multiple companies', async () => {
-      (prisma.target_accounts.findMany as jest.Mock).mockResolvedValue([
+      (prisma.target_accounts.findMany as vi.Mock).mockResolvedValue([
         { id: 'account-1', name: 'Acme Corp' },
         { id: 'account-2', name: 'Beta Inc' },
       ]);
 
-      (prisma.target_accounts.findUnique as jest.Mock)
+      (prisma.target_accounts.findUnique as vi.Mock)
         .mockResolvedValueOnce({ id: 'account-1', name: 'Acme Corp' })
         .mockResolvedValueOnce({ id: 'account-2', name: 'Beta Inc' });
 
@@ -241,7 +242,7 @@ describe('PatternApplicator', () => {
         recommendation: 'Strong pattern',
       });
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([
         { id: '1', accountId: 'account-1', name: 'Bob Wilson', email: null },
       ]);
 

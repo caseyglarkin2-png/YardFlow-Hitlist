@@ -2,16 +2,17 @@
  * Tests for Wikipedia Extractor
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WikipediaExtractor } from '../wikipedia-extractor';
 
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('WikipediaExtractor', () => {
   let extractor: WikipediaExtractor;
 
   beforeEach(() => {
     extractor = new WikipediaExtractor();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Input Validation', () => {
@@ -34,7 +35,7 @@ describe('WikipediaExtractor', () => {
 
   describe('searchCompany', () => {
     it('should return first search result', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ['query', ['Apple Inc.', 'Apple Store'], [], []],
       });
@@ -44,7 +45,7 @@ describe('WikipediaExtractor', () => {
     });
 
     it('should return null when no results found', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ['query', [], [], []],
       });
@@ -54,7 +55,7 @@ describe('WikipediaExtractor', () => {
     });
 
     it('should handle JSON parse errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => {
           throw new Error('Invalid JSON');
@@ -66,7 +67,7 @@ describe('WikipediaExtractor', () => {
     });
 
     it('should handle HTTP errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 500,
       });
@@ -79,13 +80,13 @@ describe('WikipediaExtractor', () => {
   describe('extractCompanyData', () => {
     it('should extract infobox data', async () => {
       // Mock search
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ['query', ['Acme Corp'], [], []],
       });
 
       // Mock page data
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           query: {
@@ -111,12 +112,12 @@ describe('WikipediaExtractor', () => {
     });
 
     it('should handle missing pages', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ['query', ['Test'], [], []],
       });
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           query: {
@@ -132,12 +133,12 @@ describe('WikipediaExtractor', () => {
     });
 
     it('should handle malformed API response', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ['query', ['Test'], [], []],
       });
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as vi.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({}), // Missing query.pages
       });

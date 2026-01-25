@@ -2,17 +2,18 @@
  * Tests for Email Pattern Detector
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EmailPatternDetector } from '../email-pattern-detector';
 import { prisma } from '@/lib/db';
 
 // Mock prisma
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   prisma: {
     people: {
-      findMany: jest.fn(),
+      findMany: vi.fn(),
     },
     email_patterns: {
-      upsert: jest.fn(),
+      upsert: vi.fn(),
     },
   },
 }));
@@ -22,12 +23,12 @@ describe('EmailPatternDetector', () => {
 
   beforeEach(() => {
     detector = new EmailPatternDetector();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('detectPatternsForCompany', () => {
     it('should return empty result when no emails found', async () => {
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([]);
 
       const result = await detector.detectPatternsForCompany('account-1');
 
@@ -57,7 +58,7 @@ describe('EmailPatternDetector', () => {
         },
       ];
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue(mockContacts);
+      (prisma.people.findMany as vi.Mock).mockResolvedValue(mockContacts);
 
       const result = await detector.detectPatternsForCompany('account-1');
 
@@ -88,7 +89,7 @@ describe('EmailPatternDetector', () => {
         },
       ];
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue(mockContacts);
+      (prisma.people.findMany as vi.Mock).mockResolvedValue(mockContacts);
 
       const result = await detector.detectPatternsForCompany('account-1');
 
@@ -116,7 +117,7 @@ describe('EmailPatternDetector', () => {
         },
       ];
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue(mockContacts);
+      (prisma.people.findMany as vi.Mock).mockResolvedValue(mockContacts);
 
       const result = await detector.detectPatternsForCompany('account-1');
 
@@ -152,7 +153,7 @@ describe('EmailPatternDetector', () => {
         },
       ];
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue(mockContacts);
+      (prisma.people.findMany as vi.Mock).mockResolvedValue(mockContacts);
 
       const result = await detector.detectPatternsForCompany('account-1');
 
@@ -167,7 +168,7 @@ describe('EmailPatternDetector', () => {
         { id: '2', accountId: 'account-1', name: 'Jane Smith', email: 'jsmith@acme.com', target_accounts: {}, createdAt: new Date() },
       ];
 
-      (prisma.people.findMany as jest.Mock).mockResolvedValue(mockContacts);
+      (prisma.people.findMany as vi.Mock).mockResolvedValue(mockContacts);
 
       const result = await detector.detectPatternsForCompany('account-1');
 
@@ -225,7 +226,7 @@ describe('EmailPatternDetector', () => {
         },
       ];
 
-      (prisma.email_patterns.upsert as jest.Mock).mockResolvedValue({});
+      (prisma.email_patterns.upsert as vi.Mock).mockResolvedValue({});
 
       await detector.savePatternsToDatabase('account-1', patterns);
 

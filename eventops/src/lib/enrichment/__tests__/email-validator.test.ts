@@ -2,17 +2,18 @@
  * Tests for Email Validator
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EmailValidator } from '../email-validator';
 
 // Mock fetch for MX record checks
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('EmailValidator', () => {
   let validator: EmailValidator;
 
   beforeEach(() => {
     validator = new EmailValidator();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('validateEmail', () => {
@@ -25,7 +26,7 @@ describe('EmailValidator', () => {
     });
 
     it('should accept valid email with MX records', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         json: async () => ({
           Answer: [
             { data: '10 mx1.google.com' },
@@ -43,7 +44,7 @@ describe('EmailValidator', () => {
     });
 
     it('should reject email without MX records', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         json: async () => ({
           Answer: [],
         }),
@@ -56,7 +57,7 @@ describe('EmailValidator', () => {
     });
 
     it('should handle MX check failures gracefully', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (global.fetch as vi.Mock).mockRejectedValue(new Error('Network error'));
 
       const result = await validator.validateEmail('john@example.com');
 
@@ -65,7 +66,7 @@ describe('EmailValidator', () => {
     });
 
     it('should validate various email formats', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         json: async () => ({ Answer: [{ data: '10 mx.example.com' }] }),
       });
 
@@ -101,7 +102,7 @@ describe('EmailValidator', () => {
 
   describe('validateBatch', () => {
     it('should validate multiple emails', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         json: async () => ({ Answer: [{ data: '10 mx.example.com' }] }),
       });
 

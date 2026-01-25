@@ -30,6 +30,10 @@ export class GeminiProClient {
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GEMINI_API_KEY || '';
+    // Don't throw during module load/build - check at runtime when actually making requests
+  }
+
+  private ensureApiKey(): void {
     if (!this.apiKey) {
       throw new Error('GEMINI_API_KEY environment variable is required');
     }
@@ -47,6 +51,7 @@ export class GeminiProClient {
       topK?: number;
     } = {}
   ): Promise<string> {
+    this.ensureApiKey();
     const { temperature = 0.7, maxOutputTokens = 2048, topP = 0.95, topK = 40 } = options;
 
     try {
@@ -180,8 +185,30 @@ export class GeminiProClient {
   }
 }
 
-// Export singleton instance
-export const geminiPro = new GeminiProClient();
+// Lazy singleton pattern - only instantiate when first accessed
+let _geminiPro: GeminiProClient | null = null;
 
-// Export as geminiClient for backward compatibility
-export const geminiClient = geminiPro;
+export function getGeminiClient(): GeminiProClient {
+  if (!_geminiPro) {
+    _geminiPro = new GeminiProClient();
+  }
+  return _geminiPro;
+}
+
+// Create a proxy that lazily initializes the client
+const createLazyProxy = (): GeminiProClient => {
+  return new Proxy({} as GeminiProClient, {
+    get(_target, prop: keyof GeminiProClient) {
+      const client = getGeminiClient();
+      const value = client[prop];
+      if (typeof value === 'function') {
+        return value.bind(client);
+      }
+      return value;
+    }
+  });
+};
+
+// Export lazy proxies for backward compatibility
+export const geminiPro = createLazyProxy();
+export const geminiClient = createLazyProxy();

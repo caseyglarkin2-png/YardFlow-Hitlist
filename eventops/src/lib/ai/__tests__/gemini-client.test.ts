@@ -2,9 +2,10 @@
  * Tests for Gemini Pro Client
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GeminiProClient } from '../gemini-client';
 
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('GeminiProClient', () => {
   let client: GeminiProClient;
@@ -12,12 +13,12 @@ describe('GeminiProClient', () => {
   beforeEach(() => {
     process.env.GEMINI_API_KEY = 'test-api-key';
     client = new GeminiProClient();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('generateContent', () => {
     it('should generate text content', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [
@@ -45,7 +46,7 @@ describe('GeminiProClient', () => {
     });
 
     it('should handle API errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 400,
         text: async () => 'Bad request',
@@ -55,7 +56,7 @@ describe('GeminiProClient', () => {
     });
 
     it('should handle empty responses', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [],
@@ -68,7 +69,7 @@ describe('GeminiProClient', () => {
 
   describe('generateJSON', () => {
     it('should parse JSON from response', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [
@@ -89,7 +90,7 @@ describe('GeminiProClient', () => {
     });
 
     it('should extract JSON from markdown code blocks', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [
@@ -110,7 +111,7 @@ describe('GeminiProClient', () => {
     });
 
     it('should throw on invalid JSON', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [
@@ -131,7 +132,7 @@ describe('GeminiProClient', () => {
 
   describe('chat', () => {
     it('should handle conversation history', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [

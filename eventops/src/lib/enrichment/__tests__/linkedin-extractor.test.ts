@@ -2,41 +2,42 @@
  * Tests for LinkedIn Extractor
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LinkedInExtractor } from '../linkedin-extractor';
 import { GoogleSearchClient } from '../google-search-client';
 import { prisma } from '@/lib/db';
 
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   prisma: {
     people: {
-      findUnique: jest.fn(),
-      findMany: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
     },
     linkedin_profiles: {
-      upsert: jest.fn(),
+      upsert: vi.fn(),
     },
     target_accounts: {
-      findMany: jest.fn(),
+      findMany: vi.fn(),
     },
   },
 }));
 
-jest.mock('../google-search-client');
+vi.mock('../google-search-client');
 
 describe('LinkedInExtractor', () => {
   let extractor: LinkedInExtractor;
-  let mockSearchClient: jest.Mocked<GoogleSearchClient>;
+  let mockSearchClient: vi.Mocked<GoogleSearchClient>;
 
   beforeEach(() => {
     extractor = new LinkedInExtractor();
     mockSearchClient = (extractor as any).searchClient;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('discoverProfile', () => {
     it('should return error when person not found', async () => {
-      (prisma.people.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.people.findUnique as vi.Mock).mockResolvedValue(null);
 
       const result = await extractor.discoverProfile('person-1');
 
@@ -46,7 +47,7 @@ describe('LinkedInExtractor', () => {
     });
 
     it('should discover LinkedIn profile', async () => {
-      (prisma.people.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.people.findUnique as vi.Mock).mockResolvedValue({
         id: 'person-1',
         name: 'John Doe',
         accountId: 'account-1',
@@ -63,7 +64,7 @@ describe('LinkedInExtractor', () => {
     });
 
     it('should calculate high confidence for exact name match', async () => {
-      (prisma.people.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.people.findUnique as vi.Mock).mockResolvedValue({
         id: 'person-1',
         name: 'John Doe',
         accountId: 'account-1',
@@ -79,7 +80,7 @@ describe('LinkedInExtractor', () => {
     });
 
     it('should calculate lower confidence for partial name match', async () => {
-      (prisma.people.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.people.findUnique as vi.Mock).mockResolvedValue({
         id: 'person-1',
         name: 'John Doe',
         accountId: 'account-1',
@@ -96,7 +97,7 @@ describe('LinkedInExtractor', () => {
     });
 
     it('should handle search failures gracefully', async () => {
-      (prisma.people.findUnique as jest.Mock).mockResolvedValue({
+      (prisma.people.findUnique as vi.Mock).mockResolvedValue({
         id: 'person-1',
         name: 'John Doe',
         accountId: 'account-1',
@@ -114,8 +115,8 @@ describe('LinkedInExtractor', () => {
 
   describe('saveProfile', () => {
     it('should save profile to database', async () => {
-      (prisma.linkedin_profiles.upsert as jest.Mock).mockResolvedValue({});
-      (prisma.people.update as jest.Mock).mockResolvedValue({});
+      (prisma.linkedin_profiles.upsert as vi.Mock).mockResolvedValue({});
+      (prisma.people.update as vi.Mock).mockResolvedValue({});
 
       await extractor.saveProfile('person-1', 'https://linkedin.com/in/johndoe', 85);
 
@@ -142,7 +143,7 @@ describe('LinkedInExtractor', () => {
 
   describe('enrichCompanyContacts', () => {
     it('should enrich all people at a company', async () => {
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([
         {
           id: 'person-1',
           name: 'John Doe',
@@ -161,8 +162,8 @@ describe('LinkedInExtractor', () => {
         .mockResolvedValueOnce('https://linkedin.com/in/johndoe')
         .mockResolvedValueOnce('https://linkedin.com/in/janesmith');
 
-      (prisma.linkedin_profiles.upsert as jest.Mock).mockResolvedValue({});
-      (prisma.people.update as jest.Mock).mockResolvedValue({});
+      (prisma.linkedin_profiles.upsert as vi.Mock).mockResolvedValue({});
+      (prisma.people.update as vi.Mock).mockResolvedValue({});
 
       const result = await extractor.enrichCompanyContacts('account-1', {
         dryRun: false,
@@ -175,7 +176,7 @@ describe('LinkedInExtractor', () => {
     });
 
     it('should respect dryRun mode', async () => {
-      (prisma.people.findMany as jest.Mock).mockResolvedValue([
+      (prisma.people.findMany as vi.Mock).mockResolvedValue([
         {
           id: 'person-1',
           name: 'John Doe',

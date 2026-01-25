@@ -2,22 +2,23 @@
  * Tests for Google Search Client
  */
 
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GoogleSearchClient } from '../google-search-client';
 
 // Mock fetch
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('GoogleSearchClient', () => {
   let client: GoogleSearchClient;
 
   beforeEach(() => {
     client = new GoogleSearchClient();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('search', () => {
     it('should return empty results on fetch error', async () => {
-      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (global.fetch as vi.Mock).mockRejectedValue(new Error('Network error'));
 
       const results = await client.search('test query');
 
@@ -25,7 +26,7 @@ describe('GoogleSearchClient', () => {
     });
 
     it('should handle rate limiting gracefully', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: false,
         status: 429,
       });
@@ -36,7 +37,7 @@ describe('GoogleSearchClient', () => {
     });
 
     it('should use rotating user agents', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => '<html></html>',
       });
@@ -45,7 +46,7 @@ describe('GoogleSearchClient', () => {
       await client.search('test 2');
       await client.search('test 3');
 
-      const calls = (global.fetch as jest.Mock).mock.calls;
+      const calls = (global.fetch as vi.Mock).mock.calls;
       const userAgents = calls.map(call => call[1]?.headers?.['User-Agent']);
 
       // Should have different user agents (at least sometimes)
@@ -65,7 +66,7 @@ describe('GoogleSearchClient', () => {
         </div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => mockHtml,
       });
@@ -77,7 +78,7 @@ describe('GoogleSearchClient', () => {
     });
 
     it('should return null when no LinkedIn profile found', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => '<html>No results</html>',
       });
@@ -98,7 +99,7 @@ describe('GoogleSearchClient', () => {
         </div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => mockHtml,
       });
@@ -122,7 +123,7 @@ describe('GoogleSearchClient', () => {
         </div>
       `;
 
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (global.fetch as vi.Mock).mockResolvedValue({
         ok: true,
         text: async () => mockHtml,
       });
