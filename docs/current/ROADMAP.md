@@ -2,47 +2,38 @@
 
 **Current Phase**: Stabilization & Event Prep
 **Target Event**: Manifest 2026 (Feb 10-12, 2026)
+**Production URL**: [https://yardflow-web-production.up.railway.app](https://yardflow-web-production.up.railway.app)
 
 ## 📌 Active Sprints
 
-### Sprint 30: Production Hardening (CURRENT)
-**Focus**: Deployment stability, observability, and "shipping fast" infrastructure.
-- ✅ Railway Worker/Web Separation
-- ✅ Health Checks & Monitoring (/api/health, /api/ping)
-- 🔄 CI/CD Pipeline Gates (smoke tests)
-- 🔄 Documentation Cleanup
+### Sprint 31: Manifest Intelligence (CURRENT)
+**Focus**: Turn raw seeded data into actionable booth intelligence for Manifest 2026.
+**Key Deliverables**:
+- Manifest Meeting Request Generator (AI-powered)
+- Sync Requests UI & Worker
+- Mobile "Booth Mode" View
+- Enriched Facility Data Schema
 
-### Sprint 31: Manifest Integration (NEXT)
-**Focus**: Event-specific features for Manifest Vegas.
-- [ ] Manifest Meeting Request Generator (250-char optimized)
-- [ ] Facility Intelligence Integration (Warehouse counts)
-- [ ] Booth Conversation Starters (AI-generated)
-- [ ] "Meet us at Booth #1847" dynamic content
+### Sprint 32: Agent Orchestration (NEXT)
+**Focus**: Robust, observable, database-backed AI Agent entities.
+**Key Deliverables**:
+- `BaseAgent` Architecture & Database Schema
+- BullMQ Dispatch System
+- Agent Observability Dashboard
+- Migration of Research Logic to Agent Pattern
 
-### Sprint 32: AI Agent Squad (PLANNED)
-**Focus**: Automated GTM workflow agents.
-- [ ] Prospecting Agent (Lead discovery)
-- [ ] Research Agent (Dossier generation)
-- [ ] Sequence Engineer (Campaign builder)
-
-## 🔮 Future Phases
-
-### Sprint 33: Content Hub Integration
-**Focus**: Connecting to `flow-state-klbt.vercel.app` assets.
-- ROI Calculator API integration
-- Case study injection
-- Dynamic asset personalization
-
-### Sprint 34: Multi-Channel Orchestration
-**Focus**: Coordinating Email, LinkedIn, and Phone steps.
-- Sequence enrollment logic
-- Cross-channel state tracking
-- Reply detection & sentiment analysis
+### Sprint 33: Content Integration (PLANNED)
+**Focus**: Inject external marketing assets from Flow State.
+**Key Deliverables**:
+- Content Hub Client with Redis Caching
+- ROI Logic Service
+- Content Purposing Agent
 
 ## 🏗️ Architecture Roadmap
-- **Lazy Initialization**: Enforced for all external services (Redis, DB, AI).
 - **Monorepo Strictness**: All ops in `/eventops`.
-- **Testing**: Smoke tests -> Unit tests -> E2E.
+- **Agent Pattern**: Moving away from ad-hoc API routes to structured `AgentTask` records managed by background workers.
+- **Validation**: Every atomic task requires a specific verification script or test.
+- **Fail-Safe**: Rate limiting for AI services (Gemini).
 
 ---
-*Last Updated: Jan 25, 2026 - Sprint 30*
+*Last Updated: Jan 25, 2026*

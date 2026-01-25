@@ -117,7 +117,7 @@ npm run dev          # Start at localhost:3000
 git commit -m "Task X.Y: Description"
 git push origin main
 # Railway auto-deploys on push
-# Verify: https://yardflow-hitlist-production.up.railway.app/api/health
+# verify: https://yardflow-web-production.up.railway.app/api/health
 ```
 
 **Health Check**: `/api/health` validates database, Redis, auth, env vars  
