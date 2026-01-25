@@ -39,6 +39,34 @@ export HOST=0.0.0.0
 export HOSTNAME="0.0.0.0" 
 export PORT=${PORT:-3000}
 
+# FIX: Layout drift / CSS 404s
+# Next.js 'standalone' output does NOT include static assets (CSS, Images, chunks).
+# We must copy/link them into the standalone directory for them to be served.
+log_info "Preparing static assets for standalone server..."
+mkdir -p .next/standalone/.next
+mkdir -p .next/standalone/public
+
+# Copy .next/static -> .next/standalone/.next/static
+if [ -d ".next/static" ]; then
+    log_info "Linking .next/static..."
+    # Remove if exists to prevent stale links
+    rm -rf .next/standalone/.next/static
+    # Copy is safer than symlink for some container filesystems
+    cp -R .next/static .next/standalone/.next/static
+else
+    log_error "WARNING: .next/static not found! styling will be broken."
+fi
+
+# Copy public -> .next/standalone/public
+if [ -d "public" ]; then
+    log_info "Linking public/ directory..."
+    # Remove if exists
+    rm -rf .next/standalone/public
+    cp -R public .next/standalone/
+else
+    log_info "No public/ directory found."
+fi
+
 log_info "Starting Next.js standalone server on $HOSTNAME:$PORT"
 
 # Check if standalone server exists
