@@ -26,5 +26,7 @@
 
 ## 🔗 Quick Links
 - [Roadmap](./ROADMAP.md)
+- [Sprint 32 Plan (Stability)](./SPRINT_32_STABILITY.md)
+- [Sprint 33 Plan (Agents)](./SPRINT_33_AGENT_ENGINE.md)
 - [Sprint 30 Reference](./SPRINT_30_QUICK_REFERENCE.md)
 - [Copilot Instructions](../../.github/copilot-instructions.md)
