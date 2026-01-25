@@ -1,91 +1,76 @@
 # YardFlow Hitlist - AI Coding Agent Instructions
 
-## Project Overview
+## 🎯 Project Overview
+**YardFlow Hitlist** is an event-driven Account-Based Marketing (ABM) platform.
+- **Goal**: Target high-value accounts at events (Manifest 2026).
+- **Core Philosophy**: **Ship Fast, Ship Often**. Deploy production updates incrementally (60-120 min tasks).
+- **Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
+- **Stack**: Next.js 14.2 (App Router), PostgreSQL (Prisma), Redis (BullMQ), NextAuth v5.
 
-Event-driven Account-Based Marketing (ABM) platform built for targeting high-value accounts at industry events (Manifest 2026). Core focus: **ship fast, ship often** with production deploys after every 60-120 min task.
+## 🏗️ Architecture: "One Monorepo, Two Services"
+All code lives in `/eventops`, but runs as two distict services on Railway.
 
-**Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
-**Tech Stack**: Next.js 14.2 (App Router), PostgreSQL, Prisma, Redis/BullMQ, NextAuth v5, Railway deployment, Nixpacks.  
-**Philosophy**: Free services over paid ($0/month AI via Gemini Pro, pattern detection over Hunter.io API).
+### 1. Web App (`YardFlow-Hitlist`)
+- **Role**: Serves UI and API routes.
+- **Entry**: `eventops/start-production.sh` (Using Next.js Standalone mode).
+- **Criticality**: Must never block. 502s are unacceptable.
 
-## Architecture Patterns
+### 2. Worker Service (`YardFlow-Worker`)
+- **Role**: Process async jobs, AI agents, and scrapers.
+- **Entry**: `eventops/start-worker.sh`.
+- **Scaling**: Independent from web traffic.
 
-### Monorepo Structure
+## 🛠️ Developer Workflow
+**ROOT RULE**: All commands must be run from the `eventops` directory.
 
-- **Root `/`**: deployment configs (`railway.json`, `Dockerfile.worker`)
-- **App `/eventops`**: Next.js application & all source code
-- **Protocol**:
-  - Run all `npm` / `npx` commands from `/eventops` directory
-  - Railway build commands: `cd eventops && ...`
-  - Start Command: `HOST=0.0.0.0 PORT=8080 node .next/standalone/server.js`
-
-### Database Access Pattern (`src/lib/db.ts`)
-
-- **Rule**: Always import `prisma` from `@/lib/db`
-- **Why**: Handles singleton pattern with `globalThis` caching to prevent connection exhaustion in serverless/dev environments.
-- **Never**: Create new `new PrismaClient()` instances.
-
-### Lazy Initialization (Critical for Railway/Nixpacks)
-
-**Rule**: Never initialize Redis, database connections, or external API clients at module load time.
-**Why**: Nixpacks builds hang if top-level code tries to connect to services.
-
-```typescript
-// ✅ CORRECT: Lazy accessor
-let agentQueueInstance: Queue;
-export const agentQueue = {
-  get queue(): Queue {
-    if (!agentQueueInstance) agentQueueInstance = new Queue('agents', { ... });
-    return agentQueueInstance;
-  },
-  add: (...args) => agentQueue.queue.add(...args)
-};
-
-// ❌ WRONG: Top-level connection
-export const queue = new Queue("name", { connection: redis }); // BLOCKS BUILD
+```bash
+cd eventops
+npm install       # Install deps
+npm run dev       # Start local server
+npm run build     # Test production build
 ```
 
-### Agent Squad Architecture (EventOps GTM)
+## 🔍 Codebase Patterns
 
-Independent AI workers coordinated via `agent_tasks` table and `BullMQ`.
+### Database & Redis (Lazy Init)
+**CRITICAL**: Never initialize connections at the top level. It breaks build steps (Nixpacks).
+Always use the singleton pattern with lazy getters.
 
-**Component Map**:
-- **State Manager**: `src/lib/agents/state-manager.ts` (Persists state to Postgres)
-- **Orchestrator**: `src/lib/agents/orchestrator.ts` (Manages flow)
-- **Workers**: `src/lib/queue/workers.ts` (Consumes jobs)
+```typescript
+// ✅ Correct: src/lib/db.ts
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-**Active Agents**:
-1.  **Prospecting**: `prospecting-agent.ts` - Lead discovery & ICP scoring
-2.  **Research**: `research-agent.ts` - Dossier generation (Redis cached)
-3.  **Content**: `content-purposing-agent.ts` - Adaptation from Content Hub
-4.  **Graphics**: `graphics-agent.ts` - Visual asset generation
-5.  **Socials**: `socials-agent.ts` - LinkedIn post scheduling
-6.  **Contracting**: `contracting-agent.ts` - Legal doc generation
+// ✅ Correct: Lazy Queue
+export const agentQueue = {
+  get queue() {
+    if (!instance) instance = new Queue('agents'); // Init only when called!
+    return instance;
+  }
+}
+```
 
-**Integration**: Assets pulled from YardFlow Content Hub (`src/lib/yardflow-content-hub.ts`).
+### Next.js App Router Rules
+1.  **Route Handlers**: `src/app/api/**/route.ts`
+    - **MUST ONLY EXPORT**: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`, and config consts (`dynamic`, `revalidate`).
+    - **FORBIDDEN**: Exporting utility functions or types. Move them to `src/lib/`.
+2.  **Server Actions**: Forbidden. Use API Routes (`src/app/api`) for all backend logic to keep architecture clean and decoupled.
 
-## Critical Workflows
+### AI Agent Squad (`src/lib/agents`)
+- **Structure**: Independent agents coordinated via **BullMQ**.
+- **State**: Persisted in Postgres via `AgentStateManager`.
+- **Communication**: Queue-based (Prospecting -> Research -> Content).
 
-## Deployment Critical Warnings
+## 🚀 Deployment & Config
+- **Source of Truth**: `railway.json` dictates the build/start commands.
+- **Build**: `output: 'standalone'` in `next.config.mjs` is required.
+- **Memory**: Builds run with 4GB heap (`NODE_OPTIONS="--max-old-space-size=4096"`).
+- **Duplicate Services**: **NEVER** create a duplicate Web service (e.g., `YardFlow-Web`). It causes race conditions during DB migrations.
 
-### Duplicate Services Warning
-**CRITICAL**: Ensure there is only **ONE** web service running the main application (`YardFlow-Hitlist`).
-Delete any duplicate services (e.g., `YardFlow-Web`) completely.
-**Reason**: Multiple services booting simultaneously create race conditions during Prisma Migrations (`npx prisma migrate deploy`), causing database locks and boot crashes.
-
-### Queue System (BullMQ)
-- **Queues**: `enrichment`, `outreach`, `sequence-steps`, `agents`
-- **Workers**: All defined in `src/lib/queue/workers.ts`
-- **Add Job**: `await agentQueue.add("action-name", { ...data })`
-
-### Testing
+## 🧪 Testing Strategy
 - **Unit**: `npm run test:unit` (Vitest)
-- **E2E**: `npm run test:e2e` (Playwright)
-- **Smoke**: `npm run test:smoke:local` (Bash script)
+- **Validation**: Every task requires a verification script in `scripts/` (e.g., `verify-health-check-local.ts`).
+- **Smoke**: `npm run test:smoke:local`
 
-## Domain Rules & Gotchas
-
-1.  **Agent Timeouts**: AI tasks run long. Do NOT set `timeout` in `defaultJobOptions` (deprecated in BullMQ v5). Handle concurrency in Worker options.
-2.  **API Only**: Use `app/api/...` for backend logic. No Server Actions (Architecture decision).
-3.  **Authentication**: Protect routes with `import { auth } from '@/auth'`.
-4.  **Logging**: Use `import { logger } from '@/lib/logger'` for structured JSON logs (required for observability).
+## 📝 Logging
+- **Format**: Structured JSON via `src/lib/logger.ts`.
+- **Usage**: `logger.info('Event occurred', { metadata })` instead of `console.log`.
