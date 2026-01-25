@@ -1,13 +1,34 @@
-{
-  "$schema": "https://railway.app/railway.schema.json",
-  "build": {
-    "builder": "NIXPACKS",
-    "nixpacksConfigPath": "eventops/nixpacks.toml",
-    "buildCommand": "cd eventops && npm ci && npx prisma generate && npm run build"
-  },
-  "deploy": {
-    "startCommand": "cd eventops && npx prisma migrate deploy && node .next/standalone/server.js",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  }
-}
+FROM node:20-slim
+
+WORKDIR /app
+
+# Install OpenSSL for Prisma
+# Cache bust: 2026-01-24T21:30:00Z
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+# Copy eventops package files first
+COPY eventops/package*.json ./eventops/
+COPY eventops/prisma ./eventops/prisma/
+
+# Install dependencies in eventops directory (where bullmq and tsx are listed)
+WORKDIR /app/eventops
+RUN npm ci
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy eventops source code
+COPY eventops/src ./src
+COPY eventops/tsconfig.json ./tsconfig.json
+
+# Set environment
+ENV NODE_ENV=production
+
+# Stay in eventops directory for proper module resolution
+# WORKDIR is already /app/eventops from the install step
+
+# Expose health check port
+EXPOSE 8080
+
+# Start worker directly with tsx (no shell script needed)
+CMD ["./node_modules/.bin/tsx", "./src/lib/queue/workers.ts"]
