@@ -125,8 +125,6 @@ export class ContractingAgent {
       pricingTier: 'growth',
     }, parentTaskId);
   }
-    });
-  }
 
   /**
    * Generate SOW from closed deal
