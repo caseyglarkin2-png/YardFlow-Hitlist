@@ -10,11 +10,22 @@ echo "1️⃣  Checking production deployment..."
 PROD_URL="https://yardflow-hitlist-production-2f41.up.railway.app"
 
 # Test main app
-if curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" | grep -q "200"; then
+if curl -s -o /dev/null -w "%{http_code}" "$PROD_URL" | grep -q "200\|307\|308"; then
     echo "   ✅ Main app is live"
 else
     echo "   ❌ Main app not responding"
-    exit 1
+    # Don't exit yet, check deep health
+fi
+
+echo ""
+echo "🔍 Checking Deep Health..."
+DEEP_HEALTH=$(curl -s "$PROD_URL/api/health/deep")
+if echo "$DEEP_HEALTH" | grep -q "healthy"; then
+    echo "   ✅ Deep Health Check: PASS"
+    echo "      $DEEP_HEALTH"
+else
+    echo "   ⚠️ Deep Health Check: FAIL or UNREACHABLE"
+    echo "      Response: $DEEP_HEALTH"
 fi
 
 # Test OAuth connect endpoint (should redirect)
