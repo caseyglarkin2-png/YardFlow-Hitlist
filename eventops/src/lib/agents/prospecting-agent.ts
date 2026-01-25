@@ -85,7 +85,7 @@ export class ProspectingAgent {
 
     // Mock implementation until scrapers are fully integrated
     // In a real implementation, this would call specialized scrapers
-    
+
     // 1. Manifest Source
     if (criteria.sources?.includes('manifest') || criteria.eventUrl) {
       // Mock data representing a scrape result
@@ -96,7 +96,7 @@ export class ProspectingAgent {
         source: 'manifest-attendee-list',
         confidence: 'HIGH',
         estimatedIcpScore: 85,
-        notes: 'Found in Manifest 2026 attendee list'
+        notes: 'Found in Manifest 2026 attendee list',
       });
       leads.push({
         name: 'Mike Procurement',
@@ -105,7 +105,7 @@ export class ProspectingAgent {
         source: 'manifest-attendee-list',
         confidence: 'MEDIUM',
         estimatedIcpScore: 75,
-        notes: 'Found in Manifest 2026 attendee list'
+        notes: 'Found in Manifest 2026 attendee list',
       });
     }
 
@@ -118,7 +118,7 @@ export class ProspectingAgent {
         linkedinUrl: 'https://linkedin.com/in/david-mock',
         source: 'linkedin-search',
         confidence: 'HIGH',
-        estimatedIcpScore: 90
+        estimatedIcpScore: 90,
       });
     }
 
@@ -134,7 +134,7 @@ export class ProspectingAgent {
    * Qualify leads based on ICP criteria
    */
   async qualifyLeads(
-    leads: DiscoveredLead[], 
+    leads: DiscoveredLead[],
     criteria?: ProspectingCriteria['icpCriteria']
   ): Promise<DiscoveredLead[]> {
     if (!criteria) return leads;
@@ -144,12 +144,12 @@ export class ProspectingAgent {
       if (criteria.minScore && (lead.estimatedIcpScore || 0) < criteria.minScore) {
         return false;
       }
-      
+
       // 2. Filter by persona (simple title match for now)
       if (criteria.personas && criteria.personas.length > 0) {
         const titleLower = lead.title?.toLowerCase() || '';
-        const matchesPersona = criteria.personas.some(p => titleLower.includes(p.toLowerCase()));
-        // If persona filtering is strict, we might return false here. 
+        const matchesPersona = criteria.personas.some((p) => titleLower.includes(p.toLowerCase()));
+        // If persona filtering is strict, we might return false here.
         // For now, let's keep it loose as estimatedIcpScore usually handles the weighting.
       }
 
@@ -160,7 +160,10 @@ export class ProspectingAgent {
   /**
    * Import qualified leads into database
    */
-  async importLeads(leads: DiscoveredLead[], eventId: string): Promise<{ imported: number; skipped: number }> {
+  async importLeads(
+    leads: DiscoveredLead[],
+    eventId: string
+  ): Promise<{ imported: number; skipped: number }> {
     let imported = 0;
     let skipped = 0;
 
@@ -170,36 +173,36 @@ export class ProspectingAgent {
         // We use the company name as a unique key for now (in absence of domain)
         // Ideally we'd have a clean domain, but for prospecting raw leads, name is often all we have.
         const account = await prisma.target_accounts.upsert({
-          where: { 
-            // This assumes we have a unique constraint or logic for ID. 
+          where: {
+            // This assumes we have a unique constraint or logic for ID.
             // Since ID is a CUID/UUID usually, we can't upsert by name directly unless name is @unique.
-            // But target_accounts doesn't have name as unique. 
+            // But target_accounts doesn't have name as unique.
             // So we first find, then create if not exists.
-            id: `temp-${lead.company.toLowerCase().replace(/\s+/g, '-')}` // Placeholder logic only valid if ID allows it or we generate one
-           }, 
-           // ACTUALLY: upsert requires a unique where clause. 
-           // Let's use findFirst then create/update.
-           create: {
-             id: crypto.randomUUID(),
-             name: lead.company,
-             eventId: eventId,
-             icpScore: lead.estimatedIcpScore || 0,
-             notes: `Imported by Prospecting Agent. Source: ${lead.source}. ${lead.notes || ''}`,
-             updatedAt: new Date(),
-           },
-           update: {
-             // If found (logic below), update basic info
-             updatedAt: new Date(),
-           }
-        }); 
-        
-        // Wait, the above upsert logic is flawed because ID isn't known. 
+            id: `temp-${lead.company.toLowerCase().replace(/\s+/g, '-')}`, // Placeholder logic only valid if ID allows it or we generate one
+          },
+          // ACTUALLY: upsert requires a unique where clause.
+          // Let's use findFirst then create/update.
+          create: {
+            id: crypto.randomUUID(),
+            name: lead.company,
+            eventId: eventId,
+            icpScore: lead.estimatedIcpScore || 0,
+            notes: `Imported by Prospecting Agent. Source: ${lead.source}. ${lead.notes || ''}`,
+            updatedAt: new Date(),
+          },
+          update: {
+            // If found (logic below), update basic info
+            updatedAt: new Date(),
+          },
+        });
+
+        // Wait, the above upsert logic is flawed because ID isn't known.
         // Correct approach:
         let targetAccount = await prisma.target_accounts.findFirst({
-          where: { 
+          where: {
             name: { equals: lead.company, mode: 'insensitive' },
-            eventId: eventId
-          }
+            eventId: eventId,
+          },
         });
 
         if (!targetAccount) {
@@ -211,7 +214,7 @@ export class ProspectingAgent {
               icpScore: lead.estimatedIcpScore || 0,
               notes: `Imported by Prospecting Agent. Source: ${lead.source}. ${lead.notes || ''}`,
               updatedAt: new Date(),
-            }
+            },
           });
         }
 
@@ -219,13 +222,13 @@ export class ProspectingAgent {
         // Check if person exists by email (if avail) or name+account
         let person = null;
         if (lead.email) {
-          person = await prisma.people.findFirst({ where: { email: lead.email }});
+          person = await prisma.people.findFirst({ where: { email: lead.email } });
         } else {
-          person = await prisma.people.findFirst({ 
-            where: { 
+          person = await prisma.people.findFirst({
+            where: {
               name: { equals: lead.name, mode: 'insensitive' },
-              accountId: targetAccount.id
-            }
+              accountId: targetAccount.id,
+            },
           });
         }
 
@@ -241,17 +244,20 @@ export class ProspectingAgent {
               notes: `Source: ${lead.source}`,
               updatedAt: new Date(),
               // Attempt to guess persona flags based on title
-              isExecOps: /vp|director|chief|head/i.test(lead.title || '') && /ops|operations|logistics/i.test(lead.title || ''),
-              isOps: /manager|supervisor/i.test(lead.title || '') && /ops|operations/i.test(lead.title || ''),
+              isExecOps:
+                /vp|director|chief|head/i.test(lead.title || '') &&
+                /ops|operations|logistics/i.test(lead.title || ''),
+              isOps:
+                /manager|supervisor/i.test(lead.title || '') &&
+                /ops|operations/i.test(lead.title || ''),
               isProc: /procurement|sourcing|buyer/i.test(lead.title || ''),
-            }
+            },
           });
           imported++;
         } else {
           // Person already exists, skip
           skipped++;
         }
-
       } catch (error) {
         logger.error('Failed to import lead', { error, lead });
         skipped++;

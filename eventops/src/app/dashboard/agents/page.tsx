@@ -11,12 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PlayCircle } from 'lucide-react';
+import { PlayCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function AgentsDashboardPage() {
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
-  const { data, loading, error } = useAgentMonitoring(timeRange);
+  const { data, loading, error, refresh } = useAgentMonitoring(timeRange);
   const { toast } = useToast();
   const [triggering, setTriggering] = useState(false);
 
@@ -35,9 +35,9 @@ export default function AgentsDashboardPage() {
         title: 'Agent Triggered',
         description: `Successfully started ${action}`,
       });
-      
-      // Force reload as useAgentMonitoring might not have refresh exposed
-      setTimeout(() => window.location.reload(), 1500);
+
+      // Refresh data without reloading page
+      setTimeout(() => refresh(), 1000);
     } catch (err) {
       toast({
         title: 'Error',
@@ -49,10 +49,11 @@ export default function AgentsDashboardPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-muted-foreground">Loading agent metrics...</div>
+      <div className="flex h-64 items-center justify-center flex-col gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-muted-foreground">Loading squad status...</div>
       </div>
     );
   }
@@ -72,7 +73,7 @@ export default function AgentsDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">AI Agent Squad Monitoring</h1>
           <p className="text-muted-foreground">
@@ -80,21 +81,26 @@ export default function AgentsDashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-             <Button 
-                onClick={() => triggerAgent('run-prospecting', { eventId: 'manifest-2026' })}
-                disabled={triggering}
-              >
-                <PlayCircle className="mr-2 h-4 w-4" />
-                Start Prospecting
-              </Button>
-              <Button 
-                variant="secondary"
-                onClick={() => triggerAgent('start-campaign', { eventId: 'manifest-2026', campaignType: 'pre-event' })}
-                disabled={triggering}
-              >
-                <PlayCircle className="mr-2 h-4 w-4" />
-                Full Campaign
-              </Button>
+          <Button
+            onClick={() => triggerAgent('run-prospecting', { eventId: 'manifest-2026' })}
+            disabled={triggering}
+          >
+            <PlayCircle className="mr-2 h-4 w-4" />
+            Start Prospecting
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              triggerAgent('start-campaign', {
+                eventId: 'manifest-2026',
+                campaignType: 'pre-event',
+              })
+            }
+            disabled={triggering}
+          >
+            <PlayCircle className="mr-2 h-4 w-4" />
+            Full Campaign
+          </Button>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 /**
  * Graphics Agent
  * Generates visual content for social media and email campaigns
- * 
+ *
  * Future integration: DALL-E, Midjourney, or Canva API
  */
 
@@ -44,7 +44,10 @@ export class GraphicsAgent {
   /**
    * Generate visual content based on request
    */
-  async generateGraphic(request: GraphicsRequest, parentTaskId?: string): Promise<GeneratedGraphic> {
+  async generateGraphic(
+    request: GraphicsRequest,
+    parentTaskId?: string
+  ): Promise<GeneratedGraphic> {
     logger.info('Graphics agent started', { type: request.type });
 
     const task = await agentStateManager.createTask({
@@ -97,7 +100,7 @@ export class GraphicsAgent {
   ): Promise<GeneratedGraphic> {
     // TODO: Implement image resizing
     logger.warn('Graphic resizing not yet implemented');
-    
+
     return {
       imageUrl: originalUrl,
       altText: 'Resized graphic',

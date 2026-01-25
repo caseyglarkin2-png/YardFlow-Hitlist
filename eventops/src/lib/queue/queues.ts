@@ -32,7 +32,14 @@ export interface SequenceStepJobData {
 }
 
 export interface AgentJobData {
-  action: 'start-campaign' | 'run-prospecting' | 'run-research' | 'run-content' | 'run-graphics' | 'run-socials' | 'run-contracting';
+  action:
+    | 'start-campaign'
+    | 'run-prospecting'
+    | 'run-research'
+    | 'run-content'
+    | 'run-graphics'
+    | 'run-socials'
+    | 'run-contracting';
   params: any;
   userId?: string;
   parentTaskId?: string;
@@ -111,7 +118,6 @@ export const agentQueue = {
     return this.queue.getFailed(...args);
   },
 };
-
 
 export const outreachQueue = {
   get queue(): Queue {
@@ -204,11 +210,7 @@ export async function addEnrichmentJob(
   }
 }
 
-export async function addOutreachJob(
-  name: string,
-  data: OutreachSequenceJobData,
-  options?: any
-) {
+export async function addOutreachJob(name: string, data: OutreachSequenceJobData, options?: any) {
   try {
     const job = await outreachQueue.add(name, data, options);
     logger.info('Outreach job added', { jobId: job.id, name, data });
@@ -219,10 +221,7 @@ export async function addOutreachJob(
   }
 }
 
-export async function addSequenceJob(
-  data: SequenceStepJobData,
-  delayMs: number = 0
-) {
+export async function addSequenceJob(data: SequenceStepJobData, delayMs: number = 0) {
   try {
     const job = await sequenceQueue.add('process-step', data, {
       delay: delayMs,
@@ -239,14 +238,14 @@ export async function addSequenceJob(
         age: 604800, // Keep failed jobs for 7 days
       },
     });
-    
+
     logger.info('Sequence job added to queue', {
       jobId: job.id,
       enrollmentId: data.enrollmentId,
       stepNumber: data.stepNumber,
       delayMs,
     });
-    
+
     return job;
   } catch (error) {
     logger.error('Error adding sequence job', { data, error });

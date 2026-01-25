@@ -146,7 +146,7 @@ function getAgentWorker(): Worker {
             // Run full campaign orchestration
             // This is long-running but acceptable for now in a worker
             return await orchestrator.runFullCampaign(job.data.params);
-          
+
           case 'run-prospecting':
             const prospectingAgent = new ProspectingAgent();
             return await prospectingAgent.run(job.data.params, job.data.parentTaskId);
@@ -157,12 +157,12 @@ function getAgentWorker(): Worker {
 
           case 'run-content':
             const contentAgent = new ContentPurposingAgent();
-            // contentAgent.purposeContent requires 2nd arg accountId if strictly typed, 
+            // contentAgent.purposeContent requires 2nd arg accountId if strictly typed,
             // but params should include it. Let's assume params maps correctly.
             // Actually purposeContent signature: purposeContent(request, accountId?, parentTaskId?)
             return await contentAgent.purposeContent(
-              job.data.params.request, 
-              job.data.params.accountId, 
+              job.data.params.request,
+              job.data.params.accountId,
               job.data.parentTaskId
             );
 
@@ -173,7 +173,7 @@ function getAgentWorker(): Worker {
           case 'run-socials':
             const socialsAgent = new SocialsAgent();
             return await socialsAgent.schedulePost(job.data.params, job.data.parentTaskId);
-            
+
           case 'run-contracting':
             const contractingAgent = new ContractingAgent();
             return await contractingAgent.generateContract(job.data.params, job.data.parentTaskId);
@@ -272,4 +272,3 @@ process.on('SIGINT', async () => {
   if (agentWorker) await agentWorker.close();
   process.exit(0);
 });
-

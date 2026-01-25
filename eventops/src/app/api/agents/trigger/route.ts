@@ -12,7 +12,7 @@ const triggerSchema = z.object({
     'run-content',
     'run-graphics',
     'run-socials',
-    'run-contracting'
+    'run-contracting',
   ]),
   params: z.record(z.any()),
 });
@@ -48,17 +48,13 @@ export async function POST(request: Request) {
       userId: session.user.id,
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       jobId: job.id,
-      message: `Agent action '${action}' triggered successfully` 
+      message: `Agent action '${action}' triggered successfully`,
     });
-
   } catch (error) {
     logger.error('Failed to trigger agent', { error });
-    return NextResponse.json(
-      { error: 'Internal server error' }, 
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

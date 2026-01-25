@@ -35,7 +35,10 @@ export class ContractingAgent {
   /**
    * Generate contract document from template
    */
-  async generateContract(request: ContractRequest, parentTaskId?: string): Promise<GeneratedContract> {
+  async generateContract(
+    request: ContractRequest,
+    parentTaskId?: string
+  ): Promise<GeneratedContract> {
     logger.info('Contracting agent started', { type: request.type, accountId: request.accountId });
 
     const task = await agentStateManager.createTask({
@@ -101,11 +104,14 @@ export class ContractingAgent {
   /**
    * Create proposal with ROI calculations
    */
-  async generateProposal(params: {
-    accountId: string;
-    facilities: number;
-    estimatedShipments: number;
-  }, parentTaskId?: string): Promise<GeneratedContract> {
+  async generateProposal(
+    params: {
+      accountId: string;
+      facilities: number;
+      estimatedShipments: number;
+    },
+    parentTaskId?: string
+  ): Promise<GeneratedContract> {
     // TODO: Integrate with ROI calculator
     // 1. Calculate savings based on facility count
     // 2. Generate executive summary
@@ -113,17 +119,20 @@ export class ContractingAgent {
     // 4. Add implementation timeline
     // 5. Include pricing options (good/better/best)
 
-    return this.generateContract({
-      type: 'proposal',
-      accountId: params.accountId,
-      dealTerms: {
-        value: 50000, // Placeholder
-        duration: 12,
-        facilities: params.facilities,
-        services: ['Yard Management', 'Dock Scheduling', 'Asset Tracking'],
+    return this.generateContract(
+      {
+        type: 'proposal',
+        accountId: params.accountId,
+        dealTerms: {
+          value: 50000, // Placeholder
+          duration: 12,
+          facilities: params.facilities,
+          services: ['Yard Management', 'Dock Scheduling', 'Asset Tracking'],
+        },
+        pricingTier: 'growth',
       },
-      pricingTier: 'growth',
-    }, parentTaskId);
+      parentTaskId
+    );
   }
 
   /**

@@ -25,7 +25,10 @@ export class SocialsAgent {
   /**
    * Schedule social media post
    */
-  async schedulePost(post: SocialPost, parentTaskId?: string): Promise<{ postId: string; scheduledAt: Date }> {
+  async schedulePost(
+    post: SocialPost,
+    parentTaskId?: string
+  ): Promise<{ postId: string; scheduledAt: Date }> {
     logger.info('Socials agent - scheduling post', {
       platform: post.platform,
       scheduledFor: post.scheduledFor,

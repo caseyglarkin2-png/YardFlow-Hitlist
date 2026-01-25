@@ -41,31 +41,33 @@ export function useAgentMonitoring(timeRange: '24h' | '7d' | '30d' = '24h', agen
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const params = new URLSearchParams({ timeRange });
-        if (agentType) params.append('agentType', agentType);
+  const fetchData = async () => {
+    try {
+      // Don't set global loading on refresh to avoid UI flicker
+      if (!data) setLoading(true);
+      
+      const params = new URLSearchParams({ timeRange });
+      if (agentType) params.append('agentType', agentType);
 
-        const response = await fetch(`/api/agents/monitor?${params}`);
-        if (!response.ok) throw new Error('Failed to fetch monitoring data');
+      const response = await fetch(`/api/agents/monitor?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch monitoring data');
 
-        const result = await response.json();
-        setData(result);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
+      const result = await response.json();
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      if (!data) setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchData();
     // Refresh every 30 seconds
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [timeRange, agentType]);
 
-  return { data, loading, error };
+  return { data, loading, error, refresh: fetchData };
 }
