@@ -50,7 +50,7 @@ export class ResearchAgent {
    * Generate comprehensive research dossier for an account
    * Enhanced with multi-source data aggregation
    */
-  async generateDossier(input: ResearchInput): Promise<CompanyDossier> {
+  async generateDossier(input: ResearchInput, parentTaskId?: string): Promise<CompanyDossier> {
     // Create agent task for tracking
     const task = await agentStateManager.createTask({
       agentType: 'research',
@@ -59,9 +59,12 @@ export class ResearchAgent {
         ...input,
         sources: input.sources || ['gemini', 'content-hub', 'database'],
       },
+      parentTaskId,
     });
 
     try {
+      await agentStateManager.updateTaskStatus(task.id, 'in_progress');
+
       logger.info('Research agent started (enhanced)', {
         accountId: input.accountId,
         deepDive: input.deepDive,

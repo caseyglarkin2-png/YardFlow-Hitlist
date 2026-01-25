@@ -36,11 +36,14 @@ export class SequenceEngineerAgent {
    * Generate optimal sequence based on contact attributes
    * Enhanced with dynamic blueprint generation
    */
-  async designSequence(input: {
-    personId: string;
-    campaignGoal: 'meeting' | 'demo' | 'relationship';
-    urgency?: 'low' | 'medium' | 'high';
-  }): Promise<SequenceBlueprint> {
+  async designSequence(
+    input: {
+      personId: string;
+      campaignGoal: 'meeting' | 'demo' | 'relationship';
+      urgency?: 'low' | 'medium' | 'high';
+    },
+    parentTaskId?: string
+  ): Promise<SequenceBlueprint> {
     // Create agent task
     const task = await agentStateManager.createTask({
       agentType: 'sequence',
@@ -49,6 +52,7 @@ export class SequenceEngineerAgent {
         ...input,
         goal: input.campaignGoal,
       },
+      parentTaskId,
     });
 
     try {

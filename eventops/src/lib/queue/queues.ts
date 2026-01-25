@@ -31,6 +31,13 @@ export interface SequenceStepJobData {
   stepNumber: number;
 }
 
+export interface AgentJobData {
+  action: 'start-campaign' | 'run-prospecting' | 'run-research' | 'run-content' | 'run-graphics' | 'run-socials' | 'run-contracting';
+  params: any;
+  userId?: string;
+  parentTaskId?: string;
+}
+
 // Default queue options
 const defaultJobOptions = {
   attempts: 3,
@@ -38,7 +45,7 @@ const defaultJobOptions = {
     type: 'exponential' as const,
     delay: 2000, // Start with 2 seconds
   },
-  timeout: 300000, // 5 minutes
+  timeout: 3600000, // 1 hour for agents
   removeOnComplete: {
     count: 100,
     age: 86400, // 24 hours
@@ -53,6 +60,7 @@ let _enrichmentQueue: Queue | null = null;
 let _outreachQueue: Queue | null = null;
 let _emailQueue: Queue | null = null;
 let _sequenceQueue: Queue | null = null;
+let _agentQueue: Queue | null = null;
 
 export const enrichmentQueue = {
   get queue(): Queue {
@@ -77,6 +85,34 @@ export const enrichmentQueue = {
     return this.queue.getFailed(...args);
   },
 };
+
+export const agentQueue = {
+  get queue(): Queue {
+    if (!_agentQueue) {
+      _agentQueue = new Queue('agents', {
+        connection: getRedisConnection(),
+        defaultJobOptions: {
+          ...defaultJobOptions,
+          timeout: 3600000, // 1 hour for agent tasks
+        },
+      });
+    }
+    return _agentQueue;
+  },
+  add(...args: Parameters<Queue['add']>) {
+    return this.queue.add(...args);
+  },
+  getJob(...args: Parameters<Queue['getJob']>) {
+    return this.queue.getJob(...args);
+  },
+  getJobCounts(...args: Parameters<Queue['getJobCounts']>) {
+    return this.queue.getJobCounts(...args);
+  },
+  getFailed(...args: Parameters<Queue['getFailed']>) {
+    return this.queue.getFailed(...args);
+  },
+};
+
 
 export const outreachQueue = {
   get queue(): Queue {

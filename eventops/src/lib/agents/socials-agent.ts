@@ -4,6 +4,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { agentStateManager } from './state-manager';
 
 export interface SocialPost {
   platform: 'linkedin' | 'twitter';
@@ -24,22 +25,43 @@ export class SocialsAgent {
   /**
    * Schedule social media post
    */
-  async schedulePost(post: SocialPost): Promise<{ postId: string; scheduledAt: Date }> {
+  async schedulePost(post: SocialPost, parentTaskId?: string): Promise<{ postId: string; scheduledAt: Date }> {
     logger.info('Socials agent - scheduling post', {
       platform: post.platform,
       scheduledFor: post.scheduledFor,
     });
 
-    // TODO: Integrate with social media APIs
-    // 1. LinkedIn API for company page posts
-    // 2. Twitter API v2 for tweets
-    // 3. Store in database with scheduled time
-    // 4. Use BullMQ delayed jobs for actual posting
+    const task = await agentStateManager.createTask({
+      agentType: 'socials',
+      inputData: post as unknown as Record<string, unknown>,
+      parentTaskId,
+    });
 
-    return {
-      postId: `post-${Date.now()}`,
-      scheduledAt: post.scheduledFor || new Date(),
-    };
+    try {
+      await agentStateManager.updateTaskStatus(task.id, 'in_progress');
+
+      // TODO: Integrate with social media APIs
+      // 1. LinkedIn API for company page posts
+      // 2. Twitter API v2 for tweets
+      // 3. Store in database with scheduled time
+      // 4. Use BullMQ delayed jobs for actual posting
+
+      const result = {
+        postId: `post-${Date.now()}`,
+        scheduledAt: post.scheduledFor || new Date(),
+      };
+
+      await agentStateManager.updateTaskStatus(task.id, 'completed', result);
+      return result;
+    } catch (error) {
+      await agentStateManager.updateTaskStatus(
+        task.id,
+        'failed',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+      throw error;
+    }
   }
 
   /**

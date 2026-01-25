@@ -4,8 +4,9 @@
  */
 
 import { logger } from '@/lib/logger';
-import { ProspectingAgent } from './prospecting-agent';
-import { ResearchAgent } from './research-agent';
+import { agentStateManager } from '@/lib/agents/state-manager';
+import { ProspectingAgent, ProspectingCriteria } from './prospecting-agent';
+import { ResearchAgent, ResearchInput } from './research-agent';
 import { SequenceEngineerAgent } from './sequence-engineer-agent';
 import { ContentPurposingAgent } from './content-purposing-agent';
 import { GraphicsAgent } from './graphics-agent';
@@ -32,6 +33,7 @@ export interface AgentTask {
   startedAt?: Date;
   completedAt?: Date;
   error?: string;
+  parentTaskId?: string;
 }
 
 export class AgentOrchestrator {
@@ -87,8 +89,19 @@ export class AgentOrchestrator {
   }): Promise<CampaignWorkflow> {
     logger.info('Starting full campaign orchestration', params);
 
+    // Create a Root Task for the workflow
+    // Note: 'campaign' or 'orchestrator' type needs to be supported in AgentType if using strict types
+    // but for now we'll rely on the loose string in Prisma
+    const rootTask = await agentStateManager.createTask({
+      agentType: 'sequence', // Using 'sequence' as a proxy for high-level flow for now, or just 'orchestrator' if schema allows string
+      inputData: params as unknown as Record<string, unknown>,
+      accountId: params.targetAccounts?.[0], // Link to first account if available
+    });
+
+    await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress');
+
     const workflow: CampaignWorkflow = {
-      id: crypto.randomUUID(),
+      id: rootTask.id,
       name: `${params.campaignType} - ${params.eventId}`,
       tasks: [],
       status: 'in-progress',
@@ -99,26 +112,28 @@ export class AgentOrchestrator {
       // Step 1: Discover new leads (if no target accounts provided)
       if (!params.targetAccounts || params.targetAccounts.length === 0) {
         const prospectingTask = await this.executeTask({
-          id: crypto.randomUUID(),
+          id: '', // Will be set by agent
           agentType: 'prospecting',
           input: { eventId: params.eventId },
           status: 'pending',
+          parentTaskId: rootTask.id,
         });
         workflow.tasks.push(prospectingTask);
 
-        // Use discovered leads as target accounts
-        const prospectOutput = prospectingTask.output as { accountIds?: string[] } | undefined;
-        params.targetAccounts = prospectOutput?.accountIds || [];
+        // TODO: Retrieve discovered accounts from DB/Task output
+        // const prospectOutput = prospectingTask.output as { accountIds?: string[] } | undefined;
+        // params.targetAccounts = prospectOutput?.accountIds || [];
       }
 
       // Step 2: Research each account
       const targetAccounts = params.targetAccounts || [];
       for (const accountId of targetAccounts) {
         const researchTask = await this.executeTask({
-          id: crypto.randomUUID(),
+          id: '',
           agentType: 'research',
           input: { accountId },
           status: 'pending',
+          parentTaskId: rootTask.id,
         });
         workflow.tasks.push(researchTask);
       }
@@ -135,6 +150,8 @@ export class AgentOrchestrator {
       workflow.status = 'completed';
       workflow.progress = { completed: workflow.tasks.length, total: workflow.tasks.length };
 
+      await agentStateManager.updateTaskStatus(rootTask.id, 'completed');
+
       logger.info('Campaign orchestration completed', {
         workflowId: workflow.id,
         tasksCompleted: workflow.tasks.length,
@@ -144,57 +161,70 @@ export class AgentOrchestrator {
     } catch (error) {
       logger.error('Campaign orchestration failed', { error, workflowId: workflow.id });
       workflow.status = 'failed';
+      await agentStateManager.updateTaskStatus(
+        rootTask.id,
+        'failed',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       return workflow;
     }
   }
 
   /**
-   * Execute single agent task
+   * Execute single agent task with State Manager integration
    */
   private async executeTask(task: AgentTask): Promise<AgentTask> {
     task.status = 'in-progress';
     task.startedAt = new Date();
 
     try {
+      let output: unknown;
+      let taskId = task.id;
+
       switch (task.agentType) {
         case 'prospecting':
-          task.output = await this.prospecting.discoverLeads(
-            task.input as Parameters<typeof this.prospecting.discoverLeads>[0]
-          );
+          // ProspectingAgent.run now returns taskId and handles state updates
+          taskId = await this.prospecting.run(task.input as ProspectingCriteria, task.parentTaskId);
+          output = { message: 'Prospecting completed', taskId };
           break;
 
         case 'research':
-          task.output = await this.research.generateDossier(
-            task.input as Parameters<typeof this.research.generateDossier>[0]
+          // ResearchAgent.generateDossier handles state updates but returns data
+          // We need to capture the task ID if we want to link it properly in the Workflow object
+          // But generateDossier returns CompanyDossier.
+          // For now, we accept we might not get the child taskId easily without structured returns.
+          // However, the child task IS created in DB with parentTaskId.
+          output = await this.research.generateDossier(
+            task.input as ResearchInput,
+            task.parentTaskId
           );
           break;
 
         case 'sequence-engineer':
-          task.output = await this.sequenceEngineer.designSequence(
-            task.input as Parameters<typeof this.sequenceEngineer.designSequence>[0]
-          );
+          output = await this.sequenceEngineer.designSequence(task.input as any, task.parentTaskId);
           break;
 
         case 'content-purposing':
-          task.output = await this.contentPurposing.purposeContent(
+          output = await this.contentPurposing.purposeContent(
             task.input as Parameters<typeof this.contentPurposing.purposeContent>[0]
           );
           break;
 
         case 'graphics':
-          task.output = await this.graphics.generateGraphic(
+          output = await this.graphics.generateGraphic(
             task.input as Parameters<typeof this.graphics.generateGraphic>[0]
           );
           break;
 
         case 'socials':
-          task.output = await this.socials.schedulePost(
+          output = await this.socials.schedulePost(
             task.input as Parameters<typeof this.socials.schedulePost>[0]
           );
           break;
 
         case 'contracting':
-          task.output = await this.contracting.generateContract(
+          output = await this.contracting.generateContract(
             task.input as Parameters<typeof this.contracting.generateContract>[0]
           );
           break;
@@ -203,6 +233,8 @@ export class AgentOrchestrator {
           throw new Error(`Unknown agent type: ${task.agentType}`);
       }
 
+      task.id = taskId || task.id; // Update ID if available
+      task.output = output;
       task.status = 'completed';
       task.completedAt = new Date();
     } catch (error) {

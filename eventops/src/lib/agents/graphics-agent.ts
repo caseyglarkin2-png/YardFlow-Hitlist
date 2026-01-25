@@ -6,6 +6,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import { agentStateManager } from './state-manager';
 
 export interface GraphicsRequest {
   type: 'social-post' | 'email-header' | 'presentation-slide' | 'infographic';
@@ -43,27 +44,48 @@ export class GraphicsAgent {
   /**
    * Generate visual content based on request
    */
-  async generateGraphic(request: GraphicsRequest): Promise<GeneratedGraphic> {
+  async generateGraphic(request: GraphicsRequest, parentTaskId?: string): Promise<GeneratedGraphic> {
     logger.info('Graphics agent started', { type: request.type });
 
-    // TODO: Integrate with graphics generation service
-    // Options:
-    // 1. DALL-E for AI-generated images
-    // 2. Canva API for template-based designs
-    // 3. Pre-designed templates from YardFlow content hub
+    const task = await agentStateManager.createTask({
+      agentType: 'graphics',
+      inputData: request as unknown as Record<string, unknown>,
+      parentTaskId,
+    });
 
-    // Placeholder response
-    return {
-      imageUrl: 'https://flow-state-klbt.vercel.app/api/assets/placeholder.png',
-      altText: `${request.theme} - ${request.type}`,
-      format: 'png',
-      dimensions: request.dimensions || { width: 1200, height: 630 },
-      metadata: {
-        generatedAt: new Date(),
-        tool: 'placeholder',
-        confidence: 0.5,
-      },
-    };
+    try {
+      await agentStateManager.updateTaskStatus(task.id, 'in_progress');
+
+      // TODO: Integrate with graphics generation service
+      // Options:
+      // 1. DALL-E for AI-generated images
+      // 2. Canva API for template-based designs
+      // 3. Pre-designed templates from YardFlow content hub
+
+      // Placeholder response
+      const result: GeneratedGraphic = {
+        imageUrl: 'https://flow-state-klbt.vercel.app/api/assets/placeholder.png',
+        altText: `${request.theme} - ${request.type}`,
+        format: 'png',
+        dimensions: request.dimensions || { width: 1200, height: 630 },
+        metadata: {
+          generatedAt: new Date(),
+          tool: 'placeholder',
+          confidence: 0.5,
+        },
+      };
+
+      await agentStateManager.updateTaskStatus(task.id, 'completed', result);
+      return result;
+    } catch (error) {
+      await agentStateManager.updateTaskStatus(
+        task.id,
+        'failed',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+      throw error;
+    }
   }
 
   /**

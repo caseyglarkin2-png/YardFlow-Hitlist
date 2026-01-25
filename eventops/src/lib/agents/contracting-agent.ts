@@ -5,6 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db';
+import { agentStateManager } from './state-manager';
 
 export interface ContractRequest {
   type: 'msa' | 'sow' | 'nda' | 'proposal';
@@ -34,44 +35,67 @@ export class ContractingAgent {
   /**
    * Generate contract document from template
    */
-  async generateContract(request: ContractRequest): Promise<GeneratedContract> {
+  async generateContract(request: ContractRequest, parentTaskId?: string): Promise<GeneratedContract> {
     logger.info('Contracting agent started', { type: request.type, accountId: request.accountId });
 
-    // Get account details for personalization
-    const account = await prisma.target_accounts.findUnique({
-      where: { id: request.accountId },
-      include: {
-        people: {
-          where: { isExecOps: true },
-          take: 1,
-        },
-      },
+    const task = await agentStateManager.createTask({
+      agentType: 'contracting',
+      inputData: request as unknown as Record<string, unknown>,
+      accountId: request.accountId,
+      parentTaskId,
     });
 
-    if (!account) {
-      throw new Error('Account not found');
+    try {
+      await agentStateManager.updateTaskStatus(task.id, 'in_progress');
+
+      // Get account details for personalization
+      const account = await prisma.target_accounts.findUnique({
+        where: { id: request.accountId },
+        include: {
+          people: {
+            where: { isExecOps: true },
+            take: 1,
+          },
+        },
+      });
+
+      if (!account) {
+        throw new Error('Account not found');
+      }
+
+      // TODO: Implement document generation
+      // 1. Fetch base template from YardFlow content hub
+      // 2. Fill in company details, contact names, terms
+      // 3. Calculate pricing based on tier and facilities
+      // 4. Generate PDF with proper formatting
+      // 5. Store in cloud storage (S3, Cloudinary)
+
+      const sections = this.getSectionsForType(request.type);
+      const customizations = this.getCustomizations(account, request.dealTerms);
+
+      const result: GeneratedContract = {
+        documentUrl: 'https://flow-state-klbt.vercel.app/api/contracts/placeholder.pdf',
+        format: 'pdf',
+        sections,
+        metadata: {
+          generatedAt: new Date(),
+          template: request.type,
+          customizations,
+        },
+      };
+
+      await agentStateManager.updateTaskStatus(task.id, 'completed', result);
+
+      return result;
+    } catch (error) {
+      await agentStateManager.updateTaskStatus(
+        task.id,
+        'failed',
+        undefined,
+        error instanceof Error ? error.message : 'Unknown error'
+      );
+      throw error;
     }
-
-    // TODO: Implement document generation
-    // 1. Fetch base template from YardFlow content hub
-    // 2. Fill in company details, contact names, terms
-    // 3. Calculate pricing based on tier and facilities
-    // 4. Generate PDF with proper formatting
-    // 5. Store in cloud storage (S3, Cloudinary)
-
-    const sections = this.getSectionsForType(request.type);
-    const customizations = this.getCustomizations(account, request.dealTerms);
-
-    return {
-      documentUrl: 'https://flow-state-klbt.vercel.app/api/contracts/placeholder.pdf',
-      format: 'pdf',
-      sections,
-      metadata: {
-        generatedAt: new Date(),
-        template: request.type,
-        customizations,
-      },
-    };
   }
 
   /**
@@ -81,7 +105,7 @@ export class ContractingAgent {
     accountId: string;
     facilities: number;
     estimatedShipments: number;
-  }): Promise<GeneratedContract> {
+  }, parentTaskId?: string): Promise<GeneratedContract> {
     // TODO: Integrate with ROI calculator
     // 1. Calculate savings based on facility count
     // 2. Generate executive summary
@@ -98,6 +122,9 @@ export class ContractingAgent {
         facilities: params.facilities,
         services: ['Yard Management', 'Dock Scheduling', 'Asset Tracking'],
       },
+      pricingTier: 'growth',
+    }, parentTaskId);
+  }
     });
   }
 

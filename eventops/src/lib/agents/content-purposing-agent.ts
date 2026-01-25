@@ -53,7 +53,7 @@ export class ContentPurposingAgent {
   /**
    * Purpose content from YardFlow hub for specific use case
    */
-  async purposeContent(request: ContentRequest, accountId?: string): Promise<PurposedContent> {
+  async purposeContent(request: ContentRequest, accountId?: string, parentTaskId?: string): Promise<PurposedContent> {
     logger.info('Content purposing agent started', { request, accountId });
 
     // Create agent task for tracking
@@ -62,6 +62,7 @@ export class ContentPurposingAgent {
           agentType: 'content',
           inputData: request,
           accountId,
+          parentTaskId,
         })
       : null;
 

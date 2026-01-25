@@ -10,10 +10,44 @@ import { useAgentMonitoring } from '@/hooks/useAgentMonitoring';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { PlayCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AgentsDashboardPage() {
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
   const { data, loading, error } = useAgentMonitoring(timeRange);
+  const { toast } = useToast();
+  const [triggering, setTriggering] = useState(false);
+
+  const triggerAgent = async (action: string, params: any) => {
+    try {
+      setTriggering(true);
+      const response = await fetch('/api/agents/trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, params }),
+      });
+
+      if (!response.ok) throw new Error('Failed to trigger agent');
+
+      toast({
+        title: 'Agent Triggered',
+        description: `Successfully started ${action}`,
+      });
+      
+      // Force reload as useAgentMonitoring might not have refresh exposed
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'Failed to start agent task',
+        variant: 'destructive',
+      });
+    } finally {
+      setTriggering(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -38,11 +72,30 @@ export default function AgentsDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">AI Agent Squad Monitoring</h1>
-        <p className="text-muted-foreground">
-          Real-time performance metrics for autonomous GTM agents
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">AI Agent Squad Monitoring</h1>
+          <p className="text-muted-foreground">
+            Real-time performance metrics for autonomous GTM agents
+          </p>
+        </div>
+        <div className="flex gap-2">
+             <Button 
+                onClick={() => triggerAgent('run-prospecting', { eventId: 'manifest-2026' })}
+                disabled={triggering}
+              >
+                <PlayCircle className="mr-2 h-4 w-4" />
+                Start Prospecting
+              </Button>
+              <Button 
+                variant="secondary"
+                onClick={() => triggerAgent('start-campaign', { eventId: 'manifest-2026', campaignType: 'pre-event' })}
+                disabled={triggering}
+              >
+                <PlayCircle className="mr-2 h-4 w-4" />
+                Full Campaign
+              </Button>
+        </div>
       </div>
 
       {/* Time Range Selector */}
