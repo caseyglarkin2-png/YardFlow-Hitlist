@@ -1,29 +1,28 @@
-# PROJECT STATUS: SPRINT 30
+# PROJECT STATUS: SPRINT 31 (Manifest Integration)
 
 **Date**: Jan 25, 2026
-**Current Focus**: Production Hardening & Deployment Stability
-**Deployment Status**: Investigating Web HTTP 502 (Worker Healthy)
+**Current Focus**: Manifest 2026 Data Ingestion & Features
+**Deployment Status**: Fixes Deployed, Verifying Web Service
 
 ## 🚦 System Health Board
 
 | Service | Status | Check | Note |
 |:--- |:--- |:--- |:--- |
-| **Web App** | ⚠️ Unstable | `/api/health` | 502 Bad Gateway - Fix deployed, verifying |
+| **Web App** | 🔄 Deploying | `/api/health` | `PORT` binding fix applied |
 | **Worker** | ✅ Healthy | `/healthz` | Processing queues |
 | **Database** | ✅ Connected | PING | Migrations applied |
 | **Redis** | ✅ Connected | PING | Queue connection validated |
 
 ## 📝 Recent Accomplishments
-*   **Architecture**: Successfully split Web and Worker services on Railway (Cost & Stability win).
-*   **Reliability**: Implemented lazy initialization pattern to fix build hangs.
-*   **Observability**: Added `/api/ping`, `/api/health`, and `/api/queue/status` endpoints.
-*   **Tooling**: Added `config:check` and `smoke:test` scripts.
-*   **Docs**: Cleaned up documentation, archived hallucinations, consolidated Roadmap.
+*   **Fix Deployed**: Updated `railway.json` to properly bind `PORT` for Next.js standalone mode.
+*   **Infrastructure**: Created `db:seed:manifest` pipeline for ingesting `manifest_companies.csv` and `manifest_people.csv`.
+*   **UI**: Launched `/dashboard/manifest` for visualizing event targets.
+*   **Docs**: Consolidated Roadmap and Status.
 
 ## ⚠️ Active Blockers / Todos
-1.  **Web 502 Config**: `PORT=8080` and `HOST=0.0.0.0` fix applied to `railway.json` - Pending deploy verification.
-2.  **UI Review**: Need to verify `dashboard/` pages load correctly once web is up.
-3.  **Sprint 31 Prep**: Ready to start Manifest Meeting Generator.
+1.  **Data Ingestion**: Need to upload `manifest_companies.csv` and `manifest_people.csv` to `eventops/prisma/seeds/data/` (files missing from workspace).
+2.  **Verify**: Confirm `/dashboard/manifest` loads correctly after deployment.
+3.  **Feature**: Implement "Sync Requests" button logic.
 
 ## 🔗 Quick Links
 - [Roadmap](./ROADMAP.md)

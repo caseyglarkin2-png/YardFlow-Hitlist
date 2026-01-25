@@ -18,7 +18,8 @@
     "test:smoke": "chmod +x tests/smoke/smoke-test.sh && ./tests/smoke/smoke-test.sh",
     "test:smoke:prod": "npm run test:smoke https://yard-flow-hitlist.vercel.app",
     "test:smoke:local": "npm run test:smoke http://localhost:3000",
-    "db:seed:prod": "npx tsx prisma/seed-production.ts"
+    "db:seed:prod": "npx tsx prisma/seed-production.ts",
+    "db:seed:manifest": "npx tsx prisma/seed-manifest.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

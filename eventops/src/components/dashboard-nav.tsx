@@ -20,6 +20,7 @@ export function DashboardNav() {
     { name: 'Accounts', href: '/dashboard/accounts' },
     { name: 'People', href: '/dashboard/people' },
     { name: 'Calendar', href: '/dashboard/calendar' },
+    { name: 'Manifest', href: '/dashboard/manifest' },
     { name: 'Outreach', href: '/dashboard/outreach' },
     { name: 'Campaigns', href: '/dashboard/campaigns' },
     { name: 'Research', href: '/dashboard/research/bulk' },
