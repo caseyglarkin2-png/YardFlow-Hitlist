@@ -61,25 +61,39 @@ async function getQueueCounts() {
 }
 
 export async function GET() {
+  // Graceful handling of checks - never crash this endpoint
   const envMissing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
-  const [db, redis, queueCounts] = await Promise.all([checkDatabase(), checkRedis(), getQueueCounts()]);
+  
+  // Run checks in parallel but catch all errors individually
+  // We want to return a 200/503 response, not a 500 runtime exception
+  let dbCheck, redisCheck, queueCheck;
+  
+  try { dbCheck = await checkDatabase(); } catch(e) { dbCheck = { status: 'fatal', error: String(e) } }
+  try { redisCheck = await checkRedis(); } catch(e) { redisCheck = { status: 'fatal', error: String(e) } }
+  try { queueCheck = await getQueueCounts(); } catch(e) { queueCheck = { status: 'fatal', error: String(e) } }
 
   const healthy =
-    db.status === 'ok' && redis.status === 'ok' && envMissing.length === 0 && queueCounts.status === 'ok';
+    dbCheck.status === 'ok' && 
+    redisCheck.status === 'ok' && 
+    envMissing.length === 0;
 
   const response = {
-    status: healthy ? 'ok' : 'degraded',
+    // If DB is down, we are DEGRADED but the Web App is UP.
+    status: healthy ? 'healthy' : 'degraded',
     checks: {
+      system: { status: 'ok', uptime: process.uptime() },
       environment: {
         status: envMissing.length === 0 ? 'ok' : 'missing',
         missing: envMissing,
       },
-      database: db,
-      redis,
-      queues: queueCounts,
+      database: dbCheck,
+      redis: redisCheck,
+      queues: queueCheck,
       timestamp: new Date().toISOString(),
     },
   };
 
+  // Return 503 only if CRITICAL infrastructure is missing (DB/Redis)
+  // But always return valid JSON so we can debug.
   return NextResponse.json(response, { status: healthy ? 200 : 503 });
 }

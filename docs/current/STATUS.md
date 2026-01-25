@@ -1,32 +1,24 @@
-# PROJECT STATUS: SPRINT 31 (Manifest Integration)
+# PROJECT STATUS: RED ALERT (RESCUE MODE)
 
-**Date**: Jan 25, 2026
-**Current Focus**: Manifest 2026 Data Ingestion & Features
-**Deployment Status**: Fixes Deployed, Verifying Web Service
+> **Current Phase**: SPRINT 33 - THE RESCUE
+> **Focus**: Production Stability (502 Fixes)
+> **Master Plan**: [RESCUE_PLAN_MASTER.md](./RESCUE_PLAN_MASTER.md)
 
-## 🚦 System Health Board
+## 🚨 Critical Issues
+1.  **Production 502**: Application fails to respond on Railway.
+    *   *Status*: Fix Committed (Bind to 0.0.0.0). Awaiting Verification.
+2.  **Health Checks**: Currently coupled to Database. Need separation.
+    *   *Action*: Creating `/api/ping` (Liveness) vs `/api/health` (Readiness).
 
-| Service | Status | Check | Note |
-|:--- |:--- |:--- |:--- |
-| **Web App** | 🔄 Deploying | `/api/health` | `PORT` binding fix applied |
-| **Worker** | ✅ Healthy | `/healthz` | Processing queues |
-| **Database** | ✅ Connected | PING | Migrations applied |
-| **Redis** | ✅ Connected | PING | Queue connection validated |
+## 📅 Sprint 33 Checklist
+- [x] **33.1 Network Binding**: Fix `start-production.sh` HOSTNAME.
+- [ ] **33.2 Liveness Endpoint**: Create `/api/ping` (Zero Deps).
+- [ ] **33.3 Robust Health**: Hardening `/api/health` (Try/Catch DB).
+- [ ] **33.4 DB Diagnostic**: Create `scripts/test-db-connection.ts`.
+- [ ] **33.5 Verification**: Run `verify-production-health.sh`.
 
-## 📝 Recent Accomplishments
-*   **Fix Deployed**: Updated `railway.json` to properly bind `PORT` for Next.js standalone mode.
-*   **Infrastructure**: Created `db:seed:manifest` pipeline for ingesting `manifest_companies.csv` and `manifest_people.csv`.
-*   **Data Ingestion**: ✅ Successfully seeded 2,653 companies and 5,409 people into Production DB.
-*   **UI**: Launched `/dashboard/manifest` for visualizing event targets.
-*   **Docs**: Consolidated Roadmap and Status.
+## 🛑 Blockers
+- None. Waiting on Deployment #5 verification.
 
-## ⚠️ Active Blockers / Todos
-1.  **Verify**: Confirm `/dashboard/manifest` loads correctly after deployment.
-2.  **Feature**: Implement "Sync Requests" button logic.
-
-## 🔗 Quick Links
-- [Roadmap](./ROADMAP.md)
-- [Sprint 32 Plan (Stability)](./SPRINT_32_STABILITY.md)
-- [Sprint 33 Plan (Agents)](./SPRINT_33_AGENT_ENGINE.md)
-- [Sprint 30 Reference](./SPRINT_30_QUICK_REFERENCE.md)
-- [Copilot Instructions](../../.github/copilot-instructions.md)
+---
+*Last Updated: Jan 25, 2026*
