@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Use standalone output for Railway deployment
+  output: 'standalone',
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',

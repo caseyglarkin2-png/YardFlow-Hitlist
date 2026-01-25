@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { auth } from '@/auth';
 
+// Force dynamic rendering - never statically generate this route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 interface HealthCheck {
   status: 'healthy' | 'unhealthy' | 'not-configured';
   message?: string;
