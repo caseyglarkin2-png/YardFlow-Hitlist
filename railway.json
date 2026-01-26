@@ -3,7 +3,7 @@
   "build": {
     "builder": "NIXPACKS",
     "nixpacksConfigPath": "eventops/nixpacks.toml",
-    "buildCommand": "cd eventops && npm ci && npx prisma generate && NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build"
+    "buildCommand": "cd eventops && npx prisma generate && NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build"
   },
   "deploy": {
     "startCommand": "cd eventops && ./start-production.sh",

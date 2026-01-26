@@ -3,12 +3,13 @@
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = ["cd eventops && npm ci --no-audit --prefer-offline"]
+cacheDirectories = ["eventops/node_modules", "eventops/.next/cache"]
 
 [phases.build]
 cmds = [
-  "npx prisma generate",
-  "npm run build"
+  "cd eventops && npx prisma generate",
+  "cd eventops && npm run build"
 ]
 
 
