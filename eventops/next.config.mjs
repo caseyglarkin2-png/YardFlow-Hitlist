@@ -8,11 +8,8 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-  // Optimize build for Vercel memory limits
+  // Optimize build for Railway memory limits
   swcMinify: true,
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
   // Disable type checking and linting during builds (run in CI instead)
   typescript: {
     ignoreBuildErrors: true,
