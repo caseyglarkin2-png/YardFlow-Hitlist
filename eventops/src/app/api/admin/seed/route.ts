@@ -15,71 +15,77 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Check if admin already exists
-    const existingAdmin = await prisma.users.findUnique({
-      where: { email: 'admin@yardflow.com' }
+    // Check if Casey already exists
+    const existingCasey = await prisma.users.findUnique({
+      where: { email: 'casey@freightroll.com' }
     });
 
-    if (existingAdmin) {
+    if (existingCasey) {
       return NextResponse.json({ 
         status: 'already_seeded',
-        message: 'Admin user already exists',
-        email: existingAdmin.email
+        message: 'Users already exist',
+        users: ['casey@freightroll.com', 'jake@freightroll.com']
       });
     }
 
-    // Create admin user
-    const hashedPassword = await bcrypt.hash('YardFlow2026!', 10);
+    // Create Casey (Admin)
+    const caseyPassword = await bcrypt.hash('FreightRoll2026!', 10);
     
-    const admin = await prisma.users.create({
+    const casey = await prisma.users.create({
       data: {
-        id: 'user_admin_prod',
-        email: 'admin@yardflow.com',
-        name: 'Admin User',
-        password: hashedPassword,
+        id: 'user_casey_prod',
+        email: 'casey@freightroll.com',
+        name: 'Casey Larkin',
+        password: caseyPassword,
         role: 'ADMIN',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     });
 
-    // Create demo user
-    const demoPassword = await bcrypt.hash('demo123', 10);
+    // Create Jake (Admin)
+    const jakePassword = await bcrypt.hash('FreightRoll2026!', 10);
     
-    const demo = await prisma.users.create({
+    const jake = await prisma.users.create({
       data: {
-        id: 'user_demo_prod',
-        email: 'demo@yardflow.com',
-        name: 'Demo User',
-        password: demoPassword,
-        role: 'MEMBER',
+        id: 'user_jake_prod',
+        email: 'jake@freightroll.com',
+        name: 'Jake',
+        password: jakePassword,
+        role: 'ADMIN',
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     });
 
-    // Create Manifest 2026 event
-    const event = await prisma.events.create({
-      data: {
-        id: 'manifest-2026-prod',
-        name: 'Manifest 2026',
-        location: 'Las Vegas Convention Center, NV',
-        startDate: new Date('2026-02-10'),
-        endDate: new Date('2026-02-12'),
-        status: 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+    // Find existing Manifest 2026 event or create it
+    let event = await prisma.events.findFirst({
+      where: { name: 'Manifest 2026' }
     });
+
+    if (!event) {
+      event = await prisma.events.create({
+        data: {
+          id: 'manifest-2026-prod',
+          name: 'Manifest 2026',
+          location: 'Las Vegas Convention Center, NV',
+          startDate: new Date('2026-02-10'),
+          endDate: new Date('2026-02-12'),
+          status: 'ACTIVE',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+    }
 
     // Link users to event
     await prisma.users.update({
-      where: { id: admin.id },
+      where: { id: casey.id },
       data: { activeEventId: event.id },
     });
 
     await prisma.users.update({
-      where: { id: demo.id },
+      where: { id: jake.id },
       data: { activeEventId: event.id },
     });
 
@@ -87,8 +93,8 @@ export async function POST(request: Request) {
       status: 'success',
       message: 'Database seeded successfully',
       users: [
-        { email: 'admin@yardflow.com', role: 'ADMIN' },
-        { email: 'demo@yardflow.com', role: 'MEMBER' },
+        { email: 'casey@freightroll.com', role: 'ADMIN' },
+        { email: 'jake@freightroll.com', role: 'ADMIN' },
       ],
       event: { name: event.name, id: event.id },
     });
