@@ -147,22 +147,36 @@ Ensure these are already set:
 
 ## 🌱 Run Production Seed (After Deploy)
 
-### Option A: Railway Dashboard
-1. Go to web service → Settings
-2. Click "Deploy" dropdown → "Run Command"
-3. Enter: `cd eventops && npx prisma db seed`
-4. Click "Run"
-5. Check logs for success message
+### ⚠️ IMPORTANT: Production Credentials
+The production seed creates different users than development!
 
-### Option B: Railway CLI
+**Admin User**
+- Email: `admin@yardflow.com`
+- Password: `YardFlow2026!`
+
+**Demo User**
+- Email: `demo@yardflow.com`
+- Password: `demo123`
+
+### Run the Seed Command
+You must run the **production** seed script manually after your first deployment. The standard seed command (`prisma db seed`) creates the dev user 'casey'.
+
+**Option A: Railway Dashboard (Recommended)**
+1. Go to "yardflow-hitlist-production" service → **Settings** tab.
+2. Scroll to "Deploy" section.
+3. Click **Run Command**.
+4. Enter: `cd eventops && npm run db:seed:prod`
+5. Click **Run** and check logs.
+
+**Option B: Railway CLI**
 ```bash
-railway run --service yardflow-hitlist-production npx prisma db seed
+# Run from your local terminal
+railway run --service yardflow-hitlist-production npm run db:seed:prod
 ```
 
 ### Verification
-```bash
-# Test login
-curl -X POST https://yardflow-hitlist-production.up.railway.app/api/auth/signin \
+Login at the production URL with `admin@yardflow.com`.
+
   -H "Content-Type: application/json" \
   -d '{"email":"admin@yardflow.com","password":"YardFlow2026!"}'
 

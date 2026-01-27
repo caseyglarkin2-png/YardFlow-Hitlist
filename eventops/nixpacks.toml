@@ -1,15 +1,13 @@
 # Nixpacks configuration for YardFlow EventOps
+# NOTE: Build commands are handled by railway.json buildCommand
+# This file only configures the environment and caching
+
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
-[phases.install]
-cmds = ["cd eventops && npm ci --no-audit --prefer-offline"]
-cacheDirectories = ["eventops/node_modules", "eventops/.next/cache"]
-
-[phases.build]
-cmds = [
-  "cd eventops && npx prisma generate",
-  "cd eventops && npm run build"
-]
+# Caching for faster rebuilds
+[caches]
+npm = "eventops/node_modules"
+next = "eventops/.next/cache"
 
 

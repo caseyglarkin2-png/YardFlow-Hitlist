@@ -11,7 +11,6 @@
     "test": "vitest",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "postinstall": "prisma generate",
     "backup:create": "chmod +x scripts/backup-database.sh && cd \"$PWD\" && ./scripts/backup-database.sh",
     "metrics:baseline": "npx tsx scripts/collect-baseline-metrics.ts",
     "config:check": "tsx scripts/config-check.ts",
