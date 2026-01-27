@@ -75,12 +75,12 @@ export async function POST(request: Request) {
     // Link users to event
     await prisma.users.update({
       where: { id: admin.id },
-      data: { eventId: event.id },
+      data: { activeEventId: event.id },
     });
 
     await prisma.users.update({
       where: { id: demo.id },
-      data: { eventId: event.id },
+      data: { activeEventId: event.id },
     });
 
     return NextResponse.json({
