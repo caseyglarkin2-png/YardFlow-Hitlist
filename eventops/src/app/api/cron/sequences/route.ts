@@ -27,13 +27,17 @@ export async function GET(request: NextRequest) {
 
   try {
     // Find active enrollments that have pending steps
-    // A step is due when: lastProcessedAt + delayHours <= now
+    // A step is due when: startedAt + delayHours <= now (or last email sent time)
     const activeEnrollments = await prisma.sequenceEnrollment.findMany({
       where: {
         status: 'active',
       },
       include: {
-        outreachSequence: true,
+        sequence: true,
+        emailActivities: {
+          orderBy: { sentAt: 'desc' },
+          take: 1,
+        },
       },
       take: 100, // Process in batches
     });
@@ -42,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     for (const enrollment of activeEnrollments) {
       try {
-        const sequence = enrollment.outreachSequence;
+        const sequence = enrollment.sequence;
         if (!sequence) continue;
 
         const steps = sequence.steps as unknown as Array<{
@@ -67,8 +71,9 @@ export async function GET(request: NextRequest) {
 
         const currentStep = steps[currentStepIndex];
         
-        // Calculate if step is due
-        const lastProcessed = enrollment.lastProcessedAt || enrollment.createdAt;
+        // Calculate if step is due based on last email sent or enrollment start
+        const lastActivity = enrollment.emailActivities[0];
+        const lastProcessed = lastActivity?.sentAt || enrollment.startedAt;
         const delayMs = (currentStep.delayHours || 0) * 60 * 60 * 1000;
         const dueTime = new Date(lastProcessed.getTime() + delayMs);
         
