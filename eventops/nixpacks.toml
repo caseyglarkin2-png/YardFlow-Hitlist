@@ -5,9 +5,7 @@
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
-# Caching for faster rebuilds
+# Disable npm cache to force fresh install after Prisma 7 upgrade
+# Re-enable after successful deploy
 [caches]
-npm = "eventops/node_modules"
 next = "eventops/.next/cache"
-
-
