@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Auto-recalculate account score
-    await autoRecalculateScore(data.accountId, session.user.email || undefined);
+    await autoRecalculateScore(data.accountId, authResult.email || undefined);
 
     return NextResponse.json(person, { status: 201 });
   } catch (error) {
