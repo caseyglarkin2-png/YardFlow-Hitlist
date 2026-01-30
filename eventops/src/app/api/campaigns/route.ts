@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         goals: goals ? JSON.stringify(goals) : null,
-        createdBy: user.email || session.user.id,
+        createdBy: user.email || authResult.userId,
         status: 'DRAFT',
         createdAt: new Date(),
         updatedAt: new Date(),
