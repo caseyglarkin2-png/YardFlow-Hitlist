@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { parsePaginationParams, buildPaginatedResponse, getPrismaCursorParams } from '@/lib/pagination';
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,14 +16,18 @@ const accountSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user's active event
+    // Get user's active event - for S2S, use the userId header
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (request.headers.get('x-user-id') || authResult.userId);
+
     const user = await prisma.users.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { activeEventId: true },
     });
 
@@ -69,13 +74,17 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (request.headers.get('x-user-id') || authResult.userId);
+
     const user = await prisma.users.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { activeEventId: true },
     });
 

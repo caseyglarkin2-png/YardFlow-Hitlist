@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { authServiceOrSession } from '@/lib/auth-service';
 
 // GET /api/analytics/cohort - Cohort analysis
 export async function GET(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const groupBy = searchParams.get('groupBy') || 'month'; // month, week, persona, icpScore

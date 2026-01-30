@@ -1,21 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
 
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (req.headers.get('x-user-id') || authResult.userId);
+
     const where: any = {
-      createdBy: session.user.id,
+      createdBy: userId,
     };
 
     if (status) {
@@ -53,10 +58,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (req.headers.get('x-user-id') || authResult.userId);
 
     const body = await req.json();
     const { name, description, steps } = body;
@@ -128,7 +137,7 @@ export async function POST(req: NextRequest) {
         description: description?.trim() || null,
         steps: normalizedSteps,
         status: 'draft',
-        createdBy: session.user.id,
+        createdBy: userId,
       },
     });
 

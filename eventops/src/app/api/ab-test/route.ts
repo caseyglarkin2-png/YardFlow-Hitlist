@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,14 +8,9 @@ export const dynamic = 'force-dynamic';
  * Create A/B test for outreach messages
  */
 export async function POST(req: NextRequest) {
-  // Service-to-service auth (from Vercel proxy)
-  const authHeader = req.headers.get('authorization');
-  const serviceSecret = process.env.CRON_SECRET;
-  const isServiceAuth = serviceSecret && authHeader === `Bearer ${serviceSecret}`;
-
-  // Check either service auth OR user session
-  const session = await auth();
-  if (!isServiceAuth && !session?.user) {
+  // Use unified auth helper (supports session, S2S, and CRON_SECRET)
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -25,10 +20,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'name and at least 2 variants required' }, { status: 400 });
   }
 
-  // Create campaign for A/B test
-  const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+  // Get user - for S2S auth, use the userId from header or lookup by email
+  const userId = authResult.type === 'session' 
+    ? authResult.userId 
+    : (req.headers.get('x-user-id') || authResult.userId);
+  
+  // Try to find user by ID or email
+  let user = await prisma.users.findUnique({
+    where: { id: userId },
   });
+  
+  // If not found by ID and we have an email, try that
+  if (!user && authResult.email) {
+    user = await prisma.users.findUnique({
+      where: { email: authResult.email },
+    });
+  }
 
   if (!user?.activeEventId) {
     return NextResponse.json({ error: 'No active event' }, { status: 400 });
@@ -41,7 +48,7 @@ export async function POST(req: NextRequest) {
       name: `A/B Test: ${name}`,
       description: `${description}\n\nVariants: ${variants.map((v: any, i: number) => `${String.fromCharCode(65 + i)}: ${v.name}`).join(', ')}`,
       status: 'ACTIVE',
-      createdBy: session?.user?.id || 'service:vercel-proxy',
+      createdBy: authResult.userId,
       goals: JSON.stringify({
         testName: name,
         variants: variants.length,
@@ -66,8 +73,8 @@ export async function POST(req: NextRequest) {
  * Get A/B test results
  */
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

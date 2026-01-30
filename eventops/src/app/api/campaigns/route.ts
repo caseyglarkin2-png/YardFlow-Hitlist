@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -10,13 +11,17 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (req.headers.get('x-user-id') || authResult.userId);
+
     const user = await prisma.users.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { activeEventId: true },
     });
 
@@ -50,13 +55,17 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (req.headers.get('x-user-id') || authResult.userId);
+
     const user = await prisma.users.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { activeEventId: true, email: true },
     });
 

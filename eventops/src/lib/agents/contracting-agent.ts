@@ -73,11 +73,14 @@ export class ContractingAgent {
       // 4. Generate PDF with proper formatting
       // 5. Store in cloud storage (S3, Cloudinary)
 
+      // Import content hub for placeholder URL
+      const { contentHub } = await import('@/lib/content-hub');
+
       const sections = this.getSectionsForType(request.type);
       const customizations = this.getCustomizations(account, request.dealTerms);
 
       const result: GeneratedContract = {
-        documentUrl: 'https://flow-state-klbt.vercel.app/api/contracts/placeholder.pdf',
+        documentUrl: contentHub.getPlaceholderPdf(),
         format: 'pdf',
         sections,
         metadata: {

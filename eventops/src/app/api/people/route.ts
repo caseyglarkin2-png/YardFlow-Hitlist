@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { autoRecalculateScore } from '@/lib/auto-recalculate';
 import { NextRequest, NextResponse } from 'next/server';
@@ -22,8 +23,8 @@ const personSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -31,8 +32,12 @@ export async function POST(request: NextRequest) {
     const data = personSchema.parse(body);
 
     // Verify account exists and belongs to user's active event
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (request.headers.get('x-user-id') || authResult.userId);
+
     const user = await prisma.users.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { activeEventId: true },
     });
 
@@ -98,13 +103,17 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : (request.headers.get('x-user-id') || authResult.userId);
+
     const user = await prisma.users.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { activeEventId: true },
     });
 

@@ -12,9 +12,11 @@
 
 import { logger } from '@/lib/logger';
 import { contentHubClient } from '@/lib/yardflow-content-hub';
+import { contentHub } from '@/lib/content-hub';
 import { agentStateManager } from './state-manager';
 
-const CONTENT_HUB_BASE = 'https://flow-state-klbt.vercel.app/api';
+// Use centralized content hub URL
+const CONTENT_HUB_BASE = contentHub.apiUrl;
 
 export interface ContentRequest {
   persona: string;

@@ -65,9 +65,12 @@ export class GraphicsAgent {
       // 2. Canva API for template-based designs
       // 3. Pre-designed templates from YardFlow content hub
 
+      // Import content hub for placeholder URL
+      const { contentHub } = await import('@/lib/content-hub');
+
       // Placeholder response
       const result: GeneratedGraphic = {
-        imageUrl: 'https://flow-state-klbt.vercel.app/api/assets/placeholder.png',
+        imageUrl: contentHub.getPlaceholderImage(),
         altText: `${request.theme} - ${request.type}`,
         format: 'png',
         dimensions: request.dimensions || { width: 1200, height: 630 },
