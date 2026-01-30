@@ -8,8 +8,14 @@ export const dynamic = 'force-dynamic';
  * Create A/B test for outreach messages
  */
 export async function POST(req: NextRequest) {
+  // Service-to-service auth (from Vercel proxy)
+  const authHeader = req.headers.get('authorization');
+  const serviceSecret = process.env.CRON_SECRET;
+  const isServiceAuth = serviceSecret && authHeader === `Bearer ${serviceSecret}`;
+
+  // Check either service auth OR user session
   const session = await auth();
-  if (!session?.user) {
+  if (!isServiceAuth && !session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -38,7 +44,7 @@ export async function POST(req: NextRequest) {
       name: `A/B Test: ${name}`,
       description: `${description}\n\nVariants: ${variants.map((v: any, i: number) => `${String.fromCharCode(65 + i)}: ${v.name}`).join(', ')}`,
       status: 'ACTIVE',
-      createdBy: session.user.id,
+      createdBy: session?.user?.id || 'service:vercel-proxy',
       goals: JSON.stringify({
         testName: name,
         variants: variants.length,
