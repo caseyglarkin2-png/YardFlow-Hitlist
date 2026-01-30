@@ -2,6 +2,7 @@
 
 > **Status**: ACTIVE  
 > **Created**: January 30, 2026  
+> **Last Updated**: January 30, 2026  
 > **Reviewed By**: AI Senior TPM Subagent  
 > **Philosophy**: Ship Fast, Ship Often - Atomic, testable tasks  
 > **Goal**: Unify GTM Vercel frontend with Railway backend into cohesive platform
@@ -11,8 +12,15 @@
 ## Quick Wins Completed ✅
 
 - [x] **R0.1**: Deleted `/api/debug/env` route (security vulnerability)
+- [x] **R0.2**: Protected `/api/ai/dossier` with authServiceOrSession
+- [x] **R0.3**: Protected analytics endpoints (cohort, funnel, predictions)
+- [x] **R0.4**: Protected `/api/locks` with authServiceOrSession
 - [x] **R1.1**: Created `src/lib/auth-service.ts` (S2S auth helper)
+- [x] **R2.1**: Added CORS headers to next.config.mjs
+- [x] **R2.2**: Updated middleware.ts with OPTIONS preflight handling
+- [x] **R3.1**: Migrated core routes to authServiceOrSession (accounts, people, campaigns, events, sequences, templates)
 - [x] **R4.1**: Created `src/lib/content-hub.ts` (centralized client)
+- [x] **R4.2**: Updated agents to use content-hub.ts client
 
 ---
 
