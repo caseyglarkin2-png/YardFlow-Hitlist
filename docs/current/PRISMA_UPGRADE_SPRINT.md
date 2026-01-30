@@ -1,10 +1,47 @@
 # Prisma Major Version Upgrade Sprint
 
-> **Status**: IN PROGRESS  
+> **Status**: IN PROGRESS - DEPLOYMENT FIX APPLIED  
 > **Created**: January 30, 2026  
+> **Last Updated**: January 30, 2026 (5 failed builds → root cause found)  
 > **Target**: Prisma 5.22.0 → 7.3.0  
 > **Risk Level**: 🔴 HIGH - Two major version jumps  
 > **Strategy**: Staged upgrade (5.x → 6.x → 7.x)
+
+---
+
+## 🔴 ROOT CAUSE ANALYSIS (5 Failed Builds)
+
+### Problem
+Railway builds failed with:
+```
+Error: Prisma schema validation - (get-config wasm)
+Error code: P1012
+error: Argument "url" is missing in data source block "db".
+Prisma CLI Version : 5.22.0  ← OLD VERSION!
+```
+
+### Root Cause
+**TWO package.json files with conflicting Prisma versions:**
+
+| File | Prisma Version | Used By |
+|------|---------------|---------|
+| `/package.json` (ROOT) | `@prisma/client@5.18.0`, `prisma@5.18.0` | Nixpacks `npm ci` |
+| `/eventops/package.json` | `@prisma/client@7.3.0`, `prisma@7.3.0` | Railway buildCommand |
+
+**Failure Chain:**
+1. Nixpacks sees ROOT `/package.json` → runs `npm ci`
+2. ROOT has `postinstall: cd eventops && npx prisma generate`
+3. postinstall runs with ROOT's Prisma 5.22.0 (from npm cache)
+4. Prisma 5.x expects `url` in schema.prisma
+5. Our schema has NO url (required for Prisma 7)
+6. **BUILD FAILS**
+
+### Fix Applied
+```diff
+- ROOT /package.json had all dependencies (including Prisma 5.18.0)
++ ROOT /package.json is now minimal stub with NO dependencies
++ All dependencies live in /eventops/package.json (Prisma 7.3.0)
+```
 
 ---
 
@@ -26,7 +63,7 @@ Railway deployment logs show Prisma upgrade available: `5.22.0 → 7.3.0`. This 
 | ESM migration | 🔴 HIGH | Next.js already ESM-compatible |
 | Driver adapters | 🔴 HIGH | Use `@prisma/adapter-pg` |
 | Import path changes | 🟡 MEDIUM | Update all `@prisma/client` imports |
-| Build system | 🟡 MEDIUM | Test on Railway build |
+| Build system | 🔴 HIGH | **TWO package.json files caused conflict** |
 | Runtime | 🟢 LOW | Node 24.x exceeds requirements |
 | Schema | 🟢 LOW | No reserved keyword conflicts |
 
@@ -39,14 +76,17 @@ Railway deployment logs show Prisma upgrade available: `5.22.0 → 7.3.0`. This 
 - [x] No `$use()` middleware usage (✅ no migration needed)
 - [x] No `NotFoundError` imports (✅ safe)
 - [x] No Prisma `Bytes` fields (✅ Buffer changes won't affect us)
-- [ ] Database backup before upgrade
-- [ ] Feature branch created
+- [x] ROOT package.json stripped of dependencies
+- [x] eventops/package.json has Prisma 7.3.0
+- [ ] Railway build succeeds
+- [ ] Production health check passes
 
 ---
 
 ## Stage 1: Upgrade to Prisma 6.x
 
 **Goal**: Get to latest v6 as stable intermediate step.
+
 
 ### Task 1.1: Create Database Backup
 ```bash
