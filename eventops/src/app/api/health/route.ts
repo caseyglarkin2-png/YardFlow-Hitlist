@@ -6,11 +6,7 @@ import { emailQueue, enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib
 export const dynamic = 'force-dynamic';
 
 // CRITICAL: App won't function without these
-const REQUIRED_ENV_VARS = [
-  'DATABASE_URL',
-  'AUTH_SECRET',
-  'REDIS_URL',
-];
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'AUTH_SECRET', 'REDIS_URL'];
 
 // OPTIONAL: Features degraded but app still works
 const OPTIONAL_ENV_VARS = [
@@ -69,20 +65,30 @@ export async function GET() {
   // Graceful handling of checks - never crash this endpoint
   const criticalMissing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
   const optionalMissing = OPTIONAL_ENV_VARS.filter((key) => !process.env[key]);
-  
+
   // Run checks in parallel but catch all errors individually
   // We want to return a 200/503 response, not a 500 runtime exception
   let dbCheck, redisCheck, queueCheck;
-  
-  try { dbCheck = await checkDatabase(); } catch(e) { dbCheck = { status: 'fatal', error: String(e) } }
-  try { redisCheck = await checkRedis(); } catch(e) { redisCheck = { status: 'fatal', error: String(e) } }
-  try { queueCheck = await getQueueCounts(); } catch(e) { queueCheck = { status: 'fatal', error: String(e) } }
+
+  try {
+    dbCheck = await checkDatabase();
+  } catch (e) {
+    dbCheck = { status: 'fatal', error: String(e) };
+  }
+  try {
+    redisCheck = await checkRedis();
+  } catch (e) {
+    redisCheck = { status: 'fatal', error: String(e) };
+  }
+  try {
+    queueCheck = await getQueueCounts();
+  } catch (e) {
+    queueCheck = { status: 'fatal', error: String(e) };
+  }
 
   // Healthy = DB + Redis + Critical Env Vars
   const healthy =
-    dbCheck.status === 'ok' && 
-    redisCheck.status === 'ok' && 
-    criticalMissing.length === 0;
+    dbCheck.status === 'ok' && redisCheck.status === 'ok' && criticalMissing.length === 0;
 
   const response = {
     // If DB is down, we are DEGRADED but the Web App is UP.

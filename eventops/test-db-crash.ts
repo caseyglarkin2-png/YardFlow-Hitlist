@@ -1,4 +1,3 @@
-
 try {
   process.env.DATABASE_URL = undefined;
   // Clear require cache for db.ts if it was loaded

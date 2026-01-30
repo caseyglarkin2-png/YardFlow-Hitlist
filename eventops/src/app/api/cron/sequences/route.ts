@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Cron job to process email sequences automatically
- * 
+ *
  * Finds active enrollments with pending steps and queues them for processing.
  * Should be called every 5-15 minutes by Railway cron or external service.
  */
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   // Verify cron secret
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET || 'dev-secret-change-in-production';
-  
+
   if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -70,19 +70,22 @@ export async function GET(request: NextRequest) {
         }
 
         const currentStep = steps[currentStepIndex];
-        
+
         // Calculate if step is due based on last email sent or enrollment start
         const lastActivity = enrollment.emailActivities[0];
         const lastProcessed = lastActivity?.sentAt || enrollment.startedAt;
         const delayMs = (currentStep.delayHours || 0) * 60 * 60 * 1000;
         const dueTime = new Date(lastProcessed.getTime() + delayMs);
-        
+
         if (new Date() >= dueTime) {
           // Step is due, queue it for processing
-          await addSequenceJob({
-            enrollmentId: enrollment.id,
-            stepNumber: currentStepIndex,
-          }, 0);
+          await addSequenceJob(
+            {
+              enrollmentId: enrollment.id,
+              stepNumber: currentStepIndex,
+            },
+            0
+          );
 
           stepsQueued++;
           logger.info('Cron: Queued sequence step', {
@@ -119,13 +122,15 @@ export async function GET(request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error: any) {
     logger.error('Cron: Sequence job failed', { error: error.message });
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 }
+    );
   }
 }

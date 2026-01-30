@@ -16,6 +16,7 @@
 ## 📋 TASK 30.5: Provision Redis (20 minutes)
 
 ### Option A: Railway Dashboard (Recommended)
+
 1. Go to https://railway.app/
 2. Select your YardFlow-Hitlist project
 3. Click "New Service" → "Database" → "Redis"
@@ -24,6 +25,7 @@
 6. Verify in project settings → Variables
 
 ### Option B: Railway CLI
+
 ```bash
 # Install CLI if not present
 npm install -g @railway/cli
@@ -42,6 +44,7 @@ railway variables | grep REDIS_URL
 ```
 
 ### Verification
+
 After adding Redis, both web and worker services will have access to `REDIS_URL` automatically.
 
 ---
@@ -89,6 +92,7 @@ railway logs -s yardflow-worker
 ### Configuration File Reference
 
 The `railway-worker.json` file has been created in the root directory as a reference:
+
 ```json
 {
   "build": {
@@ -109,6 +113,7 @@ The `railway-worker.json` file has been created in the root directory as a refer
 ### Required Variables (Set in BOTH web and worker services)
 
 #### 1. CRON_SECRET
+
 ```bash
 # Generate a secure secret
 openssl rand -base64 32
@@ -120,6 +125,7 @@ openssl rand -base64 32
 ```
 
 #### 2. SENDGRID_API_KEY (Optional but recommended)
+
 ```bash
 # Get from https://app.sendgrid.com/settings/api_keys
 # Add to Railway:
@@ -128,15 +134,18 @@ openssl rand -base64 32
 ```
 
 #### 3. GEMINI_API_KEY (If not using OpenAI)
+
 ```bash
 # Get from https://aistudio.google.com/app/apikey
 # Add to Railway:
-# Name: GEMINI_API_KEY  
+# Name: GEMINI_API_KEY
 # Value: AIzaSyxxxxxxxxxxxxx
 ```
 
 #### 4. Verify Existing Variables
+
 Ensure these are already set:
+
 - ✅ `DATABASE_URL` (Railway PostgreSQL)
 - ✅ `REDIS_URL` (from Task 30.5)
 - ✅ `AUTH_SECRET` (NextAuth)
@@ -148,20 +157,25 @@ Ensure these are already set:
 ## 🌱 Run Production Seed (After Deploy)
 
 ### ⚠️ IMPORTANT: Production Credentials
+
 The production seed creates different users than development!
 
 **Admin User**
+
 - Email: `admin@yardflow.com`
 - Password: `YardFlow2026!`
 
 **Demo User**
+
 - Email: `demo@yardflow.com`
 - Password: `demo123`
 
 ### Run the Seed Command
+
 You must run the **production** seed script manually after your first deployment. The standard seed command (`prisma db seed`) creates the dev user 'casey'.
 
 **Option A: Railway Dashboard (Recommended)**
+
 1. Go to "yardflow-hitlist-production" service → **Settings** tab.
 2. Scroll to "Deploy" section.
 3. Click **Run Command**.
@@ -169,19 +183,22 @@ You must run the **production** seed script manually after your first deployment
 5. Click **Run** and check logs.
 
 **Option B: Railway CLI**
+
 ```bash
 # Run from your local terminal
 railway run --service yardflow-hitlist-production npm run db:seed:prod
 ```
 
 ### Verification
+
 Login at the production URL with `admin@yardflow.com`.
 
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@yardflow.com","password":"YardFlow2026!"}'
+-H "Content-Type: application/json" \
+ -d '{"email":"admin@yardflow.com","password":"YardFlow2026!"}'
 
 # Should return session/redirect
-```
+
+````
 
 ---
 
@@ -199,15 +216,17 @@ open https://yardflow-hitlist-production.up.railway.app/
 # Password: YardFlow2026!
 
 # Should redirect to /dashboard
-```
+````
 
 #### 2. Dashboard ✓
+
 - View should load without errors
 - Should see 5 target accounts
 - ICP scores should be displayed
 - No console errors
 
 #### 3. Target Accounts ✓
+
 ```bash
 # Navigate to /accounts
 # Should see:
@@ -219,6 +238,7 @@ open https://yardflow-hitlist-production.up.railway.app/
 ```
 
 #### 4. People/Contacts ✓
+
 ```bash
 # Navigate to /people
 # Should see 10 contacts
@@ -227,6 +247,7 @@ open https://yardflow-hitlist-production.up.railway.app/
 ```
 
 #### 5. Campaigns & Sequences ✓
+
 ```bash
 # Navigate to /campaigns
 # Should see "Manifest 2026 - VP+ Outreach"
@@ -235,6 +256,7 @@ open https://yardflow-hitlist-production.up.railway.app/
 ```
 
 #### 6. Health Endpoint ✓
+
 ```bash
 curl https://yardflow-hitlist-production.up.railway.app/api/health | jq
 
@@ -252,6 +274,7 @@ curl https://yardflow-hitlist-production.up.railway.app/api/health | jq
 ```
 
 #### 7. Queue Processing ✓ (After worker deployed)
+
 ```bash
 # Test enrichment job
 # 1. Go to /accounts
@@ -262,6 +285,7 @@ curl https://yardflow-hitlist-production.up.railway.app/api/health | jq
 ```
 
 #### 8. Company Dossiers ✓
+
 ```bash
 # Navigate to account detail page
 # Should see AI-generated:
@@ -273,6 +297,7 @@ curl https://yardflow-hitlist-production.up.railway.app/api/health | jq
 ```
 
 #### 9. Sequence Enrollments ✓
+
 ```bash
 # Navigate to /sequences
 # Click "Manifest Exec - 5 Touch"
@@ -284,6 +309,7 @@ curl https://yardflow-hitlist-production.up.railway.app/api/health | jq
 ```
 
 #### 10. Error Handling ✓
+
 ```bash
 # Test invalid login
 # Try accessing /dashboard without auth
@@ -336,21 +362,25 @@ Once you've completed Tasks 30.5-30.7 via Railway dashboard:
 ## 🆘 Troubleshooting
 
 ### Redis not connecting
+
 - Verify `REDIS_URL` is set in both web + worker
 - Check Redis service is running in Railway dashboard
 - Look for connection errors in logs
 
 ### Worker not processing jobs
+
 - Check worker service is deployed and running
 - Verify worker has same env vars as web service
 - Check worker logs for errors
 
 ### Seed script fails
+
 - Ensure DATABASE_URL is correct
 - Check for existing data conflicts
 - Run with Railway CLI for detailed error logs
 
 ### Health check shows degraded
+
 - Redis not provisioned → Complete Task 30.5
 - Database connection issue → Check DATABASE_URL
 - Auth not configured → Verify AUTH_SECRET set

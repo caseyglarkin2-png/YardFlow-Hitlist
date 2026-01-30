@@ -22,10 +22,7 @@ export async function POST(req: NextRequest) {
   const { name, description, variants, targetFilters, sampleSize } = await req.json();
 
   if (!name || !variants || variants.length < 2) {
-    return NextResponse.json(
-      { error: 'name and at least 2 variants required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'name and at least 2 variants required' }, { status: 400 });
   }
 
   // Create campaign for A/B test

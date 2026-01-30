@@ -38,11 +38,11 @@ export async function testHubSpotConnection(): Promise<boolean> {
       method: 'GET',
       path: '/account-info/v3/api-usage/daily',
     });
-    
+
     logger.info('HubSpot connection successful', {
       status: accountInfo.status,
     });
-    
+
     return true;
   } catch (error) {
     logger.error('HubSpot connection failed', {

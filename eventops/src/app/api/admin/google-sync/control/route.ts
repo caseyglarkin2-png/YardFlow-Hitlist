@@ -4,7 +4,7 @@ import { setGlobalSyncEnabled, getGlobalSyncEnabled } from '@/lib/google/sync-st
 
 export async function POST(request: Request) {
   const session = await auth();
-  
+
   if (!session?.user?.email?.endsWith('@freightroll.com')) {
     return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
   }
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   const session = await auth();
-  
+
   if (!session?.user?.email?.endsWith('@freightroll.com')) {
     return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
   }

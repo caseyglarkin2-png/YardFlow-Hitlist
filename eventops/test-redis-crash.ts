@@ -1,4 +1,3 @@
-
 try {
   process.env.REDIS_URL = 'invalid-url-format';
   require('./src/lib/queue/client');

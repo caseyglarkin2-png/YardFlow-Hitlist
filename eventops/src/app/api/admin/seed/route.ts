@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   // Require a secret to prevent abuse
   const { searchParams } = new URL(request.url);
   const secret = searchParams.get('secret');
-  
+
   if (secret !== process.env.AUTH_SECRET?.slice(0, 16)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -17,20 +17,20 @@ export async function POST(request: Request) {
   try {
     // Check if Casey already exists
     const existingCasey = await prisma.users.findUnique({
-      where: { email: 'casey@freightroll.com' }
+      where: { email: 'casey@freightroll.com' },
     });
 
     if (existingCasey) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         status: 'already_seeded',
         message: 'Users already exist',
-        users: ['casey@freightroll.com', 'jake@freightroll.com']
+        users: ['casey@freightroll.com', 'jake@freightroll.com'],
       });
     }
 
     // Create Casey (Admin)
     const caseyPassword = await bcrypt.hash('FreightRoll2026!', 10);
-    
+
     const casey = await prisma.users.create({
       data: {
         id: 'user_casey_prod',
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
     // Create Jake (Admin)
     const jakePassword = await bcrypt.hash('FreightRoll2026!', 10);
-    
+
     const jake = await prisma.users.create({
       data: {
         id: 'user_jake_prod',
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     // Find existing Manifest 2026 event or create it
     let event = await prisma.events.findFirst({
-      where: { name: 'Manifest 2026' }
+      where: { name: 'Manifest 2026' },
     });
 
     if (!event) {
@@ -98,13 +98,15 @@ export async function POST(request: Request) {
       ],
       event: { name: event.name, id: event.id },
     });
-
   } catch (error) {
     console.error('Seed error:', error);
-    return NextResponse.json({ 
-      error: 'Seed failed', 
-      details: String(error) 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Seed failed',
+        details: String(error),
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -121,12 +123,15 @@ export async function GET() {
         users: userCount,
         events: eventCount,
         accounts: accountCount,
-      }
+      },
     });
   } catch (error) {
-    return NextResponse.json({ 
-      error: 'Database check failed', 
-      details: String(error) 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Database check failed',
+        details: String(error),
+      },
+      { status: 500 }
+    );
   }
 }

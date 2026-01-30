@@ -6,12 +6,12 @@ import { logger } from '@/lib/logger';
  */
 function getRedisConfig() {
   const redisUrl = process.env.REDIS_URL;
-  
+
   if (redisUrl) {
     try {
       // Railway provides REDIS_URL in the format: redis://default:password@host:port
       const url = new URL(redisUrl);
-      
+
       return {
         host: url.hostname,
         port: parseInt(url.port || '6379', 10),
@@ -20,10 +20,10 @@ function getRedisConfig() {
         enableReadyCheck: false,
       };
     } catch (error) {
-       logger.warn('Invalid REDIS_URL environment variable, falling back to components', { error });
+      logger.warn('Invalid REDIS_URL environment variable, falling back to components', { error });
     }
   }
-  
+
   // Fallback to individual environment variables
   return {
     host: process.env.REDIS_HOST || 'localhost',

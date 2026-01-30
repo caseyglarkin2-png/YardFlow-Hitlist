@@ -52,7 +52,7 @@ export async function GET(request: Request) {
           updated: result.updated,
           skipped: result.skipped,
         });
-        
+
         successCount++;
 
         await logGoogleAPICall(user.id, 'calendar', 'cron_sync_success', {
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
         });
       } catch (error: any) {
         console.error(`Sync failed for user ${user.id}:`, error);
-        
+
         results.push({
           userId: user.id,
           email: user.email,
@@ -72,9 +72,15 @@ export async function GET(request: Request) {
 
         failureCount++;
 
-        await logGoogleAPICall(user.id, 'calendar', 'cron_sync_failure', {
-          error: error.message,
-        }, false);
+        await logGoogleAPICall(
+          user.id,
+          'calendar',
+          'cron_sync_failure',
+          {
+            error: error.message,
+          },
+          false
+        );
 
         if (error.message.includes('refresh failed') || error.message.includes('revoked')) {
           await prisma.users.update({
@@ -87,13 +93,15 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime;
 
-    console.log(JSON.stringify({
-      event: 'cron_sync_complete',
-      totalUsers: users.length,
-      successCount,
-      failureCount,
-      durationMs: duration,
-    }));
+    console.log(
+      JSON.stringify({
+        event: 'cron_sync_complete',
+        totalUsers: users.length,
+        successCount,
+        failureCount,
+        durationMs: duration,
+      })
+    );
 
     return NextResponse.json({
       success: true,
@@ -106,7 +114,7 @@ export async function GET(request: Request) {
   } catch (error: any) {
     console.error('Cron sync error:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: error.message,
         totalUsers: 0,

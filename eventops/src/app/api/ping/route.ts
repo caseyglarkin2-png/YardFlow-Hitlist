@@ -9,10 +9,10 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   return NextResponse.json(
-    { 
-      status: 'ok', 
+    {
+      status: 'ok',
       service: 'yardflow-hitlist',
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString(),
     },
     { status: 200 }
   );
