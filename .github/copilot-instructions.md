@@ -44,8 +44,14 @@ npm run build     # Test production build
 Always use the singleton pattern with lazy getters.
 
 ```typescript
-// ✅ Correct: src/lib/db.ts
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+// ✅ Correct: src/lib/db.ts (Prisma 7 with driver adapter)
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg({ pool });
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 // ✅ Correct: Lazy Queue
 export const agentQueue = {
@@ -55,6 +61,38 @@ export const agentQueue = {
   },
 };
 ```
+
+### Prisma 7 Configuration
+
+**CRITICAL**: Prisma 7.3.0 requires specific configuration:
+- **Schema**: `eventops/prisma/schema.prisma` - NO `url` in datasource block
+- **Config**: `eventops/prisma.config.ts` - Contains `datasource.url`
+- **Client**: Uses `@prisma/adapter-pg` driver adapter
+
+```prisma
+// ✅ Correct: schema.prisma (Prisma 7)
+datasource db {
+  provider = "postgresql"
+  // NO url here - it's in prisma.config.ts
+}
+```
+
+```typescript
+// ✅ Correct: prisma.config.ts
+import { defineConfig } from 'prisma/config';
+export default defineConfig({
+  schema: './prisma/schema.prisma',
+  datasource: { url: process.env.DATABASE_URL },
+});
+```
+
+### Monorepo Structure (TWO package.json files)
+
+**CRITICAL**: This repo has TWO package.json files:
+1. **ROOT `/package.json`** - Minimal stub, NO dependencies. Just points to eventops.
+2. **`/eventops/package.json`** - All actual dependencies including Prisma 7.3.0.
+
+Railway's buildCommand (`railway.json`) runs `cd eventops && npm ci` to install from the correct location.
 
 ### Next.js App Router Rules
 
