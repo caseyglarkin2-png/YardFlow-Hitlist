@@ -8,6 +8,7 @@ WORKDIR /app
 # Copy package files and Prisma schema
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Install ALL dependencies (including devDependencies needed for build)
 RUN npm ci

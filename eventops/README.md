@@ -1,20 +1,31 @@
-# EventOps
+# EventOps (YardFlow Hitlist)
 
 Event execution platform for managing accounts, people, outreach, and day-of operations.
+Runs on **Railway** as a headless backend service.
+
+## Architecture
+
+- **Backend**: Next.js App Router (Railway)
+  - API Routes only (Headless)
+  - Worker Service (BullMQ consumers)
+- **Frontend**: YardFlow GTM (Vercel)
+- **Auth**: Service-to-Service (S2S) via `x-service-key` + NextAuth Session
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
-- npm or yarn
-- Vercel account (for deployment)
+- Railway CLI (optional)
+- PostgreSQL (Local or Railway)
+- Redis (Local or Railway)
 
 ### Local Development
 
 1. **Install dependencies:**
 
 ```bash
+cd eventops
 npm install
 ```
 
@@ -22,32 +33,44 @@ npm install
 
 ```bash
 cp .env.example .env
-# Edit .env with your values
+# Required: DATABASE_URL, REDIS_URL, SERVICE_TO_SERVICE_SECRET
 ```
 
 3. **Setup database:**
 
-For Vercel Postgres (recommended for production):
-- Create a Postgres database in Vercel dashboard
-- Copy connection strings to `.env`
-
-For local Docker (alternative):
 ```bash
-docker compose up -d
-```
-
-4. **Run migrations:**
-
-```bash
-npx prisma migrate dev
+# Push schema to DB
+npx prisma db push
 npx prisma generate
 ```
 
-5. **Seed database:**
+4. **Run development server:**
 
 ```bash
-npx prisma db seed
+npm run dev
 ```
+
+## Deployment for Railway
+
+This project is configured for split-service deployment on Railway:
+
+1. **Web Service**: Runs `start-production.sh` (Next.js Standalone)
+2. **Worker Service**: Runs `start-worker.sh` (BullMQ workers)
+
+Do not deploy to Vercel (Frontend is separate).
+
+## Service-to-Service Auth
+
+Calls from GTM Frontend (Vercel) to this backend require headers:
+
+- `x-service-key`: Matches `SERVICE_TO_SERVICE_SECRET` env var
+- `x-user-id`: User ID acting on behalf of
+- `x-user-email`: Optional user email
+
+## Agents
+
+AI Agents utilize `content-hub` for assets and contracts.
+Queues are managed via Redis/BullMQ.
 
 6. **Start development server:**
 
