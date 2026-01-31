@@ -1,11 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
+import { authServiceOrSession } from '@/lib/auth-service';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Export data in various formats
+ * GET /api/export - Export data via query params (browser-friendly)
+ */
+export async function GET(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(req.url);
+  const type = searchParams.get('type') || 'accounts';
+  const format = searchParams.get('format') || 'csv';
+
+  // Call the POST handler logic with extracted params
+  return handleExport(type, format, authResult.userId);
+}
+
+/**
+ * POST /api/export - Export data with body params
  */
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -23,15 +41,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No active event' }, { status: 400 });
   }
 
-  let data: any[] = [];
+  return handleExport(type, format, user.id, user.activeEventId, filters);
+}
+
+async function handleExport(
+  type: string,
+  format: string,
+  userId: string,
+  eventId?: string,
+  filters?: Record<string, unknown>
+) {
+  // If no eventId provided, get it from user
+  let activeEventId = eventId;
+  if (!activeEventId) {
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { activeEventId: true },
+    });
+    activeEventId = user?.activeEventId || undefined;
+  }
+
+  let data: Record<string, unknown>[] = [];
   let filename = '';
+
+  const minIcpScore = filters?.minIcpScore as number | undefined;
+  const statusFilter = filters?.status as string | undefined;
 
   // Export accounts
   if (type === 'accounts') {
     const accounts = await prisma.target_accounts.findMany({
       where: {
-        eventId: user.activeEventId,
-        ...(filters?.minIcpScore && { icpScore: { gte: filters.minIcpScore } }),
+        ...(activeEventId && { eventId: activeEventId }),
+        ...(minIcpScore && { icpScore: { gte: minIcpScore } }),
       },
       include: {
         people: true,
@@ -55,7 +96,7 @@ export async function POST(req: NextRequest) {
   if (type === 'people') {
     const people = await prisma.people.findMany({
       where: {
-        target_accounts: { eventId: user.activeEventId },
+        ...(activeEventId && { target_accounts: { eventId: activeEventId } }),
       },
       include: {
         target_accounts: {
@@ -72,8 +113,8 @@ export async function POST(req: NextRequest) {
       Title: p.title,
       Email: p.email,
       LinkedIn: p.linkedin,
-      Account: p.target_accounts.name,
-      Industry: p.target_accounts.industry,
+      Account: p.target_accounts?.name || '',
+      Industry: p.target_accounts?.industry || '',
       'Exec Ops': p.isExecOps,
       'Ops': p.isOps,
       'Procurement': p.isProc,
@@ -89,10 +130,8 @@ export async function POST(req: NextRequest) {
   if (type === 'outreach') {
     const outreach = await prisma.outreach.findMany({
       where: {
-        people: {
-          target_accounts: { eventId: user.activeEventId },
-        },
-        ...(filters?.status && { status: filters.status }),
+        ...(activeEventId && { people: { target_accounts: { eventId: activeEventId } } }),
+        ...(statusFilter && { status: statusFilter }),
       },
       include: {
         people: {
@@ -112,7 +151,7 @@ export async function POST(req: NextRequest) {
     data = outreach.map((o) => ({
       Person: o.people.name,
       Email: o.people.email,
-      Account: o.people.target_accounts.name,
+      Account: o.people.target_accounts?.name || '',
       Subject: o.subject,
       Status: o.status,
       Channel: o.channel,
@@ -122,6 +161,41 @@ export async function POST(req: NextRequest) {
     }));
 
     filename = `outreach-export-${Date.now()}.csv`;
+  }
+
+  // Export meetings
+  if (type === 'meetings') {
+    const meetings = await prisma.Meeting.findMany({
+      where: {
+        ...(activeEventId && { eventId: activeEventId }),
+      },
+      include: {
+        people: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+        target_accounts: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    data = meetings.map((m) => ({
+      Title: m.title,
+      Account: m.target_accounts?.name || '',
+      Contact: m.people?.name || '',
+      'Contact Email': m.people?.email || '',
+      Status: m.status,
+      'Deal Stage': m.dealStage || '',
+      'Scheduled Time': m.scheduledTime?.toISOString() || '',
+      'Created At': m.createdAt.toISOString(),
+    }));
+
+    filename = `meetings-export-${Date.now()}.csv`;
   }
 
   // Convert to CSV

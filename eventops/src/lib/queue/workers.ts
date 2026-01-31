@@ -19,12 +19,14 @@ import type {
   GenerateEmailsJobData,
   SequenceStepJobData,
   AgentJobData,
+  heartbeatQueue,
 } from './queues';
 
 // Lazy worker initialization - prevents crashes if Redis unavailable at startup
 let enrichmentWorker: Worker | null = null;
 let sequenceWorker: Worker | null = null;
 let agentWorker: Worker | null = null;
+let heartbeatWorker: Worker | null = null;
 
 function getWorkerOptions() {
   return {
@@ -210,12 +212,33 @@ function getAgentWorker(): Worker {
   return agentWorker;
 }
 
+function getHeartbeatWorker(): Worker {
+  if (!heartbeatWorker) {
+    heartbeatWorker = new Worker(
+      'heartbeat',
+      async () => {
+        // Simple lightweight operation to prove the process is alive
+        const redis = getRedisConnection();
+        await redis.set('worker:last_heartbeat', Date.now().toString());
+        return 'thump';
+      },
+      { connection: getRedisConnection() }
+    );
+    
+    heartbeatWorker.on('error', (err) => {
+      logger.error('Heartbeat worker error', { error: err });
+    });
+  }
+  return heartbeatWorker;
+}
+
 // Health check server for Railway monitoring
 const healthServer = http.createServer((req, res) => {
   if (req.url === '/health' || req.url === '/healthz' || req.url === '/') {
     const enrichment = enrichmentWorker;
     const sequence = sequenceWorker;
     const agents = agentWorker;
+    const heartbeat = heartbeatWorker;
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(
       JSON.stringify({
@@ -224,6 +247,7 @@ const healthServer = http.createServer((req, res) => {
           enrichment: enrichment?.isRunning() ? 'running' : 'stopped',
           sequence: sequence?.isRunning() ? 'running' : 'stopped',
           agents: agents?.isRunning() ? 'running' : 'stopped',
+          heartbeat: heartbeat?.isRunning() ? 'running' : 'stopped',
         },
         timestamp: new Date().toISOString(),
       })
@@ -245,6 +269,14 @@ function startWorkers() {
     getEnrichmentWorker();
     getSequenceWorker();
     getAgentWorker();
+    getHeartbeatWorker();
+
+    // Add a repeatable job that runs every 60 seconds
+    heartbeatQueue.add('thump', {}, {
+      repeat: { every: 60 * 1000 },
+      jobId: 'worker-heartbeat-cron' 
+    }).catch(err => logger.error('Failed to schedule heartbeat', { err }));
+
     logger.info('Queue workers started successfully');
   } catch (error) {
     logger.error('Failed to start workers', { error });

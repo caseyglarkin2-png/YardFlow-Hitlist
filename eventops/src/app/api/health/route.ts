@@ -38,6 +38,32 @@ async function checkRedis() {
   }
 }
 
+async function checkWorkerHealth() {
+  const start = Date.now();
+  try {
+    const redis = getRedisConnection();
+    const lastHeartbeat = await redis.get('worker:last_heartbeat');
+    
+    if (!lastHeartbeat) {
+      return { status: 'warning', message: 'No heartbeat found', latencyMs: Date.now() - start };
+    }
+    
+    const lag = Date.now() - parseInt(lastHeartbeat, 10);
+    // Threshold: 3 minutes (allows for 2 missed beats + some delay)
+    if (lag > 3 * 60 * 1000) {
+      return { 
+        status: 'error', 
+        message: `Worker stalled. Last heartbeat ${Math.round(lag/1000)}s ago`, 
+        latencyMs: Date.now() - start 
+      };
+    }
+    
+    return { status: 'ok', lagMs: lag, latencyMs: Date.now() - start };
+  } catch (error) {
+    return { status: 'error', error: (error as Error).message, latencyMs: Date.now() - start };
+  }
+}
+
 async function getQueueCounts() {
   try {
     const [enrichment, outreach, emails, sequence] = await Promise.all([
@@ -68,7 +94,7 @@ export async function GET() {
 
   // Run checks in parallel but catch all errors individually
   // We want to return a 200/503 response, not a 500 runtime exception
-  let dbCheck, redisCheck, queueCheck;
+  let dbCheck, redisCheck, queueCheck, workerCheck;
 
   try {
     dbCheck = await checkDatabase();
@@ -81,14 +107,22 @@ export async function GET() {
     redisCheck = { status: 'fatal', error: String(e) };
   }
   try {
+    workerCheck = await checkWorkerHealth();
+  } catch (e) {
+    workerCheck = { status: 'fatal', error: String(e) };
+  }
+  try {
     queueCheck = await getQueueCounts();
   } catch (e) {
     queueCheck = { status: 'fatal', error: String(e) };
   }
 
-  // Healthy = DB + Redis + Critical Env Vars
+  // Healthy = DB + Redis + Worker + Critical Env Vars
   const healthy =
-    dbCheck.status === 'ok' && redisCheck.status === 'ok' && criticalMissing.length === 0;
+    dbCheck.status === 'ok' && 
+    redisCheck.status === 'ok' && 
+    criticalMissing.length === 0 &&
+    workerCheck.status !== 'error';
 
   const response = {
     // If DB is down, we are DEGRADED but the Web App is UP.
@@ -102,6 +136,7 @@ export async function GET() {
       },
       database: dbCheck,
       redis: redisCheck,
+      worker: workerCheck,
       queues: queueCheck,
     },
     timestamp: new Date().toISOString(),
@@ -109,6 +144,6 @@ export async function GET() {
 
   // Return 200 even if degraded - the app is running
   // Return 503 only if CRITICAL infrastructure is missing
-  const statusCode = criticalMissing.length > 0 || dbCheck.status !== 'ok' ? 503 : 200;
+  const statusCode = healthy ? 200 : 503;
   return NextResponse.json(response, { status: statusCode });
 }

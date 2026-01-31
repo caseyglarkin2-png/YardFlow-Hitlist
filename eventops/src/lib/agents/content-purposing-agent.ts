@@ -141,43 +141,14 @@ export class ContentPurposingAgent {
     }
   }
 
-  private async fetchCaseStudy(industry: string): Promise<ContentData> {
-    try {
-      const response = await fetch(`${CONTENT_HUB_BASE}/case-studies?industry=${industry}`);
-      return await response.json();
-    } catch (error) {
-      logger.error('Failed to fetch case study', { error, industry });
-      return { placeholder: true, industry };
-    }
-  }
-
   private async fetchROITemplate(): Promise<ContentData> {
     try {
       const response = await fetch(`${CONTENT_HUB_BASE}/roi/template`);
+      if (!response.ok) throw new Error(`Status ${response.status}`);
       return await response.json();
     } catch (error) {
-      logger.error('Failed to fetch ROI template', { error });
-      return { placeholder: true };
-    }
-  }
-
-  private async fetchEmailTemplate(persona: string): Promise<ContentData> {
-    try {
-      const response = await fetch(`${CONTENT_HUB_BASE}/messaging/${persona}`);
-      return await response.json();
-    } catch (error) {
-      logger.error('Failed to fetch email template', { error, persona });
-      return { placeholder: true, persona };
-    }
-  }
-
-  private async fetchSocialTemplate(persona: string): Promise<ContentData> {
-    try {
-      const response = await fetch(`${CONTENT_HUB_BASE}/social/${persona}`);
-      return await response.json();
-    } catch (error) {
-      logger.error('Failed to fetch social template', { error, persona });
-      return { placeholder: true, persona };
+      logger.warn('Failed to fetch ROI template, using default', { error });
+      return this.getDefaultRoiTemplate();
     }
   }
 
@@ -224,6 +195,17 @@ export class ContentPurposingAgent {
     return {
       platform: 'linkedin',
       content: 'Sample social post template',
+    };
+  }
+
+  private getDefaultRoiTemplate(): ContentData {
+    return {
+      title: 'Standard ROI Calculator',
+      assumptions: {
+        laborRate: 25,
+        efficiencyGain: 0.15,
+      },
+      industry: 'logistics',
     };
   }
 }

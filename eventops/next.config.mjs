@@ -7,6 +7,9 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    // Emergency OOM Fix: Force single-threaded build
+    workerThreads: false,
+    cpus: 1,
   },
   // Optimize build for Railway memory limits
   swcMinify: true,

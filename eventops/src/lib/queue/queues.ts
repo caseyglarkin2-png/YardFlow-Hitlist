@@ -68,6 +68,7 @@ let _outreachQueue: Queue | null = null;
 let _emailQueue: Queue | null = null;
 let _sequenceQueue: Queue | null = null;
 let _agentQueue: Queue | null = null;
+let _heartbeatQueue: Queue | null = null;
 
 export const enrichmentQueue = {
   get queue(): Queue {
@@ -116,6 +117,24 @@ export const agentQueue = {
   },
   getFailed(...args: Parameters<Queue['getFailed']>) {
     return this.queue.getFailed(...args);
+  },
+};
+
+export const heartbeatQueue = {
+  get queue(): Queue {
+    if (!_heartbeatQueue) {
+      _heartbeatQueue = new Queue('heartbeat', {
+        connection: getRedisConnection(),
+        defaultJobOptions: {
+          removeOnComplete: 10,
+          removeOnFail: 10,
+        },
+      });
+    }
+    return _heartbeatQueue;
+  },
+  add(...args: Parameters<Queue['add']>) {
+    return this.queue.add(...args);
   },
 };
 

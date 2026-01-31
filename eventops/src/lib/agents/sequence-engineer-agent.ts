@@ -129,19 +129,45 @@ export class SequenceEngineerAgent {
 
   /**
    * Create sequence in database from blueprint
+   * Persists the sequence and its steps for enrollment
    */
   async createSequenceFromBlueprint(
-    _blueprint: SequenceBlueprint,
-    _campaignId?: string
+    blueprint: SequenceBlueprint,
+    campaignId?: string
   ): Promise<string> {
-    // TODO: Implement sequence creation
-    // 1. Create outreachSequence record
-    // 2. Generate message templates for each step
-    // 3. Set up delay timings
-    // 4. Link to campaign if provided
+    const sequenceId = `seq-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    logger.warn('Sequence creation not yet implemented');
-    return 'sequence-id-placeholder';
+    try {
+      // Create sequence record (steps stored as JSON per schema)
+      await prisma.sequences.create({
+        data: {
+          id: sequenceId,
+          name: blueprint.name,
+          description: blueprint.description,
+          campaignId: campaignId || null,
+          steps: JSON.stringify(blueprint.steps),
+          isActive: true,
+          updatedAt: new Date(),
+        },
+      });
+
+      logger.info('Sequence created from blueprint', {
+        sequenceId,
+        name: blueprint.name,
+        stepCount: blueprint.steps.length,
+        campaignId,
+        channels: [...new Set(blueprint.steps.map((s) => s.channel))],
+      });
+
+      return sequenceId;
+    } catch (error) {
+      logger.error('Failed to create sequence from blueprint', {
+        error,
+        blueprint: blueprint.name,
+        campaignId,
+      });
+      throw error;
+    }
   }
 
   private buildDynamicBlueprint(
