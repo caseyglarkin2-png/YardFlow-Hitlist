@@ -44,6 +44,7 @@ export interface AgentTaskResult {
   parentTaskId?: string;
   retryCount: number;
   maxRetries: number;
+  progress: number;
   createdAt: Date;
   updatedAt: Date;
   startedAt?: Date;
