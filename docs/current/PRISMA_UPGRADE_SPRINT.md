@@ -78,8 +78,21 @@ Railway deployment logs show Prisma upgrade available: `5.22.0 → 7.3.0`. This 
 - [x] No Prisma `Bytes` fields (✅ Buffer changes won't affect us)
 - [x] ROOT package.json stripped of dependencies
 - [x] eventops/package.json has Prisma 7.3.0
+- [x] db.ts uses getDatabaseUrl() helper
+- [x] Dockerfiles copy prisma.config.ts
+- [x] Verification script created (scripts/verify-prisma-7.ts)
 - [ ] Railway build succeeds
 - [ ] Production health check passes
+
+---
+
+## Commits Applied
+
+| Commit | Description |
+|--------|-------------|
+| f79af57 | Strip ROOT package.json - was installing Prisma 5.18.0 |
+| 3ae479a | Add root cause analysis to docs |
+| 75403ed | Address subagent review findings (db.ts, Dockerfiles, verify script) |
 
 ---
 
