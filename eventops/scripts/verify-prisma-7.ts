@@ -27,13 +27,13 @@ async function verify() {
 
     // Test 4: User count
     console.log('4️⃣ Testing users table access...');
-    const userCount = await prisma.user.count();
+    const userCount = await prisma.users.count();
     console.log(`   ✅ Users table accessible (${userCount} records)\n`);
 
-    // Test 5: Account count
-    console.log('5️⃣ Testing accounts table access...');
-    const accountCount = await prisma.accounts.count();
-    console.log(`   ✅ Accounts table accessible (${accountCount} records)\n`);
+    // Test 5: Target accounts count
+    console.log('5️⃣ Testing target_accounts table access...');
+    const accountCount = await prisma.target_accounts.count();
+    console.log(`   ✅ Target accounts table accessible (${accountCount} records)\n`);
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('✅ All Prisma 7 verifications passed!');

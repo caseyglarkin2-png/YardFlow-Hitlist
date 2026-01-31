@@ -29,8 +29,8 @@ function createPrismaClient(): PrismaClient {
     globalForPrisma.pool = pool;
   }
 
-  // Create Prisma adapter for pg pool
-  const adapter = new PrismaPg({ pool });
+  // Create Prisma adapter for pg pool (pass pool directly, not as object)
+  const adapter = new PrismaPg(pool);
 
   logger.info('🔌 Prisma Client Initialized with PrismaPg driver adapter (v7)');
 

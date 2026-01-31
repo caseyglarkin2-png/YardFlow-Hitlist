@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       data: {
         status: 'SENT',
         sentAt: new Date(),
-        sentBy: session.user.id,
+        sentBy: session?.user?.id ?? 'service-account',
       },
     });
 
