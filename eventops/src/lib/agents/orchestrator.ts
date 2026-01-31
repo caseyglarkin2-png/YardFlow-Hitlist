@@ -99,6 +99,24 @@ export class AgentOrchestrator {
   }
 
   /**
+   * Run a specific agent directly
+   */
+  async runAgent(agentType: string, params: Record<string, unknown>): Promise<{ taskId: string }> {
+    const task = await this.executeTask({
+      id: '',
+      agentType,
+      input: params,
+      status: 'pending'
+    });
+    
+    if (task.status === 'failed') {
+      throw new Error(task.error || 'Agent failed to start');
+    }
+    
+    return { taskId: task.id };
+  }
+
+  /**
    * Run full campaign: Prospecting → Research → Sequences → Outreach
    */
   async runFullCampaign(params: {
@@ -162,6 +180,11 @@ export class AgentOrchestrator {
 
       // Ensure no crash if still empty
       const targetAccounts = params.targetAccounts || [];
+
+      // [Progress Update: 20%]
+      await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress', undefined, undefined, 20);
+
+      // Step 2: Research each account
       for (const accountId of targetAccounts) {
         const researchTask = await this.executeTask({
           id: '',
@@ -174,6 +197,9 @@ export class AgentOrchestrator {
       }
 
       // Step 3: Design sequences for contacts at each account
+      // [Progress Update: 60%]
+      await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress', undefined, undefined, 60);
+
       for (const accountId of targetAccounts) {
         // Get contacts for this account
         const contacts = await prisma.people.findMany({
@@ -198,6 +224,9 @@ export class AgentOrchestrator {
       }
 
       // Step 4: Generate content for the campaign
+      // [Progress Update: 80%]
+      await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress', undefined, undefined, 80);
+
       const contentTask = await this.executeTask({
         id: '',
         agentType: 'content-purposing',
