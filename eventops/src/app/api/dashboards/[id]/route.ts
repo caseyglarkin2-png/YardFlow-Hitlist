@@ -4,21 +4,15 @@ import { NextRequest, NextResponse } from 'next/server';
 // Requires adding customDashboard model to Prisma schema
 
 export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params: _params }: { params: { id: string } }
 ) {
-  return NextResponse.json(
-    { error: 'Custom dashboards not yet implemented' },
-    { status: 501 }
-  );
+  return NextResponse.json({ error: 'Custom dashboards not yet implemented' }, { status: 501 });
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params: _params }: { params: { id: string } }
 ) {
-  return NextResponse.json(
-    { error: 'Custom dashboards not yet implemented' },
-    { status: 501 }
-  );
+  return NextResponse.json({ error: 'Custom dashboards not yet implemented' }, { status: 501 });
 }

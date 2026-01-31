@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/ai/next-actions - Get AI-recommended next actions for user
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
       orderBy: { icpScore: 'desc' },
     });
 
-    untouchedAccounts.forEach(account => {
+    untouchedAccounts.forEach((account) => {
       actions.push({
         id: `outreach-${account.id}`,
         type: 'create_outreach',
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       take: 3,
     });
 
-    openedNotReplied.forEach(outreach => {
+    openedNotReplied.forEach((outreach) => {
       actions.push({
         id: `followup-${outreach.id}`,
         type: 'send_followup',
@@ -98,10 +98,7 @@ export async function GET(req: NextRequest) {
           target_accounts: { eventId: user.activeEventId },
         },
         status: 'COMPLETED',
-        OR: [
-          { notes: null },
-          { notes: '' },
-        ],
+        OR: [{ notes: null }, { notes: '' }],
         scheduledAt: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
         },
@@ -112,7 +109,7 @@ export async function GET(req: NextRequest) {
       take: 3,
     });
 
-    meetingsWithoutNotes.forEach(meeting => {
+    meetingsWithoutNotes.forEach((meeting) => {
       actions.push({
         id: `notes-${meeting.id}`,
         type: 'add_meeting_notes',
@@ -147,9 +144,9 @@ export async function GET(req: NextRequest) {
       orderBy: { scheduledAt: 'asc' },
     });
 
-    todayMeetings.forEach(meeting => {
+    todayMeetings.forEach((meeting) => {
       const hoursUntil = (meeting.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
-      
+
       actions.push({
         id: `prep-${meeting.id}`,
         type: 'prepare_meeting',
@@ -166,16 +163,13 @@ export async function GET(req: NextRequest) {
     const lowScoreAccounts = await prisma.target_accounts.findMany({
       where: {
         eventId: user.activeEventId,
-        OR: [
-          { icpScore: { lt: 40 } },
-          { icpScore: null },
-        ],
+        OR: [{ icpScore: { lt: 40 } }, { icpScore: null }],
       },
       take: 2,
       orderBy: { createdAt: 'desc' },
     });
 
-    lowScoreAccounts.forEach(account => {
+    lowScoreAccounts.forEach((account) => {
       actions.push({
         id: `enrich-${account.id}`,
         type: 'enrich_account',
@@ -197,15 +191,15 @@ export async function GET(req: NextRequest) {
       actions: sortedActions,
       summary: {
         total: sortedActions.length,
-        high: sortedActions.filter(a => a.priority === 'high').length,
-        medium: sortedActions.filter(a => a.priority === 'medium').length,
-        low: sortedActions.filter(a => a.priority === 'low').length,
+        high: sortedActions.filter((a) => a.priority === 'high').length,
+        medium: sortedActions.filter((a) => a.priority === 'medium').length,
+        low: sortedActions.filter((a) => a.priority === 'low').length,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Next actions error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate actions' },
+      { error: error instanceof Error ? error.message : 'Failed to generate actions' },
       { status: 500 }
     );
   }

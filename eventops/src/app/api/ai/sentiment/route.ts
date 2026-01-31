@@ -21,46 +21,85 @@ export async function POST(req: NextRequest) {
   try {
     // Basic sentiment analysis using keyword matching
     // In production, use OpenAI API or sentiment analysis library
-    
+
     const lowerText = text.toLowerCase();
-    
+
     const positiveWords = [
-      'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'perfect',
-      'happy', 'excited', 'interested', 'yes', 'definitely', 'absolutely',
-      'thank', 'appreciate', 'looking forward', 'sounds good', 'works for me',
+      'great',
+      'excellent',
+      'amazing',
+      'wonderful',
+      'fantastic',
+      'love',
+      'perfect',
+      'happy',
+      'excited',
+      'interested',
+      'yes',
+      'definitely',
+      'absolutely',
+      'thank',
+      'appreciate',
+      'looking forward',
+      'sounds good',
+      'works for me',
     ];
-    
+
     const negativeWords = [
-      'bad', 'terrible', 'awful', 'hate', 'worst', 'poor', 'disappointing',
-      'unfortunately', 'cannot', 'unable', 'not interested', 'no thanks',
-      'decline', 'reject', 'spam', 'unsubscribe', 'stop', 'never',
+      'bad',
+      'terrible',
+      'awful',
+      'hate',
+      'worst',
+      'poor',
+      'disappointing',
+      'unfortunately',
+      'cannot',
+      'unable',
+      'not interested',
+      'no thanks',
+      'decline',
+      'reject',
+      'spam',
+      'unsubscribe',
+      'stop',
+      'never',
     ];
-    
+
     const urgentWords = [
-      'urgent', 'asap', 'immediately', 'critical', 'important', 'priority',
-      'deadline', 'emergency', 'now', 'today', 'right away',
+      'urgent',
+      'asap',
+      'immediately',
+      'critical',
+      'important',
+      'priority',
+      'deadline',
+      'emergency',
+      'now',
+      'today',
+      'right away',
     ];
 
     let positiveCount = 0;
     let negativeCount = 0;
     let urgentCount = 0;
 
-    positiveWords.forEach(word => {
+    positiveWords.forEach((word) => {
       if (lowerText.includes(word)) positiveCount++;
     });
 
-    negativeWords.forEach(word => {
+    negativeWords.forEach((word) => {
       if (lowerText.includes(word)) negativeCount++;
     });
 
-    urgentWords.forEach(word => {
+    urgentWords.forEach((word) => {
       if (lowerText.includes(word)) urgentCount++;
     });
 
     // Calculate sentiment score (-1 to 1)
     const totalWords = positiveCount + negativeCount;
     let score = 0;
-    
+
     if (totalWords > 0) {
       score = (positiveCount - negativeCount) / totalWords;
     }
@@ -72,10 +111,18 @@ export async function POST(req: NextRequest) {
 
     // Determine intent
     const intent: string[] = [];
-    if (lowerText.includes('meeting') || lowerText.includes('schedule') || lowerText.includes('call')) {
+    if (
+      lowerText.includes('meeting') ||
+      lowerText.includes('schedule') ||
+      lowerText.includes('call')
+    ) {
       intent.push('schedule_meeting');
     }
-    if (lowerText.includes('information') || lowerText.includes('details') || lowerText.includes('learn more')) {
+    if (
+      lowerText.includes('information') ||
+      lowerText.includes('details') ||
+      lowerText.includes('learn more')
+    ) {
       intent.push('request_info');
     }
     if (lowerText.includes('not interested') || lowerText.includes('no thank')) {
@@ -118,10 +165,10 @@ export async function POST(req: NextRequest) {
     */
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Sentiment analysis error:', error);
     return NextResponse.json(
-      { error: error.message || 'Analysis failed' },
+      { error: error instanceof Error ? error.message : 'Analysis failed' },
       { status: 500 }
     );
   }

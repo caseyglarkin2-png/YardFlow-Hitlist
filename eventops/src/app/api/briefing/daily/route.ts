@@ -6,14 +6,14 @@ export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/briefing/daily
- * 
+ *
  * Returns the daily intelligence brief for event day:
  * - Top 10 people to meet today (by ICP score + engagement)
  * - Upcoming meetings
  * - Hot leads (recent positive engagement)
  * - Follow-ups needed
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
     // Calculate priority score for each person
     const scoredPeople = allPeople.map((person) => {
       let score = 0;
-      
+
       // ICP score weight (40%)
       const icpScore = person.target_accounts.icpScore || 0;
       score += icpScore * 0.4;
@@ -159,14 +159,14 @@ export async function GET(req: NextRequest) {
         persona: p.isExecOps
           ? 'Executive Operations'
           : p.isOps
-          ? 'Operations'
-          : p.isProc
-          ? 'Procurement'
-          : p.isSales
-          ? 'Sales'
-          : p.isTech
-          ? 'Technology'
-          : 'Other',
+            ? 'Operations'
+            : p.isProc
+              ? 'Procurement'
+              : p.isSales
+                ? 'Sales'
+                : p.isTech
+                  ? 'Technology'
+                  : 'Other',
       }));
 
     // Hot leads (responded in last 48 hours)
@@ -187,11 +187,7 @@ export async function GET(req: NextRequest) {
     const needsFollowUp = allPeople
       .filter((p) =>
         p.outreach.some(
-          (o) =>
-            o.sentAt &&
-            o.sentAt < threeDaysAgo &&
-            !o.respondedAt &&
-            o.status === 'SENT'
+          (o) => o.sentAt && o.sentAt < threeDaysAgo && !o.respondedAt && o.status === 'SENT'
         )
       )
       .map((p) => ({
@@ -232,9 +228,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Daily briefing error:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate daily briefing' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate daily briefing' }, { status: 500 });
   }
 }

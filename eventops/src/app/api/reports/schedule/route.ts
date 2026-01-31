@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +7,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/reports/schedule - Get scheduled reports
  * POST /api/reports/schedule - Create scheduled report
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -29,21 +28,24 @@ export async function POST(req: NextRequest) {
 
   // In production, create schedule in database and configure cron job
   // For now, return success
-  
-  return NextResponse.json({
-    schedule: {
-      id: Math.random().toString(36),
-      frequency,
-      recipients,
-      reportType,
-      nextRun: getNextRunDate(frequency),
+
+  return NextResponse.json(
+    {
+      schedule: {
+        id: Math.random().toString(36),
+        frequency,
+        recipients,
+        reportType,
+        nextRun: getNextRunDate(frequency),
+      },
     },
-  }, { status: 201 });
+    { status: 201 }
+  );
 }
 
 function getNextRunDate(frequency: string): Date {
   const now = new Date();
-  
+
   switch (frequency) {
     case 'daily':
       now.setDate(now.getDate() + 1);
@@ -58,6 +60,6 @@ function getNextRunDate(frequency: string): Date {
       now.setHours(8, 0, 0, 0);
       break;
   }
-  
+
   return now;
 }

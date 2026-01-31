@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { logger } from '@/lib/logger';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { jobId: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { jobId: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -32,10 +29,7 @@ export async function GET(
     }
 
     if (!job) {
-      return NextResponse.json(
-        { error: 'Job not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
     }
 
     // At this point job is guaranteed to exist
@@ -59,11 +53,8 @@ export async function GET(
         finished: jobFound.finishedOn,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching job status', { jobId: params.jobId, error });
-    return NextResponse.json(
-      { error: 'Failed to fetch job status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch job status' }, { status: 500 });
   }
 }

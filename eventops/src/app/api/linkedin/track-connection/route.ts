@@ -16,10 +16,7 @@ export async function POST(req: NextRequest) {
   const { personId, status } = await req.json();
 
   if (!personId || !status) {
-    return NextResponse.json(
-      { error: 'personId and status required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'personId and status required' }, { status: 400 });
   }
 
   // Create or update outreach record for LinkedIn connection
@@ -63,7 +60,7 @@ export async function POST(req: NextRequest) {
 /**
  * Get LinkedIn activity stats
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -95,13 +92,9 @@ export async function GET(req: NextRequest) {
   const thisWeek = new Date();
   thisWeek.setDate(thisWeek.getDate() - 7);
 
-  const sentToday = linkedInOutreach.filter(
-    (o) => o.sentAt && o.sentAt >= today
-  ).length;
+  const sentToday = linkedInOutreach.filter((o) => o.sentAt && o.sentAt >= today).length;
 
-  const sentThisWeek = linkedInOutreach.filter(
-    (o) => o.sentAt && o.sentAt >= thisWeek
-  ).length;
+  const sentThisWeek = linkedInOutreach.filter((o) => o.sentAt && o.sentAt >= thisWeek).length;
 
   const connected = linkedInOutreach.filter((o) => o.status === 'RESPONDED').length;
   const pending = linkedInOutreach.filter((o) => o.status === 'SENT').length;

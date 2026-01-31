@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { logger } from '@/lib/logger';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -10,7 +10,8 @@ export async function GET(req: NextRequest) {
     }
 
     // Import queues dynamically to avoid Redis connection during build
-    const { enrichmentQueue, outreachQueue, emailQueue, sequenceQueue } = await import('@/lib/queue/queues');
+    const { enrichmentQueue, outreachQueue, emailQueue, sequenceQueue } =
+      await import('@/lib/queue/queues');
 
     // Get counts for all queues
     const [enrichmentCounts, outreachCounts, emailCounts, sequenceCounts] = await Promise.all([
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
       queues: {
         enrichment: {
           ...enrichmentCounts,
-          recentFailures: enrichmentFailed.map(job => ({
+          recentFailures: enrichmentFailed.map((job) => ({
             id: job.id,
             name: job.name,
             error: job.failedReason,
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
         },
         outreach: {
           ...outreachCounts,
-          recentFailures: outreachFailed.map(job => ({
+          recentFailures: outreachFailed.map((job) => ({
             id: job.id,
             name: job.name,
             error: job.failedReason,
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
         },
         emails: {
           ...emailCounts,
-          recentFailures: emailFailed.map(job => ({
+          recentFailures: emailFailed.map((job) => ({
             id: job.id,
             name: job.name,
             error: job.failedReason,
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
         },
         sequences: {
           ...sequenceCounts,
-          recentFailures: sequenceFailed.map(job => ({
+          recentFailures: sequenceFailed.map((job) => ({
             id: job.id,
             name: job.name,
             error: job.failedReason,
@@ -69,20 +70,37 @@ export async function GET(req: NextRequest) {
         },
       },
       totals: {
-        active: enrichmentCounts.active + outreachCounts.active + emailCounts.active + sequenceCounts.active,
-        waiting: enrichmentCounts.waiting + outreachCounts.waiting + emailCounts.waiting + sequenceCounts.waiting,
-        completed: enrichmentCounts.completed + outreachCounts.completed + emailCounts.completed + sequenceCounts.completed,
-        failed: enrichmentCounts.failed + outreachCounts.failed + emailCounts.failed + sequenceCounts.failed,
-        delayed: enrichmentCounts.delayed + outreachCounts.delayed + emailCounts.delayed + sequenceCounts.delayed,
+        active:
+          enrichmentCounts.active +
+          outreachCounts.active +
+          emailCounts.active +
+          sequenceCounts.active,
+        waiting:
+          enrichmentCounts.waiting +
+          outreachCounts.waiting +
+          emailCounts.waiting +
+          sequenceCounts.waiting,
+        completed:
+          enrichmentCounts.completed +
+          outreachCounts.completed +
+          emailCounts.completed +
+          sequenceCounts.completed,
+        failed:
+          enrichmentCounts.failed +
+          outreachCounts.failed +
+          emailCounts.failed +
+          sequenceCounts.failed,
+        delayed:
+          enrichmentCounts.delayed +
+          outreachCounts.delayed +
+          emailCounts.delayed +
+          sequenceCounts.delayed,
       },
     };
 
     return NextResponse.json(response);
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching queue stats', { error });
-    return NextResponse.json(
-      { error: 'Failed to fetch queue stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch queue stats' }, { status: 500 });
   }
 }

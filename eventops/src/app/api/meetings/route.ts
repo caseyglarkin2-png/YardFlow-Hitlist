@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
           eventId: user.activeEventId,
         },
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(status && { status: status as any }),
       ...(startDate && {
         scheduledAt: {
@@ -70,20 +71,10 @@ export async function POST(req: NextRequest) {
   }
 
   const data = await req.json();
-  const {
-    personId,
-    scheduledAt,
-    duration,
-    location,
-    meetingType,
-    notes,
-  } = data;
+  const { personId, scheduledAt, duration, location, meetingType, notes } = data;
 
   if (!personId || !scheduledAt) {
-    return NextResponse.json(
-      { error: 'personId and scheduledAt are required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'personId and scheduledAt are required' }, { status: 400 });
   }
 
   const meeting = await prisma.meeting.create({

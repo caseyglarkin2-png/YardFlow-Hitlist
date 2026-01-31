@@ -10,13 +10,12 @@ export async function POST() {
   }
 
   try {
-    const result = await googleCircuitBreaker.call(
-      session.user.id,
-      () => checkEmailReplies(session.user.id)
+    const result = await googleCircuitBreaker.call(session.user.id, () =>
+      checkEmailReplies(session.user.id)
     );
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Gmail reply check error:', error);
 
     const cbStatus = googleCircuitBreaker.getStatus(session.user.id);

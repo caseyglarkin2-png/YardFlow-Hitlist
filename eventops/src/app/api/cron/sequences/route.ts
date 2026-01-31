@@ -101,11 +101,12 @@ export async function GET(request: NextRequest) {
         }
 
         sequencesProcessed++;
-      } catch (error: any) {
-        errors.push(`Enrollment ${enrollment.id}: ${error.message}`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        errors.push(`Enrollment ${enrollment.id}: ${message}`);
         logger.error('Cron: Error processing enrollment', {
           enrollmentId: enrollment.id,
-          error: error.message,
+          error: message,
         });
       }
     }
@@ -127,12 +128,13 @@ export async function GET(request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
-    logger.error('Cron: Sequence job failed', { error: error.message });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Cron: Sequence job failed', { error: message });
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        error: message,
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

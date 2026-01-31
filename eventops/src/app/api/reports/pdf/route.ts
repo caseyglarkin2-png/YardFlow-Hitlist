@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No active event' }, { status: 400 });
   }
 
-  const { reportType, dateRange, includeCharts } = await req.json();
+  const { dateRange } = await req.json();
 
   try {
     // Gather report data
@@ -38,10 +38,10 @@ export async function POST(req: NextRequest) {
     });
 
     const meetings = await prisma.meeting.count({
-      where: { 
-        people: { 
-          target_accounts: { eventId: user.activeEventId } 
-        } 
+      where: {
+        people: {
+          target_accounts: { eventId: user.activeEventId },
+        },
       },
     });
 
@@ -57,9 +57,9 @@ export async function POST(req: NextRequest) {
 
     // Calculate metrics
     const totalSent = outreach.reduce((sum, o) => sum + (o.status !== 'DRAFT' ? o._count : 0), 0);
-    const opened = outreach.find(o => o.status === 'OPENED')?._count || 0;
-    const replied = outreach.find(o => o.status === 'RESPONDED')?._count || 0;
-    
+    const opened = outreach.find((o) => o.status === 'OPENED')?._count || 0;
+    const replied = outreach.find((o) => o.status === 'RESPONDED')?._count || 0;
+
     const openRate = totalSent > 0 ? ((opened / totalSent) * 100).toFixed(1) : '0';
     const replyRate = totalSent > 0 ? ((replied / totalSent) * 100).toFixed(1) : '0';
 
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     // In production, use puppeteer or similar to convert HTML to PDF
     // For now, return HTML that can be printed as PDF
-    
+
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html',
@@ -111,17 +111,30 @@ export async function POST(req: NextRequest) {
       },
     });
     */
-
-  } catch (error: any) {
+  } catch (error) {
     console.error('PDF generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'PDF generation failed' },
+      { error: error instanceof Error ? error.message : 'PDF generation failed' },
       { status: 500 }
     );
   }
 }
 
-function generateReportHTML(data: any): string {
+interface ReportData {
+  event: string;
+  dateRange?: string;
+  metrics: {
+    accounts: number;
+    people: number;
+    meetings: number;
+    totalSent: number;
+    openRate: string;
+    replyRate: string;
+  };
+  outreach: { status: string; _count: number }[];
+}
+
+function generateReportHTML(data: ReportData): string {
   return `
 <!DOCTYPE html>
 <html>
@@ -255,13 +268,17 @@ function generateReportHTML(data: any): string {
         </tr>
       </thead>
       <tbody>
-        ${data.outreach.map((item: any) => `
+        ${data.outreach
+          .map(
+            (item) => `
           <tr>
             <td>${item.status}</td>
             <td>${item._count}</td>
             <td>${((item._count / data.metrics.totalSent) * 100).toFixed(1)}%</td>
           </tr>
-        `).join('')}
+        `
+          )
+          .join('')}
       </tbody>
     </table>
   </div>

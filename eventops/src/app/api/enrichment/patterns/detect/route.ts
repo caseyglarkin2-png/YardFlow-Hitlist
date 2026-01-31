@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { accountId } = await request.json();
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'accountId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     }
 
     const detector = new EmailPatternDetector();
@@ -32,10 +29,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Pattern detection error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to detect patterns' },
+      { error: error instanceof Error ? error.message : 'Failed to detect patterns' },
       { status: 500 }
     );
   }

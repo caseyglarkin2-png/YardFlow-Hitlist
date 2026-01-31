@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     const { outreachId, type, metadata } = body;
 
     if (!outreachId || !type) {
-      return NextResponse.json(
-        { error: 'Missing outreachId or type' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing outreachId or type' }, { status: 400 });
     }
 
     // Find the outreach record
@@ -30,7 +27,14 @@ export async function POST(request: NextRequest) {
 
     // Update status based on activity type
     let newStatus = outreach.status;
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: { 
+      updatedAt: Date; 
+      status?: string; 
+      repliedAt?: Date; 
+      clickedAt?: Date;
+    } = {
+      updatedAt: new Date(),
+    };
 
     if (type === 'RESPONDED' && outreach.status !== 'RESPONDED') {
       newStatus = 'RESPONDED';
@@ -68,12 +72,8 @@ export async function POST(request: NextRequest) {
       success: true,
       status: newStatus,
     });
-
   } catch (error) {
     console.error('Error tracking email activity:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

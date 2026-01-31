@@ -4,10 +4,7 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { enrollContact } from '@/lib/outreach/sequence-engine';
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -25,10 +22,7 @@ export async function POST(
     });
 
     if (!sequence) {
-      return NextResponse.json(
-        { error: 'Sequence not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sequence not found' }, { status: 404 });
     }
 
     if (sequence.status !== 'active') {
@@ -51,15 +45,12 @@ export async function POST(
         },
         select: { id: true },
       });
-      
-      allPersonIds.push(...peopleFromAccounts.map(p => p.id));
+
+      allPersonIds.push(...peopleFromAccounts.map((p) => p.id));
     }
 
     if (allPersonIds.length === 0) {
-      return NextResponse.json(
-        { error: 'No contacts specified for enrollment' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No contacts specified for enrollment' }, { status: 400 });
     }
 
     allPersonIds = [...new Set(allPersonIds)];
@@ -71,7 +62,7 @@ export async function POST(
 
     for (const personId of allPersonIds) {
       const result = await enrollContact(params.id, personId);
-      
+
       if (result.success) {
         results.enrolled.push(personId);
       } else {
@@ -95,11 +86,8 @@ export async function POST(
       enrolled: results.enrolled,
       skipped: results.skipped,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error enrolling contacts', { sequenceId: params.id, error });
-    return NextResponse.json(
-      { error: 'Failed to enroll contacts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to enroll contacts' }, { status: 500 });
   }
 }

@@ -89,8 +89,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true, message: 'Email sent successfully' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('SendGrid error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
 
     // Update outreach with error
     await prisma.outreach.update({
@@ -98,13 +99,10 @@ export async function POST(req: NextRequest) {
       data: {
         status: 'BOUNCED',
         bouncedAt: new Date(),
-        notes: `SendGrid error: ${error.message}`,
+        notes: `SendGrid error: ${message}`,
       },
     });
 
-    return NextResponse.json(
-      { error: 'Failed to send email', details: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to send email', details: message }, { status: 500 });
   }
 }

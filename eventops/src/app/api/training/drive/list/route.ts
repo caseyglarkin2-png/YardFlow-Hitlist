@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const drive = google.drive({ version: 'v3', auth: googleClient });
 
     // Build query based on file type
-    let query = "trashed = false and (";
+    let query = 'trashed = false and (';
     if (fileType === 'video' || fileType === 'all') {
       query += "mimeType contains 'video/' or ";
     }
@@ -25,14 +25,16 @@ export async function GET(req: NextRequest) {
       query += "mimeType contains 'audio/' or ";
     }
     if (fileType === 'document' || fileType === 'all') {
-      query += "mimeType = 'application/pdf' or mimeType contains 'document' or mimeType contains 'presentation' or ";
+      query +=
+        "mimeType = 'application/pdf' or mimeType contains 'document' or mimeType contains 'presentation' or ";
     }
-    query = query.slice(0, -4) + ")"; // Remove trailing " or "
+    query = query.slice(0, -4) + ')'; // Remove trailing " or "
 
     const response = await drive.files.list({
       q: query,
       pageSize: 100,
-      fields: 'files(id, name, mimeType, size, thumbnailLink, webViewLink, webContentLink, createdTime, modifiedTime)',
+      fields:
+        'files(id, name, mimeType, size, thumbnailLink, webViewLink, webContentLink, createdTime, modifiedTime)',
       orderBy: 'modifiedTime desc',
     });
 
@@ -40,10 +42,10 @@ export async function GET(req: NextRequest) {
       files: response.data.files || [],
       success: true,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error listing Drive files:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to list files' },
+      { error: error instanceof Error ? error.message : 'Failed to list files' },
       { status: 500 }
     );
   }

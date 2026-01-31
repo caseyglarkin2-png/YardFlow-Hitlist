@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       id: `ab-test-${Date.now()}`,
       eventId: user.activeEventId,
       name: `A/B Test: ${name}`,
-      description: `${description}\n\nVariants: ${variants.map((v: any, i: number) => `${String.fromCharCode(65 + i)}: ${v.name}`).join(', ')}`,
+      description: `${description}\n\nVariants: ${variants.map((v: { name: string }, i: number) => `${String.fromCharCode(65 + i)}: ${v.name}`).join(', ')}`,
       status: 'ACTIVE',
       createdBy: authResult.userId,
       goals: JSON.stringify({
@@ -102,8 +102,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Test not found' }, { status: 404 });
   }
 
+  interface VariantStats {
+    variant: string;
+    total: number;
+    sent: number;
+    opened: number;
+    responded: number;
+    openRate: number;
+    responseRate: number;
+  }
+
   // Group by variant (using notes field or templateId as variant identifier)
-  const variantStats: Record<string, any> = {};
+  const variantStats: Record<string, VariantStats> = {};
 
   campaign.outreach.forEach((o) => {
     const variant = o.templateId || 'control';
@@ -132,13 +142,13 @@ export async function GET(req: NextRequest) {
   });
 
   // Calculate rates
-  Object.values(variantStats).forEach((stats: any) => {
+  Object.values(variantStats).forEach((stats) => {
     stats.openRate = stats.sent > 0 ? (stats.opened / stats.sent) * 100 : 0;
     stats.responseRate = stats.sent > 0 ? (stats.responded / stats.sent) * 100 : 0;
   });
 
   // Determine winner (highest response rate with minimum sample size)
-  const variants = Object.values(variantStats) as any[];
+  const variants = Object.values(variantStats);
   const minSampleSize = 20; // Minimum sends for statistical validity
   const qualifiedVariants = variants.filter((v) => v.sent >= minSampleSize);
   const winner =

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
@@ -20,6 +19,7 @@ export async function GET(req: NextRequest) {
         ? authResult.userId
         : req.headers.get('x-user-id') || authResult.userId;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       createdBy: userId,
     };
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ sequences });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching sequences', { error });
     return NextResponse.json({ error: 'Failed to fetch sequences' }, { status: 500 });
   }
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ sequence }, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error creating sequence', { error });
     return NextResponse.json({ error: 'Failed to create sequence' }, { status: 500 });
   }

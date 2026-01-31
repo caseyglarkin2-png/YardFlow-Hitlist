@@ -16,7 +16,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'IDs array required' }, { status: 400 });
     }
 
-    const updateData: any = {};
+    const updateData: { status?: string; campaignId?: string; sequenceId?: string } = {};
     if (status) updateData.status = status;
     if (campaignId !== undefined) updateData.campaignId = campaignId;
     if (sequenceId !== undefined) updateData.sequenceId = sequenceId;
@@ -26,9 +26,9 @@ export async function PATCH(req: NextRequest) {
       data: updateData,
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       updated: result.count,
-      message: `Updated ${result.count} outreach messages`
+      message: `Updated ${result.count} outreach messages`,
     });
   } catch (error) {
     console.error('Error bulk updating outreach:', error);
@@ -54,9 +54,9 @@ export async function DELETE(req: NextRequest) {
       where: { id: { in: ids } },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       deleted: result.count,
-      message: `Deleted ${result.count} outreach messages`
+      message: `Deleted ${result.count} outreach messages`,
     });
   } catch (error) {
     console.error('Error bulk deleting outreach:', error);

@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { accountId, dryRun = true, limit = 50 } = await request.json();
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'accountId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     }
 
     const extractor = new LinkedInExtractor();
@@ -30,10 +27,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('LinkedIn company enrichment error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to enrich company LinkedIn profiles' },
+      {
+        error:
+          error instanceof Error ? error.message : 'Failed to enrich company LinkedIn profiles',
+      },
       { status: 500 }
     );
   }

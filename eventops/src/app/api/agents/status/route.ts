@@ -80,33 +80,29 @@ export async function POST(req: NextRequest) {
     const { taskId, status, output, error, progress } = body;
 
     if (!taskId || !status) {
-      return NextResponse.json(
-        { error: 'taskId and status are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'taskId and status are required' }, { status: 400 });
     }
 
     // Validate status
     const validStatuses: AgentTaskStatus[] = ['pending', 'in_progress', 'completed', 'failed'];
     if (!validStatuses.includes(status as AgentTaskStatus)) {
-        return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
     await agentStateManager.updateTaskStatus(
-        taskId,
-        status as AgentTaskStatus,
-        output || undefined,
-        error || undefined,
-        progress || undefined
+      taskId,
+      status as AgentTaskStatus,
+      output || undefined,
+      error || undefined,
+      progress || undefined
     );
 
     return NextResponse.json({ success: true });
-
   } catch (err) {
     logger.error('Agent status update error', { error: err });
     return NextResponse.json(
-        { error: 'Internal Server Error', details: err instanceof Error ? err.message : String(err) },
-        { status: 500 }
+      { error: 'Internal Server Error', details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
     );
   }
 }

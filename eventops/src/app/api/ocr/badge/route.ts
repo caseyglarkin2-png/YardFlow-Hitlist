@@ -31,16 +31,16 @@ export async function POST(req: NextRequest) {
     // For now, return mock data
     // In production, process the image and extract text
     const mockExtractedData = {
-      name: "John Smith",
-      title: "Director of Operations",
-      company: "ACME Logistics",
-      email: "john.smith@acme.com",
-      phone: "+1 (555) 123-4567",
+      name: 'John Smith',
+      title: 'Director of Operations',
+      company: 'ACME Logistics',
+      email: 'john.smith@acme.com',
+      phone: '+1 (555) 123-4567',
       confidence: 0.85,
     };
 
     // Simulated processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     return NextResponse.json(mockExtractedData);
 
@@ -74,11 +74,10 @@ export async function POST(req: NextRequest) {
       rawText: text,
     });
     */
-
-  } catch (error: any) {
+  } catch (error) {
     console.error('OCR error:', error);
     return NextResponse.json(
-      { error: error.message || 'OCR processing failed' },
+      { error: error instanceof Error ? error.message : 'OCR processing failed' },
       { status: 500 }
     );
   }

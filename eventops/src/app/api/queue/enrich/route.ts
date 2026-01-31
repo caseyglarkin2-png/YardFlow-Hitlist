@@ -14,18 +14,12 @@ export async function POST(req: NextRequest) {
 
     // Validate job type
     if (!['email-pattern', 'linkedin-enrichment', 'generate-emails'].includes(jobType)) {
-      return NextResponse.json(
-        { error: 'Invalid job type' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid job type' }, { status: 400 });
     }
 
     // Validate accountId
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'Account ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Account ID is required' }, { status: 400 });
     }
 
     // Import queue function dynamically to avoid Redis connection during build
@@ -58,10 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!job) {
-      return NextResponse.json(
-        { error: 'Failed to create job' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to create job' }, { status: 500 });
     }
 
     logger.info('Enrichment job queued', {
@@ -77,11 +68,8 @@ export async function POST(req: NextRequest) {
       accountId,
       queuedAt: new Date(),
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error queuing enrichment job', { error });
-    return NextResponse.json(
-      { error: 'Failed to queue job' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to queue job' }, { status: 500 });
   }
 }

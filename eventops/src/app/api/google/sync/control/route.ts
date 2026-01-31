@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 
 export async function POST(request: Request) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   try {
     const { action } = await request.json();
 
-    const updates: any = {
+    const updates: { updatedAt: Date; googleSyncPaused?: boolean; googleSyncDryRun?: boolean } = {
       updatedAt: new Date(),
     };
 
@@ -50,10 +50,10 @@ export async function POST(request: Request) {
       googleSyncPaused: user.googleSyncPaused,
       googleSyncDryRun: user.googleSyncDryRun,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Sync control error:', error);
     return NextResponse.json(
-      { error: error.message || 'Control action failed' },
+      { error: error instanceof Error ? error.message : 'Control action failed' },
       { status: 500 }
     );
   }

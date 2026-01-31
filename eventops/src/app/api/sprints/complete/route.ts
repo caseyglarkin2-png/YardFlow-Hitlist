@@ -79,10 +79,10 @@ export async function POST(request: Request) {
       sprintNumber: metrics.sprintNumber,
       sprintName: metrics.sprintName,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Sprint completion error:', error);
     return NextResponse.json(
-      { error: error.message || 'Sprint completion failed' },
+      { error: error instanceof Error ? error.message : 'Sprint completion failed' },
       { status: 500 }
     );
   }

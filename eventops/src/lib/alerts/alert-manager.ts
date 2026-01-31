@@ -4,11 +4,11 @@ import sgMail from '@sendgrid/mail';
 
 // Configure SendGrid (Lazy check or ensure env is loaded)
 const getSendGrid = () => {
-    if (env.SENDGRID_API_KEY) {
-        sgMail.setApiKey(env.SENDGRID_API_KEY);
-        return sgMail;
-    }
-    return null;
+  if (env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(env.SENDGRID_API_KEY);
+    return sgMail;
+  }
+  return null;
 };
 
 export type AlertType = 'VIP_CHECKIN' | 'MEETING_COMPLETED' | 'SYSTEM_ERROR';
@@ -47,11 +47,13 @@ class AlertManagerService {
 
     // Await all efficiently
     const results = await Promise.allSettled(promises);
-    
+
     // Log failures
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        logger.error(`[AlertManager] Failed to send to channel index ${index}`, { error: result.reason });
+        logger.error(`[AlertManager] Failed to send to channel index ${index}`, {
+          error: result.reason,
+        });
       }
     });
   }
@@ -60,9 +62,9 @@ class AlertManagerService {
     if (!this.slackWebhookUrl) return;
 
     const colorMap = {
-      'INFO': '#36a64f', // Green
-      'WARNING': '#ecb22e', // Yellow
-      'CRITICAL': '#ff0000', // Red
+      INFO: '#36a64f', // Green
+      WARNING: '#ecb22e', // Yellow
+      CRITICAL: '#ff0000', // Red
     };
 
     const block = {
@@ -70,13 +72,15 @@ class AlertManagerService {
       attachments: [
         {
           color: colorMap[payload.level || 'INFO'],
-          fields: payload.metadata ? Object.entries(payload.metadata).map(([k, v]) => ({
-            title: k,
-            value: String(v),
-            short: true
-          })) : []
-        }
-      ]
+          fields: payload.metadata
+            ? Object.entries(payload.metadata).map(([k, v]) => ({
+                title: k,
+                value: String(v),
+                short: true,
+              }))
+            : [],
+        },
+      ],
     };
 
     try {

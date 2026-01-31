@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     const { type, data } = await request.json();
 
     const results = await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data.map(async (item: any) => {
         if (type === 'accounts') {
           // Check for duplicate company name (case-insensitive)

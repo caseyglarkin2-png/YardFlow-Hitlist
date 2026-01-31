@@ -36,17 +36,17 @@ export async function GET(request: NextRequest) {
     // Parse the rawData JSON
     const parsedDossier = {
       ...dossier,
-      ...(dossier.rawData as any), // Contains the full dossier structure
+      ...(dossier.rawData as Record<string, unknown>), // Contains the full dossier structure
     };
 
     return NextResponse.json({
       success: true,
       dossier: parsedDossier,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching dossier:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch dossier' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch dossier' },
       { status: 500 }
     );
   }

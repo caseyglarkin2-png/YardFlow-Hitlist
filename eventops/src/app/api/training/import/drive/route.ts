@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
           title: content.title,
           type: content.type,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Error importing file ${fileId}:`, error);
       }
     }
@@ -71,10 +71,10 @@ export async function POST(req: NextRequest) {
       imported,
       count: imported.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error importing from Drive:', error);
     return NextResponse.json(
-      { error: error.message || 'Import failed' },
+      { error: error instanceof Error ? error.message : 'Import failed' },
       { status: 500 }
     );
   }
@@ -83,7 +83,11 @@ export async function POST(req: NextRequest) {
 function getContentType(mimeType: string): string {
   if (mimeType.includes('video')) return 'video';
   if (mimeType.includes('audio')) return 'audio';
-  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('presentation')) {
+  if (
+    mimeType.includes('pdf') ||
+    mimeType.includes('document') ||
+    mimeType.includes('presentation')
+  ) {
     return 'document';
   }
   return 'link';

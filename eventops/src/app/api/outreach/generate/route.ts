@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/db';
+import { people } from '@prisma/client';
 
 function fillTemplate(
   template: string,
@@ -14,37 +15,34 @@ function fillTemplate(
 ): string {
   return template
     .replace(/\{\{name\}\}/g, data.name)
-    .replace(/\{\{title\}\}/g, data.title || "")
+    .replace(/\{\{title\}\}/g, data.title || '')
     .replace(/\{\{company\}\}/g, data.company)
     .replace(/\{\{event\}\}/g, data.event)
     .replace(/\{\{persona\}\}/g, data.persona);
 }
 
-function getPersonaLabel(person: any): string {
-  if (person.isExecOps) return "Executive Operations";
-  if (person.isOps) return "Operations";
-  if (person.isProc) return "Procurement";
-  if (person.isSales) return "Sales";
-  if (person.isTech) return "Technology";
-  if (person.isNonOps) return "Non-Operations";
-  return "Team Member";
+function getPersonaLabel(person: people): string {
+  if (person.isExecOps) return 'Executive Operations';
+  if (person.isOps) return 'Operations';
+  if (person.isProc) return 'Procurement';
+  if (person.isSales) return 'Sales';
+  if (person.isTech) return 'Technology';
+  if (person.isNonOps) return 'Non-Operations';
+  return 'Team Member';
 }
 
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { templateId, personIds, eventId } = body;
 
     if (!templateId || !personIds || personIds.length === 0) {
-      return NextResponse.json(
-        { error: "Template and person IDs required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Template and person IDs required' }, { status: 400 });
     }
 
     // Get template
@@ -53,7 +51,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!template) {
-      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
     }
 
     // Get event
@@ -62,7 +60,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     // Get people with accounts
@@ -96,7 +94,7 @@ export async function POST(req: NextRequest) {
         id: crypto.randomUUID(),
         personId: person.id,
         channel: template.channel,
-        status: "DRAFT" as const,
+        status: 'DRAFT' as const,
         subject,
         message,
         templateId: template.id,
@@ -115,10 +113,7 @@ export async function POST(req: NextRequest) {
       count: result.count,
     });
   } catch (error) {
-    console.error("Error generating outreach:", error);
-    return NextResponse.json(
-      { error: "Failed to generate outreach" },
-      { status: 500 }
-    );
+    console.error('Error generating outreach:', error);
+    return NextResponse.json({ error: 'Failed to generate outreach' }, { status: 500 });
   }
 }

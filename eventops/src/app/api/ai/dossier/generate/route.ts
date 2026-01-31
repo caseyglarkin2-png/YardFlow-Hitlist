@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { accountId, dryRun = false } = await request.json();
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'accountId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     }
 
     const generator = new AIDossierGenerator();
@@ -32,10 +29,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Dossier generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate dossier' },
+      { error: error instanceof Error ? error.message : 'Failed to generate dossier' },
       { status: 500 }
     );
   }

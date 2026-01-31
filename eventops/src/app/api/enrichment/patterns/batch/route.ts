@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Batch pattern application error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to apply patterns in batch' },
+      { error: error instanceof Error ? error.message : 'Failed to apply patterns in batch' },
       { status: 500 }
     );
   }

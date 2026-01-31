@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +7,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/integrations - List available integrations
  * POST /api/integrations - Create new integration connection
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -77,14 +76,17 @@ export async function POST(req: NextRequest) {
 
   // In production, initiate OAuth flow or save API key
   // For now, return success
-  
-  return NextResponse.json({
-    integration: {
-      id: Math.random().toString(36),
-      integrationId,
-      status: 'connected',
-      connectedAt: new Date().toISOString(),
-      config,
+
+  return NextResponse.json(
+    {
+      integration: {
+        id: Math.random().toString(36),
+        integrationId,
+        status: 'connected',
+        connectedAt: new Date().toISOString(),
+        config,
+      },
     },
-  }, { status: 201 });
+    { status: 201 }
+  );
 }

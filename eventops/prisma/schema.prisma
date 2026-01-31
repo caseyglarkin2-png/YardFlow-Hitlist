@@ -653,10 +653,10 @@ model agent_tasks {
 
   targetAccount target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
   contact       people?          @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  
+
   // Self-relation for task hierarchy (S0.1)
-  parentTask   agent_tasks?  @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
-  childTasks   agent_tasks[] @relation("TaskHierarchy")
+  parentTask agent_tasks?  @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
+  childTasks agent_tasks[] @relation("TaskHierarchy")
 
   @@index([agentType, status])
   @@index([accountId])

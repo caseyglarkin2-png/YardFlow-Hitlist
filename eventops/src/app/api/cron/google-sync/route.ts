@@ -60,14 +60,14 @@ export async function GET(request: Request) {
           updated: result.updated,
           skipped: result.skipped,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Sync failed for user ${user.id}:`, error);
 
         results.push({
           userId: user.id,
           email: user.email,
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
 
         failureCount++;
@@ -111,12 +111,12 @@ export async function GET(request: Request) {
       durationMs: duration,
       results,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Cron sync error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         totalUsers: 0,
       },
       { status: 500 }

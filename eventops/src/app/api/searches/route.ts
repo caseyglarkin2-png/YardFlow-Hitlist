@@ -21,11 +21,9 @@ export async function GET(request: NextRequest) {
     const entityType = searchParams.get('entityType');
     const isGlobal = searchParams.get('isGlobal') === 'true';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
-      OR: [
-        { userId: user.id },
-        { isGlobal: true },
-      ],
+      OR: [{ userId: user.id }, { isGlobal: true }],
     };
 
     if (entityType) {
@@ -45,10 +43,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(savedSearches);
   } catch (error) {
     console.error('Error fetching saved searches:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch saved searches' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch saved searches' }, { status: 500 });
   }
 }
 
@@ -91,9 +86,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(savedSearch, { status: 201 });
   } catch (error) {
     console.error('Error creating saved search:', error);
-    return NextResponse.json(
-      { error: 'Failed to create saved search' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create saved search' }, { status: 500 });
   }
 }

@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
         headers: { 'Content-Type': 'text/html' },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error processing unsubscribe', { error });
     return new NextResponse('Error processing unsubscribe request', { status: 500 });
   }

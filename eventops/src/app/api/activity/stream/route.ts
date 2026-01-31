@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
 
     if (userId) {
@@ -57,9 +58,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching activity stream:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch activity stream' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch activity stream' }, { status: 500 });
   }
 }

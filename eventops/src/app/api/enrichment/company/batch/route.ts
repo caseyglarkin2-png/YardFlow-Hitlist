@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
     const result = await orchestrator.enrichAll({ limit, dryRun });
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Batch company enrichment error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to enrich companies in batch' },
+      { error: error instanceof Error ? error.message : 'Failed to enrich companies in batch' },
       { status: 500 }
     );
   }

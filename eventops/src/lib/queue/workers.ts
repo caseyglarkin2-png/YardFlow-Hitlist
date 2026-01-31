@@ -224,7 +224,7 @@ function getHeartbeatWorker(): Worker {
       },
       { connection: getRedisConnection() }
     );
-    
+
     heartbeatWorker.on('error', (err) => {
       logger.error('Heartbeat worker error', { error: err });
     });
@@ -273,19 +273,28 @@ function startWorkers() {
 
     // Add a repeatable job that runs every 60 seconds
     const ensureHeartbeatJob = () => {
-      heartbeatQueue.add('thump', {}, {
-        repeat: { every: 60 * 1000 },
-        jobId: 'worker-heartbeat-cron' 
-      }).catch(err => logger.error('Failed to schedule heartbeat', { err }));
+      heartbeatQueue
+        .add(
+          'thump',
+          {},
+          {
+            repeat: { every: 60 * 1000 },
+            jobId: 'worker-heartbeat-cron',
+          }
+        )
+        .catch((err) => logger.error('Failed to schedule heartbeat', { err }));
     };
 
     // Initial schedule
     ensureHeartbeatJob();
 
     // Self-healing: Re-assert job every 5 minutes (survives Redis flush)
-    setInterval(() => {
-      ensureHeartbeatJob();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        ensureHeartbeatJob();
+      },
+      5 * 60 * 1000
+    );
 
     logger.info('Queue workers started successfully');
   } catch (error) {

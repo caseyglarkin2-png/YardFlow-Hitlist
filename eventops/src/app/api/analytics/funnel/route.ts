@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
           }
         : {};
 
-    const campaignFilter = campaignId ? { campaigns: { some: { id: campaignId } } } : {};
+    // const campaignFilter = campaignId ? { campaigns: { some: { id: campaignId } } } : {};
 
     // Funnel stages
     const totalAccounts = await prisma.target_accounts.count({

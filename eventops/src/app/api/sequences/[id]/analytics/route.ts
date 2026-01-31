@@ -3,10 +3,7 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -29,10 +26,7 @@ export async function GET(
     });
 
     if (!sequence) {
-      return NextResponse.json(
-        { error: 'Sequence not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sequence not found' }, { status: 404 });
     }
 
     const enrollmentStats = await prisma.sequenceEnrollment.groupBy({
@@ -41,7 +35,7 @@ export async function GET(
       _count: true,
     });
 
-    const statusBreakdown = enrollmentStats.reduce((acc: any, stat) => {
+    const statusBreakdown = enrollmentStats.reduce((acc: Record<string, number>, stat) => {
       acc[stat.status] = stat._count;
       return acc;
     }, {});
@@ -64,24 +58,25 @@ export async function GET(
     });
 
     const totalSent = emailStats.length;
-    const totalOpened = emailStats.filter(e => e.openedAt).length;
-    const totalClicked = emailStats.filter(e => e.clickedAt).length;
-    const totalReplied = emailStats.filter(e => e.repliedAt).length;
-    const totalBounced = emailStats.filter(e => e.bouncedAt).length;
+    const totalOpened = emailStats.filter((e) => e.openedAt).length;
+    const totalClicked = emailStats.filter((e) => e.clickedAt).length;
+    const totalReplied = emailStats.filter((e) => e.repliedAt).length;
+    const totalBounced = emailStats.filter((e) => e.bouncedAt).length;
 
     const openRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0;
     const clickRate = totalSent > 0 ? (totalClicked / totalSent) * 100 : 0;
     const replyRate = totalSent > 0 ? (totalReplied / totalSent) * 100 : 0;
     const bounceRate = totalSent > 0 ? (totalBounced / totalSent) * 100 : 0;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const steps = sequence.steps as any[];
     const stepAnalytics = steps.map((step, index) => {
-      const stepEmails = emailStats.filter(e => e.stepNumber === index);
+      const stepEmails = emailStats.filter((e) => e.stepNumber === index);
       const stepSent = stepEmails.length;
-      const stepOpened = stepEmails.filter(e => e.openedAt).length;
-      const stepClicked = stepEmails.filter(e => e.clickedAt).length;
-      const stepReplied = stepEmails.filter(e => e.repliedAt).length;
-      const stepBounced = stepEmails.filter(e => e.bouncedAt).length;
+      const stepOpened = stepEmails.filter((e) => e.openedAt).length;
+      const stepClicked = stepEmails.filter((e) => e.clickedAt).length;
+      const stepReplied = stepEmails.filter((e) => e.repliedAt).length;
+      const stepBounced = stepEmails.filter((e) => e.bouncedAt).length;
 
       return {
         stepNumber: index,
@@ -107,9 +102,8 @@ export async function GET(
       completed: sequence.totalCompleted,
     };
 
-    const completionRate = sequence.totalEnrolled > 0 
-      ? (sequence.totalCompleted / sequence.totalEnrolled) * 100 
-      : 0;
+    const completionRate =
+      sequence.totalEnrolled > 0 ? (sequence.totalCompleted / sequence.totalEnrolled) * 100 : 0;
 
     const analytics = {
       sequence: {
@@ -139,11 +133,8 @@ export async function GET(
     };
 
     return NextResponse.json({ analytics });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching sequence analytics', { sequenceId: params.id, error });
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }
 }

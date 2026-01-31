@@ -4,10 +4,7 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -37,26 +34,17 @@ export async function GET(
     });
 
     if (!sequence) {
-      return NextResponse.json(
-        { error: 'Sequence not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sequence not found' }, { status: 404 });
     }
 
     return NextResponse.json({ sequence });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error fetching sequence', { id: params.id, error });
-    return NextResponse.json(
-      { error: 'Failed to fetch sequence' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch sequence' }, { status: 500 });
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -74,32 +62,26 @@ export async function PUT(
     });
 
     if (!existingSequence) {
-      return NextResponse.json(
-        { error: 'Sequence not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sequence not found' }, { status: 404 });
     }
 
     if (steps) {
       if (!Array.isArray(steps) || steps.length === 0) {
-        return NextResponse.json(
-          { error: 'At least one step is required' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'At least one step is required' }, { status: 400 });
       }
 
       const errors: string[] = [];
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
-        
+
         if (!step.subject || !step.subject.trim()) {
           errors.push(`Step ${i + 1}: Subject is required`);
         }
-        
+
         if (!step.emailBody || !step.emailBody.trim()) {
           errors.push(`Step ${i + 1}: Email body is required`);
         }
-        
+
         if (step.delayHours === undefined || step.delayHours < 0) {
           errors.push(`Step ${i + 1}: Delay must be >= 0`);
         }
@@ -110,31 +92,30 @@ export async function PUT(
         });
 
         if (!complianceResult.compliant) {
-          complianceResult.errors.forEach(e => {
+          complianceResult.errors.forEach((e) => {
             errors.push(`Step ${i + 1}: ${e.message}`);
           });
         }
       }
 
       if (errors.length > 0) {
-        return NextResponse.json(
-          { error: 'Validation failed', details: errors },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
-    
+
     if (name !== undefined) {
       updateData.name = name.trim();
     }
-    
+
     if (description !== undefined) {
       updateData.description = description?.trim() || null;
     }
-    
+
     if (steps) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       updateData.steps = steps.map((step: any, index: number) => ({
         stepNumber: index,
         delayHours: step.delayHours,
@@ -142,7 +123,7 @@ export async function PUT(
         emailBody: step.emailBody.trim(),
       }));
     }
-    
+
     if (status !== undefined) {
       updateData.status = status;
     }
@@ -155,19 +136,13 @@ export async function PUT(
     logger.info('Sequence updated', { sequenceId: sequence.id });
 
     return NextResponse.json({ sequence });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error updating sequence', { id: params.id, error });
-    return NextResponse.json(
-      { error: 'Failed to update sequence' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update sequence' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -193,10 +168,7 @@ export async function DELETE(
     });
 
     if (!sequence) {
-      return NextResponse.json(
-        { error: 'Sequence not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Sequence not found' }, { status: 404 });
     }
 
     if (sequence._count.enrollments > 0) {
@@ -213,11 +185,8 @@ export async function DELETE(
     logger.info('Sequence deleted', { sequenceId: params.id });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error deleting sequence', { id: params.id, error });
-    return NextResponse.json(
-      { error: 'Failed to delete sequence' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete sequence' }, { status: 500 });
   }
 }

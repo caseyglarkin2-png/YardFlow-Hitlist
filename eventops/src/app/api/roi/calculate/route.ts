@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
-import { calculateRoi } from "@/lib/roi-calculator";
-import { calculateRoiUnified, getRoiCacheStats } from "@/lib/roi/calculator-integration";
-import { getPersonaLabel } from "@/lib/ai-contact-insights";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/db';
+import { calculateRoiUnified } from '@/lib/roi/calculator-integration';
+import { getPersonaLabel } from '@/lib/ai-contact-insights';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,17 +10,14 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { accountId, personId } = body;
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: "Account ID required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Account ID required' }, { status: 400 });
     }
 
     // Get account with dossier
@@ -34,13 +30,13 @@ export async function POST(req: NextRequest) {
     });
 
     if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Account not found' }, { status: 404 });
     }
 
     // Get persona (if personId provided, use that person's persona, otherwise use default)
-    let persona = "Operations Professional";
+    let persona = 'Operations Professional';
     if (personId) {
-      const person = account.people.find(p => p.id === personId);
+      const person = account.people.find((p) => p.id === personId);
       if (person) {
         persona = getPersonaLabel(person);
       }
@@ -94,12 +90,12 @@ export async function POST(req: NextRequest) {
       result: roiResult,
     });
   } catch (error) {
-    console.error("Error calculating ROI:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('Error calculating ROI:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { 
-        error: "Failed to calculate ROI",
-        details: errorMessage
+      {
+        error: 'Failed to calculate ROI',
+        details: errorMessage,
       },
       { status: 500 }
     );
@@ -110,17 +106,14 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const accountId = searchParams.get('accountId');
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: "Account ID required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Account ID required' }, { status: 400 });
     }
 
     // Get most recent ROI calculation for this account
@@ -131,17 +124,14 @@ export async function GET(req: NextRequest) {
 
     if (!roiCalculation) {
       return NextResponse.json(
-        { error: "No ROI calculation found. Calculate ROI first." },
+        { error: 'No ROI calculation found. Calculate ROI first.' },
         { status: 404 }
       );
     }
 
     return NextResponse.json({ roiCalculation });
   } catch (error) {
-    console.error("Error fetching ROI calculation:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch ROI calculation" },
-      { status: 500 }
-    );
+    console.error('Error fetching ROI calculation:', error);
+    return NextResponse.json({ error: 'Failed to fetch ROI calculation' }, { status: 500 });
   }
 }

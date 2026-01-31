@@ -23,9 +23,10 @@ export async function POST(req: NextRequest) {
   }
 
   const { entityType, filters } = await req.json();
-  
+
   const baseWhere = buildPrismaWhere(filters);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any[] = [];
 
   try {
@@ -93,9 +94,16 @@ export async function POST(req: NextRequest) {
       results,
       totalResults: results.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Search error:', error);
-    return NextResponse.json({ error: error.message || 'Search failed', results: [], totalResults: 0 }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : 'Search failed',
+        results: [],
+        totalResults: 0,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -127,6 +135,7 @@ export async function GET(req: NextRequest) {
   const hasEmail = searchParams.get('hasEmail');
   const limit = parseInt(searchParams.get('limit') || '100');
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const results: any = {
     accounts: [],
     people: [],
@@ -176,10 +185,12 @@ export async function GET(req: NextRequest) {
   // Search people
   if (type === 'all' || type === 'people') {
     // Build persona filter
-    const personaFilter = persona ? { 
-      [`is${persona.charAt(0).toUpperCase() + persona.slice(1)}`]: true 
-    } : {};
-    
+    const personaFilter = persona
+      ? {
+          [`is${persona.charAt(0).toUpperCase() + persona.slice(1)}`]: true,
+        }
+      : {};
+
     const people = await prisma.people.findMany({
       where: {
         target_accounts: { eventId: user.activeEventId },
@@ -233,6 +244,7 @@ export async function GET(req: NextRequest) {
               { message: { contains: query, mode: 'insensitive' } },
             ],
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...(outreachStatus ? [{ status: outreachStatus as any }] : []),
         ],
       },
@@ -262,8 +274,7 @@ export async function GET(req: NextRequest) {
     }));
   }
 
-  results.totalResults =
-    results.accounts.length + results.people.length + results.outreach.length;
+  results.totalResults = results.accounts.length + results.people.length + results.outreach.length;
 
   return NextResponse.json(results);
 }

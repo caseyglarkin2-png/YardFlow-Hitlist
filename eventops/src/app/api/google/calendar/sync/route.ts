@@ -5,7 +5,7 @@ import { googleCircuitBreaker } from '@/lib/google/circuit-breaker';
 
 export async function POST(request: Request) {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -14,20 +14,19 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const { dryRun, days } = body;
 
-    const result = await googleCircuitBreaker.call(
-      session.user.id,
-      () => syncCalendarEvents(session.user.id, { dryRun, days })
+    const result = await googleCircuitBreaker.call(session.user.id, () =>
+      syncCalendarEvents(session.user.id, { dryRun, days })
     );
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Calendar sync error:', error);
 
     const cbStatus = googleCircuitBreaker.getStatus(session.user.id);
 
     return NextResponse.json(
       {
-        error: error.message || 'Calendar sync failed',
+        error: error instanceof Error ? error.message : 'Calendar sync failed',
         circuitBreaker: cbStatus,
       },
       { status: cbStatus.state === 'open' ? 429 : 500 }

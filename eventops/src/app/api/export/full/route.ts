@@ -165,15 +165,16 @@ ${activitiesCsv}
         },
       });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Export error:', error);
     return NextResponse.json(
-      { error: error.message || 'Export failed' },
+      { error: error instanceof Error ? error.message : 'Export failed' },
       { status: 500 }
     );
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function jsonToCSV(data: any[]): string {
   if (data.length === 0) return '';
 

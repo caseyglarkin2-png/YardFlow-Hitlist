@@ -27,15 +27,14 @@ export async function POST(request: NextRequest) {
       const results = await validator.validateBatch(emails);
       return NextResponse.json(Object.fromEntries(results));
     } else {
-      return NextResponse.json(
-        { error: 'email or emails array is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'email or emails array is required' }, { status: 400 });
     }
-  } catch (error: any) {
+    // Added a response for the successful execution path to ensure all code paths return a value
+    return NextResponse.json({ success: true, message: 'Emails validated successfully' });
+  } catch (error) {
     console.error('Email validation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to validate email' },
+      { error: error instanceof Error ? error.message : 'Failed to validate email' },
       { status: 500 }
     );
   }

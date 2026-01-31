@@ -3,7 +3,7 @@ import { auth } from '@/auth';
 
 // TODO: Implement webhooks - requires webhooks table in schema
 // POST /api/webhooks - Create webhook
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

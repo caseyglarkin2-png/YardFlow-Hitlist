@@ -16,10 +16,7 @@ export async function GET(request: Request) {
   }
 
   if (!code || !state) {
-    return NextResponse.json(
-      { error: 'Missing code or state parameter' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Missing code or state parameter' }, { status: 400 });
   }
 
   try {
@@ -58,10 +55,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(
       new URL('/dashboard/settings/integrations?success=true', process.env.AUTH_URL || '')
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Google OAuth callback error:', error);
     return NextResponse.redirect(
-      new URL('/dashboard/settings/integrations?error=token_exchange_failed', process.env.AUTH_URL || '')
+      new URL(
+        '/dashboard/settings/integrations?error=token_exchange_failed',
+        process.env.AUTH_URL || ''
+      )
     );
   }
 }

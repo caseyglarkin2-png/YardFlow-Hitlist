@@ -31,10 +31,10 @@ export async function GET(req: NextRequest) {
       content: serialized,
       success: true,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching content:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch content' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch content' },
       { status: 500 }
     );
   }

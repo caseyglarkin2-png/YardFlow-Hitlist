@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 
 export async function POST() {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -28,10 +28,10 @@ export async function POST() {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Google disconnect error:', error);
     return NextResponse.json(
-      { error: error.message || 'Disconnect failed' },
+      { error: error instanceof Error ? error.message : 'Disconnect failed' },
       { status: 500 }
     );
   }

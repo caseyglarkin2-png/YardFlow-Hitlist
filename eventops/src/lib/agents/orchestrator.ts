@@ -1,7 +1,7 @@
 /**
  * Agent Orchestrator
  * Coordinates multiple agents to execute complex GTM workflows
- * 
+ *
  * Sprint S1: Complete orchestration with Steps 3-5
  */
 
@@ -106,13 +106,13 @@ export class AgentOrchestrator {
       id: '',
       agentType,
       input: params,
-      status: 'pending'
+      status: 'pending',
     });
-    
+
     if (task.status === 'failed') {
       throw new Error(task.error || 'Agent failed to start');
     }
-    
+
     return { taskId: task.id };
   }
 
@@ -161,20 +161,20 @@ export class AgentOrchestrator {
         // For Golden Build: We assume prospecting populates the database
         // and we fetch the most recent companies for this event
         try {
-           const recentCompanies = await prisma.companies.findMany({
-             where: { 
-               // Assuming 'tags' or similar links to event, or just simple fetch
-               // For now, simpler: just don't crash if 0 found
-               created_at: { gt: new Date(Date.now() - 1000 * 60 * 60) } // Last hour
-             },
-             select: { id: true },
-             take: 10
-           });
-           params.targetAccounts = recentCompanies.map(c => c.id);
-           logger.info('Auto-discovered accounts', { count: params.targetAccounts.length });
+          const recentCompanies = await prisma.companies.findMany({
+            where: {
+              // Assuming 'tags' or similar links to event, or just simple fetch
+              // For now, simpler: just don't crash if 0 found
+              created_at: { gt: new Date(Date.now() - 1000 * 60 * 60) }, // Last hour
+            },
+            select: { id: true },
+            take: 10,
+          });
+          params.targetAccounts = recentCompanies.map((c) => c.id);
+          logger.info('Auto-discovered accounts', { count: params.targetAccounts.length });
         } catch (dbError) {
-           logger.warn('Failed to retrieve auto-discovered accounts', { error: dbError });
-           params.targetAccounts = []; 
+          logger.warn('Failed to retrieve auto-discovered accounts', { error: dbError });
+          params.targetAccounts = [];
         }
       }
 
@@ -182,7 +182,13 @@ export class AgentOrchestrator {
       const targetAccounts = params.targetAccounts || [];
 
       // [Progress Update: 20%]
-      await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress', undefined, undefined, 20);
+      await agentStateManager.updateTaskStatus(
+        rootTask.id,
+        'in_progress',
+        undefined,
+        undefined,
+        20
+      );
 
       // Step 2: Research each account
       for (const accountId of targetAccounts) {
@@ -198,7 +204,13 @@ export class AgentOrchestrator {
 
       // Step 3: Design sequences for contacts at each account
       // [Progress Update: 60%]
-      await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress', undefined, undefined, 60);
+      await agentStateManager.updateTaskStatus(
+        rootTask.id,
+        'in_progress',
+        undefined,
+        undefined,
+        60
+      );
 
       for (const accountId of targetAccounts) {
         // Get contacts for this account
@@ -225,7 +237,13 @@ export class AgentOrchestrator {
 
       // Step 4: Generate content for the campaign
       // [Progress Update: 80%]
-      await agentStateManager.updateTaskStatus(rootTask.id, 'in_progress', undefined, undefined, 80);
+      await agentStateManager.updateTaskStatus(
+        rootTask.id,
+        'in_progress',
+        undefined,
+        undefined,
+        80
+      );
 
       const contentTask = await this.executeTask({
         id: '',
@@ -394,9 +412,7 @@ export class AgentOrchestrator {
 
       // Calculate progress
       const total = rootTask.childTasks.length || 1;
-      const completed = rootTask.childTasks.filter(
-        (t) => t.status === 'completed'
-      ).length;
+      const completed = rootTask.childTasks.filter((t) => t.status === 'completed').length;
       const progress = Math.round((completed / total) * 100);
 
       return {
@@ -435,10 +451,10 @@ export class AgentOrchestrator {
       }
 
       if (task.retryCount >= task.maxRetries) {
-        logger.warn('Task has exceeded max retries', { 
-          taskId, 
-          retryCount: task.retryCount, 
-          maxRetries: task.maxRetries 
+        logger.warn('Task has exceeded max retries', {
+          taskId,
+          retryCount: task.retryCount,
+          maxRetries: task.maxRetries,
         });
         return null;
       }
@@ -466,10 +482,10 @@ export class AgentOrchestrator {
 
       const result = await this.executeTask(agentTask);
 
-      logger.info('Task retry completed', { 
-        taskId, 
+      logger.info('Task retry completed', {
+        taskId,
         status: result.status,
-        retryCount: task.retryCount + 1 
+        retryCount: task.retryCount + 1,
       });
 
       return result;

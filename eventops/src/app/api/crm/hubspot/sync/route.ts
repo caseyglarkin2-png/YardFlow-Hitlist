@@ -21,18 +21,12 @@ export async function POST(req: NextRequest) {
   const { personIds } = await req.json();
 
   if (!personIds || !Array.isArray(personIds)) {
-    return NextResponse.json(
-      { error: 'personIds array required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'personIds array required' }, { status: 400 });
   }
 
   const hubspotApiKey = process.env.HUBSPOT_API_KEY;
   if (!hubspotApiKey) {
-    return NextResponse.json(
-      { error: 'HubSpot API key not configured' },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: 'HubSpot API key not configured' }, { status: 503 });
   }
 
   const results = {
@@ -100,7 +94,9 @@ export async function POST(req: NextRequest) {
       }
     } catch (error: any) {
       results.failed++;
-      results.errors.push(`Error syncing ${personId}: ${error.message}`);
+      results.errors.push(
+        `Error syncing ${personId}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -110,7 +106,7 @@ export async function POST(req: NextRequest) {
 /**
  * Get HubSpot sync status
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

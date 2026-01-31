@@ -85,10 +85,10 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ data });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Heatmap error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate heatmap', data: [] },
+      { error: error instanceof Error ? error.message : 'Heatmap generation failed' },
       { status: 500 }
     );
   }

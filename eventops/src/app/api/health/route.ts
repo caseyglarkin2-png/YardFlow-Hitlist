@@ -43,21 +43,21 @@ async function checkWorkerHealth() {
   try {
     const redis = getRedisConnection();
     const lastHeartbeat = await redis.get('worker:last_heartbeat');
-    
+
     if (!lastHeartbeat) {
       return { status: 'warning', message: 'No heartbeat found', latencyMs: Date.now() - start };
     }
-    
+
     const lag = Date.now() - parseInt(lastHeartbeat, 10);
     // Threshold: 3 minutes (allows for 2 missed beats + some delay)
     if (lag > 3 * 60 * 1000) {
-      return { 
-        status: 'error', 
-        message: `Worker stalled. Last heartbeat ${Math.round(lag/1000)}s ago`, 
-        latencyMs: Date.now() - start 
+      return {
+        status: 'error',
+        message: `Worker stalled. Last heartbeat ${Math.round(lag / 1000)}s ago`,
+        latencyMs: Date.now() - start,
       };
     }
-    
+
     return { status: 'ok', lagMs: lag, latencyMs: Date.now() - start };
   } catch (error) {
     return { status: 'error', error: (error as Error).message, latencyMs: Date.now() - start };
@@ -119,8 +119,8 @@ export async function GET() {
 
   // Healthy = DB + Redis + Worker + Critical Env Vars
   const healthy =
-    dbCheck.status === 'ok' && 
-    redisCheck.status === 'ok' && 
+    dbCheck.status === 'ok' &&
+    redisCheck.status === 'ok' &&
     criticalMissing.length === 0 &&
     workerCheck.status !== 'error';
 

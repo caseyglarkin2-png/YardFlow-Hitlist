@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let user = null;
+    let _user = null;
     if (authResult.type === 'session' && authResult.email) {
-      user = await prisma.users.findUnique({
+      _user = await prisma.users.findUnique({
         where: { email: authResult.email },
       });
     }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       currentMeetings,
       previousMeetings,
       totalOutreach,
-      openedCount,
+      _openedCount,
       repliedCount,
     ] = await Promise.all([
       prisma.target_accounts.count(),
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
           : 0;
 
     // Get meetings by day (last 7 days)
-    const last7Days = subDays(today, 7);
+    // const last7Days = subDays(today, 7);
     const meetingsByDay = await Promise.all(
       Array.from({ length: 7 }, async (_, i) => {
         const day = subDays(today, 6 - i);

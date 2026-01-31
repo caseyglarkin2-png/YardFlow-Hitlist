@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { accountId, dryRun = true, minConfidence = 70, force = false } = await request.json();
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'accountId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     }
 
     const applicator = new PatternApplicator();
@@ -31,10 +28,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Pattern application error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to apply patterns' },
+      { error: error instanceof Error ? error.message : 'Failed to apply patterns' },
       { status: 500 }
     );
   }

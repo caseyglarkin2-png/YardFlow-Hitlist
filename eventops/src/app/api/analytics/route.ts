@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
   const campaignId = searchParams.get('campaignId');
 
   // Get all outreach for the event
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const outreachQuery: any = {
     people: {
       target_accounts: {
@@ -51,15 +52,21 @@ export async function GET(req: NextRequest) {
 
   // Calculate metrics
   const totalOutreach = allOutreach.length;
-  const byStatus = allOutreach.reduce((acc, o) => {
-    acc[o.status] = (acc[o.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const byStatus = allOutreach.reduce(
+    (acc, o) => {
+      acc[o.status] = (acc[o.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const byChannel = allOutreach.reduce((acc, o) => {
-    acc[o.channel] = (acc[o.channel] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const byChannel = allOutreach.reduce(
+    (acc, o) => {
+      acc[o.channel] = (acc[o.channel] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   const sent = byStatus.SENT || 0;
   const opened = byStatus.OPENED || 0;

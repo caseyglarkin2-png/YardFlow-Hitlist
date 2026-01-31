@@ -95,7 +95,11 @@ export async function POST(req: NextRequest) {
       if (title.includes('ceo') || title.includes('chief') || title.includes('president')) {
         score += 40;
         reasoning.push(`✅ C-level executive: ${person.title} (+40)`);
-      } else if (title.includes('vp') || title.includes('vice president') || title.includes('director')) {
+      } else if (
+        title.includes('vp') ||
+        title.includes('vice president') ||
+        title.includes('director')
+      ) {
         score += 30;
         reasoning.push(`✅ VP/Director level: ${person.title} (+30)`);
       } else if (title.includes('manager') || title.includes('head of')) {
@@ -155,11 +159,8 @@ export async function POST(req: NextRequest) {
       reasoning,
       maxScore: 100,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('ICP scoring error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Scoring failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || 'Scoring failed' }, { status: 500 });
   }
 }

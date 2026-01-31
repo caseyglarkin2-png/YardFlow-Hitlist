@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(sequence);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Sequence generation error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to generate sequence' },
+      { error: error instanceof Error ? error.message : 'Failed to generate sequence' },
       { status: 500 }
     );
   }

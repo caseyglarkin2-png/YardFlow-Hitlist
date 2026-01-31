@@ -227,10 +227,11 @@ Keep it concise and actionable.`;
       prepDocument: prepDoc,
       meeting,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error generating prep doc:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to generate prep document', details: error.message },
+      { error: 'Failed to generate prep document', details: message },
       { status: 500 }
     );
   }

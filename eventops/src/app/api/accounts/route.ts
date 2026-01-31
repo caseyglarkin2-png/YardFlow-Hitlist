@@ -1,4 +1,3 @@
-import { auth } from '@/lib/auth';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import {

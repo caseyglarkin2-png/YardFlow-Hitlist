@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Fetch metadata using YouTube oEmbed API (no API key required)
     const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
     const response = await fetch(oembedUrl);
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch YouTube metadata');
     }
@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
         thumbnailUrl: content.thumbnailUrl,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error importing YouTube video:', error);
     return NextResponse.json(
-      { error: error.message || 'Import failed' },
+      { error: error instanceof Error ? error.message : 'Import failed' },
       { status: 500 }
     );
   }

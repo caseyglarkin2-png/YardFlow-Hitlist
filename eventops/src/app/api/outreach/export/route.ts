@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.users.findUnique({
@@ -17,16 +17,14 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json(
-        { error: "No active event selected" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No active event selected' }, { status: 400 });
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const status = searchParams.get("status");
-    const channel = searchParams.get("channel");
+    const status = searchParams.get('status');
+    const channel = searchParams.get('channel');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const whereClause: any = {
       people: {
         target_accounts: {
@@ -35,10 +33,10 @@ export async function GET(req: NextRequest) {
       },
     };
 
-    if (status && status !== "all") {
+    if (status && status !== 'all') {
       whereClause.status = status;
     }
-    if (channel && channel !== "all") {
+    if (channel && channel !== 'all') {
       whereClause.channel = channel;
     }
 
@@ -51,58 +49,53 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
 
     // Convert to CSV
     const csvHeaders = [
-      "Company",
-      "Person Name",
-      "Person Title",
-      "Person Email",
-      "Person LinkedIn",
-      "Channel",
-      "Status",
-      "Subject",
-      "Message",
-      "Notes",
-      "Created At",
-      "Sent At",
+      'Company',
+      'Person Name',
+      'Person Title',
+      'Person Email',
+      'Person LinkedIn',
+      'Channel',
+      'Status',
+      'Subject',
+      'Message',
+      'Notes',
+      'Created At',
+      'Sent At',
     ];
 
     const csvRows = outreach.map((item) => [
       item.people.target_accounts.name,
       item.people.name,
-      item.people.title || "",
-      item.people.email || "",
-      item.people.linkedin || "",
+      item.people.title || '',
+      item.people.email || '',
+      item.people.linkedin || '',
       item.channel,
       item.status,
-      item.subject || "",
-      item.message.replace(/\n/g, " ").replace(/"/g, '""'), // Escape newlines and quotes
-      item.notes?.replace(/\n/g, " ").replace(/"/g, '""') || "",
+      item.subject || '',
+      item.message.replace(/\n/g, ' ').replace(/"/g, '""'), // Escape newlines and quotes
+      item.notes?.replace(/\n/g, ' ').replace(/"/g, '""') || '',
       new Date(item.createdAt).toISOString(),
-      item.sentAt ? new Date(item.sentAt).toISOString() : "",
+      item.sentAt ? new Date(item.sentAt).toISOString() : '',
     ]);
 
     const csvContent = [
-      csvHeaders.join(","),
-      ...csvRows.map((row) =>
-        row.map((cell) => `"${cell}"`).join(",")
-      ),
-    ].join("\n");
+      csvHeaders.join(','),
+      ...csvRows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
+    ].join('\n');
 
     return new NextResponse(csvContent, {
       headers: {
-        "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="outreach-export-${new Date().toISOString().split("T")[0]}.csv"`,
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="outreach-export-${new Date().toISOString().split('T')[0]}.csv"`,
       },
     });
   } catch (error) {
-    console.error("Error exporting outreach:", error);
-    return NextResponse.json(
-      { error: "Failed to export outreach" },
-      { status: 500 }
-    );
+    console.error('Error exporting outreach:', error);
+    return NextResponse.json({ error: 'Failed to export outreach' }, { status: 500 });
   }
 }

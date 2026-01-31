@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         limit: body.limit ? parseInt(body.limit, 10) : undefined,
         accountId: body.accountId || undefined,
       };
-    } catch (error) {
+    } catch (_error) {
       // Body is optional, use defaults
       logger.debug('No request body provided, using defaults');
     }
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
  * GET /api/hubspot/sync/contacts
  * Get sync status and information
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Check authentication
     const session = await auth();

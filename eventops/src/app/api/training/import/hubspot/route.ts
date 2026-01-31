@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { eventId, startDate, endDate, limit = 50 } = await req.json();
+    const { eventId, startDate: _startDate, endDate: _endDate, limit = 50 } = await req.json();
 
     if (!eventId) {
       return NextResponse.json({ error: 'eventId required' }, { status: 400 });
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const response = await fetch(`${hubspotUrl}?${params}`, {
       headers: {
-        'Authorization': `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
       },
     });
@@ -41,10 +41,10 @@ export async function POST(req: NextRequest) {
 
     for (const engagement of data.results || []) {
       if (engagement.engagement?.type !== 'CALL') continue;
-      
+
       const metadata = engagement.metadata || {};
       const recordingUrl = metadata.recordingUrl;
-      
+
       if (!recordingUrl) continue;
 
       try {
@@ -55,10 +55,14 @@ export async function POST(req: NextRequest) {
             userId: session.user.id,
             source: 'hubspot',
             type: 'audio',
-            title: metadata.title || `Call Recording - ${new Date(engagement.engagement.createdAt).toLocaleDateString()}`,
+            title:
+              metadata.title ||
+              `Call Recording - ${new Date(engagement.engagement.createdAt).toLocaleDateString()}`,
             description: metadata.body || null,
             url: recordingUrl,
-            duration: metadata.durationMilliseconds ? Math.floor(metadata.durationMilliseconds / 1000) : null,
+            duration: metadata.durationMilliseconds
+              ? Math.floor(metadata.durationMilliseconds / 1000)
+              : null,
             sourceId: engagement.engagement.id.toString(),
             sourceLink: `https://app.hubspot.com/contacts/${engagement.engagement.portalId}/engagement/${engagement.engagement.id}`,
             metadata: {
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
           title: content.title,
           duration: content.duration,
         });
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Error importing call ${engagement.engagement.id}:`, error);
       }
     }
@@ -87,10 +91,10 @@ export async function POST(req: NextRequest) {
       imported,
       count: imported.length,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error importing from HubSpot:', error);
     return NextResponse.json(
-      { error: error.message || 'Import failed' },
+      { error: error instanceof Error ? error.message : 'Import failed' },
       { status: 500 }
     );
   }

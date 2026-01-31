@@ -1,35 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
-import { generateCompanyResearch, generatePersonalizedOutreach } from "@/lib/ai-research";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/db';
+import { people } from '@prisma/client';
+import { generateCompanyResearch, generatePersonalizedOutreach } from '@/lib/ai-research';
 
 export const dynamic = 'force-dynamic';
 
-function getPersonaLabel(person: any): string {
-  if (person.isExecOps) return "Executive Operations Leader";
-  if (person.isOps) return "Operations Professional";
-  if (person.isProc) return "Procurement Specialist";
-  if (person.isSales) return "Sales Leader";
-  if (person.isTech) return "Technology Leader";
-  if (person.isNonOps) return "Business Leader";
-  return "Professional";
+function getPersonaLabel(person: people): string {
+  if (person.isExecOps) return 'Executive Operations Leader';
+  if (person.isOps) return 'Operations Professional';
+  if (person.isProc) return 'Procurement Specialist';
+  if (person.isSales) return 'Sales Leader';
+  if (person.isTech) return 'Technology Leader';
+  if (person.isNonOps) return 'Business Leader';
+  return 'Professional';
 }
 
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { personIds, channel = 'EMAIL', eventId } = body;
 
     if (!personIds || personIds.length === 0) {
-      return NextResponse.json(
-        { error: "Person IDs required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Person IDs required' }, { status: 400 });
     }
 
     // Get event
@@ -38,7 +36,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
     // Get people with accounts, dossiers, insights, and ROI calculations
@@ -65,7 +63,7 @@ export async function POST(req: NextRequest) {
       try {
         // Generate or get company research
         let dossier = person.target_accounts.company_dossiers;
-        
+
         if (!dossier) {
           const researchData = await generateCompanyResearch(
             person.target_accounts.name,
@@ -91,29 +89,35 @@ export async function POST(req: NextRequest) {
         }
 
         // Parse dossier data
-        const dossierData = dossier.rawData ? JSON.parse(dossier.rawData) : {
-          companyOverview: dossier.companyOverview,
-          keyPainPoints: dossier.keyPainPoints,
-          industryContext: dossier.industryContext,
-          facilityCount: dossier.facilityCount,
-          operationalScale: dossier.operationalScale,
-        };
+        const dossierData = dossier.rawData
+          ? JSON.parse(dossier.rawData)
+          : {
+              companyOverview: dossier.companyOverview,
+              keyPainPoints: dossier.keyPainPoints,
+              industryContext: dossier.industryContext,
+              facilityCount: dossier.facilityCount,
+              operationalScale: dossier.operationalScale,
+            };
 
         // Get contact insights if available
-        const contactInsights = person.contact_insights ? {
-          roleContext: person.contact_insights.roleContext,
-          likelyPainPoints: person.contact_insights.likelyPainPoints,
-          roiOpportunity: person.contact_insights.roiOpportunity,
-        } : undefined;
+        const contactInsights = person.contact_insights
+          ? {
+              roleContext: person.contact_insights.roleContext,
+              likelyPainPoints: person.contact_insights.likelyPainPoints,
+              roiOpportunity: person.contact_insights.roiOpportunity,
+            }
+          : undefined;
 
         // Get ROI data if available
-        const roiData = person.target_accounts.roi_calculations?.[0] ? {
-          annualSavings: person.target_accounts.roi_calculations[0].annualSavings,
-          paybackPeriod: person.target_accounts.roi_calculations[0].paybackPeriod,
-          assumptions: person.target_accounts.roi_calculations[0].assumptions 
-            ? JSON.parse(person.target_accounts.roi_calculations[0].assumptions) 
-            : undefined,
-        } : undefined;
+        const roiData = person.target_accounts.roi_calculations?.[0]
+          ? {
+              annualSavings: person.target_accounts.roi_calculations[0].annualSavings,
+              paybackPeriod: person.target_accounts.roi_calculations[0].paybackPeriod,
+              assumptions: person.target_accounts.roi_calculations[0].assumptions
+                ? JSON.parse(person.target_accounts.roi_calculations[0].assumptions)
+                : undefined,
+            }
+          : undefined;
 
         // Generate personalized outreach
         const persona = getPersonaLabel(person);
@@ -129,12 +133,12 @@ export async function POST(req: NextRequest) {
         );
 
         // Create outreach record
-        const outreach = await prisma.outreach.create({
+        await prisma.outreach.create({
           data: {
             id: crypto.randomUUID(),
             personId: person.id,
             channel,
-            status: "DRAFT",
+            status: 'DRAFT',
             subject: outreachData.subject || null,
             message: outreachData.message,
             sentBy: session.user.email,
@@ -168,13 +172,15 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error("Error generating AI outreach:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('Error generating AI outreach:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { 
-        error: "Failed to generate outreach",
+      {
+        error: 'Failed to generate outreach',
         details: errorMessage,
-        hint: errorMessage.includes('API key') ? 'Check OPENAI_API_KEY environment variable' : undefined
+        hint: errorMessage.includes('API key')
+          ? 'Check OPENAI_API_KEY environment variable'
+          : undefined,
       },
       { status: 500 }
     );
