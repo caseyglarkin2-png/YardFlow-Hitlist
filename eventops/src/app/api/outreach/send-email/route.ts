@@ -8,8 +8,17 @@ export const dynamic = 'force-dynamic';
  * Send email via SendGrid
  */
 export async function POST(req: NextRequest) {
+  // ===========================================================================
+  // Service-to-service auth (from Vercel proxy)
+  // This allows the Vercel frontend to call Railway without NextAuth cookies
+  // ===========================================================================
+  const authHeader = req.headers.get('authorization');
+  const serviceSecret = process.env.CRON_SECRET;
+  const isServiceAuth = serviceSecret && authHeader === `Bearer ${serviceSecret}`;
+
+  // Check EITHER service auth OR user session
   const session = await auth();
-  if (!session?.user) {
+  if (!isServiceAuth && !session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
