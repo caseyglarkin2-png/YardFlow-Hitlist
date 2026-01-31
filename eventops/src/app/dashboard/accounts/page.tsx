@@ -97,14 +97,14 @@ export default async function AccountsPage({
             key={account.id}
             className="relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
           >
-            <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900">{account.name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-medium text-gray-900 truncate">{account.name}</h3>
               {account.website && (
                 <a
                   href={account.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1 text-sm text-blue-600 hover:text-blue-500"
+                  className="mt-1 text-sm text-blue-600 hover:text-blue-500 block truncate"
                 >
                   {account.website.replace(/^https?:\/\//, '')}
                 </a>

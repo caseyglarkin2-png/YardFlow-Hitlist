@@ -90,25 +90,25 @@ export default async function PeoplePage({
 
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-300">
+          <table className="min-w-full divide-y divide-gray-300 table-fixed">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-[18%]">
                   Name
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[18%]">
                   Company
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[18%]">
                   Title
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[18%]">
                   Contact
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[22%]">
                   Personas
                 </th>
-                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6 w-[6%]">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
@@ -116,7 +116,7 @@ export default async function PeoplePage({
             <tbody className="divide-y divide-gray-200 bg-white">
               {people.map((person: people & { target_accounts: target_accounts }) => (
                 <tr key={person.id}>
-                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">
+                  <td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 truncate max-w-0">
                     <Link
                       href={`/dashboard/people/${person.id}`}
                       className="text-blue-600 hover:text-blue-900 font-medium"
@@ -124,7 +124,7 @@ export default async function PeoplePage({
                       {person.name}
                     </Link>
                   </td>
-                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <td className="px-3 py-4 text-sm text-gray-500 truncate max-w-0">
                   <Link
                     href={`/dashboard/accounts/${person.target_accounts.id}`}
                     className="text-blue-600 hover:text-blue-500"
@@ -132,7 +132,7 @@ export default async function PeoplePage({
                     {person.target_accounts.name}
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <td className="px-3 py-4 text-sm text-gray-500 truncate max-w-0">
                   {person.title || '-'}
                 </td>
                 <td className="px-3 py-4 text-sm text-gray-500">
