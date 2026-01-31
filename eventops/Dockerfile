@@ -37,12 +37,16 @@ WORKDIR /app
 # Install OpenSSL for Prisma runtime
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-# Copy necessary files from builder
-COPY --from=base /app/package*.json ./
-COPY --from=base /app/.next ./.next
+# Copy Next.js standalone output (includes node_modules it needs)
+COPY --from=base /app/.next/standalone ./
+COPY --from=base /app/.next/static ./.next/static
 COPY --from=base /app/public ./public
-COPY --from=base /app/node_modules ./node_modules
+
+# Copy Prisma files (required for Prisma 7 runtime with driver adapter)
 COPY --from=base /app/prisma ./prisma
+COPY --from=base /app/prisma.config.ts ./prisma.config.ts
+COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -51,4 +55,5 @@ ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Use standalone server directly (not npm start)
+CMD ["node", "server.js"]
