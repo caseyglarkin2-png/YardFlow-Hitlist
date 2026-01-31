@@ -76,6 +76,7 @@ export async function GET(req: NextRequest) {
   const responseRate = sent > 0 ? (responded / sent) * 100 : 0;
 
   // By persona
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const byPersona: Record<string, any> = {
     'Executive Ops': { total: 0, sent: 0, responded: 0 },
     Operations: { total: 0, sent: 0, responded: 0 },
@@ -103,6 +104,7 @@ export async function GET(req: NextRequest) {
     }
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // By ICP tier
   const byIcpTier: Record<string, any> = {
     'Top Tier (90+)': { total: 0, sent: 0, responded: 0 },

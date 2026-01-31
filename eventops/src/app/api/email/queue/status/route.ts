@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   if (error) return response;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const redis = getRedisConnection();
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);

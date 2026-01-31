@@ -132,10 +132,10 @@ Provide insights in JSON format:
     });
 
     return NextResponse.json(insights);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error generating insights:', error);
     return NextResponse.json(
-      { error: 'Failed to generate insights', details: error.message },
+      { error: 'Failed to generate insights', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

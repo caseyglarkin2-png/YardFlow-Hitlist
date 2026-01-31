@@ -125,6 +125,7 @@ export async function GET(request: NextRequest) {
     const personas = searchParams.getAll('persona'); // Can have multiple
 
     // Build where clause
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       target_accounts: {
         eventId: user.activeEventId,

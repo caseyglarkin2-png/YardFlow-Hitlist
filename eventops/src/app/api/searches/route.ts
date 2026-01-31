@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const entityType = searchParams.get('entityType');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const isGlobal = searchParams.get('isGlobal') === 'true';
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

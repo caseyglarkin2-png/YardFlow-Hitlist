@@ -11,9 +11,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let _user = null;
     if (authResult.type === 'session' && authResult.email) {
-      _user = await prisma.users.findUnique({
+      /* const user = */ await prisma.users.findUnique({
         where: { email: authResult.email },
       });
     }
@@ -44,6 +43,7 @@ export async function GET(request: NextRequest) {
       currentMeetings,
       previousMeetings,
       totalOutreach,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       _openedCount,
       repliedCount,
     ] = await Promise.all([

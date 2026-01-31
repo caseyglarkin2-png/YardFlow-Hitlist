@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
  * Note: NextAuth v5 handles token refresh automatically via JWT rotation.
  * This endpoint exists for explicit refresh requests from the GTM frontend.
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const session = await auth();
     

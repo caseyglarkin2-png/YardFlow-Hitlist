@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { eventId, startDate: _startDate, endDate: _endDate, limit = 50 } = await req.json();
 
     if (!eventId) {

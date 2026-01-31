@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Calculate engagement scores for all accounts
  */
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

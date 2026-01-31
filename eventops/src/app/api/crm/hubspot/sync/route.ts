@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
           results.errors.push(`${person.name}: ${syncResult.error}`);
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       results.failed++;
       results.errors.push(
         `Error syncing ${personId}: ${error instanceof Error ? error.message : 'Unknown error'}`

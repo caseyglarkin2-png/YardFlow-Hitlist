@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { getRedisConnection } from '@/lib/queue/client';
 import { emailQueue } from '@/lib/queue/queues';
 
 export const dynamic = 'force-dynamic';

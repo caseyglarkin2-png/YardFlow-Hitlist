@@ -163,6 +163,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Convert to POST format and call
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const mockRequest = {
     json: async () => ({ query, limit, cursor }),
   } as NextRequest;
