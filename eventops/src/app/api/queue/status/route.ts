@@ -1,17 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { getRedisConnection } from '@/lib/queue/client';
 import { emailQueue, enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib/queue/queues';
 
 export const dynamic = 'force-dynamic';
 
-function isAuthorized(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  const secret = process.env.CRON_SECRET;
-  return Boolean(secret && authHeader === `Bearer ${secret}`);
-}
-
 export async function GET(request: NextRequest) {
-  if (!isAuthorized(request)) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
