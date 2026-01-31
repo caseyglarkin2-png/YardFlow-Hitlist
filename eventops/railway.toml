@@ -1,0 +1,13 @@
+# Railway Service Configuration for YardFlow-Hitlist Web
+# This file ensures the Dockerfile builder is used (required for Prisma 7)
+# See: https://docs.railway.app/develop/config-as-code
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

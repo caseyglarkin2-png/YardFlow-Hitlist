@@ -1,12 +1,13 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "nixpacksConfigPath": "eventops/nixpacks.toml",
-    "buildCommand": "cd eventops && npm ci --no-audit && npx prisma generate && NODE_OPTIONS=\"--max-old-space-size=8192\" npm run build"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "eventops/Dockerfile"
   },
   "deploy": {
-    "startCommand": "cd eventops && ./start-production.sh",
+    "startCommand": "",
+    "healthcheckPath": "/api/health",
+    "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5
   }
