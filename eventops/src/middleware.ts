@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getToken } from 'next-auth/jwt';
 
 /**
  * Allowed origins for CORS
@@ -42,9 +42,18 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Run NextAuth protection for dashboard routes
+  // Protect dashboard routes - use getToken for Edge compatibility
   if (pathname.startsWith('/dashboard')) {
-    return (auth as any)(request);
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET,
+    });
+
+    if (!token) {
+      const signInUrl = new URL('/login', request.url);
+      signInUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(signInUrl);
+    }
   }
 
   // Add CORS headers to API responses
@@ -60,5 +69,4 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ['/dashboard/:path*', '/api/:path*'],
-  runtime: 'nodejs', // Force Node.js runtime for bcryptjs compatibility
 };
