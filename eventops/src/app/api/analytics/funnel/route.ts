@@ -15,14 +15,15 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    const dateFilter = startDate && endDate
-      ? {
-          createdAt: {
-            gte: new Date(startDate),
-            lte: new Date(endDate),
-          },
-        }
-      : {};
+    const dateFilter =
+      startDate && endDate
+        ? {
+            createdAt: {
+              gte: new Date(startDate),
+              lte: new Date(endDate),
+            },
+          }
+        : {};
 
     const campaignFilter = campaignId ? { campaigns: { some: { id: campaignId } } } : {};
 
@@ -128,9 +129,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching funnel:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch funnel data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch funnel data' }, { status: 500 });
   }
 }

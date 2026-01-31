@@ -1,7 +1,11 @@
 import { auth } from '@/lib/auth';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
-import { parsePaginationParams, buildPaginatedResponse, getPrismaCursorParams } from '@/lib/pagination';
+import {
+  parsePaginationParams,
+  buildPaginatedResponse,
+  getPrismaCursorParams,
+} from '@/lib/pagination';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -22,9 +26,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's active event - for S2S, use the userId header
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (request.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : request.headers.get('x-user-id') || authResult.userId;
 
     const user = await prisma.users.findUnique({
       where: { id: userId },
@@ -65,10 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('Error creating account:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -79,9 +81,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (request.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : request.headers.get('x-user-id') || authResult.userId;
 
     const user = await prisma.users.findUnique({
       where: { id: userId },
@@ -115,9 +118,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching accounts:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

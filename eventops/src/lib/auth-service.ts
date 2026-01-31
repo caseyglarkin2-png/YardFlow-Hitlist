@@ -10,12 +10,12 @@ export type AuthResult = {
 /**
  * Authenticate request via session OR service-to-service key.
  * Use for routes that GTM frontend or other services call.
- * 
+ *
  * Authentication precedence:
  * 1. x-service-key header (SERVICE_TO_SERVICE_SECRET)
  * 2. Bearer token (CRON_SECRET for backward compat)
  * 3. NextAuth session
- * 
+ *
  * @example
  * ```typescript
  * export async function GET(request: NextRequest) {
@@ -27,19 +27,17 @@ export type AuthResult = {
  * }
  * ```
  */
-export async function authServiceOrSession(
-  request: Request
-): Promise<AuthResult> {
+export async function authServiceOrSession(request: Request): Promise<AuthResult> {
   const path = new URL(request.url).pathname;
-  
+
   // 1. Check service-to-service header
   const serviceKey = request.headers.get('x-service-key');
   const serviceSecret = process.env.SERVICE_TO_SERVICE_SECRET;
-  
+
   if (serviceKey && serviceSecret && serviceKey === serviceSecret) {
     const userId = request.headers.get('x-user-id') || 'service:gtm-frontend';
     const email = request.headers.get('x-user-email') || undefined;
-    
+
     // Audit log for S2S calls
     logger.info('S2S API call', {
       route: path,
@@ -47,7 +45,7 @@ export async function authServiceOrSession(
       type: 'service',
       origin: request.headers.get('origin') || 'unknown',
     });
-    
+
     return { type: 'service', userId, email };
   }
 
@@ -56,7 +54,7 @@ export async function authServiceOrSession(
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
     const cronSecret = process.env.CRON_SECRET;
-    
+
     if (cronSecret && token === cronSecret) {
       logger.info('Cron API call', {
         route: path,
@@ -87,7 +85,7 @@ export async function authServiceOrSession(
 /**
  * Require auth - returns error response if not authenticated.
  * Convenience wrapper for routes.
- * 
+ *
  * @example
  * ```typescript
  * export async function GET(request: NextRequest) {
@@ -97,19 +95,21 @@ export async function authServiceOrSession(
  * }
  * ```
  */
-export async function requireAuth(request: Request): Promise<
+export async function requireAuth(
+  request: Request
+): Promise<
   | { error: true; response: Response; auth?: never }
   | { error: false; auth: AuthResult; response?: never }
 > {
   const authResult = await authServiceOrSession(request);
-  
+
   if (!authResult) {
     return {
       error: true,
       response: Response.json({ error: 'Unauthorized' }, { status: 401 }),
     };
   }
-  
+
   return { error: false, auth: authResult };
 }
 

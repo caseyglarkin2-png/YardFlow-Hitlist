@@ -16,12 +16,14 @@ const globalForPrisma = globalThis as unknown as {
  */
 function createPrismaClient(): PrismaClient {
   // Create PostgreSQL connection pool using helper that checks both env vars
-  const pool = globalForPrisma.pool ?? new Pool({
-    connectionString: getDatabaseUrl(),
-    max: 10, // Maximum pool size
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  });
+  const pool =
+    globalForPrisma.pool ??
+    new Pool({
+      connectionString: getDatabaseUrl(),
+      max: 10, // Maximum pool size
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
 
   if (!globalForPrisma.pool) {
     globalForPrisma.pool = pool;

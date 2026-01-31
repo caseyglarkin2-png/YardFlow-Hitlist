@@ -17,18 +17,15 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
   // CORS headers for cross-origin API access (GTM Vercel frontend)
   async headers() {
-    const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-      .split(',')
-      .filter(Boolean);
-    
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
+
     // Default origins if not set
-    const primaryOrigin = allowedOrigins.length > 0 
-      ? allowedOrigins[0] 
-      : 'https://gtm-yard-flow.vercel.app';
-    
+    const primaryOrigin =
+      allowedOrigins.length > 0 ? allowedOrigins[0] : 'https://gtm-yard-flow.vercel.app';
+
     return [
       {
         source: '/api/:path*',

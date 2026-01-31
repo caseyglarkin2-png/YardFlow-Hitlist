@@ -117,7 +117,9 @@ export async function GET(request: NextRequest) {
 
         const cohort = cohortMap.get(cohortKey);
         cohort.total++;
-        cohort.sent += person.outreach.filter((o) => ['SENT', 'OPENED', 'RESPONDED'].includes(o.status)).length;
+        cohort.sent += person.outreach.filter((o) =>
+          ['SENT', 'OPENED', 'RESPONDED'].includes(o.status)
+        ).length;
         cohort.responded += person.outreach.filter((o) => o.status === 'RESPONDED').length;
         cohort.meetings += person.meetings.length;
       }
@@ -143,7 +145,9 @@ export async function GET(request: NextRequest) {
       const cohortMap = new Map();
 
       for (const account of accounts) {
-        const cohortKey = account.icpScore ? `Score ${Math.floor(account.icpScore / 20) * 20}-${Math.floor(account.icpScore / 20) * 20 + 20}` : 'Unknown';
+        const cohortKey = account.icpScore
+          ? `Score ${Math.floor(account.icpScore / 20) * 20}-${Math.floor(account.icpScore / 20) * 20 + 20}`
+          : 'Unknown';
 
         if (!cohortMap.has(cohortKey)) {
           cohortMap.set(cohortKey, {
@@ -159,7 +163,9 @@ export async function GET(request: NextRequest) {
         cohort.total += account.people.length;
 
         for (const person of account.people) {
-          cohort.sent += person.outreach.filter((o) => ['SENT', 'OPENED', 'RESPONDED'].includes(o.status)).length;
+          cohort.sent += person.outreach.filter((o) =>
+            ['SENT', 'OPENED', 'RESPONDED'].includes(o.status)
+          ).length;
           cohort.responded += person.outreach.filter((o) => o.status === 'RESPONDED').length;
           cohort.meetings += person.meetings.length;
         }
@@ -175,9 +181,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ cohorts, groupBy, metric });
   } catch (error) {
     console.error('Error fetching cohort data:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch cohort data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch cohort data' }, { status: 500 });
   }
 }

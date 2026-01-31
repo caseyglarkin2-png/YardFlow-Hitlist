@@ -45,9 +45,9 @@ Always use the singleton pattern with lazy getters.
 
 ```typescript
 // ✅ Correct: src/lib/db.ts (Prisma 7 with driver adapter)
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg({ pool });
@@ -65,6 +65,7 @@ export const agentQueue = {
 ### Prisma 7 Configuration
 
 **CRITICAL**: Prisma 7.3.0 requires specific configuration:
+
 - **Schema**: `eventops/prisma/schema.prisma` - NO `url` in datasource block
 - **Config**: `eventops/prisma.config.ts` - Contains `datasource.url`
 - **Client**: Uses `@prisma/adapter-pg` driver adapter
@@ -79,9 +80,9 @@ datasource db {
 
 ```typescript
 // ✅ Correct: prisma.config.ts
-import { defineConfig } from 'prisma/config';
+import { defineConfig } from "prisma/config";
 export default defineConfig({
-  schema: './prisma/schema.prisma',
+  schema: "./prisma/schema.prisma",
   datasource: { url: process.env.DATABASE_URL },
 });
 ```
@@ -89,6 +90,7 @@ export default defineConfig({
 ### Monorepo Structure (TWO package.json files)
 
 **CRITICAL**: This repo has TWO package.json files:
+
 1. **ROOT `/package.json`** - Minimal stub, NO dependencies. Just points to eventops.
 2. **`/eventops/package.json`** - All actual dependencies including Prisma 7.3.0.
 

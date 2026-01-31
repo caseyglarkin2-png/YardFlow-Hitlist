@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     const accountId = searchParams.get('accountId');
 
     if (!accountId) {
-      return NextResponse.json(
-        { error: 'accountId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     }
 
     // Find the most recent dossier for this account
@@ -33,10 +30,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!dossier) {
-      return NextResponse.json(
-        { error: 'Dossier not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Dossier not found' }, { status: 404 });
     }
 
     // Parse the rawData JSON

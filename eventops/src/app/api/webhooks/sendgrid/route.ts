@@ -9,7 +9,7 @@ interface SendGridEvent {
   event: string;
   email: string;
   timestamp: number;
-  'sg_message_id': string;
+  sg_message_id: string;
   enrollmentId?: string;
   stepNumber?: string;
   url?: string;
@@ -30,10 +30,10 @@ function verifySendGridSignature(
   try {
     const timestampPayload = timestamp + payload;
     const decodedSignature = Buffer.from(signature, 'base64');
-    
+
     const verifier = crypto.createVerify('SHA256');
     verifier.update(timestampPayload);
-    
+
     return verifier.verify(
       { key: publicKey, padding: crypto.constants.RSA_PKCS1_PADDING },
       decodedSignature
@@ -49,18 +49,18 @@ export async function POST(req: NextRequest) {
     // Get raw body for signature verification
     const rawBody = await req.text();
     const events: SendGridEvent[] = JSON.parse(rawBody);
-    
+
     // Verify webhook signature if verification key is configured
     const verificationKey = process.env.SENDGRID_WEBHOOK_VERIFICATION_KEY;
     if (verificationKey) {
       const signature = req.headers.get('X-Twilio-Email-Event-Webhook-Signature');
       const timestamp = req.headers.get('X-Twilio-Email-Event-Webhook-Timestamp');
-      
+
       if (!signature || !timestamp) {
         logger.warn('SendGrid webhook missing signature headers');
         return NextResponse.json({ error: 'Missing signature' }, { status: 403 });
       }
-      
+
       const isValid = verifySendGridSignature(verificationKey, rawBody, signature, timestamp);
       if (!isValid) {
         logger.warn('SendGrid webhook signature verification failed');
@@ -82,17 +82,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     logger.error('Error processing SendGrid webhook', { error });
-    return NextResponse.json(
-      { error: 'Failed to process webhook' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process webhook' }, { status: 500 });
   }
 }
 
 async function processEvent(event: SendGridEvent) {
   try {
     const messageId = event.sg_message_id;
-    
+
     const emailActivity = await prisma.emailActivity.findUnique({
       where: { messageId },
       include: {

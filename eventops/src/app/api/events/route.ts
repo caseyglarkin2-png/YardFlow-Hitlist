@@ -24,10 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Validate date logic
     if (new Date(data.startDate) > new Date(data.endDate)) {
-      return NextResponse.json(
-        { error: 'End date must be after start date' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'End date must be after start date' }, { status: 400 });
     }
 
     const event = await prisma.events.create({
@@ -51,10 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('Error creating event:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -72,9 +66,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(events);
   } catch (error) {
     console.error('Error fetching events:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -1,26 +1,23 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { authServiceOrSession } from "@/lib/auth-service";
-import { prisma } from "@/lib/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
+import { prisma } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const templates = await prisma.message_templates.findMany({
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json(templates);
   } catch (error) {
-    console.error("Error fetching templates:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch templates" },
-      { status: 500 }
-    );
+    console.error('Error fetching templates:', error);
+    return NextResponse.json({ error: 'Failed to fetch templates' }, { status: 500 });
   }
 }
 
@@ -28,7 +25,7 @@ export async function POST(req: NextRequest) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -49,10 +46,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newTemplate);
   } catch (error) {
-    console.error("Error creating template:", error);
-    return NextResponse.json(
-      { error: "Failed to create template" },
-      { status: 500 }
-    );
+    console.error('Error creating template:', error);
+    return NextResponse.json({ error: 'Failed to create template' }, { status: 500 });
   }
 }

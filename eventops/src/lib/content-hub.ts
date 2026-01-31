@@ -2,18 +2,18 @@ import { logger } from '@/lib/logger';
 
 /**
  * Centralized client for YardFlow Content Hub.
- * 
+ *
  * Content Hub (flow-state-klbt.vercel.app) provides:
  * - Brand assets and graphics
  * - Messaging templates by persona
  * - Case studies
  * - Contract templates
  * - ROI calculator data
- * 
+ *
  * All URLs are configurable via environment variables.
  */
 
-const CONTENT_HUB_URL = 
+const CONTENT_HUB_URL =
   process.env.YARDFLOW_CONTENT_HUB_URL || 'https://flow-state-klbt.vercel.app';
 const CONTENT_HUB_API_KEY = process.env.YARDFLOW_CONTENT_HUB_API_KEY;
 
@@ -65,16 +65,14 @@ export const contentHub = {
   async fetchMessaging(persona: string): Promise<any | null> {
     try {
       const res = await fetch(`${CONTENT_HUB_URL}/api/messaging/${persona}`, {
-        headers: CONTENT_HUB_API_KEY 
-          ? { 'x-api-key': CONTENT_HUB_API_KEY } 
-          : {},
+        headers: CONTENT_HUB_API_KEY ? { 'x-api-key': CONTENT_HUB_API_KEY } : {},
         next: { revalidate: 3600 }, // Cache for 1 hour
       });
 
       if (!res.ok) {
-        logger.warn('Content Hub messaging fetch failed', { 
-          persona, 
-          status: res.status 
+        logger.warn('Content Hub messaging fetch failed', {
+          persona,
+          status: res.status,
         });
         return null;
       }
@@ -92,9 +90,7 @@ export const contentHub = {
   async fetchCaseStudy(id: string): Promise<any | null> {
     try {
       const res = await fetch(`${CONTENT_HUB_URL}/api/case-studies/${id}`, {
-        headers: CONTENT_HUB_API_KEY 
-          ? { 'x-api-key': CONTENT_HUB_API_KEY } 
-          : {},
+        headers: CONTENT_HUB_API_KEY ? { 'x-api-key': CONTENT_HUB_API_KEY } : {},
         next: { revalidate: 3600 },
       });
 
@@ -116,9 +112,7 @@ export const contentHub = {
   async fetchRoiData(calculatorType: string): Promise<any | null> {
     try {
       const res = await fetch(`${CONTENT_HUB_URL}/api/roi/${calculatorType}`, {
-        headers: CONTENT_HUB_API_KEY 
-          ? { 'x-api-key': CONTENT_HUB_API_KEY } 
-          : {},
+        headers: CONTENT_HUB_API_KEY ? { 'x-api-key': CONTENT_HUB_API_KEY } : {},
         next: { revalidate: 3600 },
       });
 

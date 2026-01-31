@@ -15,9 +15,10 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
 
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (req.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : req.headers.get('x-user-id') || authResult.userId;
 
     const where: any = {
       createdBy: userId,
@@ -49,10 +50,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ sequences });
   } catch (error: any) {
     logger.error('Error fetching sequences', { error });
-    return NextResponse.json(
-      { error: 'Failed to fetch sequences' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch sequences' }, { status: 500 });
   }
 }
 
@@ -63,41 +61,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (req.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : req.headers.get('x-user-id') || authResult.userId;
 
     const body = await req.json();
     const { name, description, steps } = body;
 
     // Validate input
     if (!name || !name.trim()) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
     if (!steps || !Array.isArray(steps) || steps.length === 0) {
-      return NextResponse.json(
-        { error: 'At least one step is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'At least one step is required' }, { status: 400 });
     }
 
     // Validate each step
     const errors: string[] = [];
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
-      
+
       if (!step.subject || !step.subject.trim()) {
         errors.push(`Step ${i + 1}: Subject is required`);
       }
-      
+
       if (!step.emailBody || !step.emailBody.trim()) {
         errors.push(`Step ${i + 1}: Email body is required`);
       }
-      
+
       if (step.delayHours === undefined || step.delayHours < 0) {
         errors.push(`Step ${i + 1}: Delay must be >= 0`);
       }
@@ -109,17 +102,14 @@ export async function POST(req: NextRequest) {
       });
 
       if (!complianceResult.compliant) {
-        complianceResult.errors.forEach(e => {
+        complianceResult.errors.forEach((e) => {
           errors.push(`Step ${i + 1}: ${e.message}`);
         });
       }
     }
 
     if (errors.length > 0) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
 
     // Normalize steps
@@ -150,9 +140,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sequence }, { status: 201 });
   } catch (error: any) {
     logger.error('Error creating sequence', { error });
-    return NextResponse.json(
-      { error: 'Failed to create sequence' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create sequence' }, { status: 500 });
   }
 }

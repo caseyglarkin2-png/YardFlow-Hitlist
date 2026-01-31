@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (req.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : req.headers.get('x-user-id') || authResult.userId;
 
     const user = await prisma.users.findUnique({
       where: { id: userId },
@@ -60,9 +61,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (req.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : req.headers.get('x-user-id') || authResult.userId;
 
     const user = await prisma.users.findUnique({
       where: { id: userId },
@@ -74,15 +76,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      name,
-      description,
-      targetPersonas,
-      minIcpScore,
-      startDate,
-      endDate,
-      goals,
-    } = body;
+    const { name, description, targetPersonas, minIcpScore, startDate, endDate, goals } = body;
 
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });

@@ -21,15 +21,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Get user - for S2S auth, use the userId from header or lookup by email
-  const userId = authResult.type === 'session' 
-    ? authResult.userId 
-    : (req.headers.get('x-user-id') || authResult.userId);
-  
+  const userId =
+    authResult.type === 'session'
+      ? authResult.userId
+      : req.headers.get('x-user-id') || authResult.userId;
+
   // Try to find user by ID or email
   let user = await prisma.users.findUnique({
     where: { id: userId },
   });
-  
+
   // If not found by ID and we have an email, try that
   if (!user && authResult.email) {
     user = await prisma.users.findUnique({

@@ -78,8 +78,8 @@ export async function GET(request: NextRequest) {
           score >= 70
             ? 'HIGH - Prioritize for immediate outreach'
             : score >= 40
-            ? 'MEDIUM - Include in standard campaigns'
-            : 'LOW - Consider lower priority or nurture campaigns',
+              ? 'MEDIUM - Include in standard campaigns'
+              : 'LOW - Consider lower priority or nurture campaigns',
       });
     } else {
       // Aggregate predictions
@@ -145,9 +145,6 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error('Error generating predictions:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate predictions' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to generate predictions' }, { status: 500 });
   }
 }

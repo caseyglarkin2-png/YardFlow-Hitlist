@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
     const data = personSchema.parse(body);
 
     // Verify account exists and belongs to user's active event
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (request.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : request.headers.get('x-user-id') || authResult.userId;
 
     const user = await prisma.users.findUnique({
       where: { id: userId },
@@ -42,10 +43,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json(
-        { error: 'No active event selected' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No active event selected' }, { status: 400 });
     }
 
     const account = await prisma.target_accounts.findFirst({
@@ -94,10 +92,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.error('Error creating person:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -108,9 +103,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : (request.headers.get('x-user-id') || authResult.userId);
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : request.headers.get('x-user-id') || authResult.userId;
 
     const user = await prisma.users.findUnique({
       where: { id: userId },
@@ -124,7 +120,9 @@ export async function GET(request: NextRequest) {
     // Get query params for filtering
     const { searchParams } = new URL(request.url);
     const missingEmail = searchParams.get('missingEmail') === 'true';
-    const minIcpScore = searchParams.get('minIcpScore') ? parseInt(searchParams.get('minIcpScore')!) : 0;
+    const minIcpScore = searchParams.get('minIcpScore')
+      ? parseInt(searchParams.get('minIcpScore')!)
+      : 0;
     const personas = searchParams.getAll('persona'); // Can have multiple
 
     // Build where clause
@@ -141,7 +139,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by persona (OR logic - any of the selected personas)
     if (personas.length > 0) {
-      where.OR = personas.map(persona => ({ [persona]: true }));
+      where.OR = personas.map((persona) => ({ [persona]: true }));
     }
 
     // Filter by ICP score (need to join with account)
@@ -160,9 +158,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ people });
   } catch (error) {
     console.error('Error fetching people:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

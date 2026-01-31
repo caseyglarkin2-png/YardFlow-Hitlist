@@ -38,7 +38,6 @@ async function verify() {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('✅ All Prisma 7 verifications passed!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
   } catch (error) {
     console.error('❌ Prisma verification failed:', error);
     process.exit(1);

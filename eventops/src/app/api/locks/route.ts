@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
   if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  return NextResponse.json({ 
-    success: true, 
+  return NextResponse.json({
+    success: true,
     lock: null,
-    message: 'Edit locks feature not yet implemented' 
+    message: 'Edit locks feature not yet implemented',
   });
 }
 
