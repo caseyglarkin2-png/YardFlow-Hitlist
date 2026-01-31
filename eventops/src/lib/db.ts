@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import { env } from './env';
+import { getDatabaseUrl, env } from './env';
 import { logger } from '@/lib/logger';
 
 // Global singleton to prevent multiple instances during hot-reload
@@ -15,9 +15,9 @@ const globalForPrisma = globalThis as unknown as {
  * Follows lazy initialization pattern per project guidelines
  */
 function createPrismaClient(): PrismaClient {
-  // Create PostgreSQL connection pool
+  // Create PostgreSQL connection pool using helper that checks both env vars
   const pool = globalForPrisma.pool ?? new Pool({
-    connectionString: env.DATABASE_URL,
+    connectionString: getDatabaseUrl(),
     max: 10, // Maximum pool size
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,

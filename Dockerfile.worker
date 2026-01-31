@@ -9,6 +9,7 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 # Copy eventops package files first
 COPY eventops/package*.json ./eventops/
 COPY eventops/prisma ./eventops/prisma/
+COPY eventops/prisma.config.ts ./eventops/
 
 # Install dependencies in eventops directory (where bullmq and tsx are listed)
 WORKDIR /app/eventops
