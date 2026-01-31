@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
 
 /**
  * Agent State Manager
@@ -97,14 +98,21 @@ export class AgentStateManager {
     taskId: string,
     status: AgentTaskStatus,
     output?: object,
-    error?: string
+    error?: string,
+    progress?: number
   ): Promise<AgentTaskResult> {
-    logger.info('Updating agent task status', { taskId, status });
+    logger.info('Updating agent task status', { taskId, status, progress });
 
-    const updateData: Record<string, unknown> = {
+    const updateData: Prisma.agent_tasksUpdateInput = {
       status,
       updatedAt: new Date(),
     };
+
+    if (progress !== undefined) {
+      updateData.progress = progress;
+    } else if (status === 'completed') {
+      updateData.progress = 100;
+    }
 
     if (status === 'in_progress' && !output && !error) {
       updateData.startedAt = new Date();
@@ -385,8 +393,7 @@ export class AgentStateManager {
       contactId: task.contactId || undefined,
       parentTaskId: task.parentTaskId || undefined,
       retryCount: task.retryCount,
-      maxRetries: task.maxRetries,
-      createdAt: task.createdAt,
+      maxRetries: task.maxRetries,      progress: task.progress ?? 0,      createdAt: task.createdAt,
       updatedAt: task.updatedAt,
       startedAt: task.startedAt || undefined,
       completedAt: task.completedAt || undefined,
