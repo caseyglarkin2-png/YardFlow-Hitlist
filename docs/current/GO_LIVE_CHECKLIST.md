@@ -3,6 +3,7 @@
 **Event**: Manifest 2026 (Feb 10-12, 2026)
 **Deadline**: 14 days
 **Production URL**: https://yardflow-hitlist-production-2f41.up.railway.app
+**Pre-Event Hardening**: [PRE_EVENT_CHECKLIST.md]( PRE_EVENT_CHECKLIST.md)
 
 ---
 
