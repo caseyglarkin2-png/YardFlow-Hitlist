@@ -147,6 +147,19 @@ railway variables set GEMINI_API_KEY="xxx"
 
 ## 🆘 INCIDENT RUNBOOK
 
+> **Full rollback procedure**: See [ROLLBACK_PROCEDURE.md](./ROLLBACK_PROCEDURE.md)  
+> **Health alerts config**: See [RAILWAY_HEALTH_ALERTS.md](./RAILWAY_HEALTH_ALERTS.md)
+
+### Quick Response Matrix
+
+| Symptom | Severity | Response Time | First Action |
+|---------|----------|---------------|--------------|
+| 502 Bad Gateway | CRITICAL | Immediate | Rollback |
+| Health check 500 | HIGH | 2 min | Check logs |
+| Slow response (>2s) | MEDIUM | 5 min | Check DB latency |
+| Redis disconnect | HIGH | 2 min | Check Redis service |
+| Login failures | HIGH | 5 min | Check AUTH_SECRET |
+
 ### Build Failure
 
 ```bash
@@ -155,15 +168,22 @@ railway logs --tail 100
 
 # Verify build locally
 cd eventops && npm run build
+
+# If build fails locally, fix code before pushing
 ```
 
-### 502 Errors
+### 502 Bad Gateway (CRITICAL)
 
 ```bash
-# Check health endpoint
-curl https://yardflow-hitlist-production-2f41.up.railway.app/api/health
+# 1. Check health endpoint
+curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/health | jq .
 
-# Restart service in Railway dashboard
+# 2. If health fails, rollback immediately
+railway deployment list | head -5
+railway rollback <LAST_GOOD_DEPLOYMENT_ID>
+
+# 3. Verify recovery
+curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/health | jq .
 ```
 
 ### Database Connection Issues
@@ -174,6 +194,9 @@ cd eventops && npx prisma db push --dry-run
 
 # Check connection string in Railway
 railway variables | grep DATABASE_URL
+
+# Check for connection pool exhaustion
+railway logs | grep -i "connection\|pool\|timeout"
 ```
 
 ### Redis/BullMQ Issues
@@ -184,7 +207,43 @@ railway logs | grep -i redis
 
 # Verify REDIS_URL set
 railway variables | grep REDIS_URL
+
+# If Worker service affected, restart it
+# Railway Dashboard → YardFlow-Worker → Restart
 ```
+
+### Authentication Failures
+
+```bash
+# Check AUTH_SECRET is set
+railway variables | grep AUTH_SECRET
+
+# Check NextAuth configuration
+railway logs | grep -i "auth\|session\|jwt"
+
+# Verify Google OAuth (if configured)
+railway variables | grep GOOGLE_CLIENT
+```
+
+### Slow Response Times
+
+```bash
+# Check database query latency
+curl -w "\n%{time_total}s\n" https://yardflow-hitlist-production-2f41.up.railway.app/api/health
+
+# If > 2 seconds, check:
+# 1. Database CPU/memory in Railway dashboard
+# 2. Query optimization needed
+# 3. Consider scaling up Railway service
+```
+
+### Emergency Contacts
+
+| Role | Name | Email |
+|------|------|-------|
+| Primary Dev | Casey | casey@freightroll.com |
+| Backup Dev | Jake | jake@freightroll.com |
+| Railway Support | - | support@railway.app |
 
 ---
 
