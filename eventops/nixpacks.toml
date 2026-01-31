@@ -3,7 +3,8 @@
 # This file only configures the environment and caching
 
 [phases.setup]
-nixPkgs = ["nodejs_20"]
+# Prisma 7 requires Node.js 20.19+, 22.12+, or 24.0+
+nixPkgs = ["nodejs_22"]
 
 # Disable npm cache to force fresh install after Prisma 7 upgrade
 # Re-enable after successful deploy
