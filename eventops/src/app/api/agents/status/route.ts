@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
-import { agentStateManager, AgentType } from '@/lib/agents/state-manager';
+import { agentStateManager, AgentType, AgentTaskStatus } from '@/lib/agents/state-manager';
 import { logger } from '@/lib/logger';
 
 export async function GET(request: Request) {
@@ -66,5 +66,47 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json({ error: 'Failed to retrieve agent status' }, { status: 500 });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await authServiceOrSession(req);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { taskId, status, output, error, progress } = body;
+
+    if (!taskId || !status) {
+      return NextResponse.json(
+        { error: 'taskId and status are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate status
+    const validStatuses: AgentTaskStatus[] = ['pending', 'in_progress', 'completed', 'failed'];
+    if (!validStatuses.includes(status as AgentTaskStatus)) {
+        return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
+
+    await agentStateManager.updateTaskStatus(
+        taskId,
+        status as AgentTaskStatus,
+        output || undefined,
+        error || undefined,
+        progress || undefined
+    );
+
+    return NextResponse.json({ success: true });
+
+  } catch (err) {
+    logger.error('Agent status update error', { error: err });
+    return NextResponse.json(
+        { error: 'Internal Server Error', details: err instanceof Error ? err.message : String(err) },
+        { status: 500 }
+    );
   }
 }
