@@ -5,9 +5,10 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and Prisma configuration
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Install ALL dependencies (including devDependencies needed for build)
 RUN npm ci

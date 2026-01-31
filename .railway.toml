@@ -1,10 +1,11 @@
-# Railway Infrastructure as Code
+# Railway Infrastructure as Code - Worker Service
 # This file OVERRIDES all Railway UI settings
 # See: https://docs.railway.app/develop/config-as-code
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.worker"
+dockerfileContext = "eventops"
 
 [deploy]
 # CRITICAL: Empty startCommand to use Dockerfile CMD
