@@ -12,9 +12,14 @@ export const dynamic = 'force-dynamic';
  * Should be called every 5-15 minutes by Railway cron or external service.
  */
 export async function GET(request: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret - REQUIRED in production
   const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET || 'dev-secret-change-in-production';
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret) {
+    logger.error('CRON_SECRET environment variable not set');
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+  }
 
   if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
