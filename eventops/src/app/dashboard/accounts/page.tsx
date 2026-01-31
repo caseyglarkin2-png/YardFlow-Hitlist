@@ -15,7 +15,6 @@ export default async function AccountsPage({
     redirect('/login');
   }
 
-  
   const user = await prisma.users.findUnique({
     where: { id: session.user.id },
     select: { activeEventId: true },
@@ -43,11 +42,11 @@ export default async function AccountsPage({
 
   // Build where clause with filters
   const where: any = { eventId: user.activeEventId };
-  
+
   if (searchParams.search) {
     where.name = { contains: searchParams.search, mode: 'insensitive' };
   }
-  
+
   if (searchParams.icpMin) {
     where.icpScore = { gte: Number(searchParams.icpMin) };
   }
@@ -95,16 +94,16 @@ export default async function AccountsPage({
         {accounts.map((account: target_accounts & { _count: { people: number } }) => (
           <div
             key={account.id}
-            className="relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+            className="relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
           >
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-medium text-gray-900 truncate">{account.name}</h3>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-lg font-medium text-gray-900">{account.name}</h3>
               {account.website && (
                 <a
                   href={account.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1 text-sm text-blue-600 hover:text-blue-500 block truncate"
+                  className="mt-1 block truncate text-sm text-blue-600 hover:text-blue-500"
                 >
                   {account.website.replace(/^https?:\/\//, '')}
                 </a>
@@ -126,11 +125,15 @@ export default async function AccountsPage({
                 {account.icpScore !== null && (
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-600">ICP Score:</span>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      account.icpScore >= 80 ? 'bg-green-100 text-green-800' :
-                      account.icpScore >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        account.icpScore >= 80
+                          ? 'bg-green-100 text-green-800'
+                          : account.icpScore >= 60
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {account.icpScore}
                     </span>
                   </div>

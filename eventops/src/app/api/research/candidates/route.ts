@@ -53,12 +53,15 @@ export async function GET(req: NextRequest) {
 
     // Filter and map accounts
     const candidates = accounts
-      .map(account => {
+      .map((account) => {
         const daysSinceUpdate = account.company_dossiers
-          ? Math.floor((Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
+          ? Math.floor(
+              (Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
+            )
           : null;
 
-        const needsResearch = !account.company_dossiers || (daysSinceUpdate !== null && daysSinceUpdate >= daysOld);
+        const needsResearch =
+          !account.company_dossiers || (daysSinceUpdate !== null && daysSinceUpdate >= daysOld);
 
         return {
           id: account.id,
@@ -71,11 +74,11 @@ export async function GET(req: NextRequest) {
           needsResearch,
         };
       })
-      .filter(account => !missingOnly || account.needsResearch);
+      .filter((account) => !missingOnly || account.needsResearch);
 
     return NextResponse.json({
       totalAccounts: candidates.length,
-      needingResearch: candidates.filter(a => a.needsResearch).length,
+      needingResearch: candidates.filter((a) => a.needsResearch).length,
       accounts: candidates,
       filters: {
         daysOld,
@@ -85,9 +88,6 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error getting research candidates:', error);
-    return NextResponse.json(
-      { error: 'Failed to get candidates' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to get candidates' }, { status: 500 });
   }
 }

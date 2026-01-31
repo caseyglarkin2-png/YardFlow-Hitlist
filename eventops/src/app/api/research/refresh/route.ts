@@ -36,7 +36,9 @@ export async function POST(req: NextRequest) {
 
       // Check if refresh needed (7+ days old)
       const daysSinceUpdate = account.company_dossiers?.researchedAt
-        ? Math.floor((Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24))
+        ? Math.floor(
+            (Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
+          )
         : 999;
 
       if (!forceRefresh && daysSinceUpdate < 7) {
@@ -48,7 +50,9 @@ export async function POST(req: NextRequest) {
       const newDossier = await generateCompanyResearch(account.name, account.website || undefined);
 
       // Compare with old dossier (simple JSON comparison)
-      const oldDossierStr = account.company_dossiers ? JSON.stringify(account.company_dossiers) : '';
+      const oldDossierStr = account.company_dossiers
+        ? JSON.stringify(account.company_dossiers)
+        : '';
       const newDossierStr = JSON.stringify(newDossier);
       const hasChanged = oldDossierStr !== newDossierStr;
 

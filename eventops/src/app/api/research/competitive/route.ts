@@ -80,14 +80,15 @@ Format as JSON:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
+        Authorization: `Bearer ${openaiKey}`,
       },
       body: JSON.stringify({
         model: 'gpt-4',
         messages: [
           {
             role: 'system',
-            content: 'You are a competitive intelligence analyst specializing in logistics, supply chain, and yard management industries.',
+            content:
+              'You are a competitive intelligence analyst specializing in logistics, supply chain, and yard management industries.',
           },
           {
             role: 'user',

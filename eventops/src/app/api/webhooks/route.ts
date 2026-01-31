@@ -9,10 +9,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  return NextResponse.json({
-    success: false,
-    error: 'Webhooks feature not yet implemented'
-  }, { status: 501 });
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Webhooks feature not yet implemented',
+    },
+    { status: 501 }
+  );
 }
 
 // GET /api/webhooks - List webhooks

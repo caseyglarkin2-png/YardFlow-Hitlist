@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { personId } = await request.json();
 
     if (!personId) {
-      return NextResponse.json(
-        { error: 'personId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'personId is required' }, { status: 400 });
     }
 
     const extractor = new LinkedInExtractor();

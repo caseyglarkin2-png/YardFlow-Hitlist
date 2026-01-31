@@ -31,15 +31,15 @@ export const railwayClient = {
 
     const session = await auth();
     const headers = new Headers(options.headers);
-    
+
     // Add S2S Auth Headers
     headers.set("x-service-key", SERVICE_KEY);
     if (session?.user?.id) {
-       headers.set("x-user-id", session.user.id);
-       headers.set("x-user-email", session.user.email || "");
+      headers.set("x-user-id", session.user.id);
+      headers.set("x-user-email", session.user.email || "");
     } else {
-       // Fallback for system calls or unauthenticated calls
-       headers.set("x-user-id", "service:gtm-frontend");
+      // Fallback for system calls or unauthenticated calls
+      headers.set("x-user-id", "service:gtm-frontend");
     }
 
     // Handle Query Params
@@ -62,7 +62,7 @@ export const railwayClient = {
     // Handle empty responses
     const text = await res.text();
     return text ? JSON.parse(text) : null;
-  }
+  },
 };
 ```
 
@@ -76,7 +76,7 @@ import { railwayClient } from "@/lib/railway-client";
 
 export default async function Dashboard() {
   const stats = await railwayClient.fetch('/api/dashboards/stats');
-  
+
   return (
     <div>
        <h1>Dashboard</h1>

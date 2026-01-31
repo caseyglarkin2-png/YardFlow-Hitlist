@@ -74,14 +74,15 @@ Format as JSON with arrays of locations:
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiKey}`,
+        Authorization: `Bearer ${openaiKey}`,
       },
       body: JSON.stringify({
         model: 'gpt-4',
         messages: [
           {
             role: 'system',
-            content: 'You are a business intelligence researcher specializing in facility location analysis.',
+            content:
+              'You are a business intelligence researcher specializing in facility location analysis.',
           },
           {
             role: 'user',

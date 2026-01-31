@@ -35,3 +35,85 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* War Room Mode Styles - Fullscreen optimized for trade show displays */
+.war-room-mode {
+  --war-room-scale: 1.25;
+}
+
+/* Hide navigation in War Room mode */
+.war-room-mode .dashboard-nav,
+.war-room-mode nav:not(.war-room-nav),
+.war-room-mode header:not(.war-room-header) {
+  display: none !important;
+}
+
+/* Maximize content area */
+.war-room-mode main {
+  max-width: 100% !important;
+  padding: 1.5rem !important;
+}
+
+/* Larger fonts for readability at distance */
+.war-room-mode .text-sm {
+  font-size: 1rem !important;
+  line-height: 1.5 !important;
+}
+
+.war-room-mode .text-xs {
+  font-size: 0.875rem !important;
+  line-height: 1.4 !important;
+}
+
+.war-room-mode .text-3xl {
+  font-size: 3.5rem !important;
+  line-height: 1.2 !important;
+}
+
+.war-room-mode .text-xl {
+  font-size: 1.75rem !important;
+  line-height: 1.3 !important;
+}
+
+.war-room-mode .text-lg {
+  font-size: 1.25rem !important;
+  line-height: 1.4 !important;
+}
+
+/* Larger padding for better visual separation */
+.war-room-mode .p-6 {
+  padding: 2rem !important;
+}
+
+.war-room-mode .p-4 {
+  padding: 1.5rem !important;
+}
+
+.war-room-mode .p-3 {
+  padding: 1.25rem !important;
+}
+
+/* Larger buttons for easier touch */
+.war-room-mode button {
+  min-height: 44px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* High contrast stats cards */
+.war-room-mode .rounded-lg.bg-blue-50,
+.war-room-mode .rounded-lg.bg-green-50,
+.war-room-mode .rounded-lg.bg-orange-50,
+.war-room-mode .rounded-lg.bg-purple-50 {
+  border-width: 2px !important;
+}
+
+/* Meeting cards - more prominent */
+.war-room-mode .border-l-4 {
+  border-left-width: 6px !important;
+}
+
+/* Dark overlay to reduce glare on trade show floor */
+.war-room-mode {
+  background-color: hsl(var(--background));
+}

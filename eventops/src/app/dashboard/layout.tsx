@@ -2,11 +2,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { DashboardNav } from '@/components/dashboard-nav';
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -16,7 +12,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl xl:max-w-[1600px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:max-w-[1600px]">
           <div className="flex h-16 justify-between">
             <div className="flex">
               <div className="flex flex-shrink-0 items-center">
@@ -24,7 +20,7 @@ export default async function DashboardLayout({
               </div>
               <DashboardNav />
             </div>
-            <div className="hidden md:flex items-center">
+            <div className="hidden items-center md:flex">
               <div className="flex-shrink-0">
                 <span className="text-sm text-gray-700">{session.user.email}</span>
                 {session.user.role === 'ADMIN' && (
@@ -45,7 +41,9 @@ export default async function DashboardLayout({
           </div>
         </div>
       </nav>
-      <main className="mx-auto max-w-7xl xl:max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 xl:max-w-[1600px]">
+        {children}
+      </main>
     </div>
   );
 }

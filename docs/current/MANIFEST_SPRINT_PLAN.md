@@ -12,12 +12,14 @@
 ## Executive Summary
 
 ### Current State
+
 - **Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
 - **Build Status**: ✅ CI Passing (commit 277aca9)
 - **Railway Deploy**: ⏳ Pending verification
 - **User Complaint**: "So built for mobile that you can't see any of the names when you enter the war room"
 
 ### Critical Path to Manifest 2026
+
 ```
 Jan 31 → U0 (Audit)
 Feb 1-2 → U1 (Desktop UI) + U2 (Deploy Verification) [PARALLEL]
@@ -29,6 +31,7 @@ Feb 10-12 → MANIFEST 2026 🎯
 ```
 
 ### Architecture Reference
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                           USER (Desktop/Tablet)                      │
@@ -69,6 +72,7 @@ Feb 10-12 → MANIFEST 2026 🎯
 
 **File**: `docs/audit/desktop-screenshots-2026-01-31/`  
 **Action**: Take full-page screenshots of 6 key pages:
+
 1. `/dashboard` (main dashboard)
 2. `/dashboard/event-day` (war room)
 3. `/dashboard/accounts` (account list)
@@ -77,6 +81,7 @@ Feb 10-12 → MANIFEST 2026 🎯
 6. `/dashboard/manifest` (Manifest hitlist)
 
 **Script**:
+
 ```bash
 #!/bin/bash
 # scripts/capture-desktop-screenshots.sh
@@ -99,6 +104,7 @@ done
 
 **File**: `docs/audit/UI_ISSUES.md`  
 **Action**: For each screenshot, annotate:
+
 - Text truncation (can't read names)
 - Navigation overflow
 - Layout breaking points
@@ -120,35 +126,44 @@ done
 ### Task U0.3: Create GitHub Issues for Each Problem
 
 **Action**: Create GitHub issues with:
+
 - Screenshot attached
 - CSS selector of problematic element
 - Proposed fix
 - Acceptance criteria
 
 **Issue Template**:
-```markdown
+
+````markdown
 ## Problem
+
 [Screenshot showing issue]
 
 ## Location
+
 - File: `src/app/dashboard/event-day/page.tsx`
 - Line: 175
 - CSS: `.meeting-card .flex-1`
 
 ## Root Cause
+
 Missing `min-w-0` causes flex child to overflow instead of truncate.
 
 ## Proposed Fix
+
 ```tsx
 <div className="flex-1 min-w-0">
   <p className="font-semibold truncate">{meeting.people.name}</p>
 ```
+````
 
 ## Acceptance Criteria
+
 - [ ] Name visible up to 30 characters before truncation
 - [ ] Ellipsis shown for longer names
 - [ ] No horizontal overflow on parent container
-```
+
+````
 
 **Validation**: At least 5 GitHub issues created.
 
@@ -156,14 +171,14 @@ Missing `min-w-0` causes flex child to overflow instead of truncate.
 
 ## Sprint U1: Desktop UI/UX Emergency Fix (2 days)
 
-**Goal**: War room and key pages fully usable on 1920x1080 screens.  
-**Demo**: Side-by-side before/after screenshots showing readable names.  
+**Goal**: War room and key pages fully usable on 1920x1080 screens.
+**Demo**: Side-by-side before/after screenshots showing readable names.
 **Validation**: All U0.3 issues closed with fixes merged.
 
 ### Task U1.1: Add Hamburger Menu for Mobile
 
-**Priority**: P1  
-**File**: `src/components/dashboard-nav.tsx`, `src/components/layout/mobile-nav.tsx`  
+**Priority**: P1
+**File**: `src/components/dashboard-nav.tsx`, `src/components/layout/mobile-nav.tsx`
 **Problem**: Navigation is `hidden sm:flex` - users on phones see nothing.
 
 **Implementation**:
@@ -178,7 +193,7 @@ export function DashboardNav() {
       <div className="sm:hidden">
         <MobileNav />
       </div>
-      
+
       {/* Desktop nav - visible at sm and above */}
       <div className="hidden sm:ml-6 sm:flex sm:space-x-4 overflow-x-auto">
         {/* Core items only */}
@@ -186,9 +201,10 @@ export function DashboardNav() {
     </>
   );
 }
-```
+````
 
 **Validation**:
+
 ```bash
 # Resize browser to 375px width
 # Hamburger icon visible
@@ -204,40 +220,42 @@ export function DashboardNav() {
 **Problem**: 19 nav items overflow on screens < 1600px.
 
 **Implementation**:
+
 ```tsx
 const coreNavItems = [
-  { name: 'Dashboard', href: '/dashboard' },
-  { name: 'Event Day', href: '/dashboard/event-day' }, // War Room!
-  { name: 'Accounts', href: '/dashboard/accounts' },
-  { name: 'People', href: '/dashboard/people' },
-  { name: 'Calendar', href: '/dashboard/calendar' },
-  { name: 'Outreach', href: '/dashboard/outreach' },
+  { name: "Dashboard", href: "/dashboard" },
+  { name: "Event Day", href: "/dashboard/event-day" }, // War Room!
+  { name: "Accounts", href: "/dashboard/accounts" },
+  { name: "People", href: "/dashboard/people" },
+  { name: "Calendar", href: "/dashboard/calendar" },
+  { name: "Outreach", href: "/dashboard/outreach" },
 ];
 
 const moreNavItems = [
-  { name: 'Campaigns', href: '/dashboard/campaigns' },
-  { name: 'Research', href: '/dashboard/research/bulk' },
-  { name: 'Agents', href: '/dashboard/agents' },
-  { name: 'Analytics', href: '/dashboard/analytics' },
-  { name: 'Settings', href: '/dashboard/settings/integrations' },
-  { name: 'Team', href: '/dashboard/team' },
-  { name: 'Help', href: '/dashboard/help' },
+  { name: "Campaigns", href: "/dashboard/campaigns" },
+  { name: "Research", href: "/dashboard/research/bulk" },
+  { name: "Agents", href: "/dashboard/agents" },
+  { name: "Analytics", href: "/dashboard/analytics" },
+  { name: "Settings", href: "/dashboard/settings/integrations" },
+  { name: "Team", href: "/dashboard/team" },
+  { name: "Help", href: "/dashboard/help" },
 ];
 
 // Render core items inline, moreNavItems in dropdown
 <DropdownMenu>
   <DropdownMenuTrigger>More ▼</DropdownMenuTrigger>
   <DropdownMenuContent>
-    {moreNavItems.map(item => (
+    {moreNavItems.map((item) => (
       <DropdownMenuItem key={item.href}>
         <Link href={item.href}>{item.name}</Link>
       </DropdownMenuItem>
     ))}
   </DropdownMenuContent>
-</DropdownMenu>
+</DropdownMenu>;
 ```
 
 **Validation**:
+
 ```bash
 # At 1920px: 6 core items visible + "More" dropdown
 # At 1366px: Same layout, no overflow
@@ -254,12 +272,14 @@ const moreNavItems = [
 **Problem**: `flex-1` without `min-w-0` causes text to overflow instead of truncate.
 
 **Current Code** (Line 175):
+
 ```tsx
 <div className="flex-1">
   <p className="font-semibold">{meeting.people.name}</p>
 ```
 
 **Fixed Code**:
+
 ```tsx
 <div className="flex-1 min-w-0">
   <p className="font-semibold truncate">{meeting.people.name}</p>
@@ -269,6 +289,7 @@ const moreNavItems = [
 ```
 
 **Validation**:
+
 ```bash
 # Create meeting with person named "Alexandra Montgomery-Fitzgerald III"
 # Name shows with ellipsis, not overflowing card
@@ -280,35 +301,38 @@ const moreNavItems = [
 ### Task U1.4: Add min-width to Table Columns
 
 **Priority**: P1  
-**Files**: 
+**Files**:
+
 - `src/app/dashboard/accounts/page.tsx`
 - `src/app/dashboard/people/page.tsx`
 
 **Problem**: `whitespace-nowrap` causes columns to collapse to content width.
 
 **Implementation Pattern**:
+
 ```tsx
 <table className="min-w-full">
   <thead>
     <tr>
-      <th className="min-w-[200px]">Name</th>  {/* Enforce minimum */}
+      <th className="min-w-[200px]">Name</th> {/* Enforce minimum */}
       <th className="min-w-[150px]">Company</th>
       <th className="min-w-[120px]">Title</th>
       <th className="min-w-[100px]">ICP Score</th>
     </tr>
   </thead>
-  <tbody>
-    {/* Add wrapper for horizontal scroll */}
-  </tbody>
-</table>
+  <tbody>{/* Add wrapper for horizontal scroll */}</tbody>
+</table>;
 
-{/* Wrap table in scrollable container */}
+{
+  /* Wrap table in scrollable container */
+}
 <div className="overflow-x-auto">
   <table>...</table>
-</div>
+</div>;
 ```
 
 **Validation**:
+
 ```bash
 # At 1920px: All columns visible without scrolling
 # At 1366px: Horizontal scroll appears if needed
@@ -324,12 +348,13 @@ const moreNavItems = [
 **Problem**: Event-day dashboard designed for general use, not trade show floor.
 
 **New Component**: `src/components/war-room-mode.tsx`
-```tsx
-'use client';
 
-import { useState, useEffect } from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+```tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { Maximize2, Minimize2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function WarRoomToggle() {
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -345,28 +370,39 @@ export function WarRoomToggle() {
   };
 
   return (
-    <Button 
+    <Button
       onClick={toggleFullScreen}
       variant="outline"
       className="fixed top-4 right-4 z-50"
     >
       {isFullScreen ? <Minimize2 /> : <Maximize2 />}
-      {isFullScreen ? ' Exit War Room' : ' War Room Mode'}
+      {isFullScreen ? " Exit War Room" : " War Room Mode"}
     </Button>
   );
 }
 ```
 
 **CSS for War Room Mode**:
+
 ```css
 /* When fullscreen, hide nav and maximize content */
-:fullscreen .dashboard-nav { display: none; }
-:fullscreen main { max-width: 100%; padding: 1rem; }
-:fullscreen .text-sm { font-size: 1rem; }  /* Larger text */
-:fullscreen .text-xs { font-size: 0.875rem; }
+:fullscreen .dashboard-nav {
+  display: none;
+}
+:fullscreen main {
+  max-width: 100%;
+  padding: 1rem;
+}
+:fullscreen .text-sm {
+  font-size: 1rem;
+} /* Larger text */
+:fullscreen .text-xs {
+  font-size: 0.875rem;
+}
 ```
 
 **Validation**:
+
 ```bash
 # Click "War Room Mode" button
 # Screen goes fullscreen
@@ -384,16 +420,19 @@ export function WarRoomToggle() {
 **Problem**: `max-w-7xl` (1280px) wastes space on 1920px+ screens.
 
 **Current**:
+
 ```tsx
 <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 ```
 
 **Fixed**:
+
 ```tsx
 <main className="mx-auto max-w-7xl xl:max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-8">
 ```
 
 **Validation**:
+
 ```bash
 # At 1920px: Content uses ~1536px width
 # At 2560px: Content uses full 1536px
@@ -409,6 +448,7 @@ export function WarRoomToggle() {
 **Action**: Capture after screenshots and compare to baseline.
 
 **Script**:
+
 ```bash
 #!/bin/bash
 # Compare before/after screenshots using ImageMagick
@@ -437,12 +477,14 @@ done
 **Action**: Check Railway dashboard for latest build.
 
 **Validation Checklist**:
+
 - [ ] YardFlow-Hitlist: Build succeeded
 - [ ] YardFlow-Worker: Build succeeded
 - [ ] Both show "Online" status
 - [ ] No error badges visible
 
 **If Build Fails**:
+
 1. Check Build Logs for error
 2. Fix locally and push
 3. Re-verify
@@ -453,11 +495,13 @@ done
 
 **Priority**: P0  
 **Command**:
+
 ```bash
 curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/health | jq .
 ```
 
 **Expected Response**:
+
 ```json
 {
   "status": "healthy",
@@ -468,6 +512,7 @@ curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/health | jq 
 ```
 
 **If 500 Error**:
+
 1. Check Deploy Logs for startup error
 2. Verify DATABASE_URL and REDIS_URL env vars
 3. Check if Prisma migration needed
@@ -480,6 +525,7 @@ curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/health | jq 
 **Action**: Trigger a test job and verify it processes.
 
 **Test Script**:
+
 ```bash
 # Trigger research job via API
 curl -X POST https://yardflow-hitlist-production-2f41.up.railway.app/api/research/enqueue \
@@ -503,10 +549,12 @@ curl https://yardflow-hitlist-production-2f41.up.railway.app/api/queues/status \
 **Action**: Update with current verified status.
 
 **Add Section**:
-```markdown
+
+````markdown
 ## Verified: January 31, 2026
 
 ### Health Check Output
+
 ```json
 {
   "status": "healthy",
@@ -514,25 +562,28 @@ curl https://yardflow-hitlist-production-2f41.up.railway.app/api/queues/status \
   "redis": { "status": "ok", "latencyMs": 2 }
 }
 ```
+````
 
 ### Service Status
+
 - [x] YardFlow-Hitlist: Online
 - [x] YardFlow-Worker: Online
 - [x] PostgreSQL: Connected
 - [x] Redis: Connected
-```
+
+````
 
 ---
 
 ## Sprint U3: Core Flow E2E Testing (1.5 days)
 
-**Goal**: Validate critical user journeys work end-to-end.  
-**Demo**: QA checklist with all items checked.  
+**Goal**: Validate critical user journeys work end-to-end.
+**Demo**: QA checklist with all items checked.
 **Validation**: Smoke test script passes, manual flows verified.
 
 ### Task U3.1: Test Login Flow
 
-**Priority**: P0  
+**Priority**: P0
 **Action**: Manual test of NextAuth login.
 
 **Steps**:
@@ -551,7 +602,7 @@ curl https://yardflow-hitlist-production-2f41.up.railway.app/api/queues/status \
 
 ### Task U3.2: Test Account CRUD Operations
 
-**Priority**: P0  
+**Priority**: P0
 **Action**: Create, Read, Update, Delete account.
 
 **Test Script**:
@@ -567,7 +618,7 @@ curl -X PATCH /api/accounts/{id} -d '{"icpScore": 85}' | jq .
 
 # Delete
 curl -X DELETE /api/accounts/{id}
-```
+````
 
 **Validation**: All operations return 200/201.
 
@@ -579,6 +630,7 @@ curl -X DELETE /api/accounts/{id}
 **Action**: Create meeting and verify it shows in war room.
 
 **Steps**:
+
 1. Go to `/dashboard/calendar`
 2. Create new meeting for today
 3. Go to `/dashboard/event-day`
@@ -594,6 +646,7 @@ curl -X DELETE /api/accounts/{id}
 **Action**: Create outreach and verify status tracking.
 
 **Steps**:
+
 1. Go to `/dashboard/outreach`
 2. Create new email outreach
 3. Verify status is "DRAFT"
@@ -611,21 +664,22 @@ curl -X DELETE /api/accounts/{id}
 **Action**: Add auth flow testing.
 
 **Implementation**:
+
 ```typescript
 async function testAuthFlow() {
-  console.log('Testing auth flow...');
-  
+  console.log("Testing auth flow...");
+
   // Test login endpoint exists
   const loginPage = await fetch(`${BASE_URL}/login`);
-  assert(loginPage.status === 200, 'Login page loads');
-  
+  assert(loginPage.status === 200, "Login page loads");
+
   // Test protected route redirects
   const dashboardNoAuth = await fetch(`${BASE_URL}/dashboard`, {
-    redirect: 'manual'
+    redirect: "manual",
   });
-  assert(dashboardNoAuth.status === 307, 'Dashboard redirects without auth');
-  
-  console.log('✅ Auth flow tests passed');
+  assert(dashboardNoAuth.status === 307, "Dashboard redirects without auth");
+
+  console.log("✅ Auth flow tests passed");
 }
 ```
 
@@ -640,37 +694,44 @@ async function testAuthFlow() {
 **Action**: Document all manual test steps.
 
 **Content**:
+
 ```markdown
 # QA Checklist - Manifest 2026
 
 ## Login Flow
+
 - [ ] Login with casey@freightroll.com
 - [ ] Session persists on refresh
 - [ ] Sign out works
 
 ## Account Management
+
 - [ ] View account list
 - [ ] Create new account
 - [ ] Edit account details
 - [ ] View account dossier
 
 ## People/Contacts
+
 - [ ] View people list
 - [ ] Add person to account
 - [ ] Edit person details
 
 ## Meetings (War Room)
+
 - [ ] View calendar
 - [ ] Create meeting
 - [ ] Meeting appears in event-day
 - [ ] Check-in to meeting works
 
 ## Outreach
+
 - [ ] Create draft outreach
 - [ ] View outreach list
 - [ ] Track outreach status
 
 ## Event Day (War Room)
+
 - [ ] Stats show correct counts
 - [ ] Upcoming meetings visible
 - [ ] Recent outreach visible
@@ -692,12 +753,14 @@ async function testAuthFlow() {
 **Platform**: Railway Dashboard → YardFlow-Hitlist → Variables
 
 **Variables to Add**:
+
 ```bash
 ALLOWED_ORIGINS=https://gtm-yard-flow.vercel.app,https://flow-state-klbt.vercel.app
 SERVICE_TO_SERVICE_SECRET=<generate with: openssl rand -base64 32>
 ```
 
 **Also Set in Vercel** (GTM-YardFlow project):
+
 ```bash
 RAILWAY_API_URL=https://yardflow-hitlist-production-2f41.up.railway.app
 SERVICE_TO_SERVICE_SECRET=<same value as Railway>
@@ -711,6 +774,7 @@ SERVICE_TO_SERVICE_SECRET=<same value as Railway>
 
 **Priority**: P0  
 **Command**:
+
 ```bash
 curl -i -X OPTIONS \
   -H "Origin: https://gtm-yard-flow.vercel.app" \
@@ -720,6 +784,7 @@ curl -i -X OPTIONS \
 ```
 
 **Expected Headers**:
+
 ```
 Access-Control-Allow-Origin: https://gtm-yard-flow.vercel.app
 Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
@@ -735,6 +800,7 @@ Access-Control-Allow-Credentials: true
 
 **Priority**: P0  
 **Command**:
+
 ```bash
 curl -s \
   -H "x-service-key: $SERVICE_TO_SERVICE_SECRET" \
@@ -755,23 +821,24 @@ curl -s \
 **File**: `app/test/railway/page.tsx`
 
 **Implementation**:
-```tsx
-'use client';
 
-import { useState } from 'react';
+```tsx
+"use client";
+
+import { useState } from "react";
 
 export default function RailwayTestPage() {
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
 
   async function testFetch() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_RAILWAY_URL}/api/accounts`,
       {
         headers: {
-          'x-service-key': process.env.NEXT_PUBLIC_SERVICE_KEY!,
-          'x-user-id': 'test@example.com',
+          "x-service-key": process.env.NEXT_PUBLIC_SERVICE_KEY!,
+          "x-user-id": "test@example.com",
         },
-      }
+      },
     );
     const data = await res.json();
     setResult(JSON.stringify(data, null, 2));
@@ -803,24 +870,25 @@ export default function RailwayTestPage() {
 **Action**: Import via `/dashboard/import` or seed script.
 
 **Seed Script**:
+
 ```typescript
 // prisma/seeds/manifest-2026.ts
-import { prisma } from '../../src/lib/db';
+import { prisma } from "../../src/lib/db";
 
 const manifestAccounts = [
-  { name: 'Target Company 1', industry: 'Logistics', icpScore: 90 },
-  { name: 'Target Company 2', industry: 'Supply Chain', icpScore: 85 },
+  { name: "Target Company 1", industry: "Logistics", icpScore: 90 },
+  { name: "Target Company 2", industry: "Supply Chain", icpScore: 85 },
   // ... from attendee list
 ];
 
 async function seed() {
   const event = await prisma.events.findFirst({
-    where: { name: { contains: 'Manifest' } }
+    where: { name: { contains: "Manifest" } },
   });
-  
+
   for (const account of manifestAccounts) {
     await prisma.target_accounts.create({
-      data: { ...account, eventId: event.id }
+      data: { ...account, eventId: event.id },
     });
   }
 }
@@ -836,6 +904,7 @@ async function seed() {
 **Platform**: Railway Dashboard → Settings → Observability
 
 **Configuration**:
+
 - Health check endpoint: `/api/health`
 - Check interval: 30 seconds
 - Alert on: 3 consecutive failures
@@ -851,27 +920,32 @@ async function seed() {
 **File**: `docs/current/GO_LIVE_CHECKLIST.md` (expand INCIDENT RUNBOOK section)
 
 **Content**:
+
 ```markdown
 ## 🆘 Incident Runbook
 
 ### Symptom: 502 Bad Gateway
+
 1. Check Railway dashboard for deployment status
 2. Check Deploy Logs for startup errors
 3. Verify DATABASE_URL and REDIS_URL env vars
 4. Try rollback to previous deployment
 
 ### Symptom: Health check failing
+
 1. SSH/check Deploy Logs
 2. Check database connectivity: `SELECT 1`
 3. Check Redis connectivity
 4. Restart service via Railway dashboard
 
 ### Symptom: Slow response times
+
 1. Check database query latency
 2. Check Redis queue depth
 3. Scale up Railway service (add replicas)
 
 ### Rollback Procedure
+
 1. Go to Railway → Deployments
 2. Find last green deployment
 3. Click ... → Rollback
@@ -886,6 +960,7 @@ async function seed() {
 **Action**: Practice rollback to verify it works.
 
 **Steps**:
+
 1. Note current deployment hash
 2. Push intentionally broken commit (e.g., syntax error)
 3. Wait for failed deploy
@@ -903,29 +978,34 @@ async function seed() {
 **Target**: 50 concurrent users for 5 minutes
 
 **k6 Script**:
+
 ```javascript
 // scripts/load-test.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
 export const options = {
   vus: 50,
-  duration: '5m',
+  duration: "5m",
 };
 
 export default function () {
-  const res = http.get('https://yardflow-hitlist-production-2f41.up.railway.app/api/health');
-  check(res, { 'status is 200': (r) => r.status === 200 });
+  const res = http.get(
+    "https://yardflow-hitlist-production-2f41.up.railway.app/api/health",
+  );
+  check(res, { "status is 200": (r) => r.status === 200 });
   sleep(1);
 }
 ```
 
 **Run**:
+
 ```bash
 k6 run scripts/load-test.js
 ```
 
 **Validation**:
+
 - 95th percentile response time < 500ms
 - Error rate < 1%
 - No memory leaks (RAM stable)
@@ -938,10 +1018,12 @@ k6 run scripts/load-test.js
 **File**: `docs/current/PRE_EVENT_CHECKLIST.md`
 
 **Content**:
+
 ```markdown
 # Pre-Event Checklist - Manifest 2026
 
 ## 1 Week Before (Feb 3-7)
+
 - [ ] Verify login works for all team members
 - [ ] Import final attendee list
 - [ ] Create event-specific email templates
@@ -950,6 +1032,7 @@ k6 run scripts/load-test.js
 - [ ] Run load test (50 users)
 
 ## Day Before (Feb 9)
+
 - [ ] Check Railway health status
 - [ ] Verify Redis connection stable
 - [ ] Test email sending (if SendGrid configured)
@@ -957,6 +1040,7 @@ k6 run scripts/load-test.js
 - [ ] Bookmark War Room URL
 
 ## Day Of (Feb 10-12)
+
 - [ ] Monitor /api/health hourly
 - [ ] Check event-day dashboard every 2 hours
 - [ ] Export booth traffic data EOD
@@ -971,6 +1055,7 @@ k6 run scripts/load-test.js
 **Action**: Walk through the Day-Of checklist as if it were event day.
 
 **Steps**:
+
 1. Open War Room dashboard
 2. Enter full-screen mode
 3. Simulate checking in to a meeting
@@ -984,13 +1069,13 @@ k6 run scripts/load-test.js
 
 ## Risk Register
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| UI fixes take longer than 2 days | Medium | High | Start with highest-impact: nav overflow + war room mode |
-| Load test reveals bottleneck | Medium | High | Have Railway scaling plan (add replicas) |
-| Platform integration fails | Low | Medium | S2S auth already coded, just needs testing |
-| Redis outage during event | Low | High | Event-day dashboard should cache last fetch |
-| Import fails for attendee list | Medium | Medium | Test import with sample data first |
+| Risk                             | Likelihood | Impact | Mitigation                                              |
+| -------------------------------- | ---------- | ------ | ------------------------------------------------------- |
+| UI fixes take longer than 2 days | Medium     | High   | Start with highest-impact: nav overflow + war room mode |
+| Load test reveals bottleneck     | Medium     | High   | Have Railway scaling plan (add replicas)                |
+| Platform integration fails       | Low        | Medium | S2S auth already coded, just needs testing              |
+| Redis outage during event        | Low        | High   | Event-day dashboard should cache last fetch             |
+| Import fails for attendee list   | Medium     | Medium | Test import with sample data first                      |
 
 ---
 

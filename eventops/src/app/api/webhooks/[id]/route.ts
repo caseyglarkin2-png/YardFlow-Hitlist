@@ -8,10 +8,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  return NextResponse.json({
-    success: false,
-    error: 'Webhooks feature not yet implemented'
-  }, { status: 501 });
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Webhooks feature not yet implemented',
+    },
+    { status: 501 }
+  );
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {

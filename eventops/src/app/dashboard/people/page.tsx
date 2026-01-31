@@ -15,7 +15,6 @@ export default async function PeoplePage({
     redirect('/login');
   }
 
-  
   const user = await prisma.users.findUnique({
     where: { id: session.user.id },
     include: { events: true },
@@ -47,7 +46,7 @@ export default async function PeoplePage({
       eventId: user.activeEventId,
     },
   };
-  
+
   if (searchParams.search) {
     where.OR = [
       { name: { contains: searchParams.search, mode: 'insensitive' } },
@@ -55,7 +54,7 @@ export default async function PeoplePage({
       { email: { contains: searchParams.search, mode: 'insensitive' } },
     ];
   }
-  
+
   if (searchParams.persona) {
     const personaField = `is${searchParams.persona}`;
     where[personaField] = true;
@@ -75,7 +74,8 @@ export default async function PeoplePage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">People</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Managing {people.length} contact{people.length !== 1 ? 's' : ''} for <strong>{user.events?.name || 'No Event'}</strong>
+            Managing {people.length} contact{people.length !== 1 ? 's' : ''} for{' '}
+            <strong>{user.events?.name || 'No Event'}</strong>
           </p>
         </div>
         <Link
@@ -88,27 +88,42 @@ export default async function PeoplePage({
 
       <PeopleFilters />
 
-      <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg overflow-hidden">
+      <div className="overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-300 table-fixed">
+          <table className="min-w-[1000px] w-full table-fixed divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 w-[18%]">
+                <th
+                  scope="col"
+                  className="w-[18%] py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                >
                   Name
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[18%]">
+                <th
+                  scope="col"
+                  className="w-[18%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
                   Company
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[18%]">
+                <th
+                  scope="col"
+                  className="w-[18%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
                   Title
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[18%]">
+                <th
+                  scope="col"
+                  className="w-[18%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
                   Contact
                 </th>
-                <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 w-[22%]">
+                <th
+                  scope="col"
+                  className="w-[22%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                >
                   Personas
                 </th>
-                <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6 w-[6%]">
+                <th scope="col" className="relative w-[6%] py-3.5 pl-3 pr-4 sm:pr-6">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
@@ -116,81 +131,82 @@ export default async function PeoplePage({
             <tbody className="divide-y divide-gray-200 bg-white">
               {people.map((person: people & { target_accounts: target_accounts }) => (
                 <tr key={person.id}>
-                  <td className="py-4 pl-4 pr-3 text-sm font-medium sm:pl-6 truncate max-w-0">
+                  <td className="max-w-0 truncate py-4 pl-4 pr-3 text-sm font-medium sm:pl-6">
                     <Link
                       href={`/dashboard/people/${person.id}`}
-                      className="text-blue-600 hover:text-blue-900 font-medium"
+                      className="font-medium text-blue-600 hover:text-blue-900"
                     >
                       {person.name}
                     </Link>
                   </td>
-                <td className="px-3 py-4 text-sm text-gray-500 truncate max-w-0">
-                  <Link
-                    href={`/dashboard/accounts/${person.target_accounts.id}`}
-                    className="text-blue-600 hover:text-blue-500"
-                  >
-                    {person.target_accounts.name}
-                  </Link>
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-500 truncate max-w-0">
-                  {person.title || '-'}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-500">
-                  {person.email && (
-                    <a href={`mailto:${person.email}`} className="text-blue-600 hover:text-blue-500">
-                      {person.email}
-                    </a>
-                  )}
-                  {person.phone && (
-                    <div className="text-xs text-gray-400">{person.phone}</div>
-                  )}
-                </td>
-                <td className="px-3 py-4 text-sm text-gray-500">
-                  <div className="flex flex-wrap gap-1">
-                    {person.isExecOps && (
-                      <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">
-                        Exec/Ops
-                      </span>
+                  <td className="max-w-0 truncate px-3 py-4 text-sm text-gray-500">
+                    <Link
+                      href={`/dashboard/accounts/${person.target_accounts.id}`}
+                      className="text-blue-600 hover:text-blue-500"
+                    >
+                      {person.target_accounts.name}
+                    </Link>
+                  </td>
+                  <td className="max-w-0 truncate px-3 py-4 text-sm text-gray-500">
+                    {person.title || '-'}
+                  </td>
+                  <td className="px-3 py-4 text-sm text-gray-500">
+                    {person.email && (
+                      <a
+                        href={`mailto:${person.email}`}
+                        className="text-blue-600 hover:text-blue-500"
+                      >
+                        {person.email}
+                      </a>
                     )}
-                    {person.isOps && (
-                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                        Ops
-                      </span>
-                    )}
-                    {person.isProc && (
-                      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                        Procurement
-                      </span>
-                    )}
-                    {person.isSales && (
-                      <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
-                        Sales
-                      </span>
-                    )}
-                    {person.isTech && (
-                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
-                        Tech
-                      </span>
-                    )}
-                    {person.isNonOps && (
-                      <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
-                        Non-Ops
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                  <Link
-                    href={`/dashboard/people/${person.id}/edit`}
-                    className="text-blue-600 hover:text-blue-900"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {person.phone && <div className="text-xs text-gray-400">{person.phone}</div>}
+                  </td>
+                  <td className="px-3 py-4 text-sm text-gray-500">
+                    <div className="flex flex-wrap gap-1">
+                      {person.isExecOps && (
+                        <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">
+                          Exec/Ops
+                        </span>
+                      )}
+                      {person.isOps && (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                          Ops
+                        </span>
+                      )}
+                      {person.isProc && (
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                          Procurement
+                        </span>
+                      )}
+                      {person.isSales && (
+                        <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                          Sales
+                        </span>
+                      )}
+                      {person.isTech && (
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                          Tech
+                        </span>
+                      )}
+                      {person.isNonOps && (
+                        <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+                          Non-Ops
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <Link
+                      href={`/dashboard/people/${person.id}/edit`}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      Edit
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
         {people.length === 0 && (
           <div className="px-6 py-14 text-center text-sm text-gray-500">
@@ -208,9 +224,7 @@ export default async function PeoplePage({
               />
             </svg>
             <h3 className="mt-2 text-sm font-semibold text-gray-900">No people</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Get started by adding your first contact.
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Get started by adding your first contact.</p>
             <div className="mt-6">
               <Link
                 href="/dashboard/people/new"

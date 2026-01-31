@@ -25,10 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Basic UUID format validation
     if (!accountId.match(/^[a-zA-Z0-9_-]+$/)) {
-      return NextResponse.json(
-        { error: 'Invalid accountId format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid accountId format' }, { status: 400 });
     }
 
     const orchestrator = new CompanyEnrichmentOrchestrator();

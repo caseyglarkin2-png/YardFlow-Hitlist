@@ -32,11 +32,13 @@ YardFlow uses a decoupled architecture where the frontend (GTM) runs on Vercel a
 ## Components
 
 ### 1. GTM Frontend (Vercel)
+
 - **Role**: Dashboard UI for users.
 - **Tech**: Next.js (App Router).
 - **Communication**: Calls Railway API via `fetch` with `x-service-key`.
 
 ### 2. Railway Backend (Railway)
+
 - **Repo**: `YardFlow-Hitlist`
 - **Role**: Headless API, Database, Queues, Workers.
 - **Tech**: Next.js (API Routes), Prisma, BullMQ.
@@ -45,6 +47,7 @@ YardFlow uses a decoupled architecture where the frontend (GTM) runs on Vercel a
   - **Worker**: Processes background jobs (agents).
 
 ### 3. Content Hub (Vercel)
+
 - **Role**: Host static assets, templates, messaging.
 - **URL**: `flow-state-klbt.vercel.app`
 

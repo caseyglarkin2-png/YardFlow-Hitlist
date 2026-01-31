@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { WarRoomToggle } from '@/components/war-room-mode';
 
 interface TodaysMeeting {
   id: string;
@@ -61,16 +62,13 @@ export default function EventDayDashboard() {
       const endOfDay = new Date(today.setHours(23, 59, 59, 999)).toISOString();
 
       // Fetch today's meetings
-      const meetingsRes = await fetch(
-        `/api/meetings?startDate=${startOfDay}&endDate=${endOfDay}`
-      );
+      const meetingsRes = await fetch(`/api/meetings?startDate=${startOfDay}&endDate=${endOfDay}`);
       const meetings = await meetingsRes.json();
       setTodaysMeetings(meetings);
 
       const completed = meetings.filter((m: TodaysMeeting) => m.status === 'COMPLETED').length;
       const remaining = meetings.filter(
-        (m: TodaysMeeting) =>
-          m.status === 'SCHEDULED' && new Date(m.scheduledAt) > new Date()
+        (m: TodaysMeeting) => m.status === 'SCHEDULED' && new Date(m.scheduledAt) > new Date()
       ).length;
 
       // Fetch recent outreach
@@ -78,9 +76,8 @@ export default function EventDayDashboard() {
       const outreach = await outreachRes.json();
       setRecentOutreach(outreach.outreach || []);
 
-      const responded = outreach.outreach?.filter(
-        (o: RecentOutreach) => o.status === 'RESPONDED'
-      ).length || 0;
+      const responded =
+        outreach.outreach?.filter((o: RecentOutreach) => o.status === 'RESPONDED').length || 0;
 
       setStats({
         totalToday: meetings.length,
@@ -110,7 +107,7 @@ export default function EventDayDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg">Loading...</div>
       </div>
     );
@@ -122,40 +119,43 @@ export default function EventDayDashboard() {
   const completedMeetings = todaysMeetings.filter((m) => m.status === 'COMPLETED');
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl xl:max-w-[1600px]">
+    <div className="container mx-auto max-w-7xl px-4 py-8 xl:max-w-[1600px]">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Event Day Dashboard</h1>
-        <p className="text-gray-600 mt-1">Real-time view of today&apos;s activities</p>
-        <p className="text-sm text-gray-500 mt-1">
-          Last updated: {currentTime.toLocaleTimeString()}
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Event Day Dashboard</h1>
+          <p className="mt-1 text-gray-600">Real-time view of today&apos;s activities</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Last updated: {currentTime.toLocaleTimeString()}
+          </p>
+        </div>
+        <WarRoomToggle className="war-room-header" />
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-          <p className="text-blue-800 text-sm font-medium">Today&apos;s Meetings</p>
+      <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="rounded-lg border-l-4 border-blue-500 bg-blue-50 p-6">
+          <p className="text-sm font-medium text-blue-800">Today&apos;s Meetings</p>
           <p className="text-3xl font-bold text-blue-900">{stats.totalToday}</p>
         </div>
-        <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
-          <p className="text-green-800 text-sm font-medium">Completed</p>
+        <div className="rounded-lg border-l-4 border-green-500 bg-green-50 p-6">
+          <p className="text-sm font-medium text-green-800">Completed</p>
           <p className="text-3xl font-bold text-green-900">{stats.completed}</p>
         </div>
-        <div className="bg-orange-50 p-6 rounded-lg border-l-4 border-orange-500">
-          <p className="text-orange-800 text-sm font-medium">Remaining</p>
+        <div className="rounded-lg border-l-4 border-orange-500 bg-orange-50 p-6">
+          <p className="text-sm font-medium text-orange-800">Remaining</p>
           <p className="text-3xl font-bold text-orange-900">{stats.remaining}</p>
         </div>
-        <div className="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-500">
-          <p className="text-purple-800 text-sm font-medium">Responses Today</p>
+        <div className="rounded-lg border-l-4 border-purple-500 bg-purple-50 p-6">
+          <p className="text-sm font-medium text-purple-800">Responses Today</p>
           <p className="text-3xl font-bold text-purple-900">{stats.responded}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Upcoming Meetings */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">
             Upcoming Meetings ({upcomingMeetings.length})
           </h2>
           {upcomingMeetings.length > 0 ? (
@@ -167,19 +167,17 @@ export default function EventDayDashboard() {
                 return (
                   <div
                     key={meeting.id}
-                    className={`p-4 rounded border-l-4 ${
-                      minutesUntil <= 15
-                        ? 'border-red-500 bg-red-50'
-                        : 'border-blue-500 bg-blue-50'
+                    className={`rounded border-l-4 p-4 ${
+                      minutesUntil <= 15 ? 'border-red-500 bg-red-50' : 'border-blue-500 bg-blue-50'
                     }`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate">{meeting.people.name}</p>
-                        <p className="text-sm text-gray-600 truncate">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold">{meeting.people.name}</p>
+                        <p className="truncate text-sm text-gray-600">
                           {meeting.people.title} at {meeting.people.target_accounts.name}
                         </p>
-                        <p className="text-sm mt-1">
+                        <p className="mt-1 text-sm">
                           {new Date(meeting.scheduledAt).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -190,7 +188,7 @@ export default function EventDayDashboard() {
                           <p className="text-sm text-gray-600">📍 {meeting.location}</p>
                         )}
                         {minutesUntil <= 15 && minutesUntil > 0 && (
-                          <p className="text-sm text-red-600 font-medium mt-1">
+                          <p className="mt-1 text-sm font-medium text-red-600">
                             Starting in {minutesUntil} minutes!
                           </p>
                         )}
@@ -198,13 +196,13 @@ export default function EventDayDashboard() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => router.push(`/dashboard/meetings/${meeting.id}`)}
-                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
                         >
                           View
                         </button>
                         <button
                           onClick={() => checkInMeeting(meeting.id)}
-                          className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                          className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
                         >
                           Check In
                         </button>
@@ -220,18 +218,23 @@ export default function EventDayDashboard() {
         </div>
 
         {/* Completed Meetings */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">
             Completed Today ({completedMeetings.length})
           </h2>
           {completedMeetings.length > 0 ? (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="max-h-96 space-y-3 overflow-y-auto">
               {completedMeetings.map((meeting) => (
-                <div key={meeting.id} className="p-3 rounded bg-green-50 border-l-4 border-green-500">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate">{meeting.people.name}</p>
-                      <p className="text-sm text-gray-600 truncate">{meeting.people.target_accounts.name}</p>
+                <div
+                  key={meeting.id}
+                  className="rounded border-l-4 border-green-500 bg-green-50 p-3"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold">{meeting.people.name}</p>
+                      <p className="truncate text-sm text-gray-600">
+                        {meeting.people.target_accounts.name}
+                      </p>
                       <p className="text-sm text-gray-500">
                         {new Date(meeting.scheduledAt).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -241,7 +244,7 @@ export default function EventDayDashboard() {
                     </div>
                     <button
                       onClick={() => router.push(`/dashboard/meetings/${meeting.id}`)}
-                      className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                      className="rounded bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
                     >
                       View
                     </button>
@@ -256,40 +259,42 @@ export default function EventDayDashboard() {
       </div>
 
       {/* Recent Outreach */}
-      <div className="mt-6 bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Recent Outreach Activity</h2>
+      <div className="mt-6 rounded-lg bg-white p-6 shadow">
+        <h2 className="mb-4 text-xl font-semibold">Recent Outreach Activity</h2>
         {recentOutreach.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full table-fixed">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2 px-4 w-[25%]">Contact</th>
-                  <th className="text-left py-2 px-4 w-[25%]">Company</th>
-                  <th className="text-left py-2 px-4 w-[15%]">Channel</th>
-                  <th className="text-left py-2 px-4 w-[15%]">Status</th>
-                  <th className="text-left py-2 px-4 w-[20%]">Time</th>
+                  <th className="w-[25%] px-4 py-2 text-left">Contact</th>
+                  <th className="w-[25%] px-4 py-2 text-left">Company</th>
+                  <th className="w-[15%] px-4 py-2 text-left">Channel</th>
+                  <th className="w-[15%] px-4 py-2 text-left">Status</th>
+                  <th className="w-[20%] px-4 py-2 text-left">Time</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOutreach.slice(0, 10).map((outreach) => (
                   <tr key={outreach.id} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-4 truncate max-w-0">{outreach.people.name}</td>
-                    <td className="py-2 px-4 truncate max-w-0">{outreach.people.target_accounts.name}</td>
-                    <td className="py-2 px-4">{outreach.channel}</td>
-                    <td className="py-2 px-4">
+                    <td className="max-w-0 truncate px-4 py-2">{outreach.people.name}</td>
+                    <td className="max-w-0 truncate px-4 py-2">
+                      {outreach.people.target_accounts.name}
+                    </td>
+                    <td className="px-4 py-2">{outreach.channel}</td>
+                    <td className="px-4 py-2">
                       <span
-                        className={`px-2 py-1 rounded text-xs ${
+                        className={`rounded px-2 py-1 text-xs ${
                           outreach.status === 'RESPONDED'
                             ? 'bg-green-100 text-green-800'
                             : outreach.status === 'SENT'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-gray-100 text-gray-800'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
                         }`}
                       >
                         {outreach.status}
                       </span>
                     </td>
-                    <td className="py-2 px-4 text-sm text-gray-600">
+                    <td className="px-4 py-2 text-sm text-gray-600">
                       {new Date(outreach.createdAt).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -306,30 +311,30 @@ export default function EventDayDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mt-6 bg-gray-50 p-6 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+      <div className="mt-6 rounded-lg bg-gray-50 p-6">
+        <h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => router.push('/dashboard/meetings')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             View All Meetings
           </button>
           <button
             onClick={() => router.push('/dashboard/outreach')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             View All Outreach
           </button>
           <button
             onClick={() => router.push('/dashboard/analytics')}
-            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
           >
             View Analytics
           </button>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
           >
             Refresh Dashboard
           </button>

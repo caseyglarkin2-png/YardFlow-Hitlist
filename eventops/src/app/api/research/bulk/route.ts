@@ -18,21 +18,15 @@ export async function POST(req: NextRequest) {
     const { accountIds, forceRefresh } = await req.json();
 
     if (!accountIds || !Array.isArray(accountIds) || accountIds.length === 0) {
-      return NextResponse.json(
-        { error: 'accountIds array required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'accountIds array required' }, { status: 400 });
     }
 
     if (accountIds.length > 500) {
-      return NextResponse.json(
-        { error: 'Maximum 500 accounts per batch' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Maximum 500 accounts per batch' }, { status: 400 });
     }
 
     const result = await researchQueue.addBatch(accountIds, forceRefresh || false);
-    
+
     return NextResponse.json({
       success: true,
       queued: result.queued,
@@ -40,10 +34,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error starting bulk research:', error);
-    return NextResponse.json(
-      { error: 'Failed to start bulk research' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to start bulk research' }, { status: 500 });
   }
 }
 
@@ -62,10 +53,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(status);
   } catch (error) {
     console.error('Error getting bulk research status:', error);
-    return NextResponse.json(
-      { error: 'Failed to get status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to get status' }, { status: 500 });
   }
 }
 
@@ -84,9 +72,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ success: true, message: 'Results cleared' });
   } catch (error) {
     console.error('Error clearing results:', error);
-    return NextResponse.json(
-      { error: 'Failed to clear results' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to clear results' }, { status: 500 });
   }
 }

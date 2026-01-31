@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/enrichment/email
  * Enrich a single contact with email from Hunter.io
- * 
+ *
  * Body: { personId: string }
  */
 export async function POST(req: NextRequest) {
@@ -41,7 +41,9 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // Get domain from account
-    const domain = person.target_accounts?.website || person.target_accounts?.name.toLowerCase().replace(/\s+/g, '') + '.com';
+    const domain =
+      person.target_accounts?.website ||
+      person.target_accounts?.name.toLowerCase().replace(/\s+/g, '') + '.com';
 
     // Call Hunter.io API
     const result = await findEmail(firstName, lastName, domain);
@@ -78,11 +80,13 @@ export async function POST(req: NextRequest) {
       confidence: result.confidence,
       source: result.source,
     });
-
   } catch (error) {
     console.error('Email enrichment error:', error);
     return NextResponse.json(
-      { error: 'Failed to enrich email', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to enrich email',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -91,7 +95,7 @@ export async function POST(req: NextRequest) {
 /**
  * POST /api/enrichment/email/batch
  * Bulk enrich multiple contacts
- * 
+ *
  * Body: { personIds: string[] }
  */
 export async function PUT(req: NextRequest) {
@@ -120,12 +124,14 @@ export async function PUT(req: NextRequest) {
     });
 
     const results = [];
-    
+
     for (const person of people) {
       const nameParts = person.name.trim().split(/\s+/);
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
-      const domain = person.target_accounts?.website || person.target_accounts?.name.toLowerCase().replace(/\s+/g, '') + '.com';
+      const domain =
+        person.target_accounts?.website ||
+        person.target_accounts?.name.toLowerCase().replace(/\s+/g, '') + '.com';
 
       const result = await findEmail(firstName, lastName, domain);
 
@@ -155,10 +161,10 @@ export async function PUT(req: NextRequest) {
       }
 
       // Rate limit: 1 request per second
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
 
     return NextResponse.json({
       success: true,
@@ -167,11 +173,13 @@ export async function PUT(req: NextRequest) {
       failed: results.length - successCount,
       results,
     });
-
   } catch (error) {
     console.error('Batch enrichment error:', error);
     return NextResponse.json(
-      { error: 'Failed to enrich emails', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to enrich emails',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

@@ -13,13 +13,13 @@ export async function GET(request: NextRequest) {
 
     let user = null;
     if (authResult.type === 'session' && authResult.email) {
-       user = await prisma.users.findUnique({
+      user = await prisma.users.findUnique({
         where: { email: authResult.email },
       });
     }
     // For S2S, we might not have a full user object, but we proceed with global stats
     // or fetch user if userId is provided in authResult and matches a DB user (optional)
-    
+
     // Note: If logic below DEPENDS on 'user' object (e.g. user.activeEventId), we need to handle that.
     // Looking at the code, it uses 'user' to check existence, but later logic might be generic.
     // Let's assume global stats for now or handle S2S user.
@@ -30,29 +30,38 @@ export async function GET(request: NextRequest) {
       if(authResult.type === 'session') return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     */
-    
+
     // Get date range for change calculations
     const today = new Date();
     const last30Days = subDays(today, 30);
     const previous30Days = subDays(today, 60);
 
     // Get total counts
-    const [accounts, people, campaigns, currentMeetings, previousMeetings, totalOutreach, openedCount, repliedCount] = await Promise.all([
+    const [
+      accounts,
+      people,
+      campaigns,
+      currentMeetings,
+      previousMeetings,
+      totalOutreach,
+      openedCount,
+      repliedCount,
+    ] = await Promise.all([
       prisma.target_accounts.count(),
       prisma.people.count(),
       prisma.campaigns.count(),
       prisma.meeting.count({
-        where: { 
-          createdAt: { gte: last30Days }
-        }
+        where: {
+          createdAt: { gte: last30Days },
+        },
       }),
       prisma.meeting.count({
-        where: { 
-          createdAt: { 
+        where: {
+          createdAt: {
             gte: previous30Days,
-            lt: last30Days 
-          }
-        }
+            lt: last30Days,
+          },
+        },
       }),
       prisma.outreach.count(),
       prisma.outreach.count({
@@ -69,9 +78,12 @@ export async function GET(request: NextRequest) {
     const responseRate = totalSent > 0 ? Math.round((totalReplied / totalSent) * 100) : 0;
 
     // Calculate meetings change
-    const meetingsChange = previousMeetings > 0 
-      ? Math.round(((currentMeetings - previousMeetings) / previousMeetings) * 100) 
-      : currentMeetings > 0 ? 100 : 0;
+    const meetingsChange =
+      previousMeetings > 0
+        ? Math.round(((currentMeetings - previousMeetings) / previousMeetings) * 100)
+        : currentMeetings > 0
+          ? 100
+          : 0;
 
     // Get meetings by day (last 7 days)
     const last7Days = subDays(today, 7);
@@ -108,11 +120,11 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const campaignStats = recentCampaigns.map(campaign => ({
+    const campaignStats = recentCampaigns.map((campaign) => ({
       name: campaign.name,
       sent: campaign.outreach.length,
-      opened: campaign.outreach.filter(o => o.openedAt).length,
-      replied: campaign.outreach.filter(o => o.respondedAt).length,
+      opened: campaign.outreach.filter((o) => o.openedAt).length,
+      replied: campaign.outreach.filter((o) => o.respondedAt).length,
     }));
 
     // Get recent activity (last 10 actions)
@@ -129,7 +141,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const activityFeed = recentActivity.map(log => ({
+    const activityFeed = recentActivity.map((log) => ({
       id: log.id,
       type: log.action,
       description: `${log.action} ${log.entityType}`,
@@ -152,9 +164,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch dashboard stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
   }
 }

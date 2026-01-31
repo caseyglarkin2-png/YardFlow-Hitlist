@@ -83,6 +83,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Test Accounts
 
 After seeding:
+
 - **Admin:** casey@eventops.com / password
 - **Member:** jake@eventops.com / password
 

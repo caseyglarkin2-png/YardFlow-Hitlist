@@ -45,17 +45,11 @@ export async function POST(req: NextRequest) {
   }
 
   if (!outreach.people.email) {
-    return NextResponse.json(
-      { error: 'Person has no email address' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Person has no email address' }, { status: 400 });
   }
 
   if (outreach.channel !== 'EMAIL') {
-    return NextResponse.json(
-      { error: 'Outreach is not an email' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Outreach is not an email' }, { status: 400 });
   }
 
   // Check if SendGrid is configured
