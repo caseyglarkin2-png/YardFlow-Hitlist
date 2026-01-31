@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
           operationalScale: newDossier.operationalScale || null,
           rawData: JSON.stringify(newDossier),
           researchedAt: new Date(),
-          researchedBy: session.user.email,
+          researchedBy: authResult.email,
         },
         update: {
           companyOverview: newDossier.companyOverview || null,
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
           operationalScale: newDossier.operationalScale || null,
           rawData: JSON.stringify(newDossier),
           researchedAt: new Date(),
-          researchedBy: session.user.email,
+          researchedBy: authResult.email,
         },
       });
 
@@ -120,13 +120,13 @@ export async function POST(req: NextRequest) {
  * Get accounts that need research refresh
  */
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { email: authResult.email! },
   });
 
   if (!user?.activeEventId) {

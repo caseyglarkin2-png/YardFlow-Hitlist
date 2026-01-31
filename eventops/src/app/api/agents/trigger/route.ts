@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const { action, params } = validated.data;
 
     logger.info('Triggering agent action manually', {
-      userId: session.user.id,
+      userId: authResult.userId,
       action,
       params,
     });
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const job = await agentQueue.add(action, {
       action,
       params,
-      userId: session.user.id,
+      userId: authResult.userId,
     });
 
     return NextResponse.json({

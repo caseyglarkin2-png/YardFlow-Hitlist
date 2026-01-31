@@ -122,7 +122,7 @@ export default function EventDayDashboard() {
   const completedMeetings = todaysMeetings.filter((m) => m.status === 'COMPLETED');
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl xl:max-w-[1600px]">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Event Day Dashboard</h1>
@@ -174,9 +174,9 @@ export default function EventDayDashboard() {
                     }`}
                   >
                     <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <p className="font-semibold">{meeting.people.name}</p>
-                        <p className="text-sm text-gray-600">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate">{meeting.people.name}</p>
+                        <p className="text-sm text-gray-600 truncate">
                           {meeting.people.title} at {meeting.people.target_accounts.name}
                         </p>
                         <p className="text-sm mt-1">
@@ -229,9 +229,9 @@ export default function EventDayDashboard() {
               {completedMeetings.map((meeting) => (
                 <div key={meeting.id} className="p-3 rounded bg-green-50 border-l-4 border-green-500">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold">{meeting.people.name}</p>
-                      <p className="text-sm text-gray-600">{meeting.people.target_accounts.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold truncate">{meeting.people.name}</p>
+                      <p className="text-sm text-gray-600 truncate">{meeting.people.target_accounts.name}</p>
                       <p className="text-sm text-gray-500">
                         {new Date(meeting.scheduledAt).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -260,21 +260,21 @@ export default function EventDayDashboard() {
         <h2 className="text-xl font-semibold mb-4">Recent Outreach Activity</h2>
         {recentOutreach.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full">
+            <table className="min-w-full table-fixed">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2 px-4">Contact</th>
-                  <th className="text-left py-2 px-4">Company</th>
-                  <th className="text-left py-2 px-4">Channel</th>
-                  <th className="text-left py-2 px-4">Status</th>
-                  <th className="text-left py-2 px-4">Time</th>
+                  <th className="text-left py-2 px-4 w-[25%]">Contact</th>
+                  <th className="text-left py-2 px-4 w-[25%]">Company</th>
+                  <th className="text-left py-2 px-4 w-[15%]">Channel</th>
+                  <th className="text-left py-2 px-4 w-[15%]">Status</th>
+                  <th className="text-left py-2 px-4 w-[20%]">Time</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOutreach.slice(0, 10).map((outreach) => (
                   <tr key={outreach.id} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-4">{outreach.people.name}</td>
-                    <td className="py-2 px-4">{outreach.people.target_accounts.name}</td>
+                    <td className="py-2 px-4 truncate max-w-0">{outreach.people.name}</td>
+                    <td className="py-2 px-4 truncate max-w-0">{outreach.people.target_accounts.name}</td>
                     <td className="py-2 px-4">{outreach.channel}</td>
                     <td className="py-2 px-4">
                       <span

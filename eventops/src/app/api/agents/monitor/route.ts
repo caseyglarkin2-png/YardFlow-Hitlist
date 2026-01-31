@@ -123,7 +123,7 @@ export async function GET(request: Request) {
     const successRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
     logger.info('Agent monitoring dashboard accessed', {
-      userId: session.user.id,
+      userId: authResult.userId,
       timeRange,
       agentType,
     });

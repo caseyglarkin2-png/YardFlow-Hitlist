@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     }
 
     logger.info('Agent status retrieved', {
-      userId: session.user.id,
+      userId: authResult.userId,
       activeWorkflows: activeWorkflows.length,
       requestedAgent: agentType,
       requestedAccount: accountId,
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
   } catch (error) {
     logger.error('Failed to retrieve agent status', {
       error,
-      userId: session.user?.id,
+      userId: authResult.userId,
     });
 
     return NextResponse.json({ error: 'Failed to retrieve agent status' }, { status: 500 });
