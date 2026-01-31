@@ -1,6 +1,6 @@
 {
   "name": "eventops",
-  "version": "0.1.0",
+  "version": "1.0.0-manifest",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,6 +10,8 @@
     "lint": "next lint",
     "test": "vitest",
     "test:unit": "vitest run",
+    "test:agents": "vitest run tests/agents/",
+    "test:integration": "vitest run tests/integration/",
     "test:e2e": "playwright test",
     "test:e2e:local": "npx tsx tests/e2e/e2e-test-suite.ts http://localhost:3000",
     "test:e2e:prod": "npx tsx tests/e2e/e2e-test-suite.ts https://yardflow-hitlist-production-2f41.up.railway.app",

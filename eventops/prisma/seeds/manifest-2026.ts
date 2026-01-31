@@ -27,11 +27,11 @@ const prisma = new PrismaClient({ adapter });
 
 const MANIFEST_EVENT = {
   id: 'evt_manifest_2026',
-  name: "Manifest 2026",
-  startDate: new Date("2026-02-10T09:00:00Z"),
-  endDate: new Date("2026-02-12T17:00:00Z"),
-  location: "Las Vegas, NV",
-  status: "PLANNING" as const, 
+  name: 'Manifest 2026',
+  startDate: new Date('2026-02-10T09:00:00Z'),
+  endDate: new Date('2026-02-12T17:00:00Z'),
+  location: 'Las Vegas, NV',
+  status: 'PLANNING' as const,
 };
 
 const ACCOUNTS = [
@@ -46,7 +46,7 @@ const ACCOUNTS = [
       { name: 'Mario Harik', title: 'CEO', email: 'mario.harik@xpo.com' },
       { name: 'David Bates', title: 'COO', email: 'david.bates@xpo.com' },
       { name: 'Jay Silberkleit', title: 'CIO', email: 'jay.silberkleit@xpo.com' },
-    ]
+    ],
   },
   {
     name: 'C.H. Robinson',
@@ -57,7 +57,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Dave Bozeman', title: 'CEO', email: 'dave.bozeman@chrobinson.com' },
       { name: 'Mike Zechmeister', title: 'CFO', email: 'mike.z@chrobinson.com' },
-    ]
+    ],
   },
   {
     name: 'J.B. Hunt Transport',
@@ -68,7 +68,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Shelley Simpson', title: 'President', email: 'shelley.simpson@jbhunt.com' },
       { name: 'Nick Hobbs', title: 'COO', email: 'nick.hobbs@jbhunt.com' },
-    ]
+    ],
   },
   {
     name: 'Flexport',
@@ -79,7 +79,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Ryan Petersen', title: 'CEO', email: 'ryan@flexport.com' },
       { name: 'Parisa Sadrzadeh', title: 'EVP SMB Product', email: 'parisa@flexport.com' },
-    ]
+    ],
   },
   // Tier 2: Mid-Market / Digital
   {
@@ -91,7 +91,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Dan Lewis', title: 'CEO', email: 'dan@convoy.com' },
       { name: 'Grant Goodale', title: 'Experience Officer', email: 'grant@convoy.com' },
-    ]
+    ],
   },
   {
     name: 'Saia LTL Freight',
@@ -99,9 +99,7 @@ const ACCOUNTS = [
     website: 'https://www.saia.com',
     icpScore: 85,
     notes: 'Tier 2: Regional LTL. Expanding terminal network.',
-    people: [
-      { name: 'Fritz Holzgrefe', title: 'CEO', email: 'fritz@saia.com' },
-    ]
+    people: [{ name: 'Fritz Holzgrefe', title: 'CEO', email: 'fritz@saia.com' }],
   },
   {
     name: 'Echo Global Logistics',
@@ -112,7 +110,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Doug Waggoner', title: 'CEO', email: 'doug@echo.com' },
       { name: 'Dave Menzel', title: 'COO', email: 'dave@echo.com' },
-    ]
+    ],
   },
   // Tier 3 / Others
   {
@@ -121,9 +119,7 @@ const ACCOUNTS = [
     website: 'https://www.prologis.com',
     icpScore: 89,
     notes: 'Tier 1: Real Estate Giant. Ventures arm active.',
-    people: [
-      { name: 'Hamid Moghadam', title: 'CEO', email: 'hamid@prologis.com' },
-    ]
+    people: [{ name: 'Hamid Moghadam', title: 'CEO', email: 'hamid@prologis.com' }],
   },
   {
     name: 'Uber Freight',
@@ -131,9 +127,7 @@ const ACCOUNTS = [
     website: 'https://www.uberfreight.com',
     icpScore: 88,
     notes: 'Tier 2: Massive network.',
-    people: [
-      { name: 'Lior Ron', title: 'CEO', email: 'lior@uberfreight.com' },
-    ]
+    people: [{ name: 'Lior Ron', title: 'CEO', email: 'lior@uberfreight.com' }],
   },
   {
     name: 'Transfix',
@@ -141,9 +135,7 @@ const ACCOUNTS = [
     website: 'https://www.transfix.io',
     icpScore: 80,
     notes: 'Tier 3: Smaller digital player.',
-    people: [
-      { name: 'Jonathan Salama', title: 'CEO', email: 'jonathan@transfix.io' },
-    ]
+    people: [{ name: 'Jonathan Salama', title: 'CEO', email: 'jonathan@transfix.io' }],
   },
   // Tier 1: Enterprise Carriers
   {
@@ -152,9 +144,7 @@ const ACCOUNTS = [
     website: 'https://www.fedex.com/en-us/freight.html',
     icpScore: 94,
     notes: 'Tier 1: FedEx subsidiary. Massive LTL network. Tech modernization priority.',
-    people: [
-      { name: 'Lance Moll', title: 'President & CEO', email: 'lance.moll@fedex.com' },
-    ]
+    people: [{ name: 'Lance Moll', title: 'President & CEO', email: 'lance.moll@fedex.com' }],
   },
   {
     name: 'Werner Enterprises',
@@ -165,7 +155,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Derek Leathers', title: 'Chairman & CEO', email: 'derek.leathers@werner.com' },
       { name: 'Chris Wikoff', title: 'CFO', email: 'chris.wikoff@werner.com' },
-    ]
+    ],
   },
   {
     name: 'Schneider National',
@@ -173,9 +163,7 @@ const ACCOUNTS = [
     website: 'https://www.schneider.com',
     icpScore: 88,
     notes: 'Tier 2: Major intermodal player. Yard management pain points confirmed.',
-    people: [
-      { name: 'Mark Rourke', title: 'President & CEO', email: 'mark.rourke@schneider.com' },
-    ]
+    people: [{ name: 'Mark Rourke', title: 'President & CEO', email: 'mark.rourke@schneider.com' }],
   },
   {
     name: 'Ryder System',
@@ -186,7 +174,7 @@ const ACCOUNTS = [
     people: [
       { name: 'Robert Sanchez', title: 'CEO', email: 'robert.sanchez@ryder.com' },
       { name: 'John Diez', title: 'CFO', email: 'john.diez@ryder.com' },
-    ]
+    ],
   },
   {
     name: 'Old Dominion Freight Line',
@@ -194,13 +182,11 @@ const ACCOUNTS = [
     website: 'https://www.odfl.com',
     icpScore: 91,
     notes: 'Tier 1: Premium LTL service. Technology investment focus.',
-    people: [
-      { name: 'Greg Gantt', title: 'President & CEO', email: 'greg.gantt@odfl.com' },
-    ]
-  }
+    people: [{ name: 'Greg Gantt', title: 'President & CEO', email: 'greg.gantt@odfl.com' }],
+  },
 ];
 
-const MEETING_TYPES = ["Intro", "Demo", "Discovery", "Coffee", "Dinner"];
+const MEETING_TYPES = ['Intro', 'Demo', 'Discovery', 'Coffee', 'Dinner'];
 
 async function main() {
   console.log('🎰 Seeding Manifest 2026 data...');
@@ -209,13 +195,13 @@ async function main() {
   const event = await prisma.events.upsert({
     where: { id: MANIFEST_EVENT.id },
     update: {
-        ...MANIFEST_EVENT,
-        updatedAt: new Date(),
+      ...MANIFEST_EVENT,
+      updatedAt: new Date(),
     },
     create: {
       ...MANIFEST_EVENT,
       updatedAt: new Date(),
-    }
+    },
   });
   console.log(`✅ Event: ${event.name}`);
 
@@ -225,7 +211,7 @@ async function main() {
   for (const acc of ACCOUNTS) {
     // Deterministic ID for upsert
     const accountId = `acc_${acc.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
-    
+
     const account = await prisma.target_accounts.upsert({
       where: { id: accountId },
       update: {
@@ -246,36 +232,41 @@ async function main() {
         icpScore: acc.icpScore,
         notes: acc.notes,
         updatedAt: new Date(),
-      }
+      },
     });
 
     for (const p of acc.people) {
       // Determine roles
       const title = p.title.toLowerCase();
-      const isExecOps = title.includes('ceo') || title.includes('coo') || title.includes('vp') || title.includes('president') || title.includes('officer');
+      const isExecOps =
+        title.includes('ceo') ||
+        title.includes('coo') ||
+        title.includes('vp') ||
+        title.includes('president') ||
+        title.includes('officer');
       const isOps = title.includes('oper') || title.includes('logist') || title.includes('supply');
       const isProc = title.includes('procu');
       const isTech = title.includes('cto') || title.includes('tech') || title.includes('cio');
-      
+
       // Let's use findFirst to find by email to get ID if exists.
       const existingPerson = await prisma.people.findFirst({
-        where: { email: p.email }
+        where: { email: p.email },
       });
-      
+
       const personId = existingPerson?.id || `ppl_${randomUUID()}`;
 
       const person = await prisma.people.upsert({
         where: { id: personId },
         update: {
-            accountId: account.id,
-            name: p.name,
-            title: p.title,
-            email: p.email,
-            isExecOps: !!isExecOps,
-            isOps: !!isOps,
-            isProc: !!isProc,
-            isTech: !!isTech,
-            updatedAt: new Date(),
+          accountId: account.id,
+          name: p.name,
+          title: p.title,
+          email: p.email,
+          isExecOps: !!isExecOps,
+          isOps: !!isOps,
+          isProc: !!isProc,
+          isTech: !!isTech,
+          updatedAt: new Date(),
         },
         create: {
           id: personId,
@@ -288,7 +279,7 @@ async function main() {
           isProc: !!isProc,
           isTech: !!isTech,
           updatedAt: new Date(),
-        }
+        },
       });
       peopleIds.push(person.id);
     }
@@ -300,43 +291,45 @@ async function main() {
 
   const today = new Date();
   today.setHours(9, 0, 0, 0); // 9 AM Today
-  
+
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1); // 9 AM Tomorrow
 
   async function createMeetings(baseDate: Date, count: number, label: string) {
-    console.log(`Scheduling ${count} meetings for ${label} (starting ${baseDate.toLocaleString()})...`);
+    console.log(
+      `Scheduling ${count} meetings for ${label} (starting ${baseDate.toLocaleString()})...`
+    );
     for (let i = 0; i < count; i++) {
-        const personId = peopleIds[Math.floor(Math.random() * peopleIds.length)];
-        const hourOffset = i; // 0, 1, 2... hours after base
-        const startTime = new Date(baseDate);
-        startTime.setHours(baseDate.getHours() + hourOffset);
-        
-        const meetingId = `mtg_manifest_${label.toLowerCase()}_${i}`;
+      const personId = peopleIds[Math.floor(Math.random() * peopleIds.length)];
+      const hourOffset = i; // 0, 1, 2... hours after base
+      const startTime = new Date(baseDate);
+      startTime.setHours(baseDate.getHours() + hourOffset);
 
-        await prisma.meeting.upsert({
-            where: { id: meetingId },
-            update: {
-                personId, // Update person (might change if random)
-                scheduledAt: startTime,
-            },
-            create: {
-                id: meetingId,
-                personId,
-                scheduledAt: startTime,
-                duration: 30,
-                status: 'SCHEDULED',
-                meetingType: MEETING_TYPES[Math.floor(Math.random() * MEETING_TYPES.length)],
-                notes: `Manifest 2026 Meetup - ${label}`,
-                updatedAt: new Date(),
-            }
-        });
+      const meetingId = `mtg_manifest_${label.toLowerCase()}_${i}`;
+
+      await prisma.meeting.upsert({
+        where: { id: meetingId },
+        update: {
+          personId, // Update person (might change if random)
+          scheduledAt: startTime,
+        },
+        create: {
+          id: meetingId,
+          personId,
+          scheduledAt: startTime,
+          duration: 30,
+          status: 'SCHEDULED',
+          meetingType: MEETING_TYPES[Math.floor(Math.random() * MEETING_TYPES.length)],
+          notes: `Manifest 2026 Meetup - ${label}`,
+          updatedAt: new Date(),
+        },
+      });
     }
   }
 
-  await createMeetings(today, 5, "Today");
-  await createMeetings(tomorrow, 5, "Tomorrow");
-  
+  await createMeetings(today, 5, 'Today');
+  await createMeetings(tomorrow, 5, 'Tomorrow');
+
   console.log(`✅ Meetings scheduled.`);
 }
 

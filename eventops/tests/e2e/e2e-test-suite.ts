@@ -1,15 +1,15 @@
 #!/usr/bin/env npx tsx
 /**
  * YardFlow Hitlist - E2E Test Suite
- * 
+ *
  * Sprint U3: Core Flow E2E Testing
  * Tests all critical user journeys end-to-end.
- * 
+ *
  * Usage:
  *   npx tsx tests/e2e/e2e-test-suite.ts [baseUrl]
  *   npm run test:e2e:local
  *   npm run test:e2e:prod
- * 
+ *
  * Tasks covered:
  *   - U3.1: Login Flow
  *   - U3.2: Account CRUD Operations
@@ -66,7 +66,7 @@ function suite(name: string) {
 async function test(name: string, fn: () => Promise<void>) {
   const start = Date.now();
   process.stdout.write(`  ${colors.dim}⧖${colors.reset} ${name}... `);
-  
+
   try {
     await fn();
     const duration = Date.now() - start;
@@ -124,14 +124,21 @@ async function testLoginFlow() {
     const res = await fetch(`${BASE_URL}/login`);
     const html = await res.text();
     assert(
-      html.includes('email') || html.includes('Email') || html.includes('sign in') || html.includes('Sign In'),
+      html.includes('email') ||
+        html.includes('Email') ||
+        html.includes('sign in') ||
+        html.includes('Sign In'),
       'Login page should contain email/signin elements'
     );
   });
 
   await test('Protected route redirects without auth', async () => {
     const res = await fetch(`${BASE_URL}/dashboard`, { redirect: 'manual' });
-    assertIncludes([302, 303, 307, 308], res.status, `Dashboard should redirect, got ${res.status}`);
+    assertIncludes(
+      [302, 303, 307, 308],
+      res.status,
+      `Dashboard should redirect, got ${res.status}`
+    );
   });
 
   await test('API returns 401 without auth', async () => {
@@ -271,14 +278,19 @@ async function testSmoke() {
     const res = await fetch(`${BASE_URL}/api/health`);
     assertEqual(res.status, 200, `Health endpoint returned ${res.status}`);
     const data = await res.json();
-    assert(data.status === 'ok' || data.status === 'healthy', `Health status should be ok or healthy, got ${data.status}`);
+    assert(
+      data.status === 'ok' || data.status === 'healthy',
+      `Health status should be ok or healthy, got ${data.status}`
+    );
   });
 
   await test('Health endpoint includes service checks', async () => {
     const res = await fetch(`${BASE_URL}/api/health`);
     const data = await res.json();
-    assert('services' in data || 'database' in data || 'checks' in data || data.status === 'ok', 
-      'Health should include service info');
+    assert(
+      'services' in data || 'database' in data || 'checks' in data || data.status === 'ok',
+      'Health should include service info'
+    );
   });
 
   await test('Ping endpoint returns 200', async () => {
@@ -348,21 +360,25 @@ function printSummary() {
 
   for (const s of results) {
     const status = s.failed === 0 ? colors.green + '✓' : colors.red + '✗';
-    log(`${status} ${s.suite}${colors.reset}: ${s.passed} passed, ${s.failed} failed, ${s.skipped} skipped`);
+    log(
+      `${status} ${s.suite}${colors.reset}: ${s.passed} passed, ${s.failed} failed, ${s.skipped} skipped`
+    );
     totalPassed += s.passed;
     totalFailed += s.failed;
     totalSkipped += s.skipped;
   }
 
   log('');
-  log(`${colors.bold}Total:${colors.reset} ${totalPassed} passed, ${totalFailed} failed, ${totalSkipped} skipped`);
-  
+  log(
+    `${colors.bold}Total:${colors.reset} ${totalPassed} passed, ${totalFailed} failed, ${totalSkipped} skipped`
+  );
+
   if (totalFailed === 0) {
     log(`\n${colors.green}${colors.bold}✅ All tests passed!${colors.reset}`);
     return true;
   } else {
     log(`\n${colors.red}${colors.bold}❌ ${totalFailed} test(s) failed${colors.reset}`);
-    
+
     // Print failed tests
     log(`\n${colors.red}Failed tests:${colors.reset}`);
     for (const s of results) {
@@ -389,10 +405,10 @@ async function main() {
   try {
     // Check if server is reachable first
     log(`\n${colors.cyan}Checking server availability...${colors.reset}`);
-    const healthCheck = await fetch(`${BASE_URL}/api/health`, { 
-      signal: AbortSignal.timeout(10000) 
+    const healthCheck = await fetch(`${BASE_URL}/api/health`, {
+      signal: AbortSignal.timeout(10000),
     }).catch(() => null);
-    
+
     if (!healthCheck || !healthCheck.ok) {
       log(`${colors.red}❌ Server not reachable at ${BASE_URL}${colors.reset}`);
       log(`${colors.yellow}Make sure the server is running:${colors.reset}`);
@@ -401,7 +417,7 @@ async function main() {
       log(`  Use production: npx tsx tests/e2e/e2e-test-suite.ts ${PROD_URL}`);
       process.exit(1);
     }
-    
+
     log(`${colors.green}✓ Server is reachable${colors.reset}`);
 
     // Run all test suites

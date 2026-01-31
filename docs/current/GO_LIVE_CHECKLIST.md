@@ -3,7 +3,7 @@
 **Event**: Manifest 2026 (Feb 10-12, 2026)
 **Deadline**: 14 days
 **Production URL**: https://yardflow-hitlist-production-2f41.up.railway.app
-**Pre-Event Hardening**: [PRE_EVENT_CHECKLIST.md]( PRE_EVENT_CHECKLIST.md)
+**Pre-Event Hardening**: [PRE_EVENT_CHECKLIST.md](PRE_EVENT_CHECKLIST.md)
 
 ---
 
@@ -153,13 +153,13 @@ railway variables set GEMINI_API_KEY="xxx"
 
 ### Quick Response Matrix
 
-| Symptom | Severity | Response Time | First Action |
-|---------|----------|---------------|--------------|
-| 502 Bad Gateway | CRITICAL | Immediate | Rollback |
-| Health check 500 | HIGH | 2 min | Check logs |
-| Slow response (>2s) | MEDIUM | 5 min | Check DB latency |
-| Redis disconnect | HIGH | 2 min | Check Redis service |
-| Login failures | HIGH | 5 min | Check AUTH_SECRET |
+| Symptom             | Severity | Response Time | First Action        |
+| ------------------- | -------- | ------------- | ------------------- |
+| 502 Bad Gateway     | CRITICAL | Immediate     | Rollback            |
+| Health check 500    | HIGH     | 2 min         | Check logs          |
+| Slow response (>2s) | MEDIUM   | 5 min         | Check DB latency    |
+| Redis disconnect    | HIGH     | 2 min         | Check Redis service |
+| Login failures      | HIGH     | 5 min         | Check AUTH_SECRET   |
 
 ### Build Failure
 
@@ -240,11 +240,11 @@ curl -w "\n%{time_total}s\n" https://yardflow-hitlist-production-2f41.up.railway
 
 ### Emergency Contacts
 
-| Role | Name | Email |
-|------|------|-------|
-| Primary Dev | Casey | casey@freightroll.com |
-| Backup Dev | Jake | jake@freightroll.com |
-| Railway Support | - | support@railway.app |
+| Role            | Name  | Email                 |
+| --------------- | ----- | --------------------- |
+| Primary Dev     | Casey | casey@freightroll.com |
+| Backup Dev      | Jake  | jake@freightroll.com  |
+| Railway Support | -     | support@railway.app   |
 
 ---
 

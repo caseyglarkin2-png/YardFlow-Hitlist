@@ -90,7 +90,7 @@ export default async function PeoplePage({
 
       <div className="overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         <div className="overflow-x-auto">
-          <table className="min-w-[1000px] w-full table-fixed divide-y divide-gray-300">
+          <table className="w-full min-w-[1000px] table-fixed divide-y divide-gray-300">
             <thead className="bg-gray-50">
               <tr>
                 <th

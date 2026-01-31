@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
 import OpenAI from 'openai';
+import { AlertManager } from '@/lib/alerts/alert-manager';
 
 // Lazy initialization to avoid build-time API key validation
 let openaiClient: OpenAI | null = null;
@@ -72,6 +73,28 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       },
     },
   });
+
+  // U5.2 Check for High Value Alerts
+  if (data.status === 'COMPLETED' && meeting.status === 'COMPLETED') {
+    const icpScore = meeting.people?.target_accounts?.icpScore || 0;
+
+    // Alert logic: High ICP score (>80) completed meeting
+    if (icpScore >= 80) {
+      // Fire and forget alert
+      AlertManager.sendAlert({
+        type: 'MEETING_COMPLETED',
+        level: icpScore >= 90 ? 'CRITICAL' : 'INFO',
+        message: `High Value Meeting Completed: ${meeting.people.name} @ ${meeting.people.target_accounts.name}`,
+        metadata: {
+          meetingId: meeting.id,
+          account: meeting.people.target_accounts.name,
+          icpScore,
+          outcome: meeting.outcome || 'No outcome recorded',
+          notes: meeting.notes,
+        },
+      }).catch((err) => console.error('Failed to trigger alert', err));
+    }
+  }
 
   return NextResponse.json(meeting);
 }

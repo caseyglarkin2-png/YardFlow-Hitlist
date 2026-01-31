@@ -1,8 +1,11 @@
 /**
  * Agent Orchestrator
  * Coordinates multiple agents to execute complex GTM workflows
+ * 
+ * Sprint S1: Complete orchestration with Steps 3-5
  */
 
+import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { agentStateManager } from '@/lib/agents/state-manager';
 import { ProspectingAgent, ProspectingCriteria } from './prospecting-agent';
@@ -34,6 +37,22 @@ export interface AgentTask {
   completedAt?: Date;
   error?: string;
   parentTaskId?: string;
+}
+
+export interface WorkflowStatus {
+  found: boolean;
+  workflowId?: string;
+  status?: string;
+  progress?: number;
+  steps?: Array<{
+    step: string;
+    status: string;
+    startedAt: Date | null;
+    completedAt: Date | null;
+    error: string | null;
+  }>;
+  startedAt?: Date | null;
+  completedAt?: Date | null;
 }
 
 export class AgentOrchestrator {
@@ -138,14 +157,64 @@ export class AgentOrchestrator {
         workflow.tasks.push(researchTask);
       }
 
-      // Step 3: Design sequences for contacts
-      // TODO: Get contacts for each account and design sequences
+      // Step 3: Design sequences for contacts at each account
+      for (const accountId of targetAccounts) {
+        // Get contacts for this account
+        const contacts = await prisma.people.findMany({
+          where: { accountId },
+          take: 5, // Limit to top 5 contacts per account
+        });
 
-      // Step 4: Generate content
-      // TODO: Use content purposing agent for campaign materials
+        for (const contact of contacts) {
+          const sequenceTask = await this.executeTask({
+            id: '',
+            agentType: 'sequence-engineer',
+            input: {
+              personId: contact.id,
+              campaignGoal: params.campaignType === 'booth-outreach' ? 'meeting' : 'relationship',
+              urgency: params.campaignType === 'pre-event' ? 'high' : 'medium',
+            },
+            status: 'pending',
+            parentTaskId: rootTask.id,
+          });
+          workflow.tasks.push(sequenceTask);
+        }
+      }
 
-      // Step 5: Create social media campaign
-      // TODO: Plan and schedule social posts
+      // Step 4: Generate content for the campaign
+      const contentTask = await this.executeTask({
+        id: '',
+        agentType: 'content-purposing',
+        input: {
+          persona: 'operations-executive',
+          industry: 'logistics',
+          campaignGoal: params.campaignType === 'booth-outreach' ? 'decision' : 'consideration',
+          contentType: 'email-template',
+        },
+        status: 'pending',
+        parentTaskId: rootTask.id,
+      });
+      workflow.tasks.push(contentTask);
+
+      // Step 5: Create social media campaign (non-blocking)
+      try {
+        const socialsTask = await this.executeTask({
+          id: '',
+          agentType: 'socials',
+          input: {
+            platform: 'linkedin',
+            content: `Excited for ${params.eventId}! Stop by to learn how YardFlow is transforming yard operations.`,
+            hashtags: ['yardmanagement', 'logistics', 'supplychain'],
+            scheduledFor: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+          },
+          status: 'pending',
+          parentTaskId: rootTask.id,
+        });
+        workflow.tasks.push(socialsTask);
+      } catch (socialsError) {
+        // Socials is non-critical, log and continue
+        logger.warn('Socials task failed, continuing workflow', { error: socialsError });
+      }
 
       workflow.status = 'completed';
       workflow.progress = { completed: workflow.tasks.length, total: workflow.tasks.length };
@@ -248,12 +317,118 @@ export class AgentOrchestrator {
   }
 
   /**
-   * Get workflow status
+   * Get workflow status from database
    */
-  async getWorkflowStatus(_workflowId: string): Promise<CampaignWorkflow | null> {
-    // TODO: Fetch from database
-    // For now, return null
-    return null;
+  async getWorkflowStatus(workflowId: string): Promise<WorkflowStatus> {
+    try {
+      // Fetch the root task and its children
+      const rootTask = await prisma.agent_tasks.findUnique({
+        where: { id: workflowId },
+        include: {
+          childTasks: {
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      });
+
+      if (!rootTask) {
+        return { found: false };
+      }
+
+      // Build step status array
+      const steps = rootTask.childTasks.map((task) => ({
+        step: task.agentType,
+        status: task.status,
+        startedAt: task.startedAt,
+        completedAt: task.completedAt,
+        error: task.errorMessage,
+      }));
+
+      // Calculate progress
+      const total = rootTask.childTasks.length || 1;
+      const completed = rootTask.childTasks.filter(
+        (t) => t.status === 'completed'
+      ).length;
+      const progress = Math.round((completed / total) * 100);
+
+      return {
+        found: true,
+        workflowId: rootTask.id,
+        status: rootTask.status,
+        progress,
+        steps,
+        startedAt: rootTask.startedAt,
+        completedAt: rootTask.completedAt,
+      };
+    } catch (error) {
+      logger.error('Failed to get workflow status', { error, workflowId });
+      return { found: false };
+    }
+  }
+
+  /**
+   * Retry a failed task within a workflow
+   */
+  async retryFailedStep(workflowId: string, taskId: string): Promise<AgentTask | null> {
+    try {
+      // Find the failed task
+      const task = await prisma.agent_tasks.findUnique({
+        where: { id: taskId },
+      });
+
+      if (!task) {
+        logger.warn('Task not found for retry', { taskId });
+        return null;
+      }
+
+      if (task.status !== 'failed') {
+        logger.warn('Task is not in failed state', { taskId, status: task.status });
+        return null;
+      }
+
+      if (task.retryCount >= task.maxRetries) {
+        logger.warn('Task has exceeded max retries', { 
+          taskId, 
+          retryCount: task.retryCount, 
+          maxRetries: task.maxRetries 
+        });
+        return null;
+      }
+
+      // Increment retry count and reset status
+      await prisma.agent_tasks.update({
+        where: { id: taskId },
+        data: {
+          status: 'pending',
+          retryCount: { increment: 1 },
+          errorMessage: null,
+          startedAt: null,
+          completedAt: null,
+        },
+      });
+
+      // Re-execute the task
+      const agentTask: AgentTask = {
+        id: task.id,
+        agentType: task.agentType,
+        input: task.inputData as Record<string, unknown>,
+        status: 'pending',
+        parentTaskId: task.parentTaskId || undefined,
+      };
+
+      const result = await this.executeTask(agentTask);
+
+      logger.info('Task retry completed', { 
+        taskId, 
+        status: result.status,
+        retryCount: task.retryCount + 1 
+      });
+
+      return result;
+    } catch (error) {
+      logger.error('Failed to retry task', { error, workflowId, taskId });
+      return null;
+    }
   }
 }
 
