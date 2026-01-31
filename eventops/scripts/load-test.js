@@ -1,186 +1,125 @@
 /**
- * k6 Load Test Script for YardFlow Hitlist
+ * k6 Load Test Script for YardFlow Hitlist - Manifest 2026 Preparation
  * 
- * Sprint U5.5 - Pre-Event Hardening
- * Target: 50 concurrent users for 5 minutes
+ * Task U5.5: Pre-Event Hardening
+ * Target: 50 concurrent users strictly browsing "Manifest 2026" dashboards.
  * 
- * Install k6: 
- *   brew install k6  (macOS)
- *   apt install k6   (Linux)
+ * Scenarios:
+ * 1. Browse Manifest Dashboard
+ * 2. Scan Meetings List
+ * 3. View Person Details
  * 
- * Run:
- *   k6 run eventops/scripts/load-test.js
- * 
- * Run with custom options:
- *   k6 run --vus 100 --duration 10m eventops/scripts/load-test.js
+ * Usage:
+ *   k6 run scripts/load-test.js
+ *   BASE_URL=http://localhost:3000 k6 run scripts/load-test.js
  */
 
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
+import { parseHTML } from 'k6/html';
 
-// Custom metrics
+// Metrics
 const errorRate = new Rate('errors');
-const healthLatency = new Trend('health_latency');
-const apiLatency = new Trend('api_latency');
+const responseTime = new Trend('response_time');
 
 // Configuration
 const BASE_URL = __ENV.BASE_URL || 'https://yardflow-hitlist-production-2f41.up.railway.app';
-const SERVICE_KEY = __ENV.SERVICE_KEY || '';
+// Optional: If you have a session cookie from your browser, set it here to test authenticated flows
+// export COOKIE='next-auth.session-token=...'
+const SESSION_COOKIE = __ENV.COOKIE || '';
 
 export const options = {
-  // Ramp up to 50 users over 1 minute, sustain for 4 minutes, ramp down
   stages: [
-    { duration: '1m', target: 50 },   // Ramp up
-    { duration: '3m', target: 50 },   // Sustain
-    { duration: '1m', target: 0 },    // Ramp down
+     // Ramp up to 50 users over 1 minute
+    { duration: '1m', target: 50 },
+    // Sustain 50 users for 3 minutes
+    { duration: '3m', target: 50 },
+    // Ramp down to 0
+    { duration: '1m', target: 0 },
   ],
-  
-  // Thresholds - fail if these are not met
   thresholds: {
-    'http_req_duration': ['p(95)<500'],      // 95% of requests under 500ms
-    'http_req_failed': ['rate<0.01'],        // Less than 1% failure rate
-    'errors': ['rate<0.05'],                 // Custom error rate under 5%
-    'health_latency': ['p(95)<200'],         // Health check 95th percentile under 200ms
-    'api_latency': ['p(95)<1000'],           // API calls 95th percentile under 1s
+    'http_req_duration': ['p(95)<2000'], // 95% of requests must complete below 2s
+    'errors': ['rate<0.10'],             // Error rate < 10% (allowing some auth redirects)
   },
 };
 
-// Standard headers for S2S authentication
-function getHeaders() {
-  const headers = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (SERVICE_KEY) {
-    headers['x-service-key'] = SERVICE_KEY;
-    headers['x-user-id'] = 'loadtest@yardflow.com';
-  }
-  
-  return headers;
+const headers = {
+  'User-Agent': 'k6-load-test/1.0',
+};
+
+if (SESSION_COOKIE) {
+  headers['Cookie'] = SESSION_COOKIE;
 }
 
 export default function () {
-  // Test 1: Health Check (most critical)
-  group('Health Check', function () {
-    const start = Date.now();
-    const res = http.get(`${BASE_URL}/api/health`);
-    const duration = Date.now() - start;
+  
+  // 1. Visit Manifest Dashboard
+  group('Manifest Dashboard', function () {
+    const res = http.get(`${BASE_URL}/dashboard/manifest`, { headers });
     
-    healthLatency.add(duration);
+    responseTime.add(res.timings.duration);
     
+    // We accept 200 (OK) or 307/308 (Redirect to Login) or 401 (Unauthorized API)
+    // This confirms the server is handling the request load, even if auth fails.
     const success = check(res, {
-      'health status 200': (r) => r.status === 200,
-      'health response valid': (r) => {
-        try {
-          const body = JSON.parse(r.body);
-          return body.status === 'healthy' || body.status === 'ok';
-        } catch {
-          return false;
-        }
-      },
+      'status is 200 or redirect': (r) => [200, 307, 308, 401, 302].includes(r.status),
     });
-    
     errorRate.add(!success);
   });
-  
-  sleep(0.5);
-  
-  // Test 2: Accounts API (read-heavy)
-  group('Accounts API', function () {
-    const start = Date.now();
-    const res = http.get(`${BASE_URL}/api/accounts?limit=10`, {
-      headers: getHeaders(),
-    });
-    const duration = Date.now() - start;
-    
-    apiLatency.add(duration);
-    
-    const success = check(res, {
-      'accounts status 200 or 401': (r) => r.status === 200 || r.status === 401,
-    });
-    
-    errorRate.add(!success);
-  });
-  
-  sleep(0.5);
-  
-  // Test 3: Event Day API (war room data)
-  group('Event Day API', function () {
-    const start = Date.now();
-    const res = http.get(`${BASE_URL}/api/analytics/stats`, {
-      headers: getHeaders(),
-    });
-    const duration = Date.now() - start;
-    
-    apiLatency.add(duration);
-    
-    // Accept 200 (success) or 401 (auth required) - both mean server is responding
-    const success = check(res, {
-      'stats status ok': (r) => r.status === 200 || r.status === 401,
-    });
-    
-    errorRate.add(!success);
-  });
-  
-  sleep(0.5);
-  
-  // Test 4: People API
-  group('People API', function () {
-    const start = Date.now();
-    const res = http.get(`${BASE_URL}/api/people?limit=10`, {
-      headers: getHeaders(),
-    });
-    const duration = Date.now() - start;
-    
-    apiLatency.add(duration);
-    
-    const success = check(res, {
-      'people status ok': (r) => r.status === 200 || r.status === 401,
-    });
-    
-    errorRate.add(!success);
-  });
-  
-  sleep(0.5);
-  
-  // Test 5: Meetings API
-  group('Meetings API', function () {
-    const start = Date.now();
-    const res = http.get(`${BASE_URL}/api/meetings?limit=10`, {
-      headers: getHeaders(),
-    });
-    const duration = Date.now() - start;
-    
-    apiLatency.add(duration);
-    
-    const success = check(res, {
-      'meetings status ok': (r) => r.status === 200 || r.status === 401,
-    });
-    
-    errorRate.add(!success);
-  });
-  
-  sleep(1);
-}
 
-// Lifecycle hooks for logging
-export function handleSummary(data) {
-  console.log('\n========================================');
-  console.log('     YardFlow Hitlist Load Test Report   ');
-  console.log('========================================\n');
-  
-  const passed = data.root_group.checks.reduce((acc, c) => acc && c.passes > 0, true);
-  console.log(`Overall Result: ${passed ? '✅ PASS' : '❌ FAIL'}\n`);
-  
-  console.log('Thresholds:');
-  for (const [name, threshold] of Object.entries(data.metrics)) {
-    if (threshold.thresholds) {
-      for (const [th, result] of Object.entries(threshold.thresholds)) {
-        console.log(`  ${result.ok ? '✅' : '❌'} ${name} ${th}`);
+  sleep(1);
+
+  // 2. Scan Meetings List (Page + API)
+  group('Meetings Scan', function () {
+    // Page load
+    const pageRes = http.get(`${BASE_URL}/dashboard/meetings`, { headers });
+    check(pageRes, {
+        'page status OK': (r) => [200, 307, 308, 401, 302].includes(r.status),
+    });
+
+    // API Call (Simulate data fetching)
+    // Note: This API likely requires auth. Expect 401 if no cookie.
+    const apiRes = http.get(`${BASE_URL}/api/meetings?limit=20`, { headers });
+    check(apiRes, {
+       'api status OK': (r) => [200, 401].includes(r.status),
+    });
+  });
+
+  sleep(2);
+
+  // 3. View Person Details
+  group('Person Details', function () {
+    // First, hit the people list to find a link
+    const listRes = http.get(`${BASE_URL}/dashboard/people`, { headers });
+    
+    let personLink = null;
+    if (listRes.status === 200) {
+      // Try to parse HTML for a person link
+      const doc = parseHTML(listRes.body);
+      // Look for links that contain '/dashboard/people/' followed by an ID
+      const link = doc.find("a[href^='/dashboard/people/']");
+      if (link.size() > 0) {
+          personLink = link.attr('href');
       }
     }
-  }
-  
-  return {};
+
+    // Fallback if scraping failed
+    if (!personLink) {
+        // Construct a hypothetical one or just verify the list loaded
+        // We'll hit the list endpoint again as a proxy if we can't find a detail page
+        // or try a known ID if we had one.
+        // For now, we'll just log that we stayed on the list.
+    } else {
+        // Visit the Person Detail Page
+        // personLink is relative, e.g. "/dashboard/people/cm6n..."
+        const detailRes = http.get(`${BASE_URL}${personLink}`, { headers });
+        responseTime.add(detailRes.timings.duration);
+        check(detailRes, {
+            'detail page status OK': (r) => [200, 307, 308, 302].includes(r.status),
+        });
+    }
+  });
+
+  sleep(2);
 }

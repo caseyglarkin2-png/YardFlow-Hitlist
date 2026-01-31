@@ -144,6 +144,59 @@ const ACCOUNTS = [
     people: [
       { name: 'Jonathan Salama', title: 'CEO', email: 'jonathan@transfix.io' },
     ]
+  },
+  // Tier 1: Enterprise Carriers
+  {
+    name: 'FedEx Freight',
+    industry: 'LTL Carrier',
+    website: 'https://www.fedex.com/en-us/freight.html',
+    icpScore: 94,
+    notes: 'Tier 1: FedEx subsidiary. Massive LTL network. Tech modernization priority.',
+    people: [
+      { name: 'Lance Moll', title: 'President & CEO', email: 'lance.moll@fedex.com' },
+    ]
+  },
+  {
+    name: 'Werner Enterprises',
+    industry: 'Trucking & Logistics',
+    website: 'https://www.werner.com',
+    icpScore: 87,
+    notes: 'Tier 2: Top 5 truckload carrier. Interested in fleet visibility solutions.',
+    people: [
+      { name: 'Derek Leathers', title: 'Chairman & CEO', email: 'derek.leathers@werner.com' },
+      { name: 'Chris Wikoff', title: 'CFO', email: 'chris.wikoff@werner.com' },
+    ]
+  },
+  {
+    name: 'Schneider National',
+    industry: 'Trucking & Intermodal',
+    website: 'https://www.schneider.com',
+    icpScore: 88,
+    notes: 'Tier 2: Major intermodal player. Yard management pain points confirmed.',
+    people: [
+      { name: 'Mark Rourke', title: 'President & CEO', email: 'mark.rourke@schneider.com' },
+    ]
+  },
+  {
+    name: 'Ryder System',
+    industry: 'Fleet Management',
+    website: 'https://www.ryder.com',
+    icpScore: 90,
+    notes: 'Tier 1: Fleet management leader. Looking for yard optimization tech.',
+    people: [
+      { name: 'Robert Sanchez', title: 'CEO', email: 'robert.sanchez@ryder.com' },
+      { name: 'John Diez', title: 'CFO', email: 'john.diez@ryder.com' },
+    ]
+  },
+  {
+    name: 'Old Dominion Freight Line',
+    industry: 'LTL Carrier',
+    website: 'https://www.odfl.com',
+    icpScore: 91,
+    notes: 'Tier 1: Premium LTL service. Technology investment focus.',
+    people: [
+      { name: 'Greg Gantt', title: 'President & CEO', email: 'greg.gantt@odfl.com' },
+    ]
   }
 ];
 
