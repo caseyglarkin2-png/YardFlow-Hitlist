@@ -104,8 +104,8 @@ export async function GET(req: NextRequest) {
     }
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // By ICP tier
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const byIcpTier: Record<string, any> = {
     'Top Tier (90+)': { total: 0, sent: 0, responded: 0 },
     'High (75-89)': { total: 0, sent: 0, responded: 0 },

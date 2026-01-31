@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         limit: body.limit ? parseInt(body.limit, 10) : undefined,
         accountId: body.accountId || undefined,
       };
-    } catch (_error) {
+    } catch {
       // Body is optional, use defaults
       logger.debug('No request body provided, using defaults');
     }
