@@ -163,6 +163,12 @@ model people {
   phone                String?
   linkedin             String?
   notes                String?
+  tier                 String?                @default("Tier 2")
+  score                Int?                   @default(50)
+  status               String?                @default("active")
+  tags                 String[]               @default([])
+  custom_fields        Json?
+  last_contacted_at    DateTime?
   isExecOps            Boolean                @default(false)
   isOps                Boolean                @default(false)
   isProc               Boolean                @default(false)
