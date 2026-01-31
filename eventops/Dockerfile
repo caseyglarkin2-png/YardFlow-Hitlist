@@ -8,7 +8,6 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY prisma ./prisma/
-COPY prisma.config.ts ./
 
 # Install ALL dependencies (including devDependencies needed for build)
 RUN npm ci
@@ -44,7 +43,6 @@ COPY --from=base /app/public ./public
 
 # Copy Prisma files (required for Prisma 7 runtime with driver adapter)
 COPY --from=base /app/prisma ./prisma
-COPY --from=base /app/prisma.config.ts ./prisma.config.ts
 COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
 
