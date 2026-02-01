@@ -3,7 +3,7 @@ import { injectTrackingPixel, wrapLinksWithTracking } from './email-tracking';
 
 // Initialize SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@eventops.io';
+const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'casey@freightroll.com';
 const FROM_NAME = process.env.SENDGRID_FROM_NAME || 'EventOps';
 
 if (SENDGRID_API_KEY) {

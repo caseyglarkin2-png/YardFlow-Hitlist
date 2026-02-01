@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     const sgMail = await import('@sendgrid/mail');
     sgMail.default.setApiKey(process.env.SENDGRID_API_KEY || '');
 
-    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@yardflow.com';
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'casey@freightroll.com';
 
     const trackingPixel = `<img src="${process.env.NEXT_PUBLIC_APP_URL}/api/outreach/track/${outreach.id}/open" width="1" height="1" />`;
 
