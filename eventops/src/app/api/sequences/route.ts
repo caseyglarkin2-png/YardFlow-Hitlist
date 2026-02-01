@@ -14,15 +14,19 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
 
+    // For S2S calls, either require x-user-id or return all sequences
     const userId =
       authResult.type === 'session'
         ? authResult.userId
-        : req.headers.get('x-user-id') || authResult.userId;
+        : req.headers.get('x-user-id') || null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {
-      createdBy: userId,
-    };
+    const where: any = {};
+    
+    // Only filter by userId if present (session users always have one)
+    if (userId) {
+      where.createdBy = userId;
+    }
 
     if (status) {
       where.status = status;

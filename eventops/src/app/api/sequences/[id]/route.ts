@@ -4,8 +4,12 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -13,7 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const sequence = await prisma.outreachSequence.findFirst({
       where: {
-        id: params.id,
+        id,
         createdBy: session.user.id,
       },
       include: {
@@ -39,13 +43,17 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ sequence });
   } catch (error) {
-    logger.error('Error fetching sequence', { id: params.id, error });
+    logger.error('Error fetching sequence', { error });
     return NextResponse.json({ error: 'Failed to fetch sequence' }, { status: 500 });
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -56,7 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const existingSequence = await prisma.outreachSequence.findFirst({
       where: {
-        id: params.id,
+        id,
         createdBy: session.user.id,
       },
     });
@@ -129,7 +137,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const sequence = await prisma.outreachSequence.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
     });
 
@@ -137,33 +145,27 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ sequence });
   } catch (error) {
-    logger.error('Error updating sequence', { id: params.id, error });
+    logger.error('Error updating sequence', { id, error });
     return NextResponse.json({ error: 'Failed to update sequence' }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // First check if sequence exists and belongs to user
     const sequence = await prisma.outreachSequence.findFirst({
       where: {
-        id: params.id,
+        id,
         createdBy: session.user.id,
-      },
-      include: {
-        _count: {
-          select: {
-            enrollments: {
-              where: {
-                status: { in: ['active', 'paused'] },
-              },
-            },
-          },
-        },
       },
     });
 
@@ -171,7 +173,15 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Sequence not found' }, { status: 404 });
     }
 
-    if (sequence._count.enrollments > 0) {
+    // Separate count query for active enrollments (Prisma doesn't support where in _count)
+    const activeEnrollments = await prisma.sequenceEnrollment.count({
+      where: {
+        sequenceId: id,
+        status: { in: ['active', 'paused'] },
+      },
+    });
+
+    if (activeEnrollments > 0) {
       return NextResponse.json(
         { error: 'Cannot delete sequence with active enrollments' },
         { status: 400 }
@@ -179,14 +189,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     await prisma.outreachSequence.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
-    logger.info('Sequence deleted', { sequenceId: params.id });
+    logger.info('Sequence deleted', { sequenceId: id });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error('Error deleting sequence', { id: params.id, error });
+    logger.error('Error deleting sequence', { id, error });
     return NextResponse.json({ error: 'Failed to delete sequence' }, { status: 500 });
   }
 }
