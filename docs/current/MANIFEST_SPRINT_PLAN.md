@@ -1,10 +1,10 @@
 # YardFlow Hitlist: Manifest 2026 Sprint Plan
 
-> **Status**: ✅ COMPLETE  
+> **Status**: 🔄 ACTIVE (U6+ planned)  
 > **Created**: January 31, 2026  
-> **Completed**: January 31, 2026  
+> **Completed (U0-U5)**: January 31, 2026  
+> **Last Updated**: February 1, 2026  
 > **Target Event**: Manifest 2026 (Feb 10-12, 2026)  
-> **Days Remaining**: 10  
 > **Philosophy**: Ship Fast, Ship Often - Atomic, testable tasks  
 > **Reviewed By**: AI Senior TPM Subagent
 
@@ -1068,6 +1068,339 @@ k6 run scripts/load-test.js
 
 ---
 
+## Sprint U6: Data Quality & Import Automation (no timeline)
+
+**Goal**: Reliable, auditable CSV import pipeline with validation, dedupe, and rollback.  
+**Demo**: Upload CSV → dry-run preview → confirm import → audit log entry → rollback restores prior state.  
+**Validation**: All U6 tasks pass unit/integration checks or manual checklist.
+
+### Task U6.1: Publish CSV Template + Sample File
+
+**Priority**: P1  
+**Files**: `public/templates/manifest-2026-import.csv`, `src/app/dashboard/import/page.tsx`  
+**Action**: Provide a downloadable CSV template with required headers and example row.
+
+**Validation**:
+
+- Manual: template downloads from UI and headers match schema
+
+---
+
+### Task U6.2: Define CSV Schema + Parser
+
+**Priority**: P0  
+**Files**: `src/lib/import/csv-schema.ts`, `src/lib/import/parse-csv.ts`  
+**Action**: Define strict schema for Accounts/People rows (zod), parse with consistent header mapping.
+
+**Validation**:
+
+- Unit tests for required fields, header aliases, and type coercion
+- Invalid rows return actionable error messages with row numbers
+
+---
+
+### Task U6.3: Dry-Run Preview Endpoint + UI
+
+**Priority**: P1  
+**Files**: `src/app/api/imports/preview/route.ts`, `src/app/dashboard/import/page.tsx`  
+**Action**: Upload CSV → parse → return preview counts (new/duplicate/error) without writes.
+
+**Validation**:
+
+- Manual checklist: preview matches expected counts for sample CSV
+- API returns 200 with `errors[]` and `summary` fields
+
+---
+
+### Task U6.4: Import Runs + Idempotency Key
+
+**Priority**: P0  
+**Files**: `prisma/schema.prisma`, `prisma/migrations/*`, `src/lib/import/import-runs.ts`  
+**Action**: Store `ImportRun` with `idempotencyKey` (hash of file + user); re-run returns existing run.
+
+**Validation**:
+
+- Integration test: same file twice returns same `import_run_id`
+
+---
+
+### Task U6.5: Validation + Dedupe Policy Selector
+
+**Priority**: P0  
+**Files**: `src/lib/import/validators.ts`, `src/app/dashboard/import/page.tsx`  
+**Rules**:
+
+- People: unique by `email`
+- Accounts: unique by `name + domain` (case-insensitive)
+- Dedupe strategy: `skip`, `merge`, or `overwrite` (explicit user choice)
+
+**Validation**:
+
+- Unit tests cover duplicates, case normalization, and merge behavior
+
+---
+
+### Task U6.6: Import Job Queue (BullMQ)
+
+**Priority**: P0  
+**Files**: `src/lib/queue/queues.ts`, `src/lib/queue/workers.ts`  
+**Action**: Create `import-csv` job that processes validated rows in batches.
+
+**Validation**:
+
+- Integration test enqueues job and persists expected rows
+- Worker logs include `job_id`, `import_run_id`
+
+---
+
+### Task U6.7: Per-Row Error Export (CSV)
+
+**Priority**: P1  
+**Files**: `src/app/api/imports/errors/route.ts`  
+**Action**: Store rejected rows + error messages and allow CSV download.
+
+**Validation**:
+
+- Manual: errors CSV downloads with row + reason
+
+---
+
+### Task U6.8: Import Permissions + Rate Limits
+
+**Priority**: P0  
+**Files**: `src/app/api/imports/route.ts`, `src/lib/auth-service.ts`  
+**Action**: Restrict to admins and allow only one active import per user.
+
+**Validation**:
+
+- Non-admin receives 403
+- Second concurrent import returns 429
+
+---
+
+### Task U6.9: Import Audit Log
+
+**Priority**: P1  
+**Files**: `prisma/schema.prisma`, `src/app/api/imports/runs/route.ts`  
+**Action**: Record `import_run` + `import_item` entries with status per row.
+
+**Validation**:
+
+- Integration test verifies audit entries and row-level status
+- Manual: audit log shows timestamp, user, counts
+
+---
+
+### Task U6.10: Rollback by Import Run
+
+**Priority**: P1  
+**Files**: `src/app/api/imports/{id}/rollback/route.ts`  
+**Action**: Reverse inserts for a given `import_run_id` (soft delete or hard delete per model).
+
+**Validation**:
+
+- Manual checklist: rollback removes imported rows and restores counts
+- Integration test confirms `import_run` status = `ROLLED_BACK`
+
+---
+
+## Sprint U7: Observability & Reliability (no timeline)
+
+**Goal**: Full request tracing, reliable worker signals, and basic error budget visibility.  
+**Demo**: Every API request has a request ID; queue dashboard shows live jobs; missing heartbeat triggers alert.  
+**Validation**: U7 tasks have unit/integration tests or manual verification.
+
+### Task U7.1: Request ID Middleware
+
+**Priority**: P0  
+**Files**: `src/middleware.ts`  
+**Action**: Inject `x-request-id` if missing; pass through to responses and logs.
+
+**Validation**:
+
+- Integration test asserts `x-request-id` response header
+- Logs include `request_id` for sample API call
+
+---
+
+### Task U7.2: Structured Logging Coverage
+
+**Priority**: P0  
+**Files**: `src/lib/logger.ts`, key API routes, queue workers  
+**Action**: Ensure all API/worker flows log JSON with `request_id`, `user_id`, and `job_id`.
+
+**Validation**:
+
+- Manual: sample log line contains required fields
+- Unit test for logger helper (field inclusion)
+
+---
+
+### Task U7.3: PII Redaction in Logs
+
+**Priority**: P0  
+**Files**: `src/lib/logger.ts`  
+**Action**: Redact email/phone fields before logging payloads.
+
+**Validation**:
+
+- Unit test: redact transforms email/phone into masked values
+
+---
+
+### Task U7.4: Queue Retry Caps + DLQ Counts
+
+**Priority**: P1  
+**Files**: `src/lib/queue/queues.ts`, `src/lib/queue/workers.ts`, `src/app/api/queues/route.ts`  
+**Action**: Set retry limits, move exhausted jobs to DLQ, and surface DLQ counts.
+
+**Validation**:
+
+- Manual: forced failure increments DLQ count
+
+---
+
+### Task U7.5: Worker Heartbeat Alerting
+
+**Priority**: P1  
+**Files**: `src/lib/queue/workers.ts`, `docs/current/RAILWAY_HEALTH_ALERTS.md`  
+**Action**: Confirm `worker:last_heartbeat` updates every 60s and add alert on stale key.
+
+**Validation**:
+
+- Manual checklist: stop worker → alert fires within 3 minutes
+
+---
+
+### Task U7.6: Queue Dashboard
+
+**Priority**: P1  
+**Files**: `src/app/dashboard/queues/page.tsx`, `src/app/api/queues/route.ts`  
+**Action**: Add protected BullMQ dashboard or metrics view (job counts, failures, latency).
+
+**Validation**:
+
+- Manual: dashboard loads and shows active/waiting/failed counts
+
+---
+
+### Task U7.7: Worker Self-Heal Verification
+
+**Priority**: P1  
+**Files**: `src/lib/queue/workers.ts`, `docs/current/WAR_ROOM_WALKTHROUGH.md`  
+**Action**: Document and test that critical jobs re-register after crash/restart.
+
+**Validation**:
+
+- Manual checklist: kill worker, restart, verify heartbeat + scheduled jobs reappear
+
+---
+
+### Task U7.8: Error Budget Metrics (Redis)
+
+**Priority**: P2  
+**Files**: `src/lib/metrics/error-budget.ts`, `src/app/api/metrics/error-budget/route.ts`  
+**Action**: Track daily totals and errors in Redis counters; expose simple JSON endpoint.
+
+**Validation**:
+
+- Integration test increments counters and returns expected rates
+
+---
+
+## Sprint U8: Performance & UX Polish (no timeline)
+
+**Goal**: Faster list views and smoother UI with accessibility and visual stability checks.  
+**Demo**: Accounts/People pages page in < 300ms with pagination; event-day cached response < 100ms.  
+**Validation**: U8 tasks have unit/integration tests or manual QA checklist.
+
+### Task U8.1: DB Indexes for List Filters
+
+**Priority**: P0  
+**Files**: `prisma/schema.prisma`, `prisma/migrations/*`  
+**Action**: Add indexes for `eventId`, `createdAt`, `icpScore` on account/people tables.
+
+**Validation**:
+
+- Migration applies cleanly
+- Query plans show index usage for list endpoints
+
+---
+
+### Task U8.2: Server-Side Pagination (Accounts/People)
+
+**Priority**: P0  
+**Files**: `src/app/api/accounts/route.ts`, `src/app/api/people/route.ts`, list pages  
+**Action**: Implement cursor-based pagination with Prisma (limit + cursor). Update UI controls.
+
+**Validation**:
+
+- Integration tests for `nextCursor` and page size
+- Manual: paging controls work and maintain filters
+
+---
+
+### Task U8.3: Event-Day Cache + Invalidation
+
+**Priority**: P0  
+**Files**: `src/app/api/event-day/route.ts`, `src/lib/queue/client.ts`, meeting/outreach writes  
+**Action**: Cache event-day payload with TTL (e.g., 30s) and invalidate on meeting/outreach changes.
+
+**Validation**:
+
+- Integration test verifies cache hit on repeated calls
+- Manual: creating meeting invalidates cache
+
+---
+
+### Task U8.4: Frontend Loading States
+
+**Priority**: P1  
+**Files**: `src/app/dashboard/accounts/loading.tsx`, `src/app/dashboard/people/loading.tsx`, `src/app/dashboard/event-day/loading.tsx`  
+**Action**: Add skeletons/spinners for all core pages.
+
+**Validation**:
+
+- Manual: loading states visible on slow network throttle
+
+---
+
+### Task U8.5: A11y Regression Gate (axe)
+
+**Priority**: P1  
+**Files**: `eventops/tests/a11y/*.ts`  
+**Action**: Add axe-based checks for top 5 pages with a failure threshold in CI.
+
+**Validation**:
+
+- `npm run test:a11y` passes with 0 critical violations
+
+---
+
+### Task U8.6: Visual Regression in CI
+
+**Priority**: P2  
+**Files**: `scripts/visual-regression.sh`, CI workflow  
+**Action**: Capture Playwright screenshots for key pages and compare to baseline in CI.
+
+**Validation**:
+
+- CI fails on intentional visual change without baseline update
+
+---
+
+### Task U8.7: Server-Timing for War Room API
+
+**Priority**: P1  
+**Files**: `src/app/api/event-day/route.ts`  
+**Action**: Emit `Server-Timing` header for DB + cache timings.
+
+**Validation**:
+
+- `curl -I /api/event-day` returns `Server-Timing` header
+
+---
+
 ## Risk Register
 
 | Risk                             | Likelihood | Impact | Mitigation                                              |
@@ -1093,21 +1426,30 @@ U3 (E2E Testing) ◀────────────────────
      │                                          │
      └──── U4 (Platform Integration) ◀──────────┤ (Parallel with U3)
                 │                               │
-                └─────── U5 (Hardening) ◀───────┘
+       └─────── U5 (Hardening) ◀───────┘
+              │
+              └─────── U6 (Imports) ───────┐
+                        │
+                 U7 (Observability) ◀──┐
+                          │
+                     U8 (Perf/UX) ─┘
 ```
 
 ---
 
 ## Sprint Completion Status
 
-| Sprint | Description                 | Status      | Commits                                  |
-| ------ | --------------------------- | ----------- | ---------------------------------------- |
-| U0     | Audit & Baseline            | ✅ COMPLETE | -                                        |
-| U1     | Desktop UI/UX Emergency Fix | ✅ COMPLETE | War Room Mode, Mobile Nav, More Dropdown |
-| U2     | Build & Deploy Verification | ✅ COMPLETE | Health: DB 36ms, Redis 3ms               |
-| U3     | Core Flow E2E Testing       | ✅ COMPLETE | e2e-production.ts, smoke-test.sh         |
-| U4     | Platform Integration        | ✅ COMPLETE | CORS middleware, S2S auth                |
-| U5     | Pre-Event Hardening         | ✅ COMPLETE | Load test, Rollback, Alerts, Walkthrough |
+| Sprint | Description                      | Status      | Commits                                  |
+| ------ | -------------------------------- | ----------- | ---------------------------------------- |
+| U0     | Audit & Baseline                 | ✅ COMPLETE | -                                        |
+| U1     | Desktop UI/UX Emergency Fix      | ✅ COMPLETE | War Room Mode, Mobile Nav, More Dropdown |
+| U2     | Build & Deploy Verification      | ✅ COMPLETE | Health: DB 36ms, Redis 3ms               |
+| U3     | Core Flow E2E Testing            | ✅ COMPLETE | e2e-production.ts, smoke-test.sh         |
+| U4     | Platform Integration             | ✅ COMPLETE | CORS middleware, S2S auth                |
+| U5     | Pre-Event Hardening              | ✅ COMPLETE | Load test, Rollback, Alerts, Walkthrough |
+| U6     | Data Quality & Import Automation | 🟡 PLANNED  | CSV import, validation, dedupe, rollback |
+| U7     | Observability & Reliability      | 🟡 PLANNED  | Request IDs, logging, alerts, metrics    |
+| U8     | Performance & UX Polish          | 🟡 PLANNED  | Pagination, caching, a11y, visual tests  |
 
 ---
 
@@ -1121,6 +1463,104 @@ U3 (E2E Testing) ◀────────────────────
 6. ✅ Runbook and monitoring in place → `ROLLBACK_PROCEDURE.md`, `RAILWAY_HEALTH_ALERTS.md`
 7. ✅ Load test script ready → `load-test.js` (k6, 50 concurrent users)
 8. ✅ Pre-event checklist 100% complete → `PRE_EVENT_CHECKLIST.md`, `WAR_ROOM_WALKTHROUGH.md`
+9. 🟡 Import pipeline is safe and auditable → template, dry-run preview, idempotency, dedupe, audit log, rollback
+10. 🟡 Observability baseline in place → request IDs, PII redaction, heartbeat + DLQ visibility
+11. 🟡 Performance and UX polish complete → pagination, cache invalidation, server timing, a11y + visual checks
+12. ✅ Email send pipeline bulletproof → Zod validation, dedupe, status endpoint, tests passing
+
+---
+
+## SHIP-TODAY CHECKLIST: Email Send Pipeline (Feb 1, 2026)
+
+### ✅ Endpoints (Railway Backend)
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/outreach/send-email` | POST | Send email via SendGrid |
+| `/api/outreach/[id]/status` | GET | Get outreach status + error details |
+
+### ✅ Required Environment Variables
+
+```bash
+# SendGrid (Required for email)
+SENDGRID_API_KEY=SG.xxx
+SENDGRID_FROM_EMAIL=casey@freightroll.com
+SENDGRID_FROM_NAME=FreightRoll
+SENDGRID_REPLY_TO=casey@freightroll.com
+
+# Auth (Required for Vercel → Railway)
+CRON_SECRET=<shared secret with Vercel>
+
+# App URL (for tracking pixels/unsubscribe links)
+NEXT_PUBLIC_APP_URL=https://yardflow-hitlist-production-2f41.up.railway.app
+
+# Database + Redis (Required)
+DATABASE_URL=postgresql://...
+REDIS_URL=redis://...
+```
+
+### ✅ Curl Commands to Verify
+
+```bash
+# 1. Health check
+curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/health | jq .
+
+# 2. Send email (replace OUTREACH_ID with real ID)
+curl -X POST https://yardflow-hitlist-production-2f41.up.railway.app/api/outreach/send-email \
+  -H "Authorization: Bearer $CRON_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"outreachId": "OUTREACH_ID"}' | jq .
+
+# 3. Check status after send
+curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/outreach/OUTREACH_ID/status \
+  -H "Authorization: Bearer $CRON_SECRET" | jq .
+```
+
+### ✅ Response Codes & Meanings
+
+| Code | Error Code | Meaning | Action |
+|------|------------|---------|--------|
+| 200 | - | Email sent successfully | Check `messageId` in response |
+| 400 | `VALIDATION_ERROR` | Missing/invalid outreachId | Fix request payload |
+| 400 | `WRONG_CHANNEL` | Outreach is not EMAIL type | Use correct outreach |
+| 401 | `AUTH_REQUIRED` | Missing/invalid auth token | Add `Authorization: Bearer $CRON_SECRET` |
+| 404 | `NOT_FOUND` | Outreach ID doesn't exist | Check outreach exists |
+| 409 | `ALREADY_SENT` | Email sent within 5 min | Use `force: true` to resend |
+| 422 | `MISSING_EMAIL` | Contact has no email | Import/update contact |
+| 422 | `INVALID_EMAIL` | Email format invalid | Fix contact email |
+| 422 | `MISSING_SUBJECT` | Email subject empty | Generate content first |
+| 422 | `MISSING_BODY` | Email body empty | Generate content first |
+| 503 | `SERVICE_UNAVAILABLE` | SendGrid not configured | Set `SENDGRID_API_KEY` |
+| 500 | `SEND_FAILED` | SendGrid rejected email | Check `errorId` in logs |
+
+### ✅ Vercel → Railway Integration
+
+From Vercel (`api/railway/[...path].ts`):
+
+```typescript
+// Request to Railway
+fetch(`${RAILWAY_URL}/api/outreach/send-email`, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.CRON_SECRET}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ outreachId }),
+});
+```
+
+### ✅ Tests Passing
+
+```bash
+cd eventops && npm run test -- tests/integration/send-email.test.ts --run
+
+# Expected: 11/11 tests passing
+# - Auth validation
+# - Payload validation (outreachId, email, subject, body)
+# - Dedupe protection
+# - SendGrid config check
+# - Successful send with messageId
+```
 
 ---
 
@@ -1164,6 +1604,7 @@ U3 (E2E Testing) ◀────────────────────
 
 ---
 
-_Document Version: 2.0_  
+_Document Version: 2.1_  
 _Created: 2026-01-31_  
-_Completed: 2026-01-31_
+_Completed (U0-U5): 2026-01-31_  
+_Last Updated: 2026-02-01_
