@@ -59,10 +59,20 @@ function classifyEmail(subject: string, body: string): EmailClassification {
         const match = fullText.match(datePattern);
         if (match) {
           // Simplified date parsing - in production use a date parsing library
-          const dayMatch = match[0].match(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i);
+          const dayMatch = match[0].match(
+            /(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i
+          );
           if (dayMatch) {
             // Calculate next occurrence of that day
-            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const days = [
+              'sunday',
+              'monday',
+              'tuesday',
+              'wednesday',
+              'thursday',
+              'friday',
+              'saturday',
+            ];
             const targetDay = days.indexOf(dayMatch[1].toLowerCase());
             const today = new Date();
             const currentDay = today.getDay();
@@ -125,14 +135,14 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
 
     const inboundEmail: InboundEmail = {
-      from: formData.get('from') as string || '',
-      to: formData.get('to') as string || '',
-      subject: formData.get('subject') as string || '',
-      text: formData.get('text') as string || undefined,
-      html: formData.get('html') as string || undefined,
-      headers: formData.get('headers') as string || undefined,
-      spam_score: formData.get('spam_score') as string || undefined,
-      envelope: formData.get('envelope') as string || undefined,
+      from: (formData.get('from') as string) || '',
+      to: (formData.get('to') as string) || '',
+      subject: (formData.get('subject') as string) || '',
+      text: (formData.get('text') as string) || undefined,
+      html: (formData.get('html') as string) || undefined,
+      headers: (formData.get('headers') as string) || undefined,
+      spam_score: (formData.get('spam_score') as string) || undefined,
+      envelope: (formData.get('envelope') as string) || undefined,
     };
 
     logger.info('Received inbound email', {
@@ -149,10 +159,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Classify the email
-    const classification = classifyEmail(
-      inboundEmail.subject,
-      inboundEmail.text || ''
-    );
+    const classification = classifyEmail(inboundEmail.subject, inboundEmail.text || '');
 
     logger.info('Email classified', {
       senderEmail,

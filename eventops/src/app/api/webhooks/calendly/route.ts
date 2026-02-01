@@ -171,7 +171,9 @@ export async function POST(req: NextRequest) {
           duration: durationMinutes,
           meetingType: payload.scheduled_event?.name || 'Calendly Meeting',
           status: 'SCHEDULED',
-          location: payload.scheduled_event?.location?.join_url || payload.scheduled_event?.location?.location,
+          location:
+            payload.scheduled_event?.location?.join_url ||
+            payload.scheduled_event?.location?.location,
           notes: `Booked via Calendly. Reschedule: ${payload.reschedule_url || 'N/A'}`,
           updatedAt: new Date(),
         },

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/email/test
  * Send a test email to verify SendGrid configuration
- * 
+ *
  * Requires auth (session or service key)
  * Body: { to: "email@example.com" }
  */
@@ -27,9 +27,12 @@ export async function POST(req: NextRequest) {
 
     // Check SendGrid configuration
     if (!process.env.SENDGRID_API_KEY) {
-      return NextResponse.json({ 
-        error: 'SendGrid not configured - SENDGRID_API_KEY missing' 
-      }, { status: 503 });
+      return NextResponse.json(
+        {
+          error: 'SendGrid not configured - SENDGRID_API_KEY missing',
+        },
+        { status: 503 }
+      );
     }
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'casey@freightroll.com';
@@ -65,26 +68,28 @@ export async function POST(req: NextRequest) {
 
     logger.info('Test email sent successfully', { to: toEmail });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: 'Test email sent successfully',
       details: {
         from: fromEmail,
         to: toEmail,
         timestamp: new Date().toISOString(),
-      }
+      },
+    });
+  } catch (err) {
+    logger.error('Failed to send test email', {
+      error: err instanceof Error ? err.message : String(err),
     });
 
-  } catch (err) {
-    logger.error('Failed to send test email', { 
-      error: err instanceof Error ? err.message : String(err) 
-    });
-    
     const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ 
-      error: 'Failed to send test email',
-      details: message
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to send test email',
+        details: message,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -99,7 +104,7 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({
     configured: hasApiKey,
     fromEmail: hasApiKey ? fromEmail : 'NOT_CONFIGURED',
-    message: hasApiKey 
+    message: hasApiKey
       ? `SendGrid configured. Sending from: ${fromEmail}`
       : 'SENDGRID_API_KEY not set',
   });
