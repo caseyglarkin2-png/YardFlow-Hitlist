@@ -28,10 +28,10 @@ export async function POST(request: NextRequest) {
 
     // Update status based on activity type
     let newStatus = outreach.status;
-    const updateData: { 
-      updatedAt: Date; 
-      status?: OutreachStatus; 
-      repliedAt?: Date; 
+    const updateData: {
+      updatedAt: Date;
+      status?: OutreachStatus;
+      repliedAt?: Date;
       clickedAt?: Date;
     } = {
       updatedAt: new Date(),

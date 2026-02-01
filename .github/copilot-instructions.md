@@ -2,10 +2,10 @@
 
 ## 🎯 Project Overview
 
-**YardFlow Hitlist** is an event-driven Account-Based Marketing (ABM) platform.
+**YardFlow Hitlist** is an event-driven Account-Based Marketing (ABM) platform backend.
 
 - **Goal**: Target high-value accounts at events (Manifest 2026).
-- **Core Philosophy**: **Ship Fast, Ship Often**. Deploy production updates incrementally.
+- **Core Philosophy**: **Ship Fast, Ship Often**. Deploy production updates incrementally via "Golden Deployments".
 - **Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
 - **Stack**: Next.js 14.2 (App Router), PostgreSQL (Prisma), Redis (BullMQ), NextAuth v5.
 
@@ -14,7 +14,7 @@
 All code lives in `/eventops`, but runs as two distict services on Railway.
 
 ### 1. Web App (`YardFlow-Hitlist`)
-- **Role**: Serves UI and API routes.
+- **Role**: Serves UI and API routes (Headless).
 - **Entry**: `eventops/start-production.sh` (Using Next.js Standalone mode).
 - **Criticality**: Must never block. 502s are unacceptable.
 
@@ -31,9 +31,13 @@ All code lives in `/eventops`, but runs as two distict services on Railway.
 ```bash
 cd eventops
 npm install       # Install deps
-npm run lint      # Check for strict type errors
+npm run lint      # Check for strict type errors (BUILD BREAKER)
 npm run dev       # Start local server
 ```
+
+**Verification Protocol**:
+- Trust `npm run lint` over VS Code UI markers.
+- Run `scripts/post-deploy-verify.sh` for integration sanity checks.
 
 ## 🔍 Codebase Patterns & Standards
 
@@ -82,6 +86,7 @@ export async function POST(req: NextRequest) {
 
 ### 4. AI Agents & Progress Reporting
 Agents (in `src/lib/agents`) are long-running stateful processes.
+- **Architecture**: Specialized squad (Prospecting, Research, Sequence, Content).
 - **State**: Use `AgentStateManager` to persist headers and task status.
 - **Progress**: Agents **must** report progress % during execution via `agentStateManager.updateTaskStatus`.
 
@@ -104,8 +109,10 @@ Agents (in `src/lib/agents`) are long-running stateful processes.
 ## 🔐 Authentication Patterns
 
 ### Service-to-Service (S2S)
-Used for communication between the Vercel Frontend and this Railway Backend.
-- Headers: `x-service-key`, `x-user-id`.
+Used for communication between the Vercel Frontend (`GTM-YardFlow`) and this Railway Backend.
+- **Primary Method**: `Authorization: Bearer <CRON_SECRET>` (Preferred for automated jobs/webhooks).
+- **Secondary Method**: `x-service-key: <SERVICE_TO_SERVICE_SECRET>` (Internal services).
+- **Context Headers**: `x-user-id` (optional) can be passed to impersonate users.
 - Handled transparently by `authServiceOrSession`.
 
 ### NextAuth v5 (Internal)
@@ -124,10 +131,11 @@ Used for direct dashboard access and internal tools.
 | Agent implementations | `src/lib/agents/*.ts` |
 | State manager | `src/lib/agents/state-manager.ts` |
 | API Routes | `src/app/api/**/route.ts` |
+| Webhooks | `src/app/api/webhooks/**/*.ts` |
 
 ## ⚠️ Common Pitfalls
 
 1. **Lint Errors Blocking Build**: `any` types and unused variables (without `_`) will fail the build. Fix them proactively.
 2. **Top-level Init**: Instantiating DB/Redis clients at module scope crashes the build.
 3. **Missing `cd eventops`**: Commands fail silently at repo root.
-4. **Environment Variables**: S2S calls fail without `SERVICE_TO_SERVICE_SECRET`.
+4. **Environment Variables**: S2S calls fail without `CRON_SECRET` or `SERVICE_TO_SERVICE_SECRET`. Ensure `SENDGRID_API_KEY` is present for email features.

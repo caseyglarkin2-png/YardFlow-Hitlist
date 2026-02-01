@@ -18,7 +18,7 @@ export interface AlertPayload {
   message: string;
   metadata?: Record<string, unknown>;
   level?: 'INFO' | 'WARNING' | 'CRITICAL';
-  [key: string]: unknown;  // Index signature for LogContext compatibility
+  [key: string]: unknown; // Index signature for LogContext compatibility
 }
 
 class AlertManagerService {
