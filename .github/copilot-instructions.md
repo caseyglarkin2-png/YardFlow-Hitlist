@@ -31,54 +31,64 @@ All code lives in `/eventops`, but runs as two distict services on Railway.
 ```bash
 cd eventops
 npm install       # Install deps
+npm run lint      # Check for strict type errors
 npm run dev       # Start local server
-npm run build     # Test production build (single-threaded: cpus:1)
 ```
 
-## 🔍 Codebase Patterns
+## 🔍 Codebase Patterns & Standards
 
-### 1. Database & Redis (Lazy Init)
+### 1. Strict Typing & Linting (Non-Negotiable)
+The project enforces strict ESLint rules that function as build breakers.
+- **No Explicit Any**: Never use `: any`. Define interfaces or use constrained types (e.g., `Record<string, unknown>`).
+  - *Bad*: `catch (error: any)`
+  - *Good*: `catch (error)` check `if (error instanceof Error)`
+- **Unused Variables**: Must be prefixed with `_`.
+  - *Bad*: `export async function GET(req: NextRequest)` if `req` isn't used.
+  - *Good*: `export async function GET(_req: NextRequest)`
+
+### 2. Database & Redis (Lazy Init)
 **CRITICAL**: Never initialize connections at the top level. It breaks build steps (Nixpacks).
 Always use the singleton pattern with lazy getters.
 
 ```typescript
 // ✅ Correct: src/lib/db.ts
+// Import usage: import { prisma } from '@/lib/db';
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
-
-// ✅ Correct: src/lib/queue/queues.ts
-export const agentQueue = {
-  get queue() {
-    if (!instance) instance = new Queue("agents");
-    return instance;
-  },
-};
 ```
 
-### 2. Prisma 7 Configuration
-**CRITICAL**: Prisma 7.3.0 requires specific configuration:
-- **Schema**: `eventops/prisma/schema.prisma` - NO `url` in datasource block.
-- **Config**: `eventops/prisma.config.ts` - Contains `datasource.url`.
-- **Client**: Uses `@prisma/adapter-pg`.
-
-### 3. AI Agents & Progress Reporting
-Agents (in `src/lib/agents`) are long-running stateful processes.
-- **State**: Use `AgentStateManager` to persist headers.
-- **Progress**: Agents **must** report progress % during execution.
+### 3. API Route Standards
+All API routes (`src/app/api/**/route.ts`) follow a strict pattern:
+- **Dynamic Mode**: `export const dynamic = 'force-dynamic';`
+- **Auth**: Use `authServiceOrSession(req)` to handle both User Sessions and Service-to-Service calls.
+- **Error Handling**: Standardized JSON error responses.
 
 ```typescript
-// ✅ Correct: Reporting progress in orchestrator
-await agentStateManager.updateTaskStatus(taskId, 'in_progress', undefined, undefined, 20); // 20%
+// ✅ Standard Entry Point
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export async function POST(req: NextRequest) {
+  try {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // ... logic
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 ```
 
-### 4. Worker Integrity
-- **Heartbeat**: The `getHeartbeatWorker` runs every 60s.
-- **Self-Healing**: Workers include a `setInterval` loop to re-assert critical jobs (surviving Redis flushes).
-- **Graceful Shutdown**: All workers listen for `SIGTERM`.
+### 4. AI Agents & Progress Reporting
+Agents (in `src/lib/agents`) are long-running stateful processes.
+- **State**: Use `AgentStateManager` to persist headers and task status.
+- **Progress**: Agents **must** report progress % during execution via `agentStateManager.updateTaskStatus`.
 
-### 5. Next.js App Router Rules
-- **Route Handlers**: `src/app/api/**/route.ts`.
-- **No Server Actions**: Use API Routes for backend logic.
-- **Auth**: Protect routes with `auth()` from `src/auth.ts`.
+### 5. Worker Integrity
+- **Heartbeat**: The `getHeartbeatWorker` runs every 60s.
+- **Self-Healing**: Workers include a `setInterval` loop to re-assert critical jobs.
+- **Graceful Shutdown**: All workers listen for `SIGTERM`.
 
 ## 🚀 Deployment & Integrity
 - **Verification**: Run `scripts/post-deploy-verify.sh` after major changes.
@@ -87,129 +97,37 @@ await agentStateManager.updateTaskStatus(taskId, 'in_progress', undefined, undef
 
 ## 🧪 Testing Patterns
 
-### Test Framework
 - **Runner**: Vitest with `@/` path alias support.
-- **Location**: `eventops/tests/` with subdirectories:
-  - `agents/` - Unit tests for AI agents
-  - `integration/` - API and database integration tests
-  - `smoke/` - Quick production health checks
-  - `e2e/` - End-to-end flows
-
-### Running Tests
-```bash
-cd eventops
-npm test                    # Run all tests
-npm test -- --watch         # Watch mode
-npm test agents/            # Run agent tests only
-```
-
-### Test Patterns
-```typescript
-// ✅ Correct: Use describe/it from vitest
-import { describe, it, expect, vi } from 'vitest';
-
-describe('AgentOrchestrator', () => {
-  it('should execute workflow steps', async () => {
-    // Mock external dependencies
-    vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
-  });
-});
-```
-
-## 🤖 AI Agent Architecture
-
-### Agent Types (8 Total)
-| Agent | Purpose | Status |
-|-------|---------|--------|
-| `ProspectingAgent` | Discover leads from events | ✅ Implemented |
-| `ResearchAgent` | Generate company dossiers | ✅ Implemented |
-| `SequenceEngineerAgent` | Design outreach sequences | ✅ Implemented |
-| `ContentPurposingAgent` | Adapt marketing content | 🚧 Stub |
-| `GraphicsAgent` | Generate visual assets | 🚧 Stub |
-| `SocialsAgent` | Social media coordination | 🚧 Stub |
-| `ContractingAgent` | Generate deal documents | 🚧 Stub |
-| `AgentOrchestrator` | Coordinates all agents | ✅ Implemented |
-
-### Agent State Management
-All agents use `AgentStateManager` for:
-- Task creation and tracking via `agent_tasks` table
-- Progress reporting (0-100%)
-- Retry logic with exponential backoff
-- Parent-child task relationships
-
-```typescript
-// Creating a task
-const task = await agentStateManager.createTask({
-  agentType: 'research',
-  inputData: { accountId: 'xxx' },
-  accountId: 'xxx',
-});
-
-// Updating status with progress
-await agentStateManager.updateTaskStatus(task.id, 'in_progress', undefined, undefined, 50);
-```
-
-### Workflow API
-- **GET** `/api/agents/workflow/[workflowId]` - Get workflow status
-- **POST** `/api/agents/workflow/[workflowId]` - Retry failed step (body: `{ stepName }`)
+- **Location**: `eventops/tests/`.
+- **Mocking**: Use `vi.mock('@/lib/db', ...)` for database isolation.
 
 ## 🔐 Authentication Patterns
 
-### NextAuth v5 (Internal Users)
-```typescript
-import { auth } from '@/auth';
+### Service-to-Service (S2S)
+Used for communication between the Vercel Frontend and this Railway Backend.
+- Headers: `x-service-key`, `x-user-id`.
+- Handled transparently by `authServiceOrSession`.
 
-export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  // Use session.user.id
-}
-```
-
-### Service-to-Service Auth (External Services)
-For calls from `gtm-yardflow` (Vercel frontend):
-```typescript
-// Required headers
-const headers = {
-  'x-service-key': process.env.SERVICE_TO_SERVICE_SECRET,
-  'x-user-id': userId,
-  'x-user-email': userEmail, // Optional
-};
-```
-
-## 📊 Logging Standards
-
-Use the structured JSON logger for all operations:
-```typescript
-import { logger } from '@/lib/logger';
-
-logger.info('Processing request', { accountId, action: 'research' });
-logger.error('Failed to process', { error: error.message, stack: error.stack });
-```
+### NextAuth v5 (Internal)
+Used for direct dashboard access and internal tools.
+- Helper: `import { auth } from '@/auth'`.
 
 ## 📁 Key File Locations
 
 | Purpose | Path |
 |---------|------|
 | Database client | `src/lib/db.ts` |
+| Auth Helper | `src/lib/auth-service.ts` |
 | Redis connection | `src/lib/queue/client.ts` |
 | Queue definitions | `src/lib/queue/queues.ts` |
 | Worker processors | `src/lib/queue/workers.ts` |
 | Agent implementations | `src/lib/agents/*.ts` |
 | State manager | `src/lib/agents/state-manager.ts` |
-| Orchestrator | `src/lib/agents/orchestrator.ts` |
-| Rate limiter | `src/lib/rate-limit.ts` |
-| Auth config | `src/lib/auth.ts` |
-| Prisma schema | `prisma/schema.prisma` |
+| API Routes | `src/app/api/**/route.ts` |
 
 ## ⚠️ Common Pitfalls
 
-1. **Top-level DB/Redis init**: Causes build failures. Always use lazy initialization.
-2. **Missing `cd eventops`**: Commands fail silently at repo root.
-3. **Server Actions**: Not used. All backend logic in API routes.
-4. **Duplicate package.json edits**: Only edit `eventops/package.json`.
-5. **Hardcoded URLs**: Use environment variables for all external services.
-6. **Missing progress updates**: Long-running agents must report progress %.
-
+1. **Lint Errors Blocking Build**: `any` types and unused variables (without `_`) will fail the build. Fix them proactively.
+2. **Top-level Init**: Instantiating DB/Redis clients at module scope crashes the build.
+3. **Missing `cd eventops`**: Commands fail silently at repo root.
+4. **Environment Variables**: S2S calls fail without `SERVICE_TO_SERVICE_SECRET`.

@@ -11,27 +11,29 @@
 ## 📊 Current State Assessment
 
 ### ✅ COMPLETED TODAY (January 31, 2026)
-| Item | Status | Evidence |
-|------|--------|----------|
-| Orchestrator Steps 1-5 | ✅ Complete | All agent types wired in executeTask() |
-| `getWorkflowStatus()` | ✅ Complete | Returns progress %, steps array |
-| `retryFailedStep()` | ✅ Complete | Validates state, increments retry, re-executes |
-| Workflow API | ✅ Complete | GET/POST at `/api/agents/workflow/[workflowId]` |
-| `createSequenceFromBlueprint()` | ✅ **JUST COMPLETED** | Persists to `sequences` table |
-| WorkflowStatus UI Component | ✅ **JUST CREATED** | `components/agents/workflow-status.tsx` |
-| TaskTree Visualization | ✅ **JUST CREATED** | `components/agents/task-tree.tsx` |
-| RetryButton Component | ✅ **JUST CREATED** | `components/agents/retry-button.tsx` |
-| Progress UI Component | ✅ **JUST ADDED** | `components/ui/progress.tsx` |
-| Export API GET handler | ✅ **JUST ADDED** | Browser-friendly CSV export |
-| Export API meetings | ✅ **JUST ADDED** | Now supports accounts, people, outreach, meetings |
-| ExportButton Component | ✅ **JUST CREATED** | `components/reports/export-button.tsx` |
-| Sequence Engineer Tests | ✅ **JUST ADDED** | 3 real tests for createSequenceFromBlueprint |
-| Vitest Config | ✅ Complete | Path aliases working |
-| S2S Auth Tests | ✅ 7/8 passing | Integration tests in place |
-| Analytics Funnel API | ✅ Exists | `/api/analytics/funnel` |
-| Analytics Cohort API | ✅ Exists | `/api/analytics/cohort` |
+
+| Item                            | Status                | Evidence                                          |
+| ------------------------------- | --------------------- | ------------------------------------------------- |
+| Orchestrator Steps 1-5          | ✅ Complete           | All agent types wired in executeTask()            |
+| `getWorkflowStatus()`           | ✅ Complete           | Returns progress %, steps array                   |
+| `retryFailedStep()`             | ✅ Complete           | Validates state, increments retry, re-executes    |
+| Workflow API                    | ✅ Complete           | GET/POST at `/api/agents/workflow/[workflowId]`   |
+| `createSequenceFromBlueprint()` | ✅ **JUST COMPLETED** | Persists to `sequences` table                     |
+| WorkflowStatus UI Component     | ✅ **JUST CREATED**   | `components/agents/workflow-status.tsx`           |
+| TaskTree Visualization          | ✅ **JUST CREATED**   | `components/agents/task-tree.tsx`                 |
+| RetryButton Component           | ✅ **JUST CREATED**   | `components/agents/retry-button.tsx`              |
+| Progress UI Component           | ✅ **JUST ADDED**     | `components/ui/progress.tsx`                      |
+| Export API GET handler          | ✅ **JUST ADDED**     | Browser-friendly CSV export                       |
+| Export API meetings             | ✅ **JUST ADDED**     | Now supports accounts, people, outreach, meetings |
+| ExportButton Component          | ✅ **JUST CREATED**   | `components/reports/export-button.tsx`            |
+| Sequence Engineer Tests         | ✅ **JUST ADDED**     | 3 real tests for createSequenceFromBlueprint      |
+| Vitest Config                   | ✅ Complete           | Path aliases working                              |
+| S2S Auth Tests                  | ✅ 7/8 passing        | Integration tests in place                        |
+| Analytics Funnel API            | ✅ Exists             | `/api/analytics/funnel`                           |
+| Analytics Cohort API            | ✅ Exists             | `/api/analytics/cohort`                           |
 
 ### 📊 Test Results (Post-Execution)
+
 ```
 Agent Tests:  13 passed | 20 todo | 0 failed
 Integration:   7 passed |  1 skipped | 0 failed
@@ -39,38 +41,43 @@ Total:        20 passed | 21 todo | 0 failed
 ```
 
 ### 🟡 P2 (Nice to Have for Demo)
-| Item | Priority | Est. | Sprint |
-|------|----------|------|--------|
-| Email send job (BullMQ) | P2 | 60m | S3 |
-| Email stats API | P2 | 45m | S3 |
-| Email stats dashboard | P2 | 45m | S3 |
-| Rate limiting for exports | P2 | 30m | S4 |
-| Load test script (k6) | P2 | 60m | S5 |
+
+| Item                      | Priority | Est. | Sprint |
+| ------------------------- | -------- | ---- | ------ |
+| Email send job (BullMQ)   | P2       | 60m  | S3     |
+| Email stats API           | P2       | 45m  | S3     |
+| Email stats dashboard     | P2       | 45m  | S3     |
+| Rate limiting for exports | P2       | 30m  | S4     |
+| Load test script (k6)     | P2       | 60m  | S5     |
 
 ### ⬜ P3 (Defer Post-Manifest)
-| Item | Priority | Notes |
-|------|----------|-------|
-| GraphicsAgent real impl | P3 | DALL-E/Canva integration |
-| SocialsAgent real impl | P3 | LinkedIn/Twitter API |
-| ContractingAgent real impl | P3 | PDF generation |
-| Research deep dive | P3 | LinkedIn scraping |
-| Content AI adaptation | P3 | 4 TODOs in content-purposing |
+
+| Item                       | Priority | Notes                        |
+| -------------------------- | -------- | ---------------------------- |
+| GraphicsAgent real impl    | P3       | DALL-E/Canva integration     |
+| SocialsAgent real impl     | P3       | LinkedIn/Twitter API         |
+| ContractingAgent real impl | P3       | PDF generation               |
+| Research deep dive         | P3       | LinkedIn scraping            |
+| Content AI adaptation      | P3       | 4 TODOs in content-purposing |
 
 ---
 
 ## 🏃 Sprint Breakdown
 
 ### Sprint S1: UI Components for Workflow Visibility
+
 > **Goal**: Show workflow progress in dashboard  
 > **Time**: 3 hours  
 > **Demo**: See live workflow progress with retry capability
 
 #### S1.1: Implement createSequenceFromBlueprint
+
 **Est**: 60 min | **Priority**: P1
 
 **File**: `eventops/src/lib/agents/sequence-engineer-agent.ts`
 
 **Current Code** (lines 133-147):
+
 ```typescript
 async createSequenceFromBlueprint(
   _blueprint: SequenceBlueprint,
@@ -83,13 +90,14 @@ async createSequenceFromBlueprint(
 ```
 
 **New Implementation**:
+
 ```typescript
 async createSequenceFromBlueprint(
   blueprint: SequenceBlueprint,
   campaignId?: string
 ): Promise<string> {
   const sequenceId = `seq-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  
+
   // Create outreach_sequences record
   await prisma.outreach_sequences.create({
     data: {
@@ -135,15 +143,26 @@ async createSequenceFromBlueprint(
 ```
 
 **Test**: `tests/agents/sequence-engineer.test.ts`
+
 ```typescript
-it('should create sequence in database from blueprint', async () => {
-  const blueprint = { name: 'Test', description: 'Test', targetPersona: 'Ops', minIcpScore: 70, steps: [] };
-  const sequenceId = await agent.createSequenceFromBlueprint(blueprint, 'campaign-1');
+it("should create sequence in database from blueprint", async () => {
+  const blueprint = {
+    name: "Test",
+    description: "Test",
+    targetPersona: "Ops",
+    minIcpScore: 70,
+    steps: [],
+  };
+  const sequenceId = await agent.createSequenceFromBlueprint(
+    blueprint,
+    "campaign-1",
+  );
   expect(sequenceId).toMatch(/^seq-/);
 });
 ```
 
 **Validation**:
+
 ```bash
 npm run test:agents -- --grep "createSequenceFromBlueprint"
 ```
@@ -151,6 +170,7 @@ npm run test:agents -- --grep "createSequenceFromBlueprint"
 ---
 
 #### S1.2: Workflow Status UI Component
+
 **Est**: 45 min | **Priority**: P1
 
 **File**: `eventops/src/components/agents/workflow-status.tsx`
@@ -211,7 +231,7 @@ export function WorkflowStatus({ workflowId, pollInterval = 3000, onComplete }: 
       const data = await res.json();
       setStatus(data);
       setError(null);
-      
+
       if (data.status === 'completed' || data.status === 'failed') {
         setIsPolling(false);
         if (data.status === 'completed') {
@@ -225,9 +245,9 @@ export function WorkflowStatus({ workflowId, pollInterval = 3000, onComplete }: 
 
   useEffect(() => {
     fetchStatus();
-    
+
     if (!isPolling) return;
-    
+
     const interval = setInterval(fetchStatus, pollInterval);
     return () => clearInterval(interval);
   }, [fetchStatus, pollInterval, isPolling]);
@@ -257,7 +277,7 @@ export function WorkflowStatus({ workflowId, pollInterval = 3000, onComplete }: 
           {status.status.replace('_', ' ')}
         </Badge>
       </div>
-      
+
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span>{status.progress}% complete</span>
@@ -278,6 +298,7 @@ export function WorkflowStatus({ workflowId, pollInterval = 3000, onComplete }: 
 ```
 
 **Validation**:
+
 ```bash
 # Visual: Add component to dashboard and verify polling works
 npm run dev
@@ -287,6 +308,7 @@ npm run dev
 ---
 
 #### S1.3: Task Tree Visualization
+
 **Est**: 45 min | **Priority**: P1
 
 **File**: `eventops/src/components/agents/task-tree.tsx`
@@ -348,18 +370,18 @@ export function TaskTree({ steps, showTimestamps = false }: TaskTreeProps) {
           <div className="mt-0.5">
             <StatusIcon status={step.status} />
           </div>
-          
+
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium">
               {stepLabels[step.step] || step.step}
             </p>
-            
+
             {step.error && (
               <p className="text-xs text-red-600 mt-1 truncate" title={step.error}>
                 {step.error}
               </p>
             )}
-            
+
             {showTimestamps && step.completedAt && (
               <p className="text-xs text-muted-foreground mt-1">
                 Completed {new Date(step.completedAt).toLocaleTimeString()}
@@ -378,6 +400,7 @@ export function TaskTree({ steps, showTimestamps = false }: TaskTreeProps) {
 ---
 
 #### S1.4: Retry Button Component
+
 **Est**: 30 min | **Priority**: P1
 
 **File**: `eventops/src/components/agents/retry-button.tsx`
@@ -403,7 +426,7 @@ export function RetryButton({ workflowId, taskId, onSuccess, disabled }: RetryBu
 
   const handleRetry = async () => {
     setIsRetrying(true);
-    
+
     try {
       const res = await fetch(`/api/agents/workflow/${workflowId}`, {
         method: 'POST',
@@ -420,7 +443,7 @@ export function RetryButton({ workflowId, taskId, onSuccess, disabled }: RetryBu
         title: 'Retry started',
         description: 'The failed task is being retried.',
       });
-      
+
       onSuccess?.();
     } catch (e) {
       toast({
@@ -457,40 +480,48 @@ export function RetryButton({ workflowId, taskId, onSuccess, disabled }: RetryBu
 ---
 
 ### Sprint S4: Export & Reporting
+
 > **Goal**: Download CSV exports for Manifest prep  
 > **Time**: 1.5 hours  
 > **Demo**: Export accounts to CSV
 
 #### S4.1: Export API with CSV Support
+
 **Est**: 45 min | **Priority**: P1
 
 **File**: `eventops/src/app/api/export/route.ts`
 
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { authServiceOrSession } from '@/lib/auth-service';
-import { prisma } from '@/lib/db';
-import { logger } from '@/lib/logger';
+import { NextRequest, NextResponse } from "next/server";
+import { authServiceOrSession } from "@/lib/auth-service";
+import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   const authResult = await authServiceOrSession(request);
   if (!authResult) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type') || 'accounts';
-  const format = searchParams.get('format') || 'json';
-  const limit = Math.min(parseInt(searchParams.get('limit') || '1000'), 10000);
-  const offset = parseInt(searchParams.get('offset') || '0');
+  const type = searchParams.get("type") || "accounts";
+  const format = searchParams.get("format") || "json";
+  const limit = Math.min(parseInt(searchParams.get("limit") || "1000"), 10000);
+  const offset = parseInt(searchParams.get("offset") || "0");
 
-  logger.info('Export requested', { type, format, limit, offset, userId: authResult.userId });
+  logger.info("Export requested", {
+    type,
+    format,
+    limit,
+    offset,
+    userId: authResult.userId,
+  });
 
   try {
     let data: Record<string, unknown>[];
 
     switch (type) {
-      case 'accounts':
+      case "accounts":
         data = await prisma.target_accounts.findMany({
           take: limit,
           skip: offset,
@@ -505,7 +536,7 @@ export async function GET(request: NextRequest) {
           },
         });
         break;
-      case 'people':
+      case "people":
         data = await prisma.people.findMany({
           take: limit,
           skip: offset,
@@ -520,7 +551,7 @@ export async function GET(request: NextRequest) {
           },
         });
         break;
-      case 'meetings':
+      case "meetings":
         data = await prisma.Meeting.findMany({
           take: limit,
           skip: offset,
@@ -535,47 +566,53 @@ export async function GET(request: NextRequest) {
         });
         break;
       default:
-        return NextResponse.json({ error: 'Invalid export type' }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid export type" },
+          { status: 400 },
+        );
     }
 
-    if (format === 'csv') {
+    if (format === "csv") {
       const csv = convertToCSV(data);
       return new NextResponse(csv, {
         headers: {
-          'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="${type}-export-${Date.now()}.csv"`,
+          "Content-Type": "text/csv",
+          "Content-Disposition": `attachment; filename="${type}-export-${Date.now()}.csv"`,
         },
       });
     }
 
     return NextResponse.json({ data, count: data.length, offset, limit });
   } catch (error) {
-    logger.error('Export failed', { error, type });
-    return NextResponse.json({ error: 'Export failed' }, { status: 500 });
+    logger.error("Export failed", { error, type });
+    return NextResponse.json({ error: "Export failed" }, { status: 500 });
   }
 }
 
 function convertToCSV(data: Record<string, unknown>[]): string {
-  if (!data.length) return '';
-  
+  if (!data.length) return "";
+
   const headers = Object.keys(data[0]);
-  const headerRow = headers.join(',');
-  
-  const rows = data.map(row =>
-    headers.map(h => {
-      const val = row[h];
-      if (val === null || val === undefined) return '';
-      if (val instanceof Date) return val.toISOString();
-      if (typeof val === 'string') return `"${val.replace(/"/g, '""')}"`;
-      return String(val);
-    }).join(',')
+  const headerRow = headers.join(",");
+
+  const rows = data.map((row) =>
+    headers
+      .map((h) => {
+        const val = row[h];
+        if (val === null || val === undefined) return "";
+        if (val instanceof Date) return val.toISOString();
+        if (typeof val === "string") return `"${val.replace(/"/g, '""')}"`;
+        return String(val);
+      })
+      .join(","),
   );
 
-  return [headerRow, ...rows].join('\n');
+  return [headerRow, ...rows].join("\n");
 }
 ```
 
 **Validation**:
+
 ```bash
 curl -H "Cookie: ..." "http://localhost:3000/api/export?type=accounts&format=csv" -o test.csv
 head -3 test.csv
@@ -584,6 +621,7 @@ head -3 test.csv
 ---
 
 #### S4.2: Export Button Component
+
 **Est**: 30 min | **Priority**: P1
 
 **File**: `eventops/src/components/reports/export-button.tsx`
@@ -607,7 +645,7 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 
   const handleExport = async () => {
     setIsExporting(true);
-    
+
     try {
       // Trigger download via window.location
       window.location.href = `/api/export?type=${type}&format=csv`;
@@ -641,11 +679,13 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 ---
 
 ### Sprint S3: Email Pipeline (P2)
+
 > **Goal**: Send and track emails via SendGrid  
 > **Time**: 2.5 hours  
 > **Demo**: Send email, see open tracking
 
 #### S3.1: Email Send Job
+
 **Est**: 60 min | **Priority**: P2
 
 **File**: `eventops/src/lib/queue/jobs/send-email.ts`
@@ -655,6 +695,7 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 ---
 
 #### S3.2: Email Stats API
+
 **Est**: 45 min | **Priority**: P2
 
 **File**: `eventops/src/app/api/email/stats/route.ts`
@@ -662,6 +703,7 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 ---
 
 #### S3.3: Email Stats Dashboard
+
 **Est**: 45 min | **Priority**: P2
 
 **File**: `eventops/src/components/email/stats-card.tsx`
@@ -669,11 +711,13 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 ---
 
 ### Sprint S5: Production Hardening (P2)
+
 > **Goal**: Load test and monitoring  
 > **Time**: 3 hours  
 > **Demo**: System handles 100 concurrent users
 
 #### S5.1: k6 Load Test Script
+
 **Est**: 60 min | **Priority**: P2
 
 **File**: `eventops/tests/load/k6-load-test.js`
@@ -683,6 +727,7 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 ## 📋 Execution Order
 
 ### Day 1 (Today) - P1 Sprint
+
 ```
 09:00 - S1.1: createSequenceFromBlueprint (60m)
 10:00 - S1.2: Workflow Status UI (45m)
@@ -696,6 +741,7 @@ export function ExportButton({ type, label }: ExportButtonProps) {
 ```
 
 ### Day 2 - P2 Sprint (if time permits)
+
 ```
 - S3: Email Pipeline
 - S5: Load Testing
@@ -734,6 +780,7 @@ echo "=== Validation Complete ==="
 ## 📊 Definition of Done
 
 Each task must:
+
 - [x] Have working code committed
 - [x] Have at least one test (unit or integration)
 - [ ] Pass type checking (`tsc --noEmit`)
@@ -741,6 +788,7 @@ Each task must:
 - [x] Have a validation command documented
 
 Each sprint must:
+
 - [x] Have all tasks completed
 - [x] Pass full test suite
 - [ ] Build successfully
@@ -771,6 +819,7 @@ Each sprint must:
 | `tests/agents/sequence.test.ts` | Added 3 real tests |
 
 **Test Results:**
+
 ```
 ✓ tests/agents/orchestrator.test.ts (10 tests)
 ✓ tests/agents/sequence.test.ts (3 passed, 2 todo)
@@ -780,6 +829,7 @@ Total: 20 passed | 0 failed
 ```
 
 **Production Status:**
+
 ```
 Health: HEALTHY
 Database: OK
@@ -790,6 +840,7 @@ Queues: All operational
 ### Ready for Manifest 2026 Demo ✅
 
 The platform now has:
+
 1. **Workflow Visibility** - Watch campaigns execute in real-time
 2. **Retry Capability** - Recover from AI failures with one click
 3. **Data Exports** - Download accounts, contacts, meetings as CSV
@@ -797,16 +848,15 @@ The platform now has:
 
 ### Remaining P2/P3 for Post-Event
 
-| Priority | Item | Est. Hours |
-|----------|------|------------|
-| P2 | Email send job (BullMQ) | 1h |
-| P2 | Email stats API & dashboard | 1.5h |
-| P2 | Load test script (k6) | 1h |
-| P3 | GraphicsAgent (DALL-E) | 8-16h |
-| P3 | SocialsAgent (LinkedIn API) | 16-24h |
-| P3 | ContractingAgent (PDF gen) | 8-12h |
+| Priority | Item                        | Est. Hours |
+| -------- | --------------------------- | ---------- |
+| P2       | Email send job (BullMQ)     | 1h         |
+| P2       | Email stats API & dashboard | 1.5h       |
+| P2       | Load test script (k6)       | 1h         |
+| P3       | GraphicsAgent (DALL-E)      | 8-16h      |
+| P3       | SocialsAgent (LinkedIn API) | 16-24h     |
+| P3       | ContractingAgent (PDF gen)  | 8-12h      |
 
 ---
 
 **Manifest 2026 Readiness: GO ✅**
-
