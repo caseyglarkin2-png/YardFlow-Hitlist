@@ -244,12 +244,13 @@ model sequence_enrollments {
   id           String    @id @default(cuid())
   sequence_id  String
   contact_id   String
-  status       String    @default("ACTIVE") // 'ACTIVE' | 'COMPLETED' | 'EXITED' | 'FAILED'
+  status       String    @default("ACTIVE") // 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'EXITED' | 'FAILED'
   current_step Int       @default(0)
   enrolled_at  DateTime  @default(now())
   completed_at DateTime?
   exited_at    DateTime?
   exit_reason  String?
+  resume_at    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
