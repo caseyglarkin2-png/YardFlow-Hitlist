@@ -78,7 +78,7 @@ export async function GET(
     sentAt: outreach.sentAt?.toISOString() || null,
     sentBy: outreach.sentBy,
     openedAt: outreach.openedAt?.toISOString() || null,
-    clickedAt: outreach.clickedAt?.toISOString() || null,
+    clickedAt: null, // Click tracking not implemented in outreach model
     respondedAt: outreach.respondedAt?.toISOString() || null,
     bouncedAt: outreach.bouncedAt?.toISOString() || null,
     lastError,
