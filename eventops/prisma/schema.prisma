@@ -321,6 +321,7 @@ model users {
   emailVerified      DateTime?
   password           String?
   image              String?
+  googleId           String?            @unique  // Google OAuth subject ID
   role               Role               @default(MEMBER)
   activeEventId      String?
   createdAt          DateTime           @default(now())
