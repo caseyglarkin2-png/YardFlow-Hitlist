@@ -1479,6 +1479,27 @@ U3 (E2E Testing) ◀────────────────────
 | `/api/outreach/send-email` | POST | Send email via SendGrid |
 | `/api/outreach/[id]/status` | GET | Get outreach status + error details |
 
+### ✅ Status Endpoint Response Schema
+
+```json
+{
+  "id": "string",
+  "status": "DRAFT|SENT|OPENED|RESPONDED|BOUNCED",
+  "channel": "EMAIL|LINKEDIN|PHONE",
+  "subject": "string|null",
+  "sentAt": "ISO8601|null",
+  "sentBy": "string|null",
+  "openedAt": "ISO8601|null",
+  "clickedAt": null,              // TODO: Click tracking not wired in backend
+  "respondedAt": "ISO8601|null",
+  "bouncedAt": "ISO8601|null",
+  "lastError": "string|null",
+  "recipient": { "name": "string", "email": "string|null", "company": "string|null" }
+}
+```
+
+> **Note**: `clickedAt` always returns `null` - click tracking is not implemented in the outreach model.
+
 ### ✅ Required Environment Variables
 
 ```bash
