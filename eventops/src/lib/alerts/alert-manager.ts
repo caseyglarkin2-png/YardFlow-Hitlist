@@ -16,8 +16,9 @@ export type AlertType = 'VIP_CHECKIN' | 'MEETING_COMPLETED' | 'SYSTEM_ERROR';
 export interface AlertPayload {
   type: AlertType;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   level?: 'INFO' | 'WARNING' | 'CRITICAL';
+  [key: string]: unknown;  // Index signature for LogContext compatibility
 }
 
 class AlertManagerService {

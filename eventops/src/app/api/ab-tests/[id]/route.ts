@@ -71,6 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     opened: number;
     clicked: number;
     replied: number;
+    [key: string]: number;  // Allow indexing with event string
   }
 
   interface TestResults {
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   };
 
   const key = variant === 'A' ? 'variantA' : 'variantB';
-  results[key][event] = (results[key][event] || 0) + 1;
+  results[key][event as string] = (results[key][event as string] || 0) + 1;
 
   // Check if we should declare a winner
   let winnerId = null;
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const updated = await prisma.ab_tests.update({
     where: { id: params.id },
     data: {
-      results,
+      results: results as unknown as Parameters<typeof prisma.ab_tests.update>[0]['data']['results'],
       ...(winnerId && { winnerId, status: 'COMPLETED', completedAt: new Date() }),
     },
   });

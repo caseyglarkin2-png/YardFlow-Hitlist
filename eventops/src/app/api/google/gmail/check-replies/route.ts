@@ -19,10 +19,11 @@ export async function POST() {
     console.error('Gmail reply check error:', error);
 
     const cbStatus = googleCircuitBreaker.getStatus(session.user.id);
+    const errorMessage = error instanceof Error ? error.message : 'Gmail reply check failed';
 
     return NextResponse.json(
       {
-        error: error.message || 'Gmail reply check failed',
+        error: errorMessage,
         circuitBreaker: cbStatus,
       },
       { status: cbStatus.state === 'open' ? 429 : 500 }

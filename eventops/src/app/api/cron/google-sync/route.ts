@@ -72,17 +72,18 @@ export async function GET(request: Request) {
 
         failureCount++;
 
+        const errMsg = error instanceof Error ? error.message : String(error);
         await logGoogleAPICall(
           user.id,
           'calendar',
           'cron_sync_failure',
           {
-            error: error.message,
+            error: errMsg,
           },
           false
         );
 
-        if (error.message.includes('refresh failed') || error.message.includes('revoked')) {
+        if (errMsg.includes('refresh failed') || errMsg.includes('revoked')) {
           await prisma.users.update({
             where: { id: user.id },
             data: { googleSyncPaused: true },

@@ -16,6 +16,8 @@ const envSchema = z.object({
   // Optional APIs
   SERPAPI_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  SENDGRID_API_KEY: z.string().optional(),
+  SLACK_WEBHOOK_URL: z.string().optional(),
 
   // Environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -44,6 +46,8 @@ export const env = parsed.success
       ENABLE_AUTO_ENRICHMENT: (process.env.ENABLE_AUTO_ENRICHMENT || 'false') as 'true' | 'false',
       SERPAPI_KEY: process.env.SERPAPI_KEY,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      SENDGRID_API_KEY: process.env.SENDGRID_API_KEY,
+      SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
       NODE_ENV: (process.env.NODE_ENV || 'development') as 'development' | 'production' | 'test',
     };
 

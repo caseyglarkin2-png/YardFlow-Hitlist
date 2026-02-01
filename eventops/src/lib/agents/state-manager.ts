@@ -377,6 +377,7 @@ export class AgentStateManager {
     parentTaskId: string | null;
     retryCount: number;
     maxRetries: number;
+    progress: number;
     createdAt: Date;
     updatedAt: Date;
     startedAt: Date | null;

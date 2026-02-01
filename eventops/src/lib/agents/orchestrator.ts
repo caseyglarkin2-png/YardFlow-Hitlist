@@ -159,19 +159,18 @@ export class AgentOrchestrator {
 
         // Retrieve discovered accounts
         // For Golden Build: We assume prospecting populates the database
-        // and we fetch the most recent companies for this event
+        // and we fetch the most recent accounts for this event
         try {
-          const recentCompanies = await prisma.companies.findMany({
+          const recentAccounts = await prisma.target_accounts.findMany({
             where: {
-              // Assuming 'tags' or similar links to event, or just simple fetch
               // For now, simpler: just don't crash if 0 found
-              created_at: { gt: new Date(Date.now() - 1000 * 60 * 60) }, // Last hour
+              createdAt: { gt: new Date(Date.now() - 1000 * 60 * 60) }, // Last hour
             },
             select: { id: true },
             take: 10,
           });
-          params.targetAccounts = recentCompanies.map((c) => c.id);
-          logger.info('Auto-discovered accounts', { count: params.targetAccounts.length });
+          params.targetAccounts = recentAccounts.map((a: { id: string }) => a.id);
+          logger.info('Auto-discovered accounts', { count: params.targetAccounts?.length ?? 0 });
         } catch (dbError) {
           logger.warn('Failed to retrieve auto-discovered accounts', { error: dbError });
           params.targetAccounts = [];

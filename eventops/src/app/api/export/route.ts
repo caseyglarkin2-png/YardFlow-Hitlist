@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { OutreachStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,7 +132,7 @@ async function handleExport(
     const outreach = await prisma.outreach.findMany({
       where: {
         ...(activeEventId && { people: { target_accounts: { eventId: activeEventId } } }),
-        ...(statusFilter && { status: statusFilter }),
+        ...(statusFilter && { status: statusFilter as OutreachStatus }),
       },
       include: {
         people: {
@@ -165,33 +166,33 @@ async function handleExport(
 
   // Export meetings
   if (type === 'meetings') {
-    const meetings = await prisma.Meeting.findMany({
+    const meetings = await prisma.meeting.findMany({
       where: {
-        ...(activeEventId && { eventId: activeEventId }),
+        // Meeting doesn't have eventId directly, so skip event filter
       },
       include: {
         people: {
           select: {
             name: true,
             email: true,
-          },
-        },
-        target_accounts: {
-          select: {
-            name: true,
+            target_accounts: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
     });
 
-    data = meetings.map((m) => ({
-      Title: m.title,
-      Account: m.target_accounts?.name || '',
+    data = meetings.map((m: { meetingType: string | null; people: { name: string; email: string | null; target_accounts: { name: string } | null } | null; status: string; dealStage: string | null; scheduledAt: Date; createdAt: Date }) => ({
+      'Meeting Type': m.meetingType || '',
+      Account: m.people?.target_accounts?.name || '',
       Contact: m.people?.name || '',
       'Contact Email': m.people?.email || '',
       Status: m.status,
       'Deal Stage': m.dealStage || '',
-      'Scheduled Time': m.scheduledTime?.toISOString() || '',
+      'Scheduled At': m.scheduledAt?.toISOString() || '',
       'Created At': m.createdAt.toISOString(),
     }));
 

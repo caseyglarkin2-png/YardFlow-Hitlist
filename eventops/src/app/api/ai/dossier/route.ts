@@ -34,9 +34,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Parse the rawData JSON
+    const rawDataObj = typeof dossier.rawData === 'object' && dossier.rawData !== null
+      ? dossier.rawData as Record<string, unknown>
+      : {};
     const parsedDossier = {
       ...dossier,
-      ...(dossier.rawData as Record<string, unknown>), // Contains the full dossier structure
+      ...rawDataObj, // Contains the full dossier structure
     };
 
     return NextResponse.json({

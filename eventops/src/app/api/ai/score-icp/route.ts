@@ -161,6 +161,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('ICP scoring error:', error);
-    return NextResponse.json({ error: error.message || 'Scoring failed' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Scoring failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

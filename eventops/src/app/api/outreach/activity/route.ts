@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { OutreachStatus } from '@prisma/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,16 +30,16 @@ export async function POST(request: NextRequest) {
     let newStatus = outreach.status;
     const updateData: { 
       updatedAt: Date; 
-      status?: string; 
+      status?: OutreachStatus; 
       repliedAt?: Date; 
       clickedAt?: Date;
     } = {
       updatedAt: new Date(),
     };
 
-    if (type === 'RESPONDED' && outreach.status !== 'RESPONDED') {
-      newStatus = 'RESPONDED';
-      updateData.status = 'RESPONDED';
+    if (type === 'RESPONDED' && outreach.status !== OutreachStatus.RESPONDED) {
+      newStatus = OutreachStatus.RESPONDED;
+      updateData.status = OutreachStatus.RESPONDED;
       updateData.repliedAt = new Date();
     } else if (type === 'CLICKED' && outreach.status === 'OPENED') {
       // Track clicks but don't change status if already replied

@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
                 tier: p.tier,
                 score: p.score,
                 tags: p.tags,
-                custom_fields: p.customFields,
+                custom_fields: p.customFields as Parameters<typeof prisma.people.update>[0]['data']['custom_fields'],
                 updatedAt: new Date(),
               }
             });
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
               score: p.score ?? 50,
               status: 'active',
               tags: p.tags || [],
-              custom_fields: p.customFields || {},
+              custom_fields: (p.customFields || {}) as Parameters<typeof prisma.people.create>[0]['data']['custom_fields'],
               updatedAt: new Date(),
             }
           });

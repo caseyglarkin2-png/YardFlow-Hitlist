@@ -19,8 +19,8 @@ import type {
   GenerateEmailsJobData,
   SequenceStepJobData,
   AgentJobData,
-  heartbeatQueue,
 } from './queues';
+import { heartbeatQueue } from './queues';
 
 // Lazy worker initialization - prevents crashes if Redis unavailable at startup
 let enrichmentWorker: Worker | null = null;

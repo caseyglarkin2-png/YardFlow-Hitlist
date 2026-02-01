@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
+import { OutreachStatus } from '@prisma/client';
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -16,8 +17,8 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'IDs array required' }, { status: 400 });
     }
 
-    const updateData: { status?: string; campaignId?: string; sequenceId?: string } = {};
-    if (status) updateData.status = status;
+    const updateData: { status?: OutreachStatus; campaignId?: string; sequenceId?: string } = {};
+    if (status) updateData.status = status as OutreachStatus;
     if (campaignId !== undefined) updateData.campaignId = campaignId;
     if (sequenceId !== undefined) updateData.sequenceId = sequenceId;
 
