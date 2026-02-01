@@ -150,15 +150,24 @@ export async function GET(request: NextRequest) {
       where.target_accounts.icpScore = { gte: minIcpScore };
     }
 
+    // Pagination - default limit 100, max 500
+    const limit = Math.min(
+      parseInt(searchParams.get('limit') || '100'),
+      500
+    );
+    const skip = parseInt(searchParams.get('skip') || '0');
+
     const people = await prisma.people.findMany({
       where,
       include: {
         target_accounts: true,
       },
       orderBy: { name: 'asc' },
+      take: limit,
+      skip,
     });
 
-    return NextResponse.json({ people });
+    return NextResponse.json({ people, pagination: { limit, skip, hasMore: people.length === limit } });
   } catch (error) {
     console.error('Error fetching people:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
