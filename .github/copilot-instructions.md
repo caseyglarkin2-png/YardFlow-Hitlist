@@ -67,7 +67,9 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 // ✅ Correct: src/lib/queue/client.ts - lazy getter
 let redisConnection: Redis | null = null;
 export function getRedisConnection(): Redis {
-  if (!redisConnection) { redisConnection = new Redis(config); }
+  if (!redisConnection) {
+    redisConnection = new Redis(config);
+  }
   return redisConnection;
 }
 ```
@@ -141,11 +143,11 @@ Used for direct dashboard access and internal tools.
 
 ```typescript
 // ✅ Session check pattern
-import { auth } from '@/auth';
+import { auth } from "@/auth";
 
 const session = await auth();
 if (!session?.user?.id) {
-  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 ```
 
@@ -177,14 +179,16 @@ if (!session?.user?.id) {
 ## Critical Patterns
 
 ### Database Access
+
 - Use lazy initialization for Prisma client
 - Always use: `import { prisma } from '@/lib/db'`
 
-### Authentication  
+### Authentication
+
 - Check auth in API routes: `const session = await auth()`
 - Protect routes with session checks
 
 ### Deployment
+
 - Railway deployment with auto-deploy from main
 - All code lives in `/eventops` directory
-
