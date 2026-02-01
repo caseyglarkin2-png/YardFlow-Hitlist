@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { hashPassword } from '@/lib/password';
 import { logger } from '@/lib/logger';
+import { randomUUID } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, password, name, role = 'MEMBER' } = body;
+    const { email, password, name, role = 'MEMBER' } = body as {
+      email: string;
+      password: string;
+      name?: string;
+      role?: 'ADMIN' | 'MEMBER';
+    };
 
     if (!email || !password) {
       return NextResponse.json(
@@ -63,10 +69,12 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await hashPassword(password);
     const user = await prisma.users.create({
       data: {
+        id: randomUUID(),
         email,
         password: hashedPassword,
         name: name || email.split('@')[0],
-        role: role as 'ADMIN' | 'MEMBER',
+        role,
+        updatedAt: new Date(),
       },
     });
 

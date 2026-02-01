@@ -1,13 +1,10 @@
 // Run with: npx tsx --import 'tsconfig-paths/register' scripts/create-user.ts
 // Or: railway run npx tsx scripts/create-user.ts
 import { PrismaClient } from '@prisma/client';
-import { neonConfig, Pool } from '@neondatabase/serverless';
-import { PrismaNeon } from '@prisma/adapter-neon';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
-import ws from 'ws';
-
-// Configure Neon for serverless
-neonConfig.webSocketConstructor = ws;
+import { randomUUID } from 'crypto';
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -16,8 +13,8 @@ if (!connectionString) {
 }
 
 const pool = new Pool({ connectionString });
-const adapter = new PrismaNeon(pool);
-const prisma = new PrismaClient({ adapter } as unknown as ConstructorParameters<typeof PrismaClient>[0]);
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // Check existing users
@@ -39,12 +36,15 @@ async function main() {
       password: hashedPassword,
       name: 'Casey Glarkin',
       role: 'ADMIN',
+      updatedAt: new Date(),
     },
     create: {
+      id: randomUUID(),
       email: 'casey@freightroll.com',
       name: 'Casey Glarkin',
       password: hashedPassword,
       role: 'ADMIN',
+      updatedAt: new Date(),
     },
   });
 
