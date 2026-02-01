@@ -102,35 +102,35 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId =
-      authResult.type === 'session'
-        ? authResult.userId
-        : request.headers.get('x-user-id') || authResult.userId;
-
-    const user = await prisma.users.findUnique({
-      where: { id: userId },
-      select: { activeEventId: true },
-    });
-
-    if (!user?.activeEventId) {
-      return NextResponse.json({ people: [] });
-    }
-
     // Get query params for filtering
     const { searchParams } = new URL(request.url);
+    
+    // For S2S calls, allow eventId param or return all people
+    // For session calls, use user's activeEventId
+    let eventId: string | null = searchParams.get('eventId');
+    
+    if (!eventId && authResult.type === 'session') {
+      const userId = authResult.userId;
+      const user = await prisma.users.findUnique({
+        where: { id: userId },
+        select: { activeEventId: true },
+      });
+      eventId = user?.activeEventId || null;
+    }
+    
     const missingEmail = searchParams.get('missingEmail') === 'true';
     const minIcpScore = searchParams.get('minIcpScore')
       ? parseInt(searchParams.get('minIcpScore')!)
       : 0;
     const personas = searchParams.getAll('persona'); // Can have multiple
 
-    // Build where clause
+    // Build where clause - eventId filter is optional for S2S global access
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {
-      target_accounts: {
-        eventId: user.activeEventId,
-      },
-    };
+    const where: any = {};
+    
+    if (eventId) {
+      where.target_accounts = { eventId };
+    }
 
     // Filter by missing email
     if (missingEmail) {
@@ -144,6 +144,9 @@ export async function GET(request: NextRequest) {
 
     // Filter by ICP score (need to join with account)
     if (minIcpScore > 0) {
+      if (!where.target_accounts) {
+        where.target_accounts = {};
+      }
       where.target_accounts.icpScore = { gte: minIcpScore };
     }
 
