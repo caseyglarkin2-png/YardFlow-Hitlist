@@ -10,14 +10,14 @@
 
 ## ⚠️ TPM Review Corrections Applied
 
-| Issue Found | Resolution |
-|-------------|------------|
-| `email_events` table doesn't exist | Use existing `email_engagement` model |
-| `npm run test:agents` script missing | Added S0.2 to create it |
-| `agent_tasks` missing self-relation | Added S0.1 Prisma migration |
-| Tasks S1.8, S3.4, S4.3 too large | Split into atomic subtasks |
-| GTM repo tasks not in this workspace | Created handoff documentation |
-| Test file structure missing | Added S0.3 to scaffold tests |
+| Issue Found                          | Resolution                            |
+| ------------------------------------ | ------------------------------------- |
+| `email_events` table doesn't exist   | Use existing `email_engagement` model |
+| `npm run test:agents` script missing | Added S0.2 to create it               |
+| `agent_tasks` missing self-relation  | Added S0.1 Prisma migration           |
+| Tasks S1.8, S3.4, S4.3 too large     | Split into atomic subtasks            |
+| GTM repo tasks not in this workspace | Created handoff documentation         |
+| Test file structure missing          | Added S0.3 to scaffold tests          |
 
 ---
 
@@ -56,23 +56,23 @@
 
 ## Repository Map
 
-| Repo | Purpose | Deployed To | URL |
-|------|---------|-------------|-----|
-| `YardFlow-Hitlist` | Backend API, Workers, Dashboard | Railway | yardflow-hitlist-production-2f41.up.railway.app |
-| `gtm-yardflow` | GTM Frontend, Sales UI | Vercel | gtm-yard-flow.vercel.app |
+| Repo               | Purpose                         | Deployed To | URL                                             |
+| ------------------ | ------------------------------- | ----------- | ----------------------------------------------- |
+| `YardFlow-Hitlist` | Backend API, Workers, Dashboard | Railway     | yardflow-hitlist-production-2f41.up.railway.app |
+| `gtm-yardflow`     | GTM Frontend, Sales UI          | Vercel      | gtm-yard-flow.vercel.app                        |
 
 ---
 
 ## Sprint Overview
 
-| Sprint | Name | Tasks | Est. Time | Demo |
-|--------|------|-------|-----------|------|
-| **S0** | Infrastructure Setup | 4 | 2 hours | Test suite runs |
-| **S1** | Agent Orchestrator Completion | 10 | 8 hours | Full campaign workflow |
-| **S2** | GTM Frontend Integration | 7 | 5 hours | GTM calls Railway API |
-| **S3** | Email & Outreach Pipeline | 7 | 6 hours | Emails tracked end-to-end |
-| **S4** | Analytics & Reporting | 6 | 5 hours | Funnel dashboard |
-| **S5** | Production Hardening | 8 | 6 hours | Load test passes |
+| Sprint | Name                          | Tasks | Est. Time | Demo                      |
+| ------ | ----------------------------- | ----- | --------- | ------------------------- |
+| **S0** | Infrastructure Setup          | 4     | 2 hours   | Test suite runs           |
+| **S1** | Agent Orchestrator Completion | 10    | 8 hours   | Full campaign workflow    |
+| **S2** | GTM Frontend Integration      | 7     | 5 hours   | GTM calls Railway API     |
+| **S3** | Email & Outreach Pipeline     | 7     | 6 hours   | Emails tracked end-to-end |
+| **S4** | Analytics & Reporting         | 6     | 5 hours   | Funnel dashboard          |
+| **S5** | Production Hardening          | 8     | 6 hours   | Load test passes          |
 
 **Total**: 42 tasks, ~32 hours of dev time
 
@@ -112,7 +112,7 @@ model agent_tasks {
 
   targetAccount target_accounts? @relation(fields: [accountId], references: [id], onDelete: Cascade)
   contact       people?          @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  
+
   // NEW: Self-relation for task hierarchy
   parentTask   agent_tasks?  @relation("TaskHierarchy", fields: [parentTaskId], references: [id])
   childTasks   agent_tasks[] @relation("TaskHierarchy")
@@ -127,6 +127,7 @@ model agent_tasks {
 ```
 
 **Validation**:
+
 ```bash
 cd eventops && npx prisma migrate dev --name add_task_hierarchy
 npx prisma generate
@@ -147,6 +148,7 @@ npx prisma generate
 ```
 
 **Validation**:
+
 ```bash
 npm run test:agents
 # Should run (even if no tests exist yet, it should not error on missing script)
@@ -179,18 +181,19 @@ Create placeholder tests:
 
 ```typescript
 // tests/agents/orchestrator.test.ts
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi } from "vitest";
 
-describe('AgentOrchestrator', () => {
-  it.todo('should run full campaign workflow');
-  it.todo('should handle Step 3 (Sequence Design)');
-  it.todo('should handle Step 4 (Content Creation)');
-  it.todo('should handle Step 5 (Socials)');
-  it.todo('should retry failed tasks');
+describe("AgentOrchestrator", () => {
+  it.todo("should run full campaign workflow");
+  it.todo("should handle Step 3 (Sequence Design)");
+  it.todo("should handle Step 4 (Content Creation)");
+  it.todo("should handle Step 5 (Socials)");
+  it.todo("should retry failed tasks");
 });
 ```
 
 **Validation**:
+
 ```bash
 npm run test:agents
 # Should show 5 pending tests
@@ -205,31 +208,32 @@ npm run test:agents
 ```typescript
 // tests/agents/fixtures/mock-account.ts
 export const mockAccount = {
-  id: 'test-account-1',
-  name: 'Acme Logistics',
-  website: 'https://acme-logistics.com',
-  industry: 'Logistics',
+  id: "test-account-1",
+  name: "Acme Logistics",
+  website: "https://acme-logistics.com",
+  industry: "Logistics",
   icpScore: 85,
 };
 
 export const mockContact = {
-  id: 'test-contact-1',
-  name: 'John Smith',
-  title: 'VP Operations',
-  email: 'john@acme-logistics.com',
-  accountId: 'test-account-1',
+  id: "test-contact-1",
+  name: "John Smith",
+  title: "VP Operations",
+  email: "john@acme-logistics.com",
+  accountId: "test-account-1",
 };
 
 export const mockDossier = {
-  id: 'test-dossier-1',
-  accountId: 'test-account-1',
-  companyOverview: 'Acme Logistics is a mid-size 3PL...',
-  recentNews: 'Recently expanded to 5 new facilities',
-  keyPainPoints: 'Manual yard scheduling causing delays',
+  id: "test-dossier-1",
+  accountId: "test-account-1",
+  companyOverview: "Acme Logistics is a mid-size 3PL...",
+  recentNews: "Recently expanded to 5 new facilities",
+  keyPainPoints: "Manual yard scheduling causing delays",
 };
 ```
 
 **Validation**:
+
 ```bash
 # Import should work
 npx tsx -e "import { mockAccount } from './tests/agents/fixtures/mock-account'; console.log(mockAccount.name);"
@@ -269,13 +273,13 @@ npx tsx -e "import('./tests/agents/fixtures/mock-account').then(m => console.log
 
 The orchestrator has 3 TODOs in `eventops/src/lib/agents/orchestrator.ts`:
 
-| Step | Status | Line |
-|------|--------|------|
-| Step 1: Prospecting | ✅ Working | ~120 |
-| Step 2: Research | ✅ Working | ~130 |
-| Step 3: Sequence Design | ❌ TODO | ~141 |
-| Step 4: Content Creation | ❌ TODO | ~144 |
-| Step 5: Socials | ❌ TODO | ~147 |
+| Step                     | Status     | Line |
+| ------------------------ | ---------- | ---- |
+| Step 1: Prospecting      | ✅ Working | ~120 |
+| Step 2: Research         | ✅ Working | ~130 |
+| Step 3: Sequence Design  | ❌ TODO    | ~141 |
+| Step 4: Content Creation | ❌ TODO    | ~144 |
+| Step 5: Socials          | ❌ TODO    | ~147 |
 
 ## Tasks
 
@@ -293,11 +297,11 @@ case 'sequence_design':
     dossier,
     campaignId: campaign.id,
   });
-  
+
   if (!sequenceResult.success) {
     throw new Error(`Sequence design failed: ${sequenceResult.error}`);
   }
-  
+
   // Store sequence in database
   const sequence = await prisma.sequences.create({
     data: {
@@ -309,18 +313,19 @@ case 'sequence_design':
       updatedAt: new Date(),
     }
   });
-  
+
   stepOutputs.sequence = sequence;
   break;
 ```
 
 **Validation**:
+
 ```typescript
 // tests/agents/orchestrator.test.ts
-it('should handle Step 3 (Sequence Design)', async () => {
+it("should handle Step 3 (Sequence Design)", async () => {
   const mockSequenceAgent = vi.fn().mockResolvedValue({
     success: true,
-    data: { description: 'Test', steps: [] }
+    data: { description: "Test", steps: [] },
   });
   // ... test implementation
 });
@@ -341,11 +346,11 @@ case 'content_creation':
     sequence: stepOutputs.sequence,
     persona: contacts[0]?.title || 'Operations Executive',
   });
-  
+
   if (!contentResult.success) {
     throw new Error(`Content creation failed: ${contentResult.error}`);
   }
-  
+
   // Store templates
   for (const template of contentResult.data.templates) {
     await prisma.message_templates.create({
@@ -359,7 +364,7 @@ case 'content_creation':
       }
     });
   }
-  
+
   stepOutputs.content = contentResult.data;
   break;
 ```
@@ -381,14 +386,14 @@ case 'socials':
     content: stepOutputs.content,
     platforms: ['linkedin'], // Default to LinkedIn for B2B
   });
-  
+
   if (!socialsResult.success) {
-    logger.warn('Socials generation failed, continuing workflow', { 
-      error: socialsResult.error 
+    logger.warn('Socials generation failed, continuing workflow', {
+      error: socialsResult.error
     });
     // Non-critical - don't throw
   }
-  
+
   stepOutputs.socials = socialsResult.data;
   break;
 ```
@@ -424,12 +429,13 @@ async getTaskTree(rootTaskId: string): Promise<TaskTree> {
       }
     }
   });
-  
+
   return root;
 }
 ```
 
 **Validation**:
+
 ```bash
 # Integration test
 npm run test:agents -- --grep "task tree"
@@ -447,40 +453,41 @@ async retryFailedStep(workflowId: string): Promise<WorkflowResult> {
     where: { id: workflowId },
     include: { childTasks: true }
   });
-  
+
   if (!workflow) {
     throw new Error('Workflow not found');
   }
-  
+
   // Find first failed task
   const failedTask = workflow.childTasks.find(t => t.status === 'failed');
   if (!failedTask) {
     throw new Error('No failed tasks to retry');
   }
-  
+
   // Check retry limit
   if (failedTask.retryCount >= failedTask.maxRetries) {
     throw new Error(`Max retries (${failedTask.maxRetries}) exceeded`);
   }
-  
+
   // Increment retry count and requeue
   await prisma.agent_tasks.update({
     where: { id: failedTask.id },
-    data: { 
+    data: {
       status: 'pending',
       retryCount: { increment: 1 },
       errorMessage: null,
     }
   });
-  
+
   // Re-run from this step
   return this.resumeFromStep(workflowId, failedTask.agentType);
 }
 ```
 
 **Validation**:
+
 ```typescript
-it('should retry failed tasks up to maxRetries', async () => {
+it("should retry failed tasks up to maxRetries", async () => {
   // Create task with retryCount: 2, maxRetries: 3
   // Call retryFailedStep
   // Verify retryCount is now 3
@@ -499,17 +506,17 @@ Replace the TODO at line ~253:
 async getWorkflowStatus(workflowId: string): Promise<WorkflowStatus> {
   const workflow = await prisma.agent_tasks.findUnique({
     where: { id: workflowId },
-    include: { 
+    include: {
       childTasks: {
         orderBy: { createdAt: 'asc' }
-      } 
+      }
     }
   });
-  
+
   if (!workflow) {
     return { found: false };
   }
-  
+
   const steps = workflow.childTasks.map(task => ({
     step: task.agentType,
     status: task.status,
@@ -517,10 +524,10 @@ async getWorkflowStatus(workflowId: string): Promise<WorkflowStatus> {
     completedAt: task.completedAt,
     error: task.errorMessage,
   }));
-  
+
   const completedSteps = steps.filter(s => s.status === 'completed').length;
   const totalSteps = steps.length || 5; // Default 5 steps in full workflow
-  
+
   return {
     found: true,
     workflowId,
@@ -534,6 +541,7 @@ async getWorkflowStatus(workflowId: string): Promise<WorkflowStatus> {
 ```
 
 **Validation**:
+
 ```bash
 curl -s http://localhost:3000/api/agents/workflows/test-id/status | jq
 ```
@@ -545,31 +553,32 @@ curl -s http://localhost:3000/api/agents/workflows/test-id/status | jq
 **Est**: 45 min | **Files**: `src/app/api/agents/workflows/[id]/status/route.ts`
 
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { AgentOrchestrator } from '@/lib/agents/orchestrator';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { AgentOrchestrator } from "@/lib/agents/orchestrator";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   const orchestrator = new AgentOrchestrator();
   const status = await orchestrator.getWorkflowStatus(params.id);
-  
+
   if (!status.found) {
-    return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
+    return NextResponse.json({ error: "Workflow not found" }, { status: 404 });
   }
-  
+
   return NextResponse.json(status);
 }
 ```
 
 **Validation**:
+
 ```bash
 # Must return workflow status
 curl -H "Cookie: next-auth.session-token=..." \
@@ -595,7 +604,7 @@ interface WorkflowStatusProps {
 export function WorkflowStatus({ workflowId, pollInterval = 3000 }: WorkflowStatusProps) {
   const [status, setStatus] = useState<WorkflowStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     const fetchStatus = async () => {
       try {
@@ -607,22 +616,22 @@ export function WorkflowStatus({ workflowId, pollInterval = 3000 }: WorkflowStat
         setError(e instanceof Error ? e.message : 'Unknown error');
       }
     };
-    
+
     fetchStatus();
     const interval = setInterval(fetchStatus, pollInterval);
     return () => clearInterval(interval);
   }, [workflowId, pollInterval]);
-  
+
   if (error) return <div className="text-red-500">Error: {error}</div>;
   if (!status) return <div>Loading...</div>;
-  
+
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <span>Progress: {status.progress}%</span>
         <div className="flex-1 bg-gray-200 rounded h-2">
-          <div 
-            className="bg-blue-500 h-2 rounded" 
+          <div
+            className="bg-blue-500 h-2 rounded"
             style={{ width: `${status.progress}%` }}
           />
         </div>
@@ -692,7 +701,7 @@ interface RetryButtonProps {
 
 export function RetryButton({ workflowId, onRetry }: RetryButtonProps) {
   const [loading, setLoading] = useState(false);
-  
+
   const handleRetry = async () => {
     setLoading(true);
     try {
@@ -707,7 +716,7 @@ export function RetryButton({ workflowId, onRetry }: RetryButtonProps) {
       setLoading(false);
     }
   };
-  
+
   return (
     <Button onClick={handleRetry} disabled={loading} variant="outline">
       {loading ? 'Retrying...' : 'Retry Failed Step'}
@@ -725,47 +734,54 @@ export function RetryButton({ workflowId, onRetry }: RetryButtonProps) {
 **Est**: 90 min | **Files**: `tests/integration/campaign-workflow.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { prisma } from '@/lib/db';
-import { AgentOrchestrator } from '@/lib/agents/orchestrator';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { prisma } from "@/lib/db";
+import { AgentOrchestrator } from "@/lib/agents/orchestrator";
 
-describe('Full Campaign Workflow', () => {
+describe("Full Campaign Workflow", () => {
   let testAccountId: string;
   let testCampaignId: string;
-  
+
   beforeAll(async () => {
     // Create test data
-    const event = await prisma.events.create({ /* ... */ });
-    const account = await prisma.target_accounts.create({ /* ... */ });
+    const event = await prisma.events.create({
+      /* ... */
+    });
+    const account = await prisma.target_accounts.create({
+      /* ... */
+    });
     testAccountId = account.id;
     // ... create campaign
   });
-  
+
   afterAll(async () => {
     // Cleanup
-    await prisma.agent_tasks.deleteMany({ where: { accountId: testAccountId } });
+    await prisma.agent_tasks.deleteMany({
+      where: { accountId: testAccountId },
+    });
     // ... cleanup
   });
-  
-  it('should run full workflow from prospecting to content', async () => {
+
+  it("should run full workflow from prospecting to content", async () => {
     const orchestrator = new AgentOrchestrator();
-    
+
     const result = await orchestrator.runFullCampaign({
       accountId: testAccountId,
       campaignId: testCampaignId,
     });
-    
+
     expect(result.success).toBe(true);
-    expect(result.stepsCompleted).toContain('prospecting');
-    expect(result.stepsCompleted).toContain('research');
-    expect(result.stepsCompleted).toContain('sequence_design');
-    expect(result.stepsCompleted).toContain('content_creation');
-    expect(result.stepsCompleted).toContain('socials');
+    expect(result.stepsCompleted).toContain("prospecting");
+    expect(result.stepsCompleted).toContain("research");
+    expect(result.stepsCompleted).toContain("sequence_design");
+    expect(result.stepsCompleted).toContain("content_creation");
+    expect(result.stepsCompleted).toContain("socials");
   }, 60000); // 60s timeout for AI calls
 });
 ```
 
 **Validation**:
+
 ```bash
 npm run test:agents -- --grep "Full Campaign"
 ```
@@ -802,6 +818,7 @@ curl http://localhost:3000/api/agents/workflows/{workflowId}/status
 ## ⚠️ Cross-Repo Work
 
 Tasks S2.1-S2.4 are in the **gtm-yardflow** repository. Options:
+
 1. Clone gtm-yardflow into this workspace
 2. Create GitHub issues for the GTM team
 3. Work in both repos simultaneously
@@ -817,40 +834,41 @@ Tasks S2.1-S2.4 are in the **gtm-yardflow** repository. Options:
 Verify the Railway backend accepts S2S requests correctly.
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('S2S Authentication', () => {
-  const RAILWAY_URL = process.env.TEST_RAILWAY_URL || 'http://localhost:3000';
+describe("S2S Authentication", () => {
+  const RAILWAY_URL = process.env.TEST_RAILWAY_URL || "http://localhost:3000";
   const SERVICE_SECRET = process.env.SERVICE_TO_SERVICE_SECRET;
-  
-  it('should accept valid S2S key', async () => {
+
+  it("should accept valid S2S key", async () => {
     const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
       headers: {
-        'x-service-key': SERVICE_SECRET!,
-      }
+        "x-service-key": SERVICE_SECRET!,
+      },
     });
-    
+
     expect(res.status).toBe(200);
   });
-  
-  it('should reject missing S2S key', async () => {
+
+  it("should reject missing S2S key", async () => {
     const res = await fetch(`${RAILWAY_URL}/api/accounts`);
     expect(res.status).toBe(401);
   });
-  
-  it('should reject invalid S2S key', async () => {
+
+  it("should reject invalid S2S key", async () => {
     const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
       headers: {
-        'x-service-key': 'invalid-key',
-      }
+        "x-service-key": "invalid-key",
+      },
     });
-    
+
     expect(res.status).toBe(401);
   });
 });
 ```
 
 **Validation**:
+
 ```bash
 npm run test -- tests/integration/s2s-auth.test.ts
 ```
@@ -868,39 +886,39 @@ const SERVICE_KEY = process.env.SERVICE_TO_SERVICE_SECRET;
 
 export async function railwayFetch<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   if (!RAILWAY_API_URL || !SERVICE_KEY) {
-    throw new Error('Railway configuration missing');
+    throw new Error("Railway configuration missing");
   }
-  
+
   const response = await fetch(`${RAILWAY_API_URL}${endpoint}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
-      'x-service-key': SERVICE_KEY,
+      "Content-Type": "application/json",
+      "x-service-key": SERVICE_KEY,
       ...options.headers,
     },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Railway API error: ${response.status}`);
   }
-  
+
   return response.json();
 }
 
 // Typed API methods
 export const railway = {
   accounts: {
-    list: () => railwayFetch<Account[]>('/api/accounts'),
+    list: () => railwayFetch<Account[]>("/api/accounts"),
     get: (id: string) => railwayFetch<Account>(`/api/accounts/${id}`),
   },
   campaigns: {
-    list: () => railwayFetch<Campaign[]>('/api/campaigns'),
-    start: (data: StartCampaignInput) => 
-      railwayFetch<{ workflowId: string }>('/api/agents/campaign', {
-        method: 'POST',
+    list: () => railwayFetch<Campaign[]>("/api/campaigns"),
+    start: (data: StartCampaignInput) =>
+      railwayFetch<{ workflowId: string }>("/api/agents/campaign", {
+        method: "POST",
         body: JSON.stringify(data),
       }),
   },
@@ -924,6 +942,7 @@ export const railway = {
    - `SERVICE_TO_SERVICE_SECRET` = (copy from Railway)
 
 **Validation**:
+
 ```bash
 # In GTM repo
 npx vercel env pull .env.local
@@ -938,18 +957,18 @@ cat .env.local | grep RAILWAY
 
 ```typescript
 // GTM REPO: gtm-yardflow/app/api/proxy/accounts/route.ts
-import { NextResponse } from 'next/server';
-import { railway } from '@/lib/railway-client';
+import { NextResponse } from "next/server";
+import { railway } from "@/lib/railway-client";
 
 export async function GET() {
   try {
     const accounts = await railway.accounts.list();
     return NextResponse.json(accounts);
   } catch (error) {
-    console.error('Railway proxy error:', error);
+    console.error("Railway proxy error:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch accounts' },
-      { status: 502 }
+      { error: "Failed to fetch accounts" },
+      { status: 502 },
     );
   }
 }
@@ -964,40 +983,41 @@ export async function GET() {
 **Est**: 30 min | **Files**: `tests/integration/cors.test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('CORS Configuration', () => {
-  const RAILWAY_URL = 'https://yardflow-hitlist-production-2f41.up.railway.app';
-  const GTM_ORIGIN = 'https://gtm-yard-flow.vercel.app';
-  
-  it('should allow GTM origin', async () => {
+describe("CORS Configuration", () => {
+  const RAILWAY_URL = "https://yardflow-hitlist-production-2f41.up.railway.app";
+  const GTM_ORIGIN = "https://gtm-yard-flow.vercel.app";
+
+  it("should allow GTM origin", async () => {
     const res = await fetch(`${RAILWAY_URL}/api/health`, {
       headers: {
-        'Origin': GTM_ORIGIN,
-      }
+        Origin: GTM_ORIGIN,
+      },
     });
-    
-    const corsHeader = res.headers.get('access-control-allow-origin');
-    expect(corsHeader).toMatch(new RegExp(GTM_ORIGIN.replace('.', '\\.')));
+
+    const corsHeader = res.headers.get("access-control-allow-origin");
+    expect(corsHeader).toMatch(new RegExp(GTM_ORIGIN.replace(".", "\\.")));
   });
-  
-  it('should handle preflight OPTIONS', async () => {
+
+  it("should handle preflight OPTIONS", async () => {
     const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
-      method: 'OPTIONS',
+      method: "OPTIONS",
       headers: {
-        'Origin': GTM_ORIGIN,
-        'Access-Control-Request-Method': 'GET',
-        'Access-Control-Request-Headers': 'x-service-key',
-      }
+        Origin: GTM_ORIGIN,
+        "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Headers": "x-service-key",
+      },
     });
-    
+
     expect(res.status).toBe(200);
-    expect(res.headers.get('access-control-allow-methods')).toContain('GET');
+    expect(res.headers.get("access-control-allow-methods")).toContain("GET");
   });
 });
 ```
 
 **Validation**:
+
 ```bash
 npm run test -- tests/integration/cors.test.ts
 ```
@@ -1029,15 +1049,15 @@ Update with completed S2S implementation details.
 **Est**: 45 min | **Files**: `tests/e2e/gtm-integration.test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('GTM-Railway Integration E2E', () => {
-  const GTM_URL = process.env.GTM_URL || 'https://gtm-yard-flow.vercel.app';
-  
-  it('should fetch accounts through GTM proxy', async () => {
+describe("GTM-Railway Integration E2E", () => {
+  const GTM_URL = process.env.GTM_URL || "https://gtm-yard-flow.vercel.app";
+
+  it("should fetch accounts through GTM proxy", async () => {
     const res = await fetch(`${GTM_URL}/api/proxy/accounts`);
     expect(res.ok).toBe(true);
-    
+
     const accounts = await res.json();
     expect(Array.isArray(accounts)).toBe(true);
   });
@@ -1045,6 +1065,7 @@ describe('GTM-Railway Integration E2E', () => {
 ```
 
 **Validation**:
+
 ```bash
 GTM_URL=https://gtm-yard-flow.vercel.app npm run test -- tests/e2e/gtm-integration.test.ts
 ```
@@ -1081,10 +1102,10 @@ Use existing `email_engagement` model, NOT `email_events`.
 **Est**: 60 min | **Files**: `src/lib/queue/jobs/send-email.ts`
 
 ```typescript
-import { Job } from 'bullmq';
-import sgMail from '@sendgrid/mail';
-import { prisma } from '@/lib/db';
-import { logger } from '@/lib/logger';
+import { Job } from "bullmq";
+import sgMail from "@sendgrid/mail";
+import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
@@ -1098,10 +1119,17 @@ interface SendEmailJobData {
 }
 
 export async function processSendEmail(job: Job<SendEmailJobData>) {
-  const { to, from, subject, html, sequenceStepId, trackingEnabled = true } = job.data;
-  
-  logger.info('Sending email', { to, subject, sequenceStepId });
-  
+  const {
+    to,
+    from,
+    subject,
+    html,
+    sequenceStepId,
+    trackingEnabled = true,
+  } = job.data;
+
+  logger.info("Sending email", { to, subject, sequenceStepId });
+
   try {
     const [response] = await sgMail.send({
       to,
@@ -1116,39 +1144,40 @@ export async function processSendEmail(job: Job<SendEmailJobData>) {
         sequence_step_id: sequenceStepId,
       },
     });
-    
+
     // Update sequence step
     await prisma.sequence_steps.update({
       where: { id: sequenceStepId },
       data: {
-        status: 'SENT',
+        status: "SENT",
         sent_at: new Date(),
       },
     });
-    
-    logger.info('Email sent successfully', { 
-      messageId: response.headers['x-message-id'],
-      sequenceStepId 
+
+    logger.info("Email sent successfully", {
+      messageId: response.headers["x-message-id"],
+      sequenceStepId,
     });
-    
-    return { success: true, messageId: response.headers['x-message-id'] };
+
+    return { success: true, messageId: response.headers["x-message-id"] };
   } catch (error) {
-    logger.error('Email send failed', { error, sequenceStepId });
-    
+    logger.error("Email send failed", { error, sequenceStepId });
+
     await prisma.sequence_steps.update({
       where: { id: sequenceStepId },
       data: {
-        status: 'FAILED',
-        error_message: error instanceof Error ? error.message : 'Unknown error',
+        status: "FAILED",
+        error_message: error instanceof Error ? error.message : "Unknown error",
       },
     });
-    
+
     throw error;
   }
 }
 ```
 
 **Validation**:
+
 ```bash
 # Add to worker registration and verify job processes
 npm run worker
@@ -1164,11 +1193,11 @@ npm run worker
 Add the send-email processor to the worker.
 
 ```typescript
-import { processSendEmail } from './jobs/send-email';
+import { processSendEmail } from "./jobs/send-email";
 
 // In worker setup:
-worker.on('active', (job) => {
-  if (job.name === 'send-email') {
+worker.on("active", (job) => {
+  if (job.name === "send-email") {
     processSendEmail(job);
   }
 });
@@ -1199,6 +1228,7 @@ await prisma.email_engagement.create({
 ```
 
 **Validation**:
+
 ```bash
 # Test webhook with mock payload
 curl -X POST http://localhost:3000/api/webhooks/sendgrid \
@@ -1221,42 +1251,46 @@ Document how to register the webhook URL in SendGrid dashboard.
 **Est**: 45 min | **Files**: `src/app/api/email/stats/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { prisma } from '@/lib/db';
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   const stats = await prisma.email_engagement.groupBy({
-    by: ['eventType'],
+    by: ["eventType"],
     _count: { id: true },
   });
-  
-  const formatted = stats.reduce((acc, stat) => {
-    acc[stat.eventType.toLowerCase()] = stat._count.id;
-    return acc;
-  }, {} as Record<string, number>);
-  
+
+  const formatted = stats.reduce(
+    (acc, stat) => {
+      acc[stat.eventType.toLowerCase()] = stat._count.id;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
   return NextResponse.json({
     sent: formatted.delivered || 0,
     opened: formatted.open || 0,
     clicked: formatted.click || 0,
     bounced: formatted.bounce || 0,
-    openRate: formatted.delivered 
-      ? ((formatted.open || 0) / formatted.delivered * 100).toFixed(1) 
-      : '0',
-    clickRate: formatted.open 
-      ? ((formatted.click || 0) / formatted.open * 100).toFixed(1) 
-      : '0',
+    openRate: formatted.delivered
+      ? (((formatted.open || 0) / formatted.delivered) * 100).toFixed(1)
+      : "0",
+    clickRate: formatted.open
+      ? (((formatted.click || 0) / formatted.open) * 100).toFixed(1)
+      : "0",
   });
 }
 ```
 
 **Validation**:
+
 ```bash
 curl -H "Cookie: ..." http://localhost:3000/api/email/stats
 ```
@@ -1296,7 +1330,7 @@ export function EmailStatsCard({ stats }: EmailStatsCardProps) {
           <div className="text-2xl font-bold">{stats.sent}</div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Opens</CardTitle>
@@ -1307,7 +1341,7 @@ export function EmailStatsCard({ stats }: EmailStatsCardProps) {
           <p className="text-xs text-muted-foreground">{stats.openRate}% rate</p>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Clicks</CardTitle>
@@ -1318,7 +1352,7 @@ export function EmailStatsCard({ stats }: EmailStatsCardProps) {
           <p className="text-xs text-muted-foreground">{stats.clickRate}% rate</p>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Bounced</CardTitle>
@@ -1352,7 +1386,7 @@ async function getEmailStats() {
 
 export default async function EmailDashboardPage() {
   const stats = await getEmailStats();
-  
+
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-8">Email Analytics</h1>
@@ -1401,36 +1435,49 @@ curl http://localhost:3000/api/email/stats
 **Est**: 60 min | **Files**: `src/app/api/analytics/funnel/route.ts`
 
 ```typescript
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { prisma } from '@/lib/db';
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   // Get funnel metrics
   const [accounts, contacted, meetings, won] = await Promise.all([
     prisma.target_accounts.count(),
-    prisma.outreach.count({ where: { status: 'SENT' } }),
+    prisma.outreach.count({ where: { status: "SENT" } }),
     prisma.Meeting.count(),
-    prisma.Meeting.count({ where: { status: 'COMPLETED', dealStage: 'WON' } }),
+    prisma.Meeting.count({ where: { status: "COMPLETED", dealStage: "WON" } }),
   ]);
-  
+
   return NextResponse.json({
     stages: [
-      { name: 'Target Accounts', count: accounts, rate: 100 },
-      { name: 'Contacted', count: contacted, rate: accounts ? (contacted/accounts*100).toFixed(1) : 0 },
-      { name: 'Meetings', count: meetings, rate: contacted ? (meetings/contacted*100).toFixed(1) : 0 },
-      { name: 'Won', count: won, rate: meetings ? (won/meetings*100).toFixed(1) : 0 },
-    ]
+      { name: "Target Accounts", count: accounts, rate: 100 },
+      {
+        name: "Contacted",
+        count: contacted,
+        rate: accounts ? ((contacted / accounts) * 100).toFixed(1) : 0,
+      },
+      {
+        name: "Meetings",
+        count: meetings,
+        rate: contacted ? ((meetings / contacted) * 100).toFixed(1) : 0,
+      },
+      {
+        name: "Won",
+        count: won,
+        rate: meetings ? ((won / meetings) * 100).toFixed(1) : 0,
+      },
+    ],
   });
 }
 ```
 
 **Validation**:
+
 ```bash
 curl -H "Cookie: ..." http://localhost:3000/api/analytics/funnel
 ```
@@ -1442,67 +1489,71 @@ curl -H "Cookie: ..." http://localhost:3000/api/analytics/funnel
 **Est**: 45 min | **Files**: `src/app/api/reports/export/route.ts`
 
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { prisma } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type') || 'accounts';
-  const format = searchParams.get('format') || 'json';
-  const limit = Math.min(parseInt(searchParams.get('limit') || '1000'), 10000);
-  const offset = parseInt(searchParams.get('offset') || '0');
-  
+  const type = searchParams.get("type") || "accounts";
+  const format = searchParams.get("format") || "json";
+  const limit = Math.min(parseInt(searchParams.get("limit") || "1000"), 10000);
+  const offset = parseInt(searchParams.get("offset") || "0");
+
   let data: any[];
-  
+
   switch (type) {
-    case 'accounts':
-      data = await prisma.target_accounts.findMany({ take: limit, skip: offset });
+    case "accounts":
+      data = await prisma.target_accounts.findMany({
+        take: limit,
+        skip: offset,
+      });
       break;
-    case 'contacts':
+    case "contacts":
       data = await prisma.people.findMany({ take: limit, skip: offset });
       break;
-    case 'meetings':
+    case "meetings":
       data = await prisma.Meeting.findMany({ take: limit, skip: offset });
       break;
-    case 'outreach':
+    case "outreach":
       data = await prisma.outreach.findMany({ take: limit, skip: offset });
       break;
     default:
-      return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+      return NextResponse.json({ error: "Invalid type" }, { status: 400 });
   }
-  
-  if (format === 'csv') {
+
+  if (format === "csv") {
     const csv = convertToCSV(data);
     return new NextResponse(csv, {
       headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename=${type}-export.csv`,
+        "Content-Type": "text/csv",
+        "Content-Disposition": `attachment; filename=${type}-export.csv`,
       },
     });
   }
-  
+
   return NextResponse.json({ data, count: data.length, offset, limit });
 }
 
 function convertToCSV(data: any[]): string {
-  if (!data.length) return '';
-  const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(row => 
-    Object.values(row).map(v => 
-      typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v
-    ).join(',')
+  if (!data.length) return "";
+  const headers = Object.keys(data[0]).join(",");
+  const rows = data.map((row) =>
+    Object.values(row)
+      .map((v) => (typeof v === "string" ? `"${v.replace(/"/g, '""')}"` : v))
+      .join(","),
   );
-  return [headers, ...rows].join('\n');
+  return [headers, ...rows].join("\n");
 }
 ```
 
 **Validation**:
+
 ```bash
 curl -H "Cookie: ..." "http://localhost:3000/api/reports/export?type=accounts&format=csv"
 ```
@@ -1528,7 +1579,7 @@ export function ExportButton({ type, format = 'csv' }: ExportButtonProps) {
   const handleExport = () => {
     window.location.href = `/api/reports/export?type=${type}&format=${format}`;
   };
-  
+
   return (
     <Button onClick={handleExport} variant="outline" size="sm">
       <Download className="h-4 w-4 mr-2" />
@@ -1553,7 +1604,7 @@ export default function ReportsPage() {
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-8">Reports & Exports</h1>
-      
+
       <div className="grid gap-4">
         <div className="flex items-center justify-between p-4 border rounded">
           <div>
@@ -1562,7 +1613,7 @@ export default function ReportsPage() {
           </div>
           <ExportButton type="accounts" />
         </div>
-        
+
         <div className="flex items-center justify-between p-4 border rounded">
           <div>
             <h3 className="font-medium">Contacts</h3>
@@ -1570,7 +1621,7 @@ export default function ReportsPage() {
           </div>
           <ExportButton type="contacts" />
         </div>
-        
+
         <div className="flex items-center justify-between p-4 border rounded">
           <div>
             <h3 className="font-medium">Meetings</h3>
@@ -1578,7 +1629,7 @@ export default function ReportsPage() {
           </div>
           <ExportButton type="meetings" />
         </div>
-        
+
         <div className="flex items-center justify-between p-4 border rounded">
           <div>
             <h3 className="font-medium">Outreach</h3>
@@ -1601,58 +1652,59 @@ export default function ReportsPage() {
 **Est**: 60 min | **Files**: `src/app/api/analytics/cohorts/route.ts`
 
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { prisma } from '@/lib/db';
-import { startOfWeek, subWeeks, format } from 'date-fns';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
+import { startOfWeek, subWeeks, format } from "date-fns";
 
 export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
   const weeks = 8;
   const cohorts = [];
-  
+
   for (let i = 0; i < weeks; i++) {
     const weekStart = startOfWeek(subWeeks(new Date(), i));
     const weekEnd = startOfWeek(subWeeks(new Date(), i - 1));
-    
+
     const enrolled = await prisma.sequence_enrollments.count({
       where: {
-        enrolled_at: { gte: weekStart, lt: weekEnd }
-      }
+        enrolled_at: { gte: weekStart, lt: weekEnd },
+      },
     });
-    
+
     const completed = await prisma.sequence_enrollments.count({
       where: {
         enrolled_at: { gte: weekStart, lt: weekEnd },
-        status: 'COMPLETED'
-      }
+        status: "COMPLETED",
+      },
     });
-    
+
     const meetings = await prisma.Meeting.count({
       where: {
-        createdAt: { gte: weekStart, lt: weekEnd }
-      }
+        createdAt: { gte: weekStart, lt: weekEnd },
+      },
     });
-    
+
     cohorts.push({
-      week: format(weekStart, 'MMM d'),
+      week: format(weekStart, "MMM d"),
       enrolled,
       completed,
-      completionRate: enrolled ? (completed / enrolled * 100).toFixed(1) : 0,
+      completionRate: enrolled ? ((completed / enrolled) * 100).toFixed(1) : 0,
       meetings,
-      meetingRate: enrolled ? (meetings / enrolled * 100).toFixed(1) : 0,
+      meetingRate: enrolled ? ((meetings / enrolled) * 100).toFixed(1) : 0,
     });
   }
-  
+
   return NextResponse.json({ cohorts: cohorts.reverse() });
 }
 ```
 
 **Validation**:
+
 ```bash
 curl -H "Cookie: ..." http://localhost:3000/api/analytics/cohorts
 ```
@@ -1667,27 +1719,32 @@ curl -H "Cookie: ..." http://localhost:3000/api/analytics/cohorts
 // src/lib/rate-limit.ts
 const rateLimits = new Map<string, { count: number; resetAt: number }>();
 
-export function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
+export function checkRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+): boolean {
   const now = Date.now();
   const record = rateLimits.get(key);
-  
+
   if (!record || record.resetAt < now) {
     rateLimits.set(key, { count: 1, resetAt: now + windowMs });
     return true;
   }
-  
+
   if (record.count >= limit) {
     return false;
   }
-  
+
   record.count++;
   return true;
 }
 
 // Usage in export route:
 const userId = session.user.id;
-if (!checkRateLimit(`export:${userId}`, 10, 60000)) { // 10 per minute
-  return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+if (!checkRateLimit(`export:${userId}`, 10, 60000)) {
+  // 10 per minute
+  return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
 }
 ```
 
@@ -1700,20 +1757,21 @@ if (!checkRateLimit(`export:${userId}`, 10, 60000)) { // 10 per minute
 **Est**: 30 min | **Files**: `tests/api/cohorts.test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 
-describe('Cohort Analysis API', () => {
-  it('should return 8 weeks of cohort data', async () => {
+describe("Cohort Analysis API", () => {
+  it("should return 8 weeks of cohort data", async () => {
     // Test implementation
   });
-  
-  it('should calculate completion rates correctly', async () => {
+
+  it("should calculate completion rates correctly", async () => {
     // Test implementation
   });
 });
 ```
 
 **Validation**:
+
 ```bash
 npm run test -- tests/api/cohorts.test.ts
 ```
@@ -1762,6 +1820,7 @@ sudo apt-get install k6
 ```
 
 **Validation**:
+
 ```bash
 k6 version
 ```
@@ -1773,44 +1832,45 @@ k6 version
 **Est**: 60 min | **Files**: `tests/load/k6-load-test.js`
 
 ```javascript
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
 export const options = {
   stages: [
-    { duration: '30s', target: 20 },  // Ramp up
-    { duration: '1m', target: 50 },   // Stay at 50
-    { duration: '30s', target: 100 }, // Peak
-    { duration: '30s', target: 0 },   // Ramp down
+    { duration: "30s", target: 20 }, // Ramp up
+    { duration: "1m", target: 50 }, // Stay at 50
+    { duration: "30s", target: 100 }, // Peak
+    { duration: "30s", target: 0 }, // Ramp down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% under 500ms
-    http_req_failed: ['rate<0.01'],   // <1% errors
+    http_req_duration: ["p(95)<500"], // 95% under 500ms
+    http_req_failed: ["rate<0.01"], // <1% errors
   },
 };
 
-const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
+const BASE_URL = __ENV.BASE_URL || "http://localhost:3000";
 
 export default function () {
   // Health check
   const healthRes = http.get(`${BASE_URL}/api/health`);
   check(healthRes, {
-    'health status 200': (r) => r.status === 200,
+    "health status 200": (r) => r.status === 200,
   });
-  
+
   // Accounts list
   const accountsRes = http.get(`${BASE_URL}/api/accounts`, {
-    headers: { 'x-service-key': __ENV.SERVICE_KEY },
+    headers: { "x-service-key": __ENV.SERVICE_KEY },
   });
   check(accountsRes, {
-    'accounts status 200': (r) => r.status === 200,
+    "accounts status 200": (r) => r.status === 200,
   });
-  
+
   sleep(1);
 }
 ```
 
 **Validation**:
+
 ```bash
 k6 run tests/load/k6-load-test.js
 ```
@@ -1847,11 +1907,13 @@ Add final verification steps for each sprint completion.
 ## Service Down
 
 ### Web App (502 errors)
+
 1. Check Railway logs: `railway logs`
 2. Verify DATABASE_URL is set
 3. Restart service: Railway dashboard → Restart
 
 ### Worker Not Processing
+
 1. Check Redis connection
 2. Verify REDIS_URL
 3. Check for stuck jobs: `redis-cli LLEN bull:agents:wait`
@@ -1859,11 +1921,13 @@ Add final verification steps for each sprint completion.
 ## Database Issues
 
 ### High Latency
+
 1. Check connection pool: Look for "too many connections"
 2. Restart with fresh pool
 3. Consider scaling Postgres
 
 ### Migration Failed
+
 1. `npx prisma migrate status`
 2. `npx prisma migrate reset --force` (DEV ONLY)
 3. Manual fix in production
@@ -1915,6 +1979,7 @@ npm run db:seed:prod -- --dry-run
 **Est**: 45 min | **Files**: Multiple docs
 
 Update all documentation to reflect completed work:
+
 - STATUS.md
 - ROADMAP.md
 - GO_LIVE_CHECKLIST.md
@@ -2009,4 +2074,4 @@ Every task must meet:
 
 **End of Sprint Backlog v2**
 
-*Next action*: Execute S0 (Infrastructure Setup)
+_Next action_: Execute S0 (Infrastructure Setup)

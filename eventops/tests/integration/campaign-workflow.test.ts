@@ -1,24 +1,24 @@
 /**
  * Full Campaign Workflow Integration Test
- * 
+ *
  * Tests the complete campaign workflow from prospecting to content generation.
  * These tests run against real agents with mocked external APIs.
  */
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { mockAccount, mockContact, mockCampaign, mockEvent } from '../agents/fixtures/mock-account';
+import { describe, it, beforeAll, afterAll } from 'vitest';
+import { mockAccount, mockCampaign, mockEvent } from '../agents/fixtures/mock-account';
 
 // These tests are marked as todo until S1 is complete
 describe('Full Campaign Workflow', () => {
-  let testAccountId: string;
-  let testCampaignId: string;
-  let testEventId: string;
+  let _testAccountId: string;
+  let _testCampaignId: string;
+  let _testEventId: string;
 
   beforeAll(async () => {
     // Setup will create test data in the database
     // For now, using mock IDs
-    testEventId = mockEvent.id;
-    testAccountId = mockAccount.id;
-    testCampaignId = mockCampaign.id;
+    _testEventId = mockEvent.id;
+    _testAccountId = mockAccount.id;
+    _testCampaignId = mockCampaign.id;
   });
 
   afterAll(async () => {

@@ -33,22 +33,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { prospects, mode = 'create' }: { prospects: BatchProspect[]; mode: 'create' | 'upsert' } = body;
+    const {
+      prospects,
+      mode = 'create',
+    }: { prospects: BatchProspect[]; mode: 'create' | 'upsert' } = body;
 
     if (!Array.isArray(prospects) || prospects.length === 0) {
-      return NextResponse.json({
-        error: 'VALIDATION_ERROR',
-        message: 'prospects array is required and must not be empty',
-        statusCode: 400
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'VALIDATION_ERROR',
+          message: 'prospects array is required and must not be empty',
+          statusCode: 400,
+        },
+        { status: 400 }
+      );
     }
 
     if (prospects.length > 1000) {
-      return NextResponse.json({
-        error: 'VALIDATION_ERROR',
-        message: 'Maximum 1000 prospects per batch',
-        statusCode: 400
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'VALIDATION_ERROR',
+          message: 'Maximum 1000 prospects per batch',
+          statusCode: 400,
+        },
+        { status: 400 }
+      );
     }
 
     let created = 0;
@@ -57,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < prospects.length; i++) {
       const p = prospects[i];
-      
+
       if (!p.email) {
         errors.push({ index: i, email: p.email || '', error: 'Email is required' });
         continue;
@@ -77,7 +86,7 @@ export async function POST(request: NextRequest) {
 
         // Check if exists
         const existing = await prisma.people.findFirst({
-          where: { email: p.email, accountId: p.accountId }
+          where: { email: p.email, accountId: p.accountId },
         });
 
         if (existing) {
@@ -90,9 +99,11 @@ export async function POST(request: NextRequest) {
                 tier: p.tier,
                 score: p.score,
                 tags: p.tags,
-                custom_fields: p.customFields as Parameters<typeof prisma.people.update>[0]['data']['custom_fields'],
+                custom_fields: p.customFields as Parameters<
+                  typeof prisma.people.update
+                >[0]['data']['custom_fields'],
                 updatedAt: new Date(),
-              }
+              },
             });
             updated++;
           } else {
@@ -110,17 +121,19 @@ export async function POST(request: NextRequest) {
               score: p.score ?? 50,
               status: 'active',
               tags: p.tags || [],
-              custom_fields: (p.customFields || {}) as Parameters<typeof prisma.people.create>[0]['data']['custom_fields'],
+              custom_fields: (p.customFields || {}) as Parameters<
+                typeof prisma.people.create
+              >[0]['data']['custom_fields'],
               updatedAt: new Date(),
-            }
+            },
           });
           created++;
         }
       } catch (err) {
-        errors.push({ 
-          index: i, 
-          email: p.email, 
-          error: err instanceof Error ? err.message : 'Unknown error' 
+        errors.push({
+          index: i,
+          email: p.email,
+          error: err instanceof Error ? err.message : 'Unknown error',
         });
       }
     }
@@ -134,10 +147,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     logger.error('Batch prospect operation failed', { error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

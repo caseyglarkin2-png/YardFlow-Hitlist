@@ -1,6 +1,6 @@
 /**
  * Mock Account Fixtures for Agent Testing
- * 
+ *
  * These fixtures provide consistent test data across all agent tests.
  */
 
@@ -78,25 +78,28 @@ export const mockSecondContact = {
 export const mockDossier = {
   id: 'dossier-test-acme',
   accountId: mockAccount.id,
-  companyOverview: 'Acme Logistics is a mid-size 3PL operating 12 distribution centers across the Midwest. Founded in 1998, they specialize in last-mile delivery and warehousing.',
-  recentNews: 'Recently announced expansion to 5 new facilities in Q1 2026. CEO quoted about "operational efficiency challenges" in industry press.',
-  industryContext: 'The 3PL industry is facing driver shortages and increasing pressure to reduce dwell times. Yard management is a key bottleneck.',
+  companyOverview:
+    'Acme Logistics is a mid-size 3PL operating 12 distribution centers across the Midwest. Founded in 1998, they specialize in last-mile delivery and warehousing.',
+  recentNews:
+    'Recently announced expansion to 5 new facilities in Q1 2026. CEO quoted about "operational efficiency challenges" in industry press.',
+  industryContext:
+    'The 3PL industry is facing driver shortages and increasing pressure to reduce dwell times. Yard management is a key bottleneck.',
   keyPainPoints: JSON.stringify([
     'Manual yard scheduling causing 2-3 hour average dwell times',
     'No visibility into trailer locations across facilities',
     'Dock scheduling conflicts during peak hours',
-    'High detention fees from carriers'
+    'High detention fees from carriers',
   ]),
   techStack: JSON.stringify({
     tms: 'Oracle TMS',
     wms: 'Manhattan WMS',
     erp: 'SAP',
-    yms: 'None - Manual processes'
+    yms: 'None - Manual processes',
   }),
   companySize: '500-1000 employees',
   socialPresence: JSON.stringify({
     linkedin: 'Active, posts 2x/week',
-    twitter: 'Inactive'
+    twitter: 'Inactive',
   }),
   rawData: null,
   researchedAt: new Date(),

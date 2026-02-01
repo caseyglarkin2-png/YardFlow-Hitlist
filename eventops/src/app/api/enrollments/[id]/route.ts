@@ -14,10 +14,7 @@ interface EnrollmentMetrics {
  * GET /api/enrollments/[id]
  * Get a single enrollment by ID with metrics
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { error, response } = await requireAuth(request);
   if (error) return response;
 
@@ -39,30 +36,33 @@ export async function GET(
             opened_at: true,
             clicked_at: true,
             replied_at: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!enrollment) {
-      return NextResponse.json({
-        error: 'NOT_FOUND',
-        message: 'Enrollment not found',
-        statusCode: 404
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'NOT_FOUND',
+          message: 'Enrollment not found',
+          statusCode: 404,
+        },
+        { status: 404 }
+      );
     }
 
     // Calculate metrics from steps
     const steps = enrollment.sequence_steps;
     const metrics: EnrollmentMetrics = {
-      emailsSent: steps.filter(s => s.sent_at).length,
-      emailsOpened: steps.filter(s => s.opened_at).length,
-      emailsClicked: steps.filter(s => s.clicked_at).length,
-      repliesReceived: steps.filter(s => s.replied_at).length,
+      emailsSent: steps.filter((s) => s.sent_at).length,
+      emailsOpened: steps.filter((s) => s.opened_at).length,
+      emailsClicked: steps.filter((s) => s.clicked_at).length,
+      repliesReceived: steps.filter((s) => s.replied_at).length,
     };
 
     // Find next step
-    const nextStep = steps.find(s => s.status === 'PENDING');
+    const nextStep = steps.find((s) => s.status === 'PENDING');
 
     // Map to GTM-expected format
     const result = {
@@ -73,9 +73,10 @@ export async function GET(
       currentStep: enrollment.current_step,
       totalSteps: steps.length,
       startedAt: enrollment.enrolled_at.toISOString(),
-      lastStepAt: steps.filter(s => s.sent_at).sort((a, b) => 
-        new Date(b.sent_at!).getTime() - new Date(a.sent_at!).getTime()
-      )[0]?.sent_at?.toISOString(),
+      lastStepAt: steps
+        .filter((s) => s.sent_at)
+        .sort((a, b) => new Date(b.sent_at!).getTime() - new Date(a.sent_at!).getTime())[0]
+        ?.sent_at?.toISOString(),
       nextStepAt: nextStep ? undefined : undefined, // Would need scheduled_at on steps
       pausedAt: enrollment.status === 'EXITED' ? enrollment.exited_at?.toISOString() : undefined,
       pauseReason: enrollment.exit_reason,
@@ -91,11 +92,14 @@ export async function GET(
     return NextResponse.json(result);
   } catch (err) {
     logger.error('Failed to fetch enrollment', { id, error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -115,15 +119,18 @@ export async function DELETE(
 
   try {
     const enrollment = await prisma.sequence_enrollments.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!enrollment) {
-      return NextResponse.json({
-        error: 'NOT_FOUND',
-        message: 'Enrollment not found',
-        statusCode: 404
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'NOT_FOUND',
+          message: 'Enrollment not found',
+          statusCode: 404,
+        },
+        { status: 404 }
+      );
     }
 
     await prisma.sequence_enrollments.update({
@@ -132,7 +139,7 @@ export async function DELETE(
         status: 'EXITED',
         exited_at: new Date(),
         exit_reason: reason,
-      }
+      },
     });
 
     logger.info('Enrollment stopped', { id, reason });
@@ -140,10 +147,13 @@ export async function DELETE(
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     logger.error('Failed to stop enrollment', { id, error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

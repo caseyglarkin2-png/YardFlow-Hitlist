@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
 /**
  * POST /api/users/from-firebase
  * Create/link Railway user from Firebase auth
- * 
+ *
  * Called by GTM frontend to ensure a Railway user exists
  * for the Firebase-authenticated user.
  */
@@ -14,11 +14,14 @@ export async function POST(request: NextRequest) {
   // Require S2S auth for this endpoint
   const authResult = await authServiceOrSession(request);
   if (!authResult || authResult.type !== 'service') {
-    return NextResponse.json({
-      error: 'UNAUTHORIZED',
-      message: 'This endpoint requires service-to-service authentication',
-      statusCode: 401
-    }, { status: 401 });
+    return NextResponse.json(
+      {
+        error: 'UNAUTHORIZED',
+        message: 'This endpoint requires service-to-service authentication',
+        statusCode: 401,
+      },
+      { status: 401 }
+    );
   }
 
   try {
@@ -26,21 +29,21 @@ export async function POST(request: NextRequest) {
     const { firebaseUid, email, displayName, photoURL } = body;
 
     if (!firebaseUid || !email) {
-      return NextResponse.json({
-        error: 'VALIDATION_ERROR',
-        message: 'firebaseUid and email are required',
-        statusCode: 400
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'VALIDATION_ERROR',
+          message: 'firebaseUid and email are required',
+          statusCode: 400,
+        },
+        { status: 400 }
+      );
     }
 
     // Check if user exists by email or firebaseUid (stored in googleId field)
     let user = await prisma.users.findFirst({
       where: {
-        OR: [
-          { email },
-          { googleId: firebaseUid },
-        ]
-      }
+        OR: [{ email }, { googleId: firebaseUid }],
+      },
     });
 
     let isNewUser = false;
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
             name: displayName || user.name,
             image: photoURL || user.image,
             updatedAt: new Date(),
-          }
+          },
         });
       }
     } else {
@@ -71,13 +74,13 @@ export async function POST(request: NextRequest) {
           role: 'MEMBER',
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       });
 
-      logger.info('New user created from Firebase', { 
-        railwayUserId: user.id, 
-        firebaseUid, 
-        email 
+      logger.info('New user created from Firebase', {
+        railwayUserId: user.id,
+        firebaseUid,
+        email,
       });
     }
 
@@ -87,10 +90,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     logger.error('Failed to create/link Firebase user', { error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

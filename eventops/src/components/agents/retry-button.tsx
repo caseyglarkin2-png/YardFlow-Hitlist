@@ -18,7 +18,7 @@ export function RetryButton({ workflowId, taskId, onSuccess, disabled }: RetryBu
 
   const handleRetry = async () => {
     setIsRetrying(true);
-    
+
     try {
       const res = await fetch(`/api/agents/workflow/${workflowId}`, {
         method: 'POST',
@@ -35,7 +35,7 @@ export function RetryButton({ workflowId, taskId, onSuccess, disabled }: RetryBu
         title: 'Retry started',
         description: 'The failed task is being retried.',
       });
-      
+
       onSuccess?.();
     } catch (e) {
       toast({

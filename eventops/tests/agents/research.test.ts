@@ -1,7 +1,7 @@
 /**
  * Research Agent Tests
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -20,17 +20,17 @@ describe('ResearchAgent', () => {
 
   describe('execute', () => {
     it.todo('should research company and create dossier');
-    
+
     it.todo('should extract key pain points');
-    
+
     it.todo('should identify tech stack');
-    
+
     it.todo('should find recent news');
   });
 
   describe('generateDossier', () => {
     it.todo('should compile research into structured dossier');
-    
+
     it.todo('should handle missing data gracefully');
   });
 });

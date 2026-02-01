@@ -49,10 +49,10 @@ export function EmailStatsCard({ days = 30 }: EmailStatsCardProps) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {[...Array(4)].map((_, i) => (
           <Card key={i}>
-            <CardContent className="pt-6 flex items-center justify-center">
+            <CardContent className="flex items-center justify-center pt-6">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </CardContent>
           </Card>
@@ -65,7 +65,7 @@ export function EmailStatsCard({ days = 30 }: EmailStatsCardProps) {
     return (
       <Card className="border-red-200 bg-red-50">
         <CardContent className="pt-6">
-          <p className="text-red-600 text-sm">Error loading stats: {error}</p>
+          <p className="text-sm text-red-600">Error loading stats: {error}</p>
         </CardContent>
       </Card>
     );
@@ -80,7 +80,7 @@ export function EmailStatsCard({ days = 30 }: EmailStatsCardProps) {
         <span className="text-sm text-muted-foreground">{stats.period}</span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Sent</CardTitle>

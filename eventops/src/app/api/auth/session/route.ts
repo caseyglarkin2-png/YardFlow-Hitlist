@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     // Try session auth first
     const session = await auth();
-    
+
     if (session?.user) {
       return NextResponse.json({
         user: {
@@ -37,17 +37,23 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      error: 'NOT_AUTHENTICATED',
-      message: 'No valid session found',
-      statusCode: 401
-    }, { status: 401 });
+    return NextResponse.json(
+      {
+        error: 'NOT_AUTHENTICATED',
+        message: 'No valid session found',
+        statusCode: 401,
+      },
+      { status: 401 }
+    );
   } catch (err) {
     logger.error('Session check failed', { error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

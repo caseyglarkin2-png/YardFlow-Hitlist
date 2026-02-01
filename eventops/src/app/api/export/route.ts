@@ -117,10 +117,10 @@ async function handleExport(
       Account: p.target_accounts?.name || '',
       Industry: p.target_accounts?.industry || '',
       'Exec Ops': p.isExecOps,
-      'Ops': p.isOps,
-      'Procurement': p.isProc,
-      'Sales': p.isSales,
-      'Tech': p.isTech,
+      Ops: p.isOps,
+      Procurement: p.isProc,
+      Sales: p.isSales,
+      Tech: p.isTech,
       'Created At': p.createdAt.toISOString(),
     }));
 
@@ -185,16 +185,29 @@ async function handleExport(
       },
     });
 
-    data = meetings.map((m: { meetingType: string | null; people: { name: string; email: string | null; target_accounts: { name: string } | null } | null; status: string; dealStage: string | null; scheduledAt: Date; createdAt: Date }) => ({
-      'Meeting Type': m.meetingType || '',
-      Account: m.people?.target_accounts?.name || '',
-      Contact: m.people?.name || '',
-      'Contact Email': m.people?.email || '',
-      Status: m.status,
-      'Deal Stage': m.dealStage || '',
-      'Scheduled At': m.scheduledAt?.toISOString() || '',
-      'Created At': m.createdAt.toISOString(),
-    }));
+    data = meetings.map(
+      (m: {
+        meetingType: string | null;
+        people: {
+          name: string;
+          email: string | null;
+          target_accounts: { name: string } | null;
+        } | null;
+        status: string;
+        dealStage: string | null;
+        scheduledAt: Date;
+        createdAt: Date;
+      }) => ({
+        'Meeting Type': m.meetingType || '',
+        Account: m.people?.target_accounts?.name || '',
+        Contact: m.people?.name || '',
+        'Contact Email': m.people?.email || '',
+        Status: m.status,
+        'Deal Stage': m.dealStage || '',
+        'Scheduled At': m.scheduledAt?.toISOString() || '',
+        'Created At': m.createdAt.toISOString(),
+      })
+    );
 
     filename = `meetings-export-${Date.now()}.csv`;
   }
@@ -208,9 +221,7 @@ async function handleExport(
     const headers = Object.keys(data[0]);
     const csvRows = [
       headers.join(','),
-      ...data.map((row) =>
-        headers.map((header) => JSON.stringify(row[header] || '')).join(',')
-      ),
+      ...data.map((row) => headers.map((header) => JSON.stringify(row[header] || '')).join(',')),
     ];
 
     const csvContent = csvRows.join('\n');

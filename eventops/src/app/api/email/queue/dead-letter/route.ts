@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
         enrollment: {
           include: {
             people: { select: { id: true, name: true, email: true } },
-            sequence: { select: { id: true, name: true } }
-          }
-        }
-      }
+            sequence: { select: { id: true, name: true } },
+          },
+        },
+      },
     });
 
     const hasMore = failedSteps.length > limit;
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const nextCursor = hasMore ? data[data.length - 1]?.id : null;
 
     // Transform to expected format
-    const deadLetterItems = data.map(step => ({
+    const deadLetterItems = data.map((step) => ({
       id: step.id,
       prospectId: step.enrollment.contact_id,
       prospectEmail: step.enrollment.people?.email || 'unknown',
@@ -58,14 +58,17 @@ export async function GET(request: NextRequest) {
       pagination: {
         hasMore,
         nextCursor,
-      }
+      },
     });
   } catch (err) {
     logger.error('Failed to get dead letter queue', { error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

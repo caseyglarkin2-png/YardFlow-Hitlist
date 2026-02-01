@@ -7,10 +7,7 @@ import { logger } from '@/lib/logger';
  * POST /api/enrollments/[id]/resume
  * Resume a paused enrollment
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { error, response } = await requireAuth(request);
   if (error) return response;
 
@@ -22,28 +19,34 @@ export async function POST(
       include: {
         sequence: { select: { id: true, name: true } },
         people: { select: { id: true, name: true, email: true } },
-        sequence_steps: { orderBy: { step_number: 'asc' } }
-      }
+        sequence_steps: { orderBy: { step_number: 'asc' } },
+      },
     });
 
     if (!enrollment) {
-      return NextResponse.json({
-        error: 'NOT_FOUND',
-        message: 'Enrollment not found',
-        statusCode: 404
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: 'NOT_FOUND',
+          message: 'Enrollment not found',
+          statusCode: 404,
+        },
+        { status: 404 }
+      );
     }
 
     // Can only resume EXITED enrollments that were paused (not failed/completed)
-    const isPaused = enrollment.status === 'EXITED' && 
-                     enrollment.exit_reason?.startsWith('PAUSED:');
-    
+    const isPaused =
+      enrollment.status === 'EXITED' && enrollment.exit_reason?.startsWith('PAUSED:');
+
     if (!isPaused) {
-      return NextResponse.json({
-        error: 'INVALID_STATE',
-        message: `Cannot resume enrollment with status: ${enrollment.status.toLowerCase()}. Only paused enrollments can be resumed.`,
-        statusCode: 400
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'INVALID_STATE',
+          message: `Cannot resume enrollment with status: ${enrollment.status.toLowerCase()}. Only paused enrollments can be resumed.`,
+          statusCode: 400,
+        },
+        { status: 400 }
+      );
     }
 
     // Calculate next step time (now + 1 hour for immediate resumption)
@@ -59,8 +62,8 @@ export async function POST(
       include: {
         sequence: { select: { id: true, name: true } },
         people: { select: { id: true, name: true, email: true } },
-        sequence_steps: { orderBy: { step_number: 'asc' } }
-      }
+        sequence_steps: { orderBy: { step_number: 'asc' } },
+      },
     });
 
     logger.info('Enrollment resumed', { id });
@@ -78,11 +81,11 @@ export async function POST(
         totalSteps: steps.length,
         startedAt: updated.enrolled_at.toISOString(),
         metrics: {
-          emailsSent: steps.filter(s => s.sent_at).length,
-          emailsOpened: steps.filter(s => s.opened_at).length,
-          emailsClicked: steps.filter(s => s.clicked_at).length,
-          repliesReceived: steps.filter(s => s.replied_at).length,
-        }
+          emailsSent: steps.filter((s) => s.sent_at).length,
+          emailsOpened: steps.filter((s) => s.opened_at).length,
+          emailsClicked: steps.filter((s) => s.clicked_at).length,
+          repliesReceived: steps.filter((s) => s.replied_at).length,
+        },
       },
       nextStepAt: nextStepAt.toISOString(),
     };
@@ -90,10 +93,13 @@ export async function POST(
     return NextResponse.json(result);
   } catch (err) {
     logger.error('Failed to resume enrollment', { id, error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

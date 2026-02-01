@@ -306,7 +306,10 @@ async function testSmoke() {
   await test('API routes return JSON content-type', async () => {
     const res = await fetch(`${BASE_URL}/api/health`);
     const contentType = res.headers.get('content-type');
-    assert(!!contentType?.includes('application/json'), `Expected JSON, got ${contentType}`);
+    assert(
+      Boolean(contentType && contentType.includes('application/json')),
+      `Expected JSON, got ${contentType}`
+    );
   });
 
   await test('Response times are acceptable (<2s)', async () => {

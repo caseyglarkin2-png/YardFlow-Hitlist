@@ -52,7 +52,7 @@ if (SESSION_COOKIE) {
   headers['Cookie'] = SESSION_COOKIE;
 }
 
-export default function () {
+export default function loadTest() {
   // 1. Visit Manifest Dashboard
   group('Manifest Dashboard', function () {
     const res = http.get(`${BASE_URL}/dashboard/manifest`, { headers });

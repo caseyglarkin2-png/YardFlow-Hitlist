@@ -51,7 +51,10 @@ vi.mock('@/lib/yardflow-content-hub', () => ({
   },
 }));
 
-import { SequenceEngineerAgent, type SequenceBlueprint } from '@/lib/agents/sequence-engineer-agent';
+import {
+  SequenceEngineerAgent,
+  type SequenceBlueprint,
+} from '@/lib/agents/sequence-engineer-agent';
 import { prisma } from '@/lib/db';
 
 describe('SequenceEngineerAgent', () => {
@@ -70,8 +73,20 @@ describe('SequenceEngineerAgent', () => {
         targetPersona: 'ExecOps',
         minIcpScore: 70,
         steps: [
-          { stepNumber: 1, delayHours: 0, channel: 'EMAIL', templateType: 'intro', personalizationLevel: 'high' },
-          { stepNumber: 2, delayHours: 48, channel: 'LINKEDIN', templateType: 'follow-up', personalizationLevel: 'medium' },
+          {
+            stepNumber: 1,
+            delayHours: 0,
+            channel: 'EMAIL',
+            templateType: 'intro',
+            personalizationLevel: 'high',
+          },
+          {
+            stepNumber: 2,
+            delayHours: 48,
+            channel: 'LINKEDIN',
+            templateType: 'follow-up',
+            personalizationLevel: 'medium',
+          },
         ],
       };
 
@@ -95,7 +110,13 @@ describe('SequenceEngineerAgent', () => {
         targetPersona: 'Ops',
         minIcpScore: 60,
         steps: [
-          { stepNumber: 1, delayHours: 0, channel: 'EMAIL', templateType: 'intro', personalizationLevel: 'high' },
+          {
+            stepNumber: 1,
+            delayHours: 0,
+            channel: 'EMAIL',
+            templateType: 'intro',
+            personalizationLevel: 'high',
+          },
         ],
       };
 

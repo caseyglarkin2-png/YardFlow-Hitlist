@@ -4,8 +4,9 @@ import sgMail from '@sendgrid/mail';
 
 // Configure SendGrid (Lazy check or ensure env is loaded)
 const getSendGrid = () => {
-  if (env.SENDGRID_API_KEY) {
-    sgMail.setApiKey(env.SENDGRID_API_KEY);
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (apiKey) {
+    sgMail.setApiKey(apiKey);
     return sgMail;
   }
   return null;
@@ -32,7 +33,11 @@ class AlertManagerService {
    * Dispatch an alert to all configured channels
    */
   async sendAlert(payload: AlertPayload): Promise<void> {
-    logger.info(`[AlertManager] Dispatching alert: ${payload.type}`, payload);
+    logger.info(`[AlertManager] Dispatching alert: ${payload.type}`, {
+      alertType: payload.type,
+      message: payload.message,
+      level: payload.level,
+    });
 
     const promises: Promise<void>[] = [];
 

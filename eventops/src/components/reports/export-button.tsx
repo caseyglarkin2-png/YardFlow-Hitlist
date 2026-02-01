@@ -20,20 +20,15 @@ const typeLabels: Record<ExportType, string> = {
   meetings: 'Meetings',
 };
 
-export function ExportButton({ 
-  type, 
-  label, 
-  variant = 'outline', 
-  size = 'sm' 
-}: ExportButtonProps) {
+export function ExportButton({ type, label, variant = 'outline', size = 'sm' }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = () => {
     setIsExporting(true);
-    
+
     // Trigger download via window.location (browser will handle file download)
     window.location.href = `/api/export?type=${type}&format=csv`;
-    
+
     // Reset after a delay (download starts async)
     setTimeout(() => setIsExporting(false), 2000);
   };

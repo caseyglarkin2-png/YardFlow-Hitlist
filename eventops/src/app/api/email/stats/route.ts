@@ -31,10 +31,13 @@ export async function GET(request: NextRequest) {
     });
 
     // Convert to object
-    const statsMap = engagementStats.reduce((acc, stat) => {
-      acc[stat.eventType.toLowerCase()] = stat._count.id;
-      return acc;
-    }, {} as Record<string, number>);
+    const statsMap = engagementStats.reduce(
+      (acc, stat) => {
+        acc[stat.eventType.toLowerCase()] = stat._count.id;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Get outreach stats (sent emails)
     const sentCount = await prisma.outreach.count({
@@ -101,16 +104,16 @@ export async function GET(request: NextRequest) {
         bounceRate: `${bounceRate}%`,
       },
       engagementEvents: statsMap,
-      statusBreakdown: dailyTrend.reduce((acc, item) => {
-        acc[item.status] = item._count.id;
-        return acc;
-      }, {} as Record<string, number>),
+      statusBreakdown: dailyTrend.reduce(
+        (acc, item) => {
+          acc[item.status] = item._count.id;
+          return acc;
+        },
+        {} as Record<string, number>
+      ),
     });
   } catch (error) {
     logger.error('Failed to get email stats', { error });
-    return NextResponse.json(
-      { error: 'Failed to retrieve email statistics' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to retrieve email statistics' }, { status: 500 });
   }
 }

@@ -16,7 +16,7 @@ let cleanupTimer: NodeJS.Timeout | null = null;
 
 function startCleanup() {
   if (cleanupTimer) return;
-  
+
   cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [key, record] of rateLimits.entries()) {
@@ -40,7 +40,7 @@ export function checkRateLimit(
   windowMs: number
 ): { allowed: boolean; remaining: number; resetAt: number } {
   startCleanup();
-  
+
   const now = Date.now();
   const record = rateLimits.get(key);
 
@@ -68,10 +68,7 @@ export function checkRateLimit(
  * @param limit Requests per window (default: 100)
  * @param windowMs Window in ms (default: 60000 = 1 minute)
  */
-export function createRateLimiter(
-  limit: number = 100,
-  windowMs: number = 60000
-) {
+export function createRateLimiter(limit: number = 100, windowMs: number = 60000) {
   return (identifier: string, endpoint: string = 'default') => {
     const key = `${identifier}:${endpoint}`;
     return checkRateLimit(key, limit, windowMs);
@@ -82,13 +79,13 @@ export function createRateLimiter(
 export const rateLimiters = {
   // Export API: 10 requests per minute
   export: createRateLimiter(10, 60000),
-  
+
   // Agent API: 20 requests per minute
   agent: createRateLimiter(20, 60000),
-  
+
   // Email sending: 50 per minute
   email: createRateLimiter(50, 60000),
-  
+
   // General API: 100 per minute
   general: createRateLimiter(100, 60000),
 };

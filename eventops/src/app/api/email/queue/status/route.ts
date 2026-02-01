@@ -33,19 +33,19 @@ export async function GET(request: NextRequest) {
     // Get sequence step stats as proxy for email queue
     const [pendingSteps, sentLast24h, failedLast24h] = await Promise.all([
       prisma.sequence_steps.count({
-        where: { status: 'PENDING' }
+        where: { status: 'PENDING' },
       }),
       prisma.sequence_steps.count({
         where: {
           status: 'SENT',
-          sent_at: { gte: yesterday }
-        }
+          sent_at: { gte: yesterday },
+        },
       }),
       prisma.sequence_steps.count({
         where: {
           status: 'FAILED',
-          updatedAt: { gte: yesterday }
-        }
+          updatedAt: { gte: yesterday },
+        },
       }),
     ]);
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     const oldestPending = await prisma.sequence_steps.findFirst({
       where: { status: 'PENDING' },
       orderBy: { scheduled_at: 'asc' },
-      select: { scheduled_at: true }
+      select: { scheduled_at: true },
     });
 
     // Note: SendGrid rate limit would need API call to check
@@ -74,16 +74,19 @@ export async function GET(request: NextRequest) {
         active,
         completed,
         failed,
-      }
+      },
     };
 
     return NextResponse.json(status);
   } catch (err) {
     logger.error('Failed to get queue status', { error: String(err) });
-    return NextResponse.json({
-      error: 'INTERNAL_ERROR',
-      message: err instanceof Error ? err.message : 'Unknown error',
-      statusCode: 500
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'INTERNAL_ERROR',
+        message: err instanceof Error ? err.message : 'Unknown error',
+        statusCode: 500,
+      },
+      { status: 500 }
+    );
   }
 }

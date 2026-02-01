@@ -1,6 +1,6 @@
 /**
  * Agent Orchestrator Tests
- * 
+ *
  * Tests for the full campaign workflow orchestrator.
  * These tests verify Steps 1-5 of runFullCampaign work correctly.
  */
@@ -16,9 +16,11 @@ vi.mock('@/lib/db', () => ({
       update: vi.fn().mockResolvedValue({ id: 'task-123', status: 'in_progress' }),
     },
     people: {
-      findMany: vi.fn().mockResolvedValue([
-        { id: 'person-1', name: 'John Doe', title: 'VP Ops', email: 'john@test.com' },
-      ]),
+      findMany: vi
+        .fn()
+        .mockResolvedValue([
+          { id: 'person-1', name: 'John Doe', title: 'VP Ops', email: 'john@test.com' },
+        ]),
     },
     sequences: {
       create: vi.fn().mockResolvedValue({ id: 'seq-123' }),
@@ -54,6 +56,9 @@ vi.mock('@/lib/agents/state-manager', () => ({
 import { AgentOrchestrator, getAgentOrchestrator } from '@/lib/agents/orchestrator';
 import { prisma } from '@/lib/db';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MockAgentTask = any; // Test mock - Prisma types are complex
+
 describe('AgentOrchestrator', () => {
   let orchestrator: AgentOrchestrator;
 
@@ -73,7 +78,7 @@ describe('AgentOrchestrator', () => {
   describe('runFullCampaign', () => {
     it('should create a root task for the workflow', async () => {
       const { agentStateManager } = await import('@/lib/agents/state-manager');
-      
+
       await orchestrator.runFullCampaign({
         eventId: 'event-123',
         targetAccounts: ['account-1'],
@@ -119,7 +124,7 @@ describe('AgentOrchestrator', () => {
       vi.mocked(prisma.agent_tasks.findUnique).mockResolvedValue(null);
 
       const status = await orchestrator.getWorkflowStatus('invalid-id');
-      
+
       expect(status.found).toBe(false);
     });
 
@@ -141,13 +146,27 @@ describe('AgentOrchestrator', () => {
         startedAt: new Date(),
         completedAt: new Date(),
         childTasks: [
-          { id: 'task-1', agentType: 'research', status: 'completed', startedAt: new Date(), completedAt: new Date(), errorMessage: null },
-          { id: 'task-2', agentType: 'sequence', status: 'completed', startedAt: new Date(), completedAt: new Date(), errorMessage: null },
+          {
+            id: 'task-1',
+            agentType: 'research',
+            status: 'completed',
+            startedAt: new Date(),
+            completedAt: new Date(),
+            errorMessage: null,
+          },
+          {
+            id: 'task-2',
+            agentType: 'sequence',
+            status: 'completed',
+            startedAt: new Date(),
+            completedAt: new Date(),
+            errorMessage: null,
+          },
         ],
       } as any);
 
       const status = await orchestrator.getWorkflowStatus('workflow-123');
-      
+
       expect(status.found).toBe(true);
       expect(status.progress).toBe(100);
       expect(status.steps).toHaveLength(2);
@@ -171,15 +190,43 @@ describe('AgentOrchestrator', () => {
         startedAt: new Date(),
         completedAt: null,
         childTasks: [
-          { id: 'task-1', agentType: 'research', status: 'completed', startedAt: new Date(), completedAt: new Date(), errorMessage: null },
-          { id: 'task-2', agentType: 'sequence', status: 'pending', startedAt: null, completedAt: null, errorMessage: null },
-          { id: 'task-3', agentType: 'content', status: 'pending', startedAt: null, completedAt: null, errorMessage: null },
-          { id: 'task-4', agentType: 'socials', status: 'pending', startedAt: null, completedAt: null, errorMessage: null },
+          {
+            id: 'task-1',
+            agentType: 'research',
+            status: 'completed',
+            startedAt: new Date(),
+            completedAt: new Date(),
+            errorMessage: null,
+          },
+          {
+            id: 'task-2',
+            agentType: 'sequence',
+            status: 'pending',
+            startedAt: null,
+            completedAt: null,
+            errorMessage: null,
+          },
+          {
+            id: 'task-3',
+            agentType: 'content',
+            status: 'pending',
+            startedAt: null,
+            completedAt: null,
+            errorMessage: null,
+          },
+          {
+            id: 'task-4',
+            agentType: 'socials',
+            status: 'pending',
+            startedAt: null,
+            completedAt: null,
+            errorMessage: null,
+          },
         ],
-      } as any);
+      } as MockAgentTask);
 
       const status = await orchestrator.getWorkflowStatus('workflow-123');
-      
+
       expect(status.found).toBe(true);
       expect(status.progress).toBe(25); // 1 of 4 completed = 25%
     });
@@ -190,7 +237,7 @@ describe('AgentOrchestrator', () => {
       vi.mocked(prisma.agent_tasks.findUnique).mockResolvedValue(null);
 
       const result = await orchestrator.retryFailedStep('workflow-123', 'invalid-task');
-      
+
       expect(result).toBeNull();
     });
 
@@ -200,10 +247,10 @@ describe('AgentOrchestrator', () => {
         status: 'completed',
         retryCount: 0,
         maxRetries: 3,
-      } as any);
+      } as MockAgentTask);
 
       const result = await orchestrator.retryFailedStep('workflow-123', 'task-123');
-      
+
       expect(result).toBeNull();
     });
 
@@ -213,10 +260,10 @@ describe('AgentOrchestrator', () => {
         status: 'failed',
         retryCount: 3,
         maxRetries: 3,
-      } as any);
+      } as MockAgentTask);
 
       const result = await orchestrator.retryFailedStep('workflow-123', 'task-123');
-      
+
       expect(result).toBeNull();
     });
   });

@@ -1,6 +1,6 @@
 /**
  * Workflow Status & Retry API
- * 
+ *
  * GET /api/agents/workflow/[workflowId] - Get workflow status
  * POST /api/agents/workflow/[workflowId]/retry - Retry a failed task
  */
@@ -25,10 +25,7 @@ export async function GET(
     const status = await orchestrator.getWorkflowStatus(workflowId);
 
     if (!status.found) {
-      return NextResponse.json(
-        { error: 'Workflow not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Workflow not found' }, { status: 404 });
     }
 
     logger.info('Workflow status retrieved', {
@@ -41,10 +38,7 @@ export async function GET(
     return NextResponse.json(status);
   } catch (error) {
     logger.error('Failed to get workflow status', { error, workflowId });
-    return NextResponse.json(
-      { error: 'Failed to get workflow status' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to get workflow status' }, { status: 500 });
   }
 }
 
@@ -64,10 +58,7 @@ export async function POST(
     const { taskId } = body;
 
     if (!taskId) {
-      return NextResponse.json(
-        { error: 'taskId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'taskId is required' }, { status: 400 });
     }
 
     const orchestrator = getAgentOrchestrator();
@@ -93,9 +84,6 @@ export async function POST(
     });
   } catch (error) {
     logger.error('Failed to retry task', { error, workflowId });
-    return NextResponse.json(
-      { error: 'Failed to retry task' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to retry task' }, { status: 500 });
   }
 }

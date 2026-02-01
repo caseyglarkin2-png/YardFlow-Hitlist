@@ -32,7 +32,7 @@ const StatusIcon = ({ status }: { status: string }) => {
     case 'completed':
       return <Check className="h-4 w-4 text-green-600" />;
     case 'in_progress':
-      return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
+      return <Loader2 className="h-4 w-4 animate-spin text-blue-600" />;
     case 'failed':
       return <AlertCircle className="h-4 w-4 text-red-600" />;
     default:
@@ -43,7 +43,7 @@ const StatusIcon = ({ status }: { status: string }) => {
 export function TaskTree({ steps, showTimestamps = false }: TaskTreeProps) {
   if (!steps || steps.length === 0) {
     return (
-      <div className="p-4 border rounded-lg text-center text-muted-foreground">
+      <div className="rounded-lg border p-4 text-center text-muted-foreground">
         No workflow steps yet
       </div>
     );
@@ -55,7 +55,7 @@ export function TaskTree({ steps, showTimestamps = false }: TaskTreeProps) {
         <div
           key={idx}
           className={cn(
-            'flex items-start gap-3 p-2 rounded-md transition-colors',
+            'flex items-start gap-3 rounded-md p-2 transition-colors',
             step.status === 'in_progress' && 'bg-blue-50',
             step.status === 'failed' && 'bg-red-50'
           )}
@@ -63,20 +63,18 @@ export function TaskTree({ steps, showTimestamps = false }: TaskTreeProps) {
           <div className="mt-0.5">
             <StatusIcon status={step.status} />
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">
-              {stepLabels[step.step] || step.step}
-            </p>
-            
+
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">{stepLabels[step.step] || step.step}</p>
+
             {step.error && (
-              <p className="text-xs text-red-600 mt-1 truncate" title={step.error}>
+              <p className="mt-1 truncate text-xs text-red-600" title={step.error}>
                 {step.error}
               </p>
             )}
-            
+
             {showTimestamps && step.completedAt && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Completed {new Date(step.completedAt).toLocaleTimeString()}
               </p>
             )}
