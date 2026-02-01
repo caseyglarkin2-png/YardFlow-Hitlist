@@ -171,3 +171,20 @@ if (!session?.user?.id) {
 4. **Environment Variables**: S2S calls fail without `CRON_SECRET` or `SERVICE_TO_SERVICE_SECRET`. Ensure `SENDGRID_API_KEY` is present for email features.
 5. **Prisma Model Access**: Use lowercase for Prisma client access (`prisma.meeting` not `prisma.Meeting`), even if model is defined as `model Meeting`. The `@@map("meetings")` directive maps to table name.
 6. **Prisma Enums**: Import enums from `@prisma/client` (e.g., `import { OutreachStatus } from '@prisma/client'`), don't use string literals.
+
+---
+
+## Critical Patterns
+
+### Database Access
+- Use lazy initialization for Prisma client
+- Always use: `import { prisma } from '@/lib/db'`
+
+### Authentication  
+- Check auth in API routes: `const session = await auth()`
+- Protect routes with session checks
+
+### Deployment
+- Railway deployment with auto-deploy from main
+- All code lives in `/eventops` directory
+
