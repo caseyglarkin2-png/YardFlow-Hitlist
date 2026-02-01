@@ -1,6 +1,8 @@
 {
   "$schema": "https://aka.ms/vscode-copilot-workspace-schema",
   "name": "YardFlow Hitlist",
+  "version": "1.0.0-manifest",
+  "tech_stack": "Next.js 14.2, TypeScript, Prisma 7, PostgreSQL, Redis, BullMQ, NextAuth v5",
   "description": "Event-driven ABM platform for Manifest 2026. Ship fast, ship often - production deploys every 60-120 min.",
   "instructions": [
     "This is a monorepo with the Next.js app in /eventops subdirectory",
