@@ -25,19 +25,13 @@ export const dynamic = 'force-dynamic';
  *     recipient: { name: string, email: string | null, company: string | null }
  *   }
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   // Auth check
   const authResult = await authServiceOrSession(req);
   if (!authResult) {
-    return NextResponse.json(
-      { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }, { status: 401 });
   }
 
   // Fetch outreach with person info
@@ -53,10 +47,7 @@ export async function GET(
   });
 
   if (!outreach) {
-    return NextResponse.json(
-      { error: 'Outreach not found', code: 'NOT_FOUND' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Outreach not found', code: 'NOT_FOUND' }, { status: 404 });
   }
 
   // Extract last error from notes if status is BOUNCED

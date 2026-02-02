@@ -1474,10 +1474,10 @@ U3 (E2E Testing) ◀────────────────────
 
 ### ✅ Endpoints (Railway Backend)
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/outreach/send-email` | POST | Send email via SendGrid |
-| `/api/outreach/[id]/status` | GET | Get outreach status + error details |
+| Endpoint                    | Method | Purpose                             |
+| --------------------------- | ------ | ----------------------------------- |
+| `/api/outreach/send-email`  | POST   | Send email via SendGrid             |
+| `/api/outreach/[id]/status` | GET    | Get outreach status + error details |
 
 ### ✅ Status Endpoint Response Schema
 
@@ -1490,11 +1490,15 @@ U3 (E2E Testing) ◀────────────────────
   "sentAt": "ISO8601|null",
   "sentBy": "string|null",
   "openedAt": "ISO8601|null",
-  "clickedAt": null,              // TODO: Click tracking not wired in backend
+  "clickedAt": null, // TODO: Click tracking not wired in backend
   "respondedAt": "ISO8601|null",
   "bouncedAt": "ISO8601|null",
   "lastError": "string|null",
-  "recipient": { "name": "string", "email": "string|null", "company": "string|null" }
+  "recipient": {
+    "name": "string",
+    "email": "string|null",
+    "company": "string|null"
+  }
 }
 ```
 
@@ -1539,20 +1543,20 @@ curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/outreach/OUT
 
 ### ✅ Response Codes & Meanings
 
-| Code | Error Code | Meaning | Action |
-|------|------------|---------|--------|
-| 200 | - | Email sent successfully | Check `messageId` in response |
-| 400 | `VALIDATION_ERROR` | Missing/invalid outreachId | Fix request payload |
-| 400 | `WRONG_CHANNEL` | Outreach is not EMAIL type | Use correct outreach |
-| 401 | `AUTH_REQUIRED` | Missing/invalid auth token | Add `Authorization: Bearer $CRON_SECRET` |
-| 404 | `NOT_FOUND` | Outreach ID doesn't exist | Check outreach exists |
-| 409 | `ALREADY_SENT` | Email sent within 5 min | Use `force: true` to resend |
-| 422 | `MISSING_EMAIL` | Contact has no email | Import/update contact |
-| 422 | `INVALID_EMAIL` | Email format invalid | Fix contact email |
-| 422 | `MISSING_SUBJECT` | Email subject empty | Generate content first |
-| 422 | `MISSING_BODY` | Email body empty | Generate content first |
-| 503 | `SERVICE_UNAVAILABLE` | SendGrid not configured | Set `SENDGRID_API_KEY` |
-| 500 | `SEND_FAILED` | SendGrid rejected email | Check `errorId` in logs |
+| Code | Error Code            | Meaning                    | Action                                   |
+| ---- | --------------------- | -------------------------- | ---------------------------------------- |
+| 200  | -                     | Email sent successfully    | Check `messageId` in response            |
+| 400  | `VALIDATION_ERROR`    | Missing/invalid outreachId | Fix request payload                      |
+| 400  | `WRONG_CHANNEL`       | Outreach is not EMAIL type | Use correct outreach                     |
+| 401  | `AUTH_REQUIRED`       | Missing/invalid auth token | Add `Authorization: Bearer $CRON_SECRET` |
+| 404  | `NOT_FOUND`           | Outreach ID doesn't exist  | Check outreach exists                    |
+| 409  | `ALREADY_SENT`        | Email sent within 5 min    | Use `force: true` to resend              |
+| 422  | `MISSING_EMAIL`       | Contact has no email       | Import/update contact                    |
+| 422  | `INVALID_EMAIL`       | Email format invalid       | Fix contact email                        |
+| 422  | `MISSING_SUBJECT`     | Email subject empty        | Generate content first                   |
+| 422  | `MISSING_BODY`        | Email body empty           | Generate content first                   |
+| 503  | `SERVICE_UNAVAILABLE` | SendGrid not configured    | Set `SENDGRID_API_KEY`                   |
+| 500  | `SEND_FAILED`         | SendGrid rejected email    | Check `errorId` in logs                  |
 
 ### ✅ Vercel → Railway Integration
 
@@ -1561,10 +1565,10 @@ From Vercel (`api/railway/[...path].ts`):
 ```typescript
 // Request to Railway
 fetch(`${RAILWAY_URL}/api/outreach/send-email`, {
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${process.env.CRON_SECRET}`,
-    'Content-Type': 'application/json',
+    Authorization: `Bearer ${process.env.CRON_SECRET}`,
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({ outreachId }),
 });

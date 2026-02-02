@@ -44,10 +44,7 @@ export async function POST(req: NextRequest) {
   // -------------------------------------------------------------------------
   const authResult = await authServiceOrSession(req);
   if (!authResult) {
-    return NextResponse.json(
-      { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }, { status: 401 });
   }
 
   // -------------------------------------------------------------------------
@@ -57,10 +54,7 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON body', code: 'INVALID_JSON' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid JSON body', code: 'INVALID_JSON' }, { status: 400 });
   }
 
   const parseResult = SendEmailSchema.safeParse(body);
@@ -89,10 +83,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (!outreach) {
-    return NextResponse.json(
-      { error: 'Outreach not found', code: 'NOT_FOUND' },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: 'Outreach not found', code: 'NOT_FOUND' }, { status: 404 });
   }
 
   // -------------------------------------------------------------------------
@@ -188,7 +179,8 @@ export async function POST(req: NextRequest) {
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'casey@freightroll.com';
     const fromName = process.env.SENDGRID_FROM_NAME || 'FreightRoll';
     const replyTo = process.env.SENDGRID_REPLY_TO || fromEmail;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://yardflow-hitlist-production-2f41.up.railway.app';
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL || 'https://yardflow-hitlist-production-2f41.up.railway.app';
 
     // Tracking pixel for open tracking
     const trackingPixel = `<img src="${appUrl}/api/outreach/track/${outreach.id}/open" width="1" height="1" style="display:none;" alt="" />`;
@@ -216,7 +208,7 @@ export async function POST(req: NextRequest) {
     };
 
     const [response] = await sgMail.default.send(msg);
-    const messageId = response.headers['x-message-id'] as string || crypto.randomUUID();
+    const messageId = (response.headers['x-message-id'] as string) || crypto.randomUUID();
 
     // Update outreach with success
     await prisma.outreach.update({
@@ -251,7 +243,8 @@ export async function POST(req: NextRequest) {
       code?: number;
     };
 
-    const sgError = err.response?.body?.errors?.[0]?.message || err.message || 'Unknown SendGrid error';
+    const sgError =
+      err.response?.body?.errors?.[0]?.message || err.message || 'Unknown SendGrid error';
 
     logger.error('SendGrid send failed', {
       errorId,
