@@ -47,6 +47,11 @@ COPY --from=base /app/public ./public
 COPY --from=base /app/prisma ./prisma
 COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=base /app/prisma.config.ts ./prisma.config.ts
+
+# Copy entrypoint script
+COPY --from=base /app/docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -55,5 +60,5 @@ ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 3000
 
-# Use standalone server directly (not npm start)
-CMD ["node", "server.js"]
+# Use entrypoint to run migrations before starting server
+CMD ["./docker-entrypoint.sh"]
