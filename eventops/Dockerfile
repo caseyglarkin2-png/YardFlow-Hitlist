@@ -5,7 +5,8 @@ RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists
 
 WORKDIR /app
 
-# Copy package files and Prisma schema
+# Copy package files and Prisma schema first for layer caching
+# Bust cache: 2026-02-02 - added prospect fields to people model
 COPY package*.json ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
