@@ -49,6 +49,12 @@ COPY --from=base /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=base /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=base /app/prisma.config.ts ./prisma.config.ts
 
+# Copy Prisma CLI for migrations at runtime (npx prisma migrate deploy)
+COPY --from=base /app/node_modules/prisma ./node_modules/prisma
+COPY --from=base /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+# Copy package.json for npx to find local binaries
+COPY --from=base /app/package.json ./package.json
+
 # Copy entrypoint script
 COPY --from=base /app/docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
