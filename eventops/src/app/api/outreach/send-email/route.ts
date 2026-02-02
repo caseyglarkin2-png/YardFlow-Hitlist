@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { isValidEmail } from '@/lib/sendgrid';
+import { getRedisConnection } from '@/lib/queue/client';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,40 @@ const SendEmailSchema = z.object({
 
 // Dedupe window: reject same outreach send within 5 minutes
 const DEDUPE_WINDOW_MS = 5 * 60 * 1000;
+
+// Rate limiting: max emails per user per minute
+const RATE_LIMIT_WINDOW_SECONDS = 60;
+const MAX_SENDS_PER_WINDOW = 10;
+
+/**
+ * Check rate limit using Redis
+ */
+async function checkRateLimit(
+  userId: string
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  try {
+    const redis = getRedisConnection();
+    const key = `ratelimit:email:${userId}`;
+
+    const count = await redis.incr(key);
+
+    // Set expiry on first increment
+    if (count === 1) {
+      await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS);
+    }
+
+    if (count > MAX_SENDS_PER_WINDOW) {
+      const ttl = await redis.ttl(key);
+      return { allowed: false, retryAfter: ttl > 0 ? ttl : RATE_LIMIT_WINDOW_SECONDS };
+    }
+
+    return { allowed: true };
+  } catch (error) {
+    // If Redis fails, allow the request but log
+    logger.warn('[send-email] Rate limit check failed', { error, userId });
+    return { allowed: true };
+  }
+}
 
 /**
  * POST /api/outreach/send-email
@@ -45,6 +80,26 @@ export async function POST(req: NextRequest) {
   const authResult = await authServiceOrSession(req);
   if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }, { status: 401 });
+  }
+
+  // -------------------------------------------------------------------------
+  // 1.5 Rate limiting (skip for service accounts)
+  // -------------------------------------------------------------------------
+  if (authResult.type === 'session' && authResult.userId) {
+    const rateCheck = await checkRateLimit(authResult.userId);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: `Rate limit exceeded. Try again in ${rateCheck.retryAfter} seconds.`,
+          code: 'RATE_LIMITED',
+          retryAfter: rateCheck.retryAfter,
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateCheck.retryAfter) },
+        }
+      );
+    }
   }
 
   // -------------------------------------------------------------------------

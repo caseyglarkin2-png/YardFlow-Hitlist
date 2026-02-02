@@ -17,6 +17,43 @@ const OPTIONAL_ENV_VARS = [
   'CRON_SECRET',
 ];
 
+async function checkEmailService() {
+  try {
+    if (!process.env.SENDGRID_API_KEY) {
+      return { status: 'error', details: 'SENDGRID_API_KEY not configured' };
+    }
+
+    // Check recent email failures (last hour)
+    const recentFailures = await prisma.outreach.count({
+      where: {
+        status: 'BOUNCED',
+        updatedAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
+      },
+    });
+
+    // Check recent successful sends
+    const recentSends = await prisma.outreach.count({
+      where: {
+        status: 'SENT',
+        sentAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
+      },
+    });
+
+    if (recentFailures > 10) {
+      return {
+        status: 'degraded',
+        details: `${recentFailures} failures in last hour`,
+        recentSends,
+        recentFailures,
+      };
+    }
+
+    return { status: 'ok', recentSends, recentFailures };
+  } catch (error) {
+    return { status: 'error', error: (error as Error).message };
+  }
+}
+
 async function checkDatabase() {
   const start = Date.now();
   try {
@@ -94,7 +131,7 @@ export async function GET() {
 
   // Run checks in parallel but catch all errors individually
   // We want to return a 200/503 response, not a 500 runtime exception
-  let dbCheck, redisCheck, queueCheck, workerCheck;
+  let dbCheck, redisCheck, queueCheck, workerCheck, emailCheck;
 
   try {
     dbCheck = await checkDatabase();
@@ -115,6 +152,11 @@ export async function GET() {
     queueCheck = await getQueueCounts();
   } catch (e) {
     queueCheck = { status: 'fatal', error: String(e) };
+  }
+  try {
+    emailCheck = await checkEmailService();
+  } catch (e) {
+    emailCheck = { status: 'fatal', error: String(e) };
   }
 
   // Healthy = DB + Redis + Worker + Critical Env Vars
@@ -138,6 +180,7 @@ export async function GET() {
       redis: redisCheck,
       worker: workerCheck,
       queues: queueCheck,
+      email: emailCheck,
     },
     timestamp: new Date().toISOString(),
   };
