@@ -88,7 +88,6 @@ export async function GET(request: NextRequest) {
       by: ['personId'],
       where: {
         sentAt: { gte: startDate },
-        people: { accountId: { not: null } },
       },
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },
