@@ -110,6 +110,12 @@ enum MeetingStatus {
   NO_SHOW
 }
 
+enum TemplateTone {
+  LUIS
+  PROFESSIONAL
+  CHALLENGER
+}
+
 model message_templates {
   id          String          @id
   name        String
@@ -117,7 +123,10 @@ model message_templates {
   channel     OutreachChannel
   subject     String?
   template    String
+  tone        TemplateTone?   // AI voice tone for content generation
   isActive    Boolean         @default(true)
+  isDefault   Boolean         @default(false) // Default template for this tone
+  createdBy   String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime
 }
