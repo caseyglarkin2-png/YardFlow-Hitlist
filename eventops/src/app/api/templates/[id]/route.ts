@@ -24,7 +24,7 @@ const UpdateTemplateSchema = z.object({
   subject: z.string().max(200).optional().nullable(),
   template: z.string().min(1).max(5000).optional(),
   isActive: z.boolean().optional(),
-  isDefault: z.boolean().optional(),
+  isDefault: z.boolean().optional(), // Note: requires migration 20260203000000
 });
 
 // GET /api/templates/[id]

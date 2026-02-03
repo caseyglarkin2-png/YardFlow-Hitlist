@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
 
     const templates = await prisma.message_templates.findMany({
       where,
-      orderBy: [{ isDefault: 'desc' }, { updatedAt: 'desc' }],
+      orderBy: { updatedAt: 'desc' },
       take: limit ? parseInt(limit, 10) : 50,
       skip: offset ? parseInt(offset, 10) : 0,
     });
