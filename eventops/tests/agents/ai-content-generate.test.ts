@@ -55,7 +55,8 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        context: { prospectName: 'Casey', companyName: 'FreightRoll', tone: 'luis' },
+        tone: 'luis',
+        context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );
 
@@ -70,7 +71,8 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        context: { prospectName: 'Casey', companyName: 'FreightRoll', tone: 'unknown' },
+        tone: 'unknown',
+        context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );
 
@@ -91,7 +93,8 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        context: { prospectName: 'Casey', companyName: 'FreightRoll', tone: 'luis' },
+        tone: 'luis',
+        context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );
 
@@ -112,7 +115,8 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        context: { prospectName: 'Casey', companyName: 'FreightRoll', tone: 'luis' },
+        tone: 'luis',
+        context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );
 

@@ -25,12 +25,12 @@ const ToneSchema = z.enum(['luis', 'professional', 'challenger']);
 
 const RequestSchema = z.object({
   type: z.literal('email'),
+  tone: ToneSchema,
+  goal: z.string().optional(),
   context: z.object({
     prospectName: z.string().min(1),
     companyName: z.string().min(1),
     title: z.string().optional(),
-    tone: ToneSchema,
-    goal: z.string().optional(),
   }),
 });
 
@@ -106,8 +106,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'validation_error', details }, { status: 400 });
     }
 
-    const { context } = parsed.data;
-    const tone = context.tone as VoiceTone;
+    const { context, tone, goal } = parsed.data;
 
     if (!VOICE_CONFIGS[tone]) {
       return NextResponse.json({ error: 'invalid_tone' }, { status: 400 });
@@ -123,7 +122,7 @@ export async function POST(request: NextRequest) {
       prospectName: context.prospectName,
       companyName: context.companyName,
       title: context.title,
-      goal: context.goal,
+      goal: goal,
       tone,
     };
 

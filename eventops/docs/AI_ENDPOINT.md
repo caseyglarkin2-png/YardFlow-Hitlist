@@ -21,12 +21,12 @@ Missing or invalid key returns:
 ```json
 {
   "type": "email",
+  "tone": "luis",
+  "goal": "Schedule meeting to discuss yard visibility",
   "context": {
     "prospectName": "Casey Larkin",
     "companyName": "FreightRoll",
-    "title": "VP Operations",
-    "tone": "luis",
-    "goal": "Schedule meeting to discuss yard visibility"
+    "title": "VP Operations"
   }
 }
 ```
