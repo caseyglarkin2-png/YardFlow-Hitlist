@@ -8,32 +8,35 @@
 
 ## Executive Summary
 
-| Area | Status | Notes |
-|------|--------|-------|
-| **Railway Backend** | ✅ Healthy | All systems green (DB, Redis, Worker, Queues) |
-| **Email Sending** | ✅ Working | Test email to casey@freightroll.com successful |
-| **SendGrid Verified** | ✅ Done | Single Sender `casey@freightroll.com` verified |
-| **Calendly Webhook** | ✅ Created | `/api/webhooks/calendly` - meeting attribution |
-| **Inbound Webhook** | ✅ Created | `/api/webhooks/inbound` - reply/OOO detection |
-| **Schema Drift** | ⚠️ BLOCKING | Duplicate enrollment models need consolidation |
-| **Frontend Connector** | ⚠️ Partial | GTM needs RAILWAY_API_SECRET in Vercel |
+| Area                   | Status      | Notes                                          |
+| ---------------------- | ----------- | ---------------------------------------------- |
+| **Railway Backend**    | ✅ Healthy  | All systems green (DB, Redis, Worker, Queues)  |
+| **Email Sending**      | ✅ Working  | Test email to casey@freightroll.com successful |
+| **SendGrid Verified**  | ✅ Done     | Single Sender `casey@freightroll.com` verified |
+| **Calendly Webhook**   | ✅ Created  | `/api/webhooks/calendly` - meeting attribution |
+| **Inbound Webhook**    | ✅ Created  | `/api/webhooks/inbound` - reply/OOO detection  |
+| **Schema Drift**       | ⚠️ BLOCKING | Duplicate enrollment models need consolidation |
+| **Frontend Connector** | ⚠️ Partial  | GTM needs RAILWAY_API_SECRET in Vercel         |
 
 ---
 
 ## 🏆 Today's Accomplishments
 
 ### 1. Email Infrastructure Complete
+
 - Updated Railway `SENDGRID_FROM_EMAIL` to `casey@freightroll.com`
 - Verified email sends via `/api/email/test`
 - Email received successfully in inbox
 
 ### 2. Calendly Webhook Implemented (`/api/webhooks/calendly`)
+
 - Handles `invitee.created` → Create meeting, stop sequences
 - Handles `invitee.canceled` → Mark meeting cancelled
 - HMAC-SHA256 signature verification
 - Auto-stops active enrollments on meeting booked
 
 ### 3. Inbound Email Webhook Implemented (`/api/webhooks/inbound`)
+
 - SendGrid Inbound Parse compatible
 - OOO detection with smart patterns (10+ phrases)
 - Return date extraction (day names, MM/DD dates)
@@ -41,6 +44,7 @@
 - Auto-pause enrollments on OOO, stop on reply
 
 ### 4. Schema Updates
+
 - Added `PAUSED` status to sequence_enrollments
 - Added `resume_at` field for OOO auto-resume
 
@@ -52,17 +56,19 @@
 
 **Problem**: Two separate enrollment tables exist in the schema with different naming and fields:
 
-| Model | Table | Used By |
-|-------|-------|---------|
-| `SequenceEnrollment` | PascalCase | sequence-engine.ts, cron/sequences, compliance.ts |
-| `sequence_enrollments` | snake_case | webhooks, enrollments API |
+| Model                  | Table      | Used By                                           |
+| ---------------------- | ---------- | ------------------------------------------------- |
+| `SequenceEnrollment`   | PascalCase | sequence-engine.ts, cron/sequences, compliance.ts |
+| `sequence_enrollments` | snake_case | webhooks, enrollments API                         |
 
-**Impact**: 
+**Impact**:
+
 - Enrollments created via sequence-engine go to one table
 - Webhooks update a different table
 - They are **completely disconnected**
 
 **Files Affected**:
+
 - `src/lib/outreach/sequence-engine.ts` (17 usages)
 - `src/app/api/cron/sequences/route.ts` (3 usages)
 - `src/lib/outreach/compliance.ts` (3 usages)
@@ -81,6 +87,7 @@
 **File**: `src/app/api/prospects/route.ts`
 
 **Fix**: Run Prisma migrations on production:
+
 ```bash
 DATABASE_URL="<prod>" npx prisma migrate deploy
 ```
@@ -89,9 +96,9 @@ DATABASE_URL="<prod>" npx prisma migrate deploy
 
 ### P1 — Missing Environment Variables in Railway
 
-| Variable | Status | Required For |
-|----------|--------|--------------|
-| `CALENDLY_WEBHOOK_SECRET` | ❓ Unknown | Calendly webhook verification |
+| Variable                            | Status     | Required For                  |
+| ----------------------------------- | ---------- | ----------------------------- |
+| `CALENDLY_WEBHOOK_SECRET`           | ❓ Unknown | Calendly webhook verification |
 | `SENDGRID_WEBHOOK_VERIFICATION_KEY` | ❓ Unknown | SendGrid webhook verification |
 
 ---
@@ -100,30 +107,30 @@ DATABASE_URL="<prod>" npx prisma migrate deploy
 
 ### P0 — Blocking (Must Fix This Week)
 
-| Task | File(s) | Effort | Owner |
-|------|---------|--------|-------|
-| T26.1: Consolidate enrollment models | Schema + 5 files | 3hr | Backend |
-| T26.2: Run Prisma migration on prod | Railway | 30min | DevOps |
-| T26.3: Fix /api/prospects schema error | prospects/route.ts | 1hr | Backend |
+| Task                                   | File(s)            | Effort | Owner   |
+| -------------------------------------- | ------------------ | ------ | ------- |
+| T26.1: Consolidate enrollment models   | Schema + 5 files   | 3hr    | Backend |
+| T26.2: Run Prisma migration on prod    | Railway            | 30min  | DevOps  |
+| T26.3: Fix /api/prospects schema error | prospects/route.ts | 1hr    | Backend |
 
 ### P1 — High Priority (This Week)
 
-| Task | File(s) | Effort | Owner |
-|------|---------|--------|-------|
-| T26.4: Add CALENDLY_WEBHOOK_SECRET to Railway | Railway Dashboard | 15min | DevOps |
-| T26.5: Add SENDGRID_WEBHOOK_VERIFICATION_KEY | Railway Dashboard | 15min | DevOps |
-| T26.6: Add webhook idempotency (Redis dedup) | 3 webhook routes | 2hr | Backend |
-| T26.7: Add resume_at cron check | cron/sequences/route.ts | 1hr | Backend |
-| T26.8: Add inbound webhook auth | inbound/route.ts | 1hr | Backend |
+| Task                                          | File(s)                 | Effort | Owner   |
+| --------------------------------------------- | ----------------------- | ------ | ------- |
+| T26.4: Add CALENDLY_WEBHOOK_SECRET to Railway | Railway Dashboard       | 15min  | DevOps  |
+| T26.5: Add SENDGRID_WEBHOOK_VERIFICATION_KEY  | Railway Dashboard       | 15min  | DevOps  |
+| T26.6: Add webhook idempotency (Redis dedup)  | 3 webhook routes        | 2hr    | Backend |
+| T26.7: Add resume_at cron check               | cron/sequences/route.ts | 1hr    | Backend |
+| T26.8: Add inbound webhook auth               | inbound/route.ts        | 1hr    | Backend |
 
 ### P2 — Can Wait (Next Week)
 
-| Task | File(s) | Effort | Owner |
-|------|---------|--------|-------|
-| T26.9: Improve OOO date parsing with chrono-node | inbound/route.ts | 1hr | Backend |
-| T26.10: Add webhook_events audit table | Schema + webhooks | 2hr | Backend |
-| T26.11: Fix lint warnings (batched) | Multiple | 3hr | Backend |
-| T26.12: Add GTM frontend proxy testing | GTM-YardFlow | 2hr | Frontend |
+| Task                                             | File(s)           | Effort | Owner    |
+| ------------------------------------------------ | ----------------- | ------ | -------- |
+| T26.9: Improve OOO date parsing with chrono-node | inbound/route.ts  | 1hr    | Backend  |
+| T26.10: Add webhook_events audit table           | Schema + webhooks | 2hr    | Backend  |
+| T26.11: Fix lint warnings (batched)              | Multiple          | 3hr    | Backend  |
+| T26.12: Add GTM frontend proxy testing           | GTM-YardFlow      | 2hr    | Frontend |
 
 ---
 
@@ -132,6 +139,7 @@ DATABASE_URL="<prod>" npx prisma migrate deploy
 ### Current State
 
 **Model 1: `SequenceEnrollment`** (line 591 in schema)
+
 ```prisma
 model SequenceEnrollment {
   id          String    @id @default(cuid())
@@ -148,6 +156,7 @@ model SequenceEnrollment {
 ```
 
 **Model 2: `sequence_enrollments`** (line 243 in schema)
+
 ```prisma
 model sequence_enrollments {
   id           String    @id @default(cuid())
@@ -167,6 +176,7 @@ model sequence_enrollments {
 ### Target State
 
 Keep `sequence_enrollments` with merged fields:
+
 ```prisma
 model sequence_enrollments {
   id           String    @id @default(cuid())
@@ -181,13 +191,13 @@ model sequence_enrollments {
   exit_reason  String?
   pause_reason String?
   resume_at    DateTime?
-  
+
   // Relations
   sequence     sequences       @relation(...)
   people       people          @relation(...)
   target_accounts target_accounts? @relation(...)
   sequence_steps sequence_steps[]
-  
+
   @@index([sequence_id])
   @@index([contact_id])
   @@index([status])
@@ -197,7 +207,7 @@ model sequence_enrollments {
 ### Files to Update
 
 1. **src/lib/outreach/sequence-engine.ts** — 12 usages
-2. **src/app/api/cron/sequences/route.ts** — 3 usages  
+2. **src/app/api/cron/sequences/route.ts** — 3 usages
 3. **src/lib/outreach/compliance.ts** — 3 usages
 4. **src/app/api/sequences/[id]/analytics/route.ts** — 1 usage
 
@@ -215,25 +225,26 @@ model sequence_enrollments {
 
 ### GTM-YardFlow (Vercel) Requirements
 
-| Config | Value | Status |
-|--------|-------|--------|
-| `RAILWAY_API_URL` | `https://yardflow-hitlist-production-2f41.up.railway.app` | ⏳ Need to set |
-| `RAILWAY_API_SECRET` | Same as Railway `CRON_SECRET` | ⏳ Need to set |
+| Config               | Value                                                     | Status         |
+| -------------------- | --------------------------------------------------------- | -------------- |
+| `RAILWAY_API_URL`    | `https://yardflow-hitlist-production-2f41.up.railway.app` | ⏳ Need to set |
+| `RAILWAY_API_SECRET` | Same as Railway `CRON_SECRET`                             | ⏳ Need to set |
 
 ### Integration Points
 
-| Endpoint | GTM Usage | Railway Status |
-|----------|-----------|----------------|
-| `/api/health` | System health widget | ✅ Working |
-| `/api/dashboards/stats` | Dashboard overview | ✅ Working |
-| `/api/sequences` | Sequence management | ✅ Working |
-| `/api/enrollments` | Enrollment tracking | ⚠️ Uses snake_case model |
-| `/api/prospects` | Prospect management | ❌ Schema error |
-| `/api/email/test` | Email testing | ✅ Working |
+| Endpoint                | GTM Usage            | Railway Status           |
+| ----------------------- | -------------------- | ------------------------ |
+| `/api/health`           | System health widget | ✅ Working               |
+| `/api/dashboards/stats` | Dashboard overview   | ✅ Working               |
+| `/api/sequences`        | Sequence management  | ✅ Working               |
+| `/api/enrollments`      | Enrollment tracking  | ⚠️ Uses snake_case model |
+| `/api/prospects`        | Prospect management  | ❌ Schema error          |
+| `/api/email/test`       | Email testing        | ✅ Working               |
 
 ### `railwayClient` Implementation
 
 GTM should create `lib/railway-client.ts`:
+
 ```typescript
 const BASE_URL = process.env.RAILWAY_API_URL;
 const SERVICE_KEY = process.env.RAILWAY_API_SECRET;
@@ -243,16 +254,16 @@ export const railwayClient = {
     if (!BASE_URL || !SERVICE_KEY) {
       throw new Error("Missing Railway configuration");
     }
-    
+
     const res = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers: {
-        'Authorization': `Bearer ${SERVICE_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        "Content-Type": "application/json",
         ...options?.headers,
       },
     });
-    
+
     if (!res.ok) throw new Error(`Railway API Error: ${res.status}`);
     return res.json();
   },
@@ -280,7 +291,7 @@ curl -X POST \
 # Check Calendly webhook endpoint
 curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/webhooks/calendly | jq
 
-# Check inbound webhook endpoint  
+# Check inbound webhook endpoint
 curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/webhooks/inbound | jq
 ```
 
@@ -288,15 +299,15 @@ curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/webhooks/inb
 
 ## Production Database Stats
 
-| Entity | Count |
-|--------|-------|
-| Accounts | 2,615 |
-| People | 5,397 |
-| Campaigns | 0 |
-| Meetings | 0 |
-| Outreach Sent | 0 |
-| Sequences | 0 |
-| Enrollments | 0 |
+| Entity        | Count |
+| ------------- | ----- |
+| Accounts      | 2,615 |
+| People        | 5,397 |
+| Campaigns     | 0     |
+| Meetings      | 0     |
+| Outreach Sent | 0     |
+| Sequences     | 0     |
+| Enrollments   | 0     |
 
 ---
 
@@ -337,5 +348,5 @@ curl -s https://yardflow-hitlist-production-2f41.up.railway.app/api/webhooks/inb
 
 ---
 
-*Session End: February 1, 2026*  
-*Next Session: Enrollment Model Consolidation*
+_Session End: February 1, 2026_  
+_Next Session: Enrollment Model Consolidation_

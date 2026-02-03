@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`VOICE_CONFIGS > matches snapshots for prompts > challenger 1`] = `
+"Voice: Challenger (insight-led, assertive, helpful)
+
+Rules:
+- Lead with a strong insight or gap.
+- Short proof point.
+- One direct question.
+- Keep it concise and practical.
+
+Manifest Sequence Template:
+- Opener: Specific company reference + quick relevance.
+- Proof: Primo-style metrics (short, concrete).
+- Ask: Single direct question.
+- CTA: Include Calendly link.
+- Length: Tight, skimmable, no fluff.
+"
+`;
+
+exports[`VOICE_CONFIGS > matches snapshots for prompts > luis 1`] = `
+"Voice: Luis (short, punchy, metrics-first)
+
+Rules:
+- Short opener. No fluff.
+- Use Primo proof: include at least one hard metric token (examples: "$1M", "4%", "25 facilities").
+- Ask exactly one direct question.
+- Include Calendly link.
+- Avoid long paragraphs. Avoid emojis.
+- Output must be usable for cold outreach.
+
+Manifest Sequence Template:
+- Opener: Specific company reference + quick relevance.
+- Proof: Primo-style metrics (short, concrete).
+- Ask: Single direct question.
+- CTA: Include Calendly link.
+- Length: Tight, skimmable, no fluff.
+"
+`;
+
+exports[`VOICE_CONFIGS > matches snapshots for prompts > professional 1`] = `
+"Voice: Professional (clear, confident, concise)
+
+Rules:
+- Respectful, direct, value-focused.
+- One clear call-to-action.
+- No buzzwords. No fluff.
+- Keep it concise and skimmable.
+
+Manifest Sequence Template:
+- Opener: Specific company reference + quick relevance.
+- Proof: Primo-style metrics (short, concrete).
+- Ask: Single direct question.
+- CTA: Include Calendly link.
+- Length: Tight, skimmable, no fluff.
+"
+`;

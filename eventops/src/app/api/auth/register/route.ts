@@ -15,13 +15,18 @@ export async function POST(req: NextRequest) {
     // Check for service authorization (CRON_SECRET)
     const authHeader = req.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
-    
+
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
-    const { email, password, name, role = 'MEMBER' } = body as {
+    const {
+      email,
+      password,
+      name,
+      role = 'MEMBER',
+    } = body as {
       email: string;
       password: string;
       name?: string;
@@ -29,10 +34,7 @@ export async function POST(req: NextRequest) {
     };
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
     // Check if user already exists
@@ -45,14 +47,14 @@ export async function POST(req: NextRequest) {
       const hashedPassword = await hashPassword(password);
       const updatedUser = await prisma.users.update({
         where: { email },
-        data: { 
+        data: {
           password: hashedPassword,
           name: name || existingUser.name,
         },
       });
-      
+
       logger.info('User password updated', { userId: updatedUser.id, email });
-      
+
       return NextResponse.json({
         success: true,
         action: 'updated',
@@ -92,9 +94,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     logger.error('Error creating user', { error });
-    return NextResponse.json(
-      { error: 'Failed to create user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
   }
 }

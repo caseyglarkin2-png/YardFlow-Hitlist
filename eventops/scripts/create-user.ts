@@ -20,19 +20,22 @@ async function main() {
   // Check existing users
   console.log('Checking existing users...');
   const existingUsers = await prisma.users.findMany({ take: 10 });
-  console.log('Existing users:', existingUsers.map(u => ({ 
-    id: u.id, 
-    email: u.email, 
-    name: u.name, 
-    hasPassword: !!u.password 
-  })));
+  console.log(
+    'Existing users:',
+    existingUsers.map((u) => ({
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      hasPassword: !!u.password,
+    }))
+  );
 
   // Create or update Casey user
   const hashedPassword = await bcrypt.hash('password', 10);
-  
+
   const casey = await prisma.users.upsert({
     where: { email: 'casey@freightroll.com' },
-    update: { 
+    update: {
       password: hashedPassword,
       name: 'Casey Glarkin',
       role: 'ADMIN',

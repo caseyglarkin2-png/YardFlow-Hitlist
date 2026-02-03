@@ -16,13 +16,11 @@ export async function GET(req: NextRequest) {
 
     // For S2S calls, either require x-user-id or return all sequences
     const userId =
-      authResult.type === 'session'
-        ? authResult.userId
-        : req.headers.get('x-user-id') || null;
+      authResult.type === 'session' ? authResult.userId : req.headers.get('x-user-id') || null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
-    
+
     // Only filter by userId if present (session users always have one)
     if (userId) {
       where.createdBy = userId;

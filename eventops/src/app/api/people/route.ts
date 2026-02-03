@@ -104,11 +104,11 @@ export async function GET(request: NextRequest) {
 
     // Get query params for filtering
     const { searchParams } = new URL(request.url);
-    
+
     // For S2S calls, allow eventId param or return all people
     // For session calls, use user's activeEventId
     let eventId: string | null = searchParams.get('eventId');
-    
+
     if (!eventId && authResult.type === 'session') {
       const userId = authResult.userId;
       const user = await prisma.users.findUnique({
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
       });
       eventId = user?.activeEventId || null;
     }
-    
+
     const missingEmail = searchParams.get('missingEmail') === 'true';
     const minIcpScore = searchParams.get('minIcpScore')
       ? parseInt(searchParams.get('minIcpScore')!)
@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
     // Build where clause - eventId filter is optional for S2S global access
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
-    
+
     if (eventId) {
       where.target_accounts = { eventId };
     }
@@ -151,10 +151,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Pagination - default limit 100, max 500
-    const limit = Math.min(
-      parseInt(searchParams.get('limit') || '100'),
-      500
-    );
+    const limit = Math.min(parseInt(searchParams.get('limit') || '100'), 500);
     const skip = parseInt(searchParams.get('skip') || '0');
 
     const people = await prisma.people.findMany({
@@ -167,7 +164,10 @@ export async function GET(request: NextRequest) {
       skip,
     });
 
-    return NextResponse.json({ people, pagination: { limit, skip, hasMore: people.length === limit } });
+    return NextResponse.json({
+      people,
+      pagination: { limit, skip, hasMore: people.length === limit },
+    });
   } catch (error) {
     console.error('Error fetching people:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

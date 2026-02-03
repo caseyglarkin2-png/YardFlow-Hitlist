@@ -49,13 +49,29 @@
   "domains": {
     "manifest_2026": {
       "description": "Supply chain & logistics conference in Las Vegas",
-      "personas": ["ExecOps (10pts)", "Ops (5pts)", "Procurement (3pts)", "Sales (2pts)"],
-      "features": ["250-char meeting requests", "Facility intelligence", "ROI calculations", "Strategic questions"]
+      "personas": [
+        "ExecOps (10pts)",
+        "Ops (5pts)",
+        "Procurement (3pts)",
+        "Sales (2pts)"
+      ],
+      "features": [
+        "250-char meeting requests",
+        "Facility intelligence",
+        "ROI calculations",
+        "Strategic questions"
+      ]
     },
     "yardflow_brand": {
       "description": "YardFlow by FreightRoll - Yard Network System for waste management and logistics",
       "content_hub": "https://flow-state-klbt.vercel.app/",
-      "assets": ["ROI calculators", "Case studies", "Messaging templates", "Social graphics", "Contracts"]
+      "assets": [
+        "ROI calculators",
+        "Case studies",
+        "Messaging templates",
+        "Social graphics",
+        "Contracts"
+      ]
     }
   },
   "agents": {
