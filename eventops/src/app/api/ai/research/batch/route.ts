@@ -179,19 +179,28 @@ export async function POST(request: NextRequest) {
         }
 
         // Generate new dossier
-        const dossier = await generator.generateDossier(accountId);
+        const result = await generator.generateDossier(accountId);
+
+        if (!result.success || !result.dossier) {
+          results.push({
+            accountId,
+            accountName: account.name,
+            status: 'error',
+            error: result.error || 'Dossier generation failed',
+          });
+          continue;
+        }
 
         results.push({
           accountId,
           accountName: account.name,
           status: 'success',
           dossier: {
-            companyOverview: dossier?.companyOverview,
-            yardManagementPotential: dossier?.yardManagementPotential,
-            icpFitAnalysis: dossier?.icpFitAnalysis,
-            keyPainPoints: dossier?.keyPainPoints,
-            outreachAngles: dossier?.outreachAngles,
-            talkingPoints: dossier?.talkingPoints,
+            companyOverview: result.dossier.companyOverview,
+            keyPainPoints: result.dossier.keyPainPoints,
+            outreachAngles: result.dossier.outreachAngles,
+            talkingPoints: result.dossier.talkingPoints,
+            competitors: result.dossier.competitors,
           },
           generatedAt: new Date().toISOString(),
         });
