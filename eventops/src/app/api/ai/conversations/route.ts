@@ -12,7 +12,6 @@ import {
   generateConversationId,
   saveConversation,
 } from '@/lib/ai/conversation-store';
-import type { ConversationMessage } from '@/lib/ai/conversation-store';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,10 +60,10 @@ export async function POST(request: NextRequest) {
     const now = Date.now();
 
     // Create empty conversation
-    await saveConversation(conversationId, authResult.userId, {
+    await saveConversation({
       id: conversationId,
       userId: authResult.userId,
-      messages: [] as ConversationMessage[],
+      messages: [],
       createdAt: now,
       lastMessageAt: now,
     });

@@ -48,30 +48,30 @@ logger.info('Operation started', { userId: authResult.userId, ... });
 
 ### ✅ What's Already Built (Sprint 30)
 
-| File | Status | Capability |
-|------|--------|------------|
-| `src/app/api/ai/chat/route.ts` | ✅ Working | Chat with context, suggestions |
-| `src/app/api/ai/dossier/generate/route.ts` | ✅ Working | Company dossier generation |
-| `src/app/api/ai/content/generate/route.ts` | ✅ Working | Email/content generation |
-| `src/app/api/ai/content/sequence/route.ts` | ✅ Working | Multi-step sequences |
-| `src/app/api/ai/score-icp/route.ts` | ✅ Working | ICP scoring |
-| `src/app/api/ai/sentiment/route.ts` | ✅ Working | Sentiment analysis |
-| `src/lib/ai/provider.ts` | ✅ Working | Gemini → OpenAI fallback |
-| `src/lib/ai/dossier-generator.ts` | ✅ Working | Basic dossier generation |
-| `src/lib/queue/client.ts` | ✅ Working | Redis lazy initialization |
+| File                                       | Status     | Capability                     |
+| ------------------------------------------ | ---------- | ------------------------------ |
+| `src/app/api/ai/chat/route.ts`             | ✅ Working | Chat with context, suggestions |
+| `src/app/api/ai/dossier/generate/route.ts` | ✅ Working | Company dossier generation     |
+| `src/app/api/ai/content/generate/route.ts` | ✅ Working | Email/content generation       |
+| `src/app/api/ai/content/sequence/route.ts` | ✅ Working | Multi-step sequences           |
+| `src/app/api/ai/score-icp/route.ts`        | ✅ Working | ICP scoring                    |
+| `src/app/api/ai/sentiment/route.ts`        | ✅ Working | Sentiment analysis             |
+| `src/lib/ai/provider.ts`                   | ✅ Working | Gemini → OpenAI fallback       |
+| `src/lib/ai/dossier-generator.ts`          | ✅ Working | Basic dossier generation       |
+| `src/lib/queue/client.ts`                  | ✅ Working | Redis lazy initialization      |
 
 ### ❌ What's NOT Built Yet (From Sprint 31 Plan)
 
-| Component | Files Needed | Status |
-|-----------|--------------|--------|
-| Brain Actions Types | `src/types/brain-actions.ts` | ❌ Does not exist |
-| Action Parser | `src/lib/ai/action-parser.ts` | ❌ Does not exist |
-| Conversation Store | `src/lib/ai/conversation-store.ts` | ❌ Does not exist |
-| Enhanced Dossier Schema | `prisma/schema.prisma` changes | ❌ Missing fields |
+| Component                | Files Needed                              | Status            |
+| ------------------------ | ----------------------------------------- | ----------------- |
+| Brain Actions Types      | `src/types/brain-actions.ts`              | ❌ Does not exist |
+| Action Parser            | `src/lib/ai/action-parser.ts`             | ❌ Does not exist |
+| Conversation Store       | `src/lib/ai/conversation-store.ts`        | ❌ Does not exist |
+| Enhanced Dossier Schema  | `prisma/schema.prisma` changes            | ❌ Missing fields |
 | Dossier Refresh Endpoint | `src/app/api/ai/dossier/refresh/route.ts` | ❌ Does not exist |
-| Batch Research Endpoint | `src/app/api/ai/research/batch/route.ts` | ❌ Does not exist |
-| AI Status Endpoint | `src/app/api/ai/status/route.ts` | ❌ Does not exist |
-| Conversation Endpoints | `src/app/api/ai/conversations/route.ts` | ❌ Does not exist |
+| Batch Research Endpoint  | `src/app/api/ai/research/batch/route.ts`  | ❌ Does not exist |
+| AI Status Endpoint       | `src/app/api/ai/status/route.ts`          | ❌ Does not exist |
+| Conversation Endpoints   | `src/app/api/ai/conversations/route.ts`   | ❌ Does not exist |
 
 ---
 
@@ -82,7 +82,7 @@ The task order has been optimized to minimize merge conflicts and ensure depende
 ```
 Phase 1: Foundation (3 hours)
 ├─ T31A.1: Define action types
-├─ T31A.2: Create action parser  
+├─ T31A.2: Create action parser
 ├─ T31A.3: Parser unit tests
 ├─ T31C.1: Create conversation store (parallel with 31A)
 └─ T31C.2: Conversation store tests
@@ -138,6 +138,7 @@ Phase 6: Integration Tests (1 hour) - NEW
 ```
 
 **Acceptance Criteria**:
+
 - [ ] File exists at `src/types/brain-actions.ts`
 - [ ] All action types compile without errors
 - [ ] Types can be imported: `import { BrainAction } from '@/types/brain-actions'`
@@ -168,6 +169,7 @@ Phase 6: Integration Tests (1 hour) - NEW
 ```
 
 **Acceptance Criteria**:
+
 - [ ] File exists at `src/lib/ai/action-parser.ts`
 - [ ] Exports `parseActionFromResponse` function
 - [ ] Parses navigation commands correctly
@@ -187,36 +189,37 @@ Phase 6: Integration Tests (1 hour) - NEW
 
 ```typescript
 // Test cases:
-describe('parseActionFromResponse', () => {
-  describe('navigation', () => {
-    it('parses "go to prospects"')
-    it('parses "show me the dashboard"')
-    it('parses "navigate to accounts"')
-  })
-  
-  describe('filtering', () => {
-    it('parses "show tier 1 prospects"')
-    it('parses "filter prospects with email"')
-    it('parses "find tier 2 without email"')
-  })
-  
-  describe('search', () => {
-    it('parses "search for Acme Corp"')
-    it('handles quoted search terms')
-  })
-  
-  describe('research', () => {
-    it('parses "research company XYZ Logistics"')
-  })
-  
-  describe('no action', () => {
-    it('returns undefined for explanatory text')
-    it('returns undefined for questions')
-  })
-})
+describe("parseActionFromResponse", () => {
+  describe("navigation", () => {
+    it('parses "go to prospects"');
+    it('parses "show me the dashboard"');
+    it('parses "navigate to accounts"');
+  });
+
+  describe("filtering", () => {
+    it('parses "show tier 1 prospects"');
+    it('parses "filter prospects with email"');
+    it('parses "find tier 2 without email"');
+  });
+
+  describe("search", () => {
+    it('parses "search for Acme Corp"');
+    it("handles quoted search terms");
+  });
+
+  describe("research", () => {
+    it('parses "research company XYZ Logistics"');
+  });
+
+  describe("no action", () => {
+    it("returns undefined for explanatory text");
+    it("returns undefined for questions");
+  });
+});
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Test file exists at `tests/ai/action-parser.test.ts`
 - [ ] All 10+ test cases pass
 - [ ] Edge cases covered (quoted strings, mixed case)
@@ -233,6 +236,7 @@ describe('parseActionFromResponse', () => {
 **Validation**: Curl returns `action` in response
 
 **Changes**:
+
 1. Import `parseActionFromResponse` from `@/lib/ai/action-parser`
 2. Add action instruction to system prompt
 3. Parse AI response for actions after generation
@@ -242,7 +246,7 @@ describe('parseActionFromResponse', () => {
 // Add to response:
 return NextResponse.json({
   response: result.content,
-  action,  // NEW: parsed action
+  action, // NEW: parsed action
   suggestions,
   provider: result.provider,
   fallbackUsed: result.fallbackUsed,
@@ -250,12 +254,14 @@ return NextResponse.json({
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Chat endpoint imports action parser
 - [ ] System prompt includes action phrasing hints
 - [ ] Response includes `action` field (may be undefined)
 - [ ] Curl test returns action for "show me tier 1 prospects"
 
 **Validation Command**:
+
 ```bash
 curl -X POST https://yardflow-hitlist-production-2f41.up.railway.app/api/ai/chat \
   -H "Authorization: Bearer $CRON_SECRET" \
@@ -275,6 +281,7 @@ curl -X POST https://yardflow-hitlist-production-2f41.up.railway.app/api/ai/chat
 **Validation**: Confidence returned with actions
 
 **Changes**:
+
 1. Add `ParseResult` interface with `action` and `confidence`
 2. Create `parseActionWithConfidence` function
 3. Calculate confidence based on explicit intent phrases
@@ -292,6 +299,7 @@ export interface ParseResult {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] `parseActionWithConfidence` exported
 - [ ] Returns confidence between 0-1
 - [ ] Higher confidence for explicit phrasing
@@ -315,6 +323,7 @@ export interface ParseResult {
 **⚠️ REVIEW FIX**: Make `updatedAt` nullable initially to handle existing data.
 
 **Current `company_dossiers` fields**:
+
 ```prisma
 model company_dossiers {
   id               String  @id
@@ -336,6 +345,7 @@ model company_dossiers {
 ```
 
 **Fields to ADD**:
+
 ```prisma
   // New enhanced fields (all nullable for existing data)
   talkingPoints    String?  // JSON: {opener, painPoint, valueHook, nextStep}
@@ -347,8 +357,9 @@ model company_dossiers {
 ```
 
 **Rollback SQL** (if needed):
+
 ```sql
-ALTER TABLE company_dossiers 
+ALTER TABLE company_dossiers
   DROP COLUMN IF EXISTS talkingPoints,
   DROP COLUMN IF EXISTS competitors,
   DROP COLUMN IF EXISTS decisionMakers,
@@ -358,6 +369,7 @@ ALTER TABLE company_dossiers
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Schema includes new fields
 - [ ] Migration created and applied
 - [ ] `npm run lint` passes
@@ -375,6 +387,7 @@ ALTER TABLE company_dossiers
 **Validation**: TypeScript compiles
 
 **Add interface**:
+
 ```typescript
 export interface EnhancedDossier {
   // Existing
@@ -384,7 +397,7 @@ export interface EnhancedDossier {
   techStack?: string[];
   companySize?: string;
   facilityIntelligence?: FacilityIntelligence;
-  
+
   // NEW
   talkingPoints: {
     opener: string;
@@ -392,23 +405,23 @@ export interface EnhancedDossier {
     valueHook: string;
     nextStep: string;
   };
-  
+
   competitors: Array<{
     name: string;
     differentiator: string;
   }>;
-  
+
   decisionMakers: Array<{
     title: string;
     likelyPriorities: string[];
   }>;
-  
+
   outreachAngles: Array<{
     angle: string;
     emailSubject: string;
     openingLine: string;
   }>;
-  
+
   manifestContext: {
     likelyToAttend: boolean;
     boothConversationStarter: string;
@@ -418,6 +431,7 @@ export interface EnhancedDossier {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] `EnhancedDossier` interface defined
 - [ ] Compiles without errors
 - [ ] Matches Prisma schema JSON structure
@@ -434,16 +448,19 @@ export interface EnhancedDossier {
 **Validation**: Generated dossier includes new fields
 
 **Changes**:
+
 1. Update prompt to request all new fields
 2. Parse new fields from AI response
 3. Store as JSON strings in database
 
 **Acceptance Criteria**:
+
 - [ ] Prompt includes all new field requests
 - [ ] AI returns `talkingPoints`, `competitors`, `outreachAngles`, `manifestContext`
 - [ ] Fields saved to database correctly
 
 **Validation Command**:
+
 ```bash
 curl -X POST https://yardflow-hitlist-production-2f41.up.railway.app/api/ai/dossier/generate \
   -H "Authorization: Bearer $CRON_SECRET" \
@@ -463,14 +480,15 @@ curl -X POST https://yardflow-hitlist-production-2f41.up.railway.app/api/ai/doss
 **Validation**: Dossier context includes known contacts
 
 **Add method**:
+
 ```typescript
 private buildEnrichedContext(company: TargetAccountWithRelations): string {
   const parts: string[] = [];
-  
+
   // Company basics
   parts.push(`Company: ${company.name}`);
   // ... existing fields
-  
+
   // NEW: Include known contacts
   if (company.people?.length > 0) {
     parts.push('\nKnown Contacts:');
@@ -482,12 +500,13 @@ private buildEnrichedContext(company: TargetAccountWithRelations): string {
       parts.push(`- ${person.name}, ${person.title} [${roles.join(', ')}]`);
     }
   }
-  
+
   return parts.join('\n');
 }
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Context includes contacts with titles and personas
 - [ ] Limited to 5 contacts to avoid prompt bloat
 - [ ] AI uses contact info in dossier generation
@@ -515,12 +534,14 @@ private buildEnrichedContext(company: TargetAccountWithRelations): string {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Endpoint exists at `/api/ai/dossier/refresh`
 - [ ] Deletes old dossier before regenerating
 - [ ] Returns `refreshed: true` in response
 - [ ] Protected by `authServiceOrSession`
 
 **Validation Command**:
+
 ```bash
 curl -X POST .../api/ai/dossier/refresh \
   -H "Authorization: Bearer $CRON_SECRET" \
@@ -540,6 +561,7 @@ curl -X POST .../api/ai/dossier/refresh \
 **Validation**: API returns `isStale` and `daysOld`
 
 **Add method**:
+
 ```typescript
 export interface DossierWithAge {
   dossier: EnhancedDossier;
@@ -552,14 +574,14 @@ async getDossierWithAge(accountId: string): Promise<DossierWithAge | null> {
   const dossier = await prisma.company_dossiers.findUnique({
     where: { accountId },
   });
-  
+
   if (!dossier) return null;
-  
+
   const updatedAt = dossier.updatedAt || dossier.researchedAt;
   const daysOld = Math.floor(
     (Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24)
   );
-  
+
   return {
     dossier: this.parseDossier(dossier),
     isStale: daysOld > 7,
@@ -570,6 +592,7 @@ async getDossierWithAge(accountId: string): Promise<DossierWithAge | null> {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] `getDossierWithAge` method exists
 - [ ] Returns `isStale: true` for dossiers > 7 days old
 - [ ] Returns accurate `daysOld` count
@@ -595,13 +618,13 @@ async getDossierWithAge(accountId: string): Promise<DossierWithAge | null> {
 **⚠️ LAZY INIT**: Redis connection MUST be retrieved inside functions, not at module scope.
 
 ```typescript
-import { randomUUID } from 'crypto';
-import { getRedisConnection } from '@/lib/queue/client';
-import type { BrainAction } from '@/types/brain-actions';
+import { randomUUID } from "crypto";
+import { getRedisConnection } from "@/lib/queue/client";
+import type { BrainAction } from "@/types/brain-actions";
 
 // Interfaces:
 export interface ConversationMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: number;
   action?: BrainAction;
@@ -625,11 +648,14 @@ export function generateConversationId(): string {
 }
 
 // Functions (all verify userId ownership):
-export async function getConversation(conversationId: string, userId: string): Promise<Conversation | null> {
+export async function getConversation(
+  conversationId: string,
+  userId: string,
+): Promise<Conversation | null> {
   const redis = getRedisConnection(); // ✅ Lazy - inside function
   const data = await redis.get(`conversation:${conversationId}`);
   if (!data) return null;
-  
+
   const conversation = JSON.parse(data) as Conversation;
   if (conversation.userId !== userId) {
     return null; // ⚠️ Don't leak other users' conversations
@@ -637,13 +663,23 @@ export async function getConversation(conversationId: string, userId: string): P
   return conversation;
 }
 
-export async function saveConversation(conversation: Conversation): Promise<void>
-export async function addMessage(conversationId: string, userId: string, message: ConversationMessage): Promise<Conversation>
-export async function clearConversation(conversationId: string, userId: string): Promise<void>
-export async function getUserConversations(userId: string): Promise<string[]>
+export async function saveConversation(
+  conversation: Conversation,
+): Promise<void>;
+export async function addMessage(
+  conversationId: string,
+  userId: string,
+  message: ConversationMessage,
+): Promise<Conversation>;
+export async function clearConversation(
+  conversationId: string,
+  userId: string,
+): Promise<void>;
+export async function getUserConversations(userId: string): Promise<string[]>;
 ```
 
 **Acceptance Criteria**:
+
 - [ ] File exists at `src/lib/ai/conversation-store.ts`
 - [ ] Uses `getRedisConnection()` INSIDE functions (not module scope)
 - [ ] All functions verify userId ownership
@@ -664,26 +700,27 @@ export async function getUserConversations(userId: string): Promise<string[]>
 
 ```typescript
 // Test cases:
-describe('ConversationStore', () => {
-  describe('addMessage', () => {
-    it('creates new conversation on first message')
-    it('appends to existing conversation')
-    it('trims to MAX_MESSAGES limit')
-  })
-  
-  describe('getConversation', () => {
-    it('returns null for unknown ID')
-    it('returns full conversation for known ID')
-  })
-  
-  describe('clearConversation', () => {
-    it('removes conversation from Redis')
-    it('does not error for unknown ID')
-  })
-})
+describe("ConversationStore", () => {
+  describe("addMessage", () => {
+    it("creates new conversation on first message");
+    it("appends to existing conversation");
+    it("trims to MAX_MESSAGES limit");
+  });
+
+  describe("getConversation", () => {
+    it("returns null for unknown ID");
+    it("returns full conversation for known ID");
+  });
+
+  describe("clearConversation", () => {
+    it("removes conversation from Redis");
+    it("does not error for unknown ID");
+  });
+});
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Test file exists
 - [ ] Mocks Redis correctly
 - [ ] All tests pass
@@ -700,6 +737,7 @@ describe('ConversationStore', () => {
 **Validation**: Curl test with `conversationId`
 
 **Changes**:
+
 1. Import conversation store functions
 2. Accept `conversationId` in request body
 3. Load existing conversation if ID provided
@@ -708,6 +746,7 @@ describe('ConversationStore', () => {
 6. Return `conversationId` in response
 
 **Request schema update**:
+
 ```typescript
 const ChatRequestSchema = z.object({
   message: z.string().min(1).max(2000),
@@ -717,6 +756,7 @@ const ChatRequestSchema = z.object({
 ```
 
 **Response update**:
+
 ```typescript
 return NextResponse.json({
   response: result.content,
@@ -730,12 +770,14 @@ return NextResponse.json({
 ```
 
 **Acceptance Criteria**:
+
 - [ ] `conversationId` accepted in request
 - [ ] Conversation loaded from Redis if ID provided
 - [ ] Messages persisted after response
 - [ ] `conversationId` returned for tracking
 
 **Validation**:
+
 ```bash
 # First message - get conversationId
 ID=$(curl -s -X POST .../api/ai/chat -d '{"message": "Hello"}' | jq -r '.conversationId')
@@ -768,6 +810,7 @@ curl -s -X POST .../api/ai/chat -d "{\"message\": \"What did I say?\", \"convers
 ```
 
 **Acceptance Criteria**:
+
 - [ ] List endpoint returns user's conversation IDs
 - [ ] Get endpoint returns full conversation
 - [ ] Delete endpoint clears from Redis
@@ -802,6 +845,7 @@ const MAX_BATCH_SIZE = 10;
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Endpoint exists at `/api/ai/research/batch`
 - [ ] Validates `accountIds` is array
 - [ ] Enforces `MAX_BATCH_SIZE` of 10
@@ -809,6 +853,7 @@ const MAX_BATCH_SIZE = 10;
 - [ ] Protected by `authServiceOrSession`
 
 **Validation Command**:
+
 ```bash
 curl -X POST .../api/ai/research/batch \
   -H "Authorization: Bearer $CRON_SECRET" \
@@ -832,39 +877,40 @@ curl -X POST .../api/ai/research/batch \
 ```typescript
 // Redis-based rate limiting with ATOMIC operations:
 const RATE_LIMIT_WINDOW = 60; // 1 minute
-const RATE_LIMIT_MAX = 50;    // Max 50 accounts per minute per user
+const RATE_LIMIT_MAX = 50; // Max 50 accounts per minute per user
 
 async function checkAndIncrementRateLimit(
-  userId: string, 
-  count: number
+  userId: string,
+  count: number,
 ): Promise<{ allowed: boolean; retryAfter?: number }> {
   const redis = getRedisConnection();
   const key = `ratelimit:batch:${userId}`;
-  
+
   // Use INCR for atomicity (prevents race conditions)
   const current = await redis.incr(key);
   if (current === 1) {
     await redis.expire(key, RATE_LIMIT_WINDOW);
   }
-  
+
   if (current > RATE_LIMIT_MAX) {
     const ttl = await redis.ttl(key);
     return { allowed: false, retryAfter: ttl > 0 ? ttl : RATE_LIMIT_WINDOW };
   }
-  
+
   return { allowed: true };
 }
 
 // Returns 429 with retryAfter header when exceeded:
 if (!rateCheck.allowed) {
   return NextResponse.json(
-    { error: 'Rate limit exceeded', retryAfter: rateCheck.retryAfter },
-    { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter) } }
+    { error: "Rate limit exceeded", retryAfter: rateCheck.retryAfter },
+    { status: 429, headers: { "Retry-After": String(rateCheck.retryAfter) } },
   );
 }
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Rate limit checked before processing
 - [ ] Uses atomic INCR (not GET then SET)
 - [ ] Returns 429 with `retryAfter` in body and header
@@ -883,19 +929,20 @@ if (!rateCheck.allowed) {
 **Validation**: All tests pass
 
 ```typescript
-describe('POST /api/ai/research/batch', () => {
-  it('requires authentication')
-  it('validates accountIds is array')
-  it('rejects empty array')
-  it('enforces max batch size of 10')
-  it('returns stats with success/failure counts')
-  it('returns partial results when some fail')  // NEW
-  it('returns 429 when rate limited')
-  it('includes Retry-After header on 429')  // NEW
-})
+describe("POST /api/ai/research/batch", () => {
+  it("requires authentication");
+  it("validates accountIds is array");
+  it("rejects empty array");
+  it("enforces max batch size of 10");
+  it("returns stats with success/failure counts");
+  it("returns partial results when some fail"); // NEW
+  it("returns 429 when rate limited");
+  it("includes Retry-After header on 429"); // NEW
+});
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Test file exists
 - [ ] All test cases pass
 - [ ] Mocks properly (prisma, AI provider)
@@ -936,12 +983,14 @@ describe('POST /api/ai/research/batch', () => {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Endpoint exists at `/api/ai/status`
 - [ ] Returns status for both providers
 - [ ] Reads health data from Redis
 - [ ] Protected by `authServiceOrSession`
 
 **Validation Command**:
+
 ```bash
 curl -s .../api/ai/status -H "Authorization: Bearer $CRON_SECRET" | jq '.providers'
 ```
@@ -960,23 +1009,24 @@ curl -s .../api/ai/status -H "Authorization: Bearer $CRON_SECRET" | jq '.provide
 **⚠️ REVIEW FIX**: Use fire-and-forget pattern - don't block on tracking.
 
 **Add tracking function**:
+
 ```typescript
 async function trackProviderCall(
   provider: AIProvider,
   latencyMs: number,
-  error?: string
+  error?: string,
 ): Promise<void> {
   try {
     const redis = getRedisConnection();
-    const today = new Date().toISOString().split('T')[0];
-    
+    const today = new Date().toISOString().split("T")[0];
+
     // Increment daily call counter
     await redis.incr(`ai:stats:${provider}:calls:${today}`);
     await redis.expire(`ai:stats:${provider}:calls:${today}`, 86400 * 2);
-    
+
     // Store latency
     await redis.set(`ai:health:${provider}:latency`, latencyMs.toString());
-    
+
     // Track errors
     if (error) {
       await redis.set(`ai:health:${provider}:lastError`, error);
@@ -984,21 +1034,22 @@ async function trackProviderCall(
     } else {
       await redis.del(`ai:health:${provider}:lastError`);
     }
-    
+
     // Track fallbacks
-    if (provider === 'openai' && error?.includes('fallback')) {
+    if (provider === "openai" && error?.includes("fallback")) {
       await redis.incr(`ai:stats:fallback:count:${today}`);
     }
   } catch (trackingError) {
     // Don't fail on tracking errors - fire and forget
-    logger.warn('Failed to track provider call', { 
-      error: trackingError instanceof Error ? trackingError.message : 'Unknown' 
+    logger.warn("Failed to track provider call", {
+      error: trackingError instanceof Error ? trackingError.message : "Unknown",
     });
   }
 }
 ```
 
 **Call in `generateContent` (fire-and-forget)**:
+
 ```typescript
 const startTime = Date.now();
 try {
@@ -1007,13 +1058,14 @@ try {
   trackProviderCall(provider, Date.now() - startTime).catch(() => {});
   return result;
 } catch (error) {
-  const message = error instanceof Error ? error.message : 'Unknown error';
+  const message = error instanceof Error ? error.message : "Unknown error";
   trackProviderCall(provider, Date.now() - startTime, message).catch(() => {});
   throw error;
 }
 ```
 
 **Acceptance Criteria**:
+
 - [ ] `trackProviderCall` function added with internal try/catch
 - [ ] Called without await (fire-and-forget pattern)
 - [ ] Tracking failures don't block AI responses
@@ -1031,6 +1083,7 @@ try {
 **Validation**: Health includes AI summary
 
 **Add to health response**:
+
 ```typescript
 // In checks object:
 ai: {
@@ -1042,6 +1095,7 @@ ai: {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Health endpoint includes `ai` check
 - [ ] Shows status for both providers
 - [ ] Includes fallback count
@@ -1052,34 +1106,35 @@ ai: {
 
 ## Summary: Complete Task List
 
-| ID | Phase | Task | Effort | Files | Validation |
-|----|-------|------|--------|-------|------------|
-| T31A.1 | 1 | Define Action Types | 20m | `src/types/brain-actions.ts` | Lint passes |
-| T31A.2 | 1 | Create Action Parser | 30m | `src/lib/ai/action-parser.ts` | Unit tests |
-| T31A.3 | 1 | Parser Unit Tests | 25m | `tests/ai/action-parser.test.ts` | Tests pass |
-| T31C.1 | 1 | Conversation Store | 30m | `src/lib/ai/conversation-store.ts` | Unit tests |
-| T31C.2 | 1 | Store Unit Tests | 20m | `tests/ai/conversation-store.test.ts` | Tests pass |
-| T31A.4 | 2 | Wire Actions to Chat | 30m | `src/app/api/ai/chat/route.ts` | Curl test |
-| T31A.5 | 2 | Confidence Scoring | 15m | `src/lib/ai/action-parser.ts` | Confidence returned |
-| T31C.3 | 2 | Wire Conversation to Chat | 30m | `src/app/api/ai/chat/route.ts` | Curl test |
-| T31C.4 | 2 | Conversation CRUD | 20m | `src/app/api/ai/conversations/*.ts` | CRUD works |
-| T31B.0 | 3 | **Prisma Migration** ⚠️ | 20m | `prisma/schema.prisma` | Migrate succeeds |
-| T31B.1 | 3 | Extend Interface | 15m | `src/lib/ai/dossier-generator.ts` | TS compiles |
-| T31B.2 | 3 | Update Prompt | 30m | `src/lib/ai/dossier-generator.ts` | New fields present |
-| T31B.3 | 3 | Enrich from Contacts | 25m | `src/lib/ai/dossier-generator.ts` | Contacts in context |
-| T31B.4 | 3 | Refresh Endpoint | 20m | `src/app/api/ai/dossier/refresh/route.ts` | Curl test |
-| T31B.5 | 3 | Staleness Check | 15m | `src/lib/ai/dossier-generator.ts` | isStale returned |
-| T31E.2 | 4 | Track Usage ⚠️ | 20m | `src/lib/ai/provider.ts` | Stats in Redis |
-| T31E.1 | 4 | Status Endpoint | 25m | `src/app/api/ai/status/route.ts` | Curl test |
-| T31E.3 | 4 | Add to Health | 15m | `src/app/api/health/route.ts` | AI in health |
-| T31D.1 | 5 | Batch Endpoint | 30m | `src/app/api/ai/research/batch/route.ts` | Curl test |
-| T31D.2 | 5 | Rate Limiting (atomic) | 20m | `src/app/api/ai/research/batch/route.ts` | 429 returned |
-| T31D.3 | 5 | Batch Tests | 20m | `tests/ai/research-batch.test.ts` | Tests pass |
-| T31F.1 | 6 | Integration Tests | 45m | `tests/integration/ai-brain.test.ts` | All pass |
+| ID     | Phase | Task                      | Effort | Files                                     | Validation          |
+| ------ | ----- | ------------------------- | ------ | ----------------------------------------- | ------------------- |
+| T31A.1 | 1     | Define Action Types       | 20m    | `src/types/brain-actions.ts`              | Lint passes         |
+| T31A.2 | 1     | Create Action Parser      | 30m    | `src/lib/ai/action-parser.ts`             | Unit tests          |
+| T31A.3 | 1     | Parser Unit Tests         | 25m    | `tests/ai/action-parser.test.ts`          | Tests pass          |
+| T31C.1 | 1     | Conversation Store        | 30m    | `src/lib/ai/conversation-store.ts`        | Unit tests          |
+| T31C.2 | 1     | Store Unit Tests          | 20m    | `tests/ai/conversation-store.test.ts`     | Tests pass          |
+| T31A.4 | 2     | Wire Actions to Chat      | 30m    | `src/app/api/ai/chat/route.ts`            | Curl test           |
+| T31A.5 | 2     | Confidence Scoring        | 15m    | `src/lib/ai/action-parser.ts`             | Confidence returned |
+| T31C.3 | 2     | Wire Conversation to Chat | 30m    | `src/app/api/ai/chat/route.ts`            | Curl test           |
+| T31C.4 | 2     | Conversation CRUD         | 20m    | `src/app/api/ai/conversations/*.ts`       | CRUD works          |
+| T31B.0 | 3     | **Prisma Migration** ⚠️   | 20m    | `prisma/schema.prisma`                    | Migrate succeeds    |
+| T31B.1 | 3     | Extend Interface          | 15m    | `src/lib/ai/dossier-generator.ts`         | TS compiles         |
+| T31B.2 | 3     | Update Prompt             | 30m    | `src/lib/ai/dossier-generator.ts`         | New fields present  |
+| T31B.3 | 3     | Enrich from Contacts      | 25m    | `src/lib/ai/dossier-generator.ts`         | Contacts in context |
+| T31B.4 | 3     | Refresh Endpoint          | 20m    | `src/app/api/ai/dossier/refresh/route.ts` | Curl test           |
+| T31B.5 | 3     | Staleness Check           | 15m    | `src/lib/ai/dossier-generator.ts`         | isStale returned    |
+| T31E.2 | 4     | Track Usage ⚠️            | 20m    | `src/lib/ai/provider.ts`                  | Stats in Redis      |
+| T31E.1 | 4     | Status Endpoint           | 25m    | `src/app/api/ai/status/route.ts`          | Curl test           |
+| T31E.3 | 4     | Add to Health             | 15m    | `src/app/api/health/route.ts`             | AI in health        |
+| T31D.1 | 5     | Batch Endpoint            | 30m    | `src/app/api/ai/research/batch/route.ts`  | Curl test           |
+| T31D.2 | 5     | Rate Limiting (atomic)    | 20m    | `src/app/api/ai/research/batch/route.ts`  | 429 returned        |
+| T31D.3 | 5     | Batch Tests               | 20m    | `tests/ai/research-batch.test.ts`         | Tests pass          |
+| T31F.1 | 6     | Integration Tests         | 45m    | `tests/integration/ai-brain.test.ts`      | All pass            |
 
 **Total: 23 tasks, ~11-13 hours**
 
 ### ⚠️ Tasks marked with warnings require extra care:
+
 - **T31B.0**: Make `updatedAt` nullable for existing data
 - **T31E.2**: Must come BEFORE T31E.1 (writes data that status reads)
 
@@ -1088,6 +1143,7 @@ ai: {
 ## Sprint Demos
 
 ### Sprint 31A Demo: Brain Actions
+
 ```bash
 # Brain returns action for navigation
 curl -X POST .../api/ai/chat -d '{"message": "Show me tier 1 prospects"}' | jq
@@ -1095,6 +1151,7 @@ curl -X POST .../api/ai/chat -d '{"message": "Show me tier 1 prospects"}' | jq
 ```
 
 ### Sprint 31B Demo: Enhanced Dossiers
+
 ```bash
 # Generate enhanced dossier
 curl -X POST .../api/ai/dossier/generate -d '{"accountId": "xxx"}' | jq '.dossier.talkingPoints'
@@ -1102,6 +1159,7 @@ curl -X POST .../api/ai/dossier/generate -d '{"accountId": "xxx"}' | jq '.dossie
 ```
 
 ### Sprint 31C Demo: Conversation Memory
+
 ```bash
 # Multi-turn conversation
 ID=$(curl -s -X POST .../api/ai/chat -d '{"message": "Tell me about Tier 1"}' | jq -r '.conversationId')
@@ -1110,6 +1168,7 @@ curl -X POST .../api/ai/chat -d "{\"message\": \"What did I just ask?\", \"conve
 ```
 
 ### Sprint 31D Demo: Batch Research
+
 ```bash
 # Research 3 companies at once
 curl -X POST .../api/ai/research/batch -d '{"accountIds": ["a1", "a2", "a3"]}' | jq '.stats'
@@ -1117,6 +1176,7 @@ curl -X POST .../api/ai/research/batch -d '{"accountIds": ["a1", "a2", "a3"]}' |
 ```
 
 ### Sprint 31E Demo: Provider Monitoring
+
 ```bash
 # Check AI health
 curl .../api/ai/status | jq '.providers'
@@ -1127,13 +1187,13 @@ curl .../api/ai/status | jq '.providers'
 
 ## Rollback Procedures
 
-| Sprint | Rollback |
-|--------|----------|
-| 31A | Chat still works, `action` field just undefined |
-| 31B | Revert migration (see SQL above), use existing dossier fields |
-| 31C | Disable Redis conversation store, in-memory fallback |
-| 31D | Disable endpoint, use single research |
-| 31E | Remove from health response, no data loss |
+| Sprint | Rollback                                                      |
+| ------ | ------------------------------------------------------------- |
+| 31A    | Chat still works, `action` field just undefined               |
+| 31B    | Revert migration (see SQL above), use existing dossier fields |
+| 31C    | Disable Redis conversation store, in-memory fallback          |
+| 31D    | Disable endpoint, use single research                         |
+| 31E    | Remove from health response, no data loss                     |
 
 ---
 
@@ -1150,76 +1210,78 @@ curl .../api/ai/status | jq '.providers'
 **Validation**: All integration tests pass
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 
-describe('Brain Integration Tests', () => {
-  describe('Chat with Actions', () => {
+describe("Brain Integration Tests", () => {
+  describe("Chat with Actions", () => {
     it('returns action for "show tier 1 prospects"', async () => {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${CRON_SECRET}` },
-        body: JSON.stringify({ message: 'Show me Tier 1 prospects' }),
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${CRON_SECRET}` },
+        body: JSON.stringify({ message: "Show me Tier 1 prospects" }),
       });
       const data = await res.json();
       expect(data.action).toBeDefined();
-      expect(data.action.type).toBe('filter');
+      expect(data.action.type).toBe("filter");
     });
-    
-    it('persists conversation to Redis', async () => {
-      const res1 = await fetch('/api/ai/chat', { /* ... */ });
+
+    it("persists conversation to Redis", async () => {
+      const res1 = await fetch("/api/ai/chat", {
+        /* ... */
+      });
       const { conversationId } = await res1.json();
-      
-      const res2 = await fetch('/api/ai/chat', {
-        body: JSON.stringify({ 
-          message: 'What did I ask?',
-          conversationId 
+
+      const res2 = await fetch("/api/ai/chat", {
+        body: JSON.stringify({
+          message: "What did I ask?",
+          conversationId,
         }),
       });
       const data2 = await res2.json();
       expect(data2.messageCount).toBeGreaterThan(2);
     });
   });
-  
-  describe('Dossier Generation', () => {
-    it('generates enhanced dossier with talkingPoints', async () => {
-      const res = await fetch('/api/ai/dossier/generate', {
-        method: 'POST',
+
+  describe("Dossier Generation", () => {
+    it("generates enhanced dossier with talkingPoints", async () => {
+      const res = await fetch("/api/ai/dossier/generate", {
+        method: "POST",
         body: JSON.stringify({ accountId: testAccountId }),
       });
       const data = await res.json();
       expect(data.dossier.talkingPoints).toBeDefined();
       expect(data.dossier.outreachAngles).toBeDefined();
     });
-    
-    it('refresh clears and regenerates', async () => {
-      const res = await fetch('/api/ai/dossier/refresh', {
-        method: 'POST',
+
+    it("refresh clears and regenerates", async () => {
+      const res = await fetch("/api/ai/dossier/refresh", {
+        method: "POST",
         body: JSON.stringify({ accountId: testAccountId }),
       });
       const data = await res.json();
       expect(data.refreshed).toBe(true);
     });
   });
-  
-  describe('Batch Research', () => {
-    it('researches multiple accounts', async () => {
-      const res = await fetch('/api/ai/research/batch', {
-        method: 'POST',
+
+  describe("Batch Research", () => {
+    it("researches multiple accounts", async () => {
+      const res = await fetch("/api/ai/research/batch", {
+        method: "POST",
         body: JSON.stringify({ accountIds: [testAccountId] }),
       });
       const data = await res.json();
       expect(data.stats.total).toBe(1);
     });
-    
-    it('rate limits excessive requests', async () => {
+
+    it("rate limits excessive requests", async () => {
       // Make many requests to trigger rate limit
       // Expect 429 response
     });
   });
-  
-  describe('Provider Monitoring', () => {
-    it('returns provider status', async () => {
-      const res = await fetch('/api/ai/status');
+
+  describe("Provider Monitoring", () => {
+    it("returns provider status", async () => {
+      const res = await fetch("/api/ai/status");
       const data = await res.json();
       expect(data.providers.gemini).toBeDefined();
       expect(data.providers.openai).toBeDefined();
@@ -1229,6 +1291,7 @@ describe('Brain Integration Tests', () => {
 ```
 
 **Acceptance Criteria**:
+
 - [ ] Test file exists at `tests/integration/ai-brain.test.ts`
 - [ ] Tests run against real or mock endpoints
 - [ ] Covers chat + actions, conversations, dossiers, batch, status
@@ -1242,11 +1305,11 @@ describe('Brain Integration Tests', () => {
 
 After each sprint, GTM-YardFlow can integrate:
 
-| Sprint | Frontend Integration |
-|--------|---------------------|
-| 31A | Add `useBrainActions` hook to execute `action` from response |
-| 31B | Display `talkingPoints`, `outreachAngles` in DossierPanel |
-| 31C | Track `conversationId`, add "Clear Chat" button |
-| 31D | Add "Research Selected" bulk action |
-| 31E | Show AI health status in footer/settings |
-| 31F | Run integration tests before releases |
+| Sprint | Frontend Integration                                         |
+| ------ | ------------------------------------------------------------ |
+| 31A    | Add `useBrainActions` hook to execute `action` from response |
+| 31B    | Display `talkingPoints`, `outreachAngles` in DossierPanel    |
+| 31C    | Track `conversationId`, add "Clear Chat" button              |
+| 31D    | Add "Research Selected" bulk action                          |
+| 31E    | Show AI health status in footer/settings                     |
+| 31F    | Run integration tests before releases                        |

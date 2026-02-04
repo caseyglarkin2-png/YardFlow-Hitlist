@@ -10,12 +10,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { getRedisConnection } from '@/lib/queue/client';
+import { AI_USAGE_PREFIX, AI_ERRORS_PREFIX } from '@/lib/ai/usage-tracker';
 
 export const dynamic = 'force-dynamic';
-
-// Redis keys for tracking AI usage
-const AI_USAGE_PREFIX = 'ai:usage:';
-const AI_ERRORS_PREFIX = 'ai:errors:';
 
 interface ProviderStats {
   requestCount: number;
@@ -64,51 +61,6 @@ async function getProviderStats(provider: string): Promise<ProviderStats> {
       lastError: null,
       status: 'ok', // Assume ok if we can't get stats
     };
-  }
-}
-
-/**
- * Track AI provider usage (call this from provider.ts)
- */
-export async function trackProviderUsage(
-  provider: string,
-  success: boolean,
-  errorMessage?: string
-): Promise<void> {
-  const redis = getRedisConnection();
-  const today = new Date().toISOString().split('T')[0];
-  const TTL = 60 * 60 * 24 * 7; // 7 days
-
-  try {
-    const pipeline = redis.pipeline();
-
-    // Track request count
-    const requestKey = `${AI_USAGE_PREFIX}${provider}:${today}:requests`;
-    pipeline.incr(requestKey);
-    pipeline.expire(requestKey, TTL);
-
-    // Track last used
-    pipeline.set(`${AI_USAGE_PREFIX}${provider}:last_used`, new Date().toISOString());
-
-    if (!success) {
-      // Track error count
-      const errorKey = `${AI_ERRORS_PREFIX}${provider}:${today}:count`;
-      pipeline.incr(errorKey);
-      pipeline.expire(errorKey, TTL);
-
-      // Track last error
-      if (errorMessage) {
-        pipeline.set(
-          `${AI_ERRORS_PREFIX}${provider}:last_error`,
-          JSON.stringify({ message: errorMessage, timestamp: new Date().toISOString() })
-        );
-      }
-    }
-
-    await pipeline.exec();
-  } catch (error) {
-    // Non-fatal: log but don't throw
-    logger.warn('Failed to track provider usage', { provider, error });
   }
 }
 

@@ -74,7 +74,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const deleted = await clearConversation(conversationId, authResult.userId);
 
     if (!deleted) {
-      return NextResponse.json({ error: 'Conversation not found or unauthorized' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Conversation not found or unauthorized' },
+        { status: 404 }
+      );
     }
 
     logger.info('Deleted conversation', {

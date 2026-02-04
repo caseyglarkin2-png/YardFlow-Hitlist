@@ -12,7 +12,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db';
 import { getRedisConnection } from '@/lib/queue/client';
-import { DossierGenerator } from '@/lib/ai/dossier-generator';
+import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Process each account
     const results: BatchResult[] = [];
-    const generator = new DossierGenerator();
+    const generator = new AIDossierGenerator();
 
     for (const accountId of accountIds) {
       const account = accountMap.get(accountId);
@@ -165,11 +165,12 @@ export async function POST(request: NextRequest) {
               status: 'cached',
               dossier: {
                 companyOverview: account.company_dossiers.companyOverview,
-                yardManagementPotential: account.company_dossiers.yardManagementPotential,
-                icpFitAnalysis: account.company_dossiers.icpFitAnalysis,
                 keyPainPoints: account.company_dossiers.keyPainPoints,
+                industryContext: account.company_dossiers.industryContext,
                 outreachAngles: account.company_dossiers.outreachAngles,
                 talkingPoints: account.company_dossiers.talkingPoints,
+                competitors: account.company_dossiers.competitors,
+                manifestContext: account.company_dossiers.manifestContext,
               },
               generatedAt: account.company_dossiers.updatedAt?.toISOString(),
             });

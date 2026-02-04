@@ -21,7 +21,8 @@ const ACTION_PATTERNS = {
     /\b(go to|show me|open|navigate to|take you to|let me show you the)\s+(dashboard|prospects|sequences|import|accounts|hitlist|companies|contacts|campaigns)/i,
   filter:
     /\b(filter|show|display|let me find|i'll filter)\s+.*?(tier\s*[123]|with\s*email|without\s*email|no\s*email)/i,
-  search: /\b(search(?:ing)?|(?:let me )?find|look(?:ing)?\s+for|i'll search for)\s+["']?([^"'\n.!?]+)["']?/i,
+  search:
+    /\b(search(?:ing)?|(?:let me )?find|look(?:ing)?\s+for|i'll search for)\s+["']?([^"'\n.!?]+)["']?/i,
   research:
     /\b(research(?:ing)?|analyze|look(?:ing)?\s+up|let me research|i'll analyze)\s+(?:company\s+)?["']?([^"'\n.!?]+)["']?/i,
   email: /\b(send|write|compose|draft|email|emailing)\s+.*?email/i,

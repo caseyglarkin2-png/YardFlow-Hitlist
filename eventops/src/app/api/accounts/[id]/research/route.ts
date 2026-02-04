@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { authServiceOrSession } from "@/lib/auth-service";
-import { prisma } from "@/lib/db";
-import { generateCompanyResearch } from "@/lib/ai-research";
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
+import { prisma } from '@/lib/db';
+import { generateCompanyResearch } from '@/lib/ai-research';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,14 +9,11 @@ export const dynamic = 'force-dynamic';
  * POST /api/accounts/[id]/research - Generate AI company dossier
  * Supports both session auth and S2S auth for frontend proxy
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const account = await prisma.target_accounts.findUnique({
@@ -25,7 +22,7 @@ export async function POST(
     });
 
     if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Account not found' }, { status: 404 });
     }
 
     // Check if dossier already exists and is recent (less than 7 days old)
@@ -33,7 +30,7 @@ export async function POST(
       const daysSinceResearch = Math.floor(
         (Date.now() - account.company_dossiers.researchedAt.getTime()) / (1000 * 60 * 60 * 24)
       );
-      
+
       if (daysSinceResearch < 7) {
         return NextResponse.json({
           company_dossiers: account.company_dossiers,
@@ -43,10 +40,7 @@ export async function POST(
     }
 
     // Generate new research
-    const researchData = await generateCompanyResearch(
-      account.name,
-      account.website || undefined
-    );
+    const researchData = await generateCompanyResearch(account.name, account.website || undefined);
 
     // Save or update dossier
     const researchedBy = authResult.email || authResult.userId;
@@ -81,10 +75,7 @@ export async function POST(
       cached: false,
     });
   } catch (error) {
-    console.error("Error generating research:", error);
-    return NextResponse.json(
-      { error: "Failed to generate research" },
-      { status: 500 }
-    );
+    console.error('Error generating research:', error);
+    return NextResponse.json({ error: 'Failed to generate research' }, { status: 500 });
   }
 }

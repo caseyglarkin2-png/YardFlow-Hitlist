@@ -13,8 +13,8 @@ import { getRedisConnection } from '@/lib/queue/client';
 import { logger } from '@/lib/logger';
 import type { BrainAction } from '@/types/brain-actions';
 
-// Configuration
-const CONVERSATION_TTL = 60 * 60 * 24; // 24 hours
+// Configuration - configurable via environment variable
+const CONVERSATION_TTL = parseInt(process.env.CONVERSATION_TTL_SECONDS || '86400', 10); // Default 24 hours
 const MAX_MESSAGES = 20; // Trim to last N messages
 
 /**
@@ -164,10 +164,7 @@ export async function addMessage(
  * Clear a conversation
  * Only clears if userId matches (security)
  */
-export async function clearConversation(
-  conversationId: string,
-  userId: string
-): Promise<boolean> {
+export async function clearConversation(conversationId: string, userId: string): Promise<boolean> {
   const redis = getRedisConnection();
 
   try {

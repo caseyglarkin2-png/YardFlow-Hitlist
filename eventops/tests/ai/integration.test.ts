@@ -83,7 +83,7 @@ describe('Sprint 31 Integration Tests', () => {
 
   describe('Full Chat → Action Flow', () => {
     it('parses navigation action from AI response', () => {
-      const aiResponse = "Let me show you the dashboard now.";
+      const aiResponse = 'Let me show you the dashboard now.';
       const action = parseActionFromResponse(aiResponse);
 
       expect(action).toBeDefined();
@@ -102,7 +102,7 @@ describe('Sprint 31 Integration Tests', () => {
     });
 
     it('returns confidence score with action', () => {
-      const aiResponse = "Let me show you the Tier 2 accounts.";
+      const aiResponse = 'Let me show you the Tier 2 accounts.';
       const result = parseActionWithConfidence(aiResponse);
 
       expect(result.action).toBeDefined();
@@ -234,7 +234,7 @@ describe('Sprint 31 Integration Tests', () => {
   describe('Action + Conversation Combined', () => {
     it('can parse action and store in conversation', async () => {
       const mockRedis = getRedisConnection();
-      const aiResponse = "Let me show you the sequences now.";
+      const aiResponse = 'Let me show you the sequences now.';
       const conversationId = generateConversationId();
       const userId = 'user_test';
 

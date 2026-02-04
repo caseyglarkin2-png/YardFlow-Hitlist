@@ -184,23 +184,27 @@ if (!session?.user?.id) {
 This backend powers the "Brain" AI assistant in the GTM-YardFlow frontend. **All AI API keys live here, not in Vercel.**
 
 ### AI Provider Architecture
+
 - **Primary**: Gemini Pro via `GEMINI_API_KEY`
-- **Fallback**: OpenAI via `OPENAI_API_KEY`  
+- **Fallback**: OpenAI via `OPENAI_API_KEY`
 - **Unified Provider**: `src/lib/ai/provider.ts` handles fallback automatically
 
 ### AI Endpoints (S2S Auth Required)
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/ai/chat` | GET/POST | Brain chat with context |
-| `/api/ai/dossier/generate` | POST | Generate company dossiers |
-| `/api/ai/content/generate` | POST | Email/content generation |
-| `/api/ai/content/sequence` | POST | Multi-step email sequences |
-| `/api/ai/score-icp` | POST | ICP scoring |
-| `/api/ai/sentiment` | POST | Sentiment analysis |
-| `/api/accounts/[id]/research` | POST | Company research |
+
+| Endpoint                      | Method   | Purpose                    |
+| ----------------------------- | -------- | -------------------------- |
+| `/api/ai/chat`                | GET/POST | Brain chat with context    |
+| `/api/ai/dossier/generate`    | POST     | Generate company dossiers  |
+| `/api/ai/content/generate`    | POST     | Email/content generation   |
+| `/api/ai/content/sequence`    | POST     | Multi-step email sequences |
+| `/api/ai/score-icp`           | POST     | ICP scoring                |
+| `/api/ai/sentiment`           | POST     | Sentiment analysis         |
+| `/api/accounts/[id]/research` | POST     | Company research           |
 
 ### Cross-Repo Integration (GTM-YardFlow)
+
 The Vercel frontend proxies all AI calls through Railway:
+
 ```
 [GTM-YardFlow] → POST /api/ai/chat (Vercel proxy)
               → Authorization: Bearer RAILWAY_API_SECRET

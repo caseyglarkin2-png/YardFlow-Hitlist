@@ -10,7 +10,12 @@ import {
   parseActionWithConfidence,
   hasActionableContent,
 } from '@/lib/ai/action-parser';
-import type { FilterAction, NavigateAction, SearchAction, ResearchAction } from '@/types/brain-actions';
+import type {
+  FilterAction,
+  NavigateAction,
+  SearchAction,
+  ResearchAction,
+} from '@/types/brain-actions';
 
 describe('parseActionFromResponse', () => {
   describe('navigation', () => {
@@ -48,7 +53,7 @@ describe('parseActionFromResponse', () => {
     });
 
     it('parses "filter tier 2"', () => {
-      const action = parseActionFromResponse("Let me filter tier 2 for you") as FilterAction;
+      const action = parseActionFromResponse('Let me filter tier 2 for you') as FilterAction;
       expect(action?.type).toBe('filter');
       expect(action?.tier).toBe('Tier 2');
     });
@@ -62,9 +67,7 @@ describe('parseActionFromResponse', () => {
     });
 
     it('parses "find prospects without email"', () => {
-      const action = parseActionFromResponse(
-        "Let me find prospects without email"
-      ) as FilterAction;
+      const action = parseActionFromResponse('Let me find prospects without email') as FilterAction;
       expect(action?.type).toBe('filter');
       expect(action?.hasEmail).toBe(false);
     });
@@ -90,7 +93,7 @@ describe('parseActionFromResponse', () => {
 
     it('parses "find XYZ Logistics"', () => {
       const action = parseActionFromResponse(
-        "Let me find XYZ Logistics in the system"
+        'Let me find XYZ Logistics in the system'
       ) as SearchAction;
       expect(action?.type).toBe('search');
       expect(action?.query).toContain('XYZ Logistics');
@@ -125,16 +128,12 @@ describe('parseActionFromResponse', () => {
 
   describe('email', () => {
     it('parses "send email"', () => {
-      const action = parseActionFromResponse(
-        "I'll help you send an email to this contact"
-      );
+      const action = parseActionFromResponse("I'll help you send an email to this contact");
       expect(action?.type).toBe('email');
     });
 
     it('parses "compose email"', () => {
-      const action = parseActionFromResponse(
-        "Let me compose an email for you"
-      );
+      const action = parseActionFromResponse('Let me compose an email for you');
       expect(action?.type).toBe('email');
     });
   });
@@ -190,9 +189,7 @@ describe('parseActionWithConfidence', () => {
   });
 
   it('caps confidence at 1.0', () => {
-    const result = parseActionWithConfidence(
-      "I'll definitely navigate to the dashboard right now"
-    );
+    const result = parseActionWithConfidence("I'll definitely navigate to the dashboard right now");
     expect(result.confidence).toBeLessThanOrEqual(1);
   });
 });
@@ -200,7 +197,7 @@ describe('parseActionWithConfidence', () => {
 describe('hasActionableContent', () => {
   it('returns true for actionable responses', () => {
     expect(hasActionableContent("I'll go to prospects")).toBe(true);
-    expect(hasActionableContent("Let me filter tier 1")).toBe(true);
+    expect(hasActionableContent('Let me filter tier 1')).toBe(true);
     expect(hasActionableContent("I'll search for Acme")).toBe(true);
   });
 

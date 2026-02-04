@@ -1,7 +1,7 @@
 /**
  * API Route: Generate Multi-Channel Sequence
  * POST /api/ai/content/sequence
- * 
+ *
  * Supports both session auth (internal) and S2S auth (frontend proxy)
  */
 
@@ -54,9 +54,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to generate sequence';
     logger.error('Sequence generation error', { error: message });
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

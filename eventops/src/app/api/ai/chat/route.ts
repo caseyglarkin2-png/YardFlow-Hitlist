@@ -258,12 +258,7 @@ export async function POST(request: NextRequest) {
     // Build prompts
     const systemPrompt = buildSystemPrompt(context);
     const contextData = await fetchContextData(context);
-    const fullPrompt = buildMessages(
-      systemPrompt,
-      message,
-      contextData,
-      conversationHistory
-    );
+    const fullPrompt = buildMessages(systemPrompt, message, contextData, conversationHistory);
 
     // Generate response
     const result = await generateContent(fullPrompt, {

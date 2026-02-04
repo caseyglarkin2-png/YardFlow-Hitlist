@@ -45,10 +45,10 @@ model company_dossiers {
   locations        String?
   operationalScale String?
   // Enhanced dossier fields (Sprint 31B)
-  talkingPoints    String?         // JSON array of conversation starters
-  competitors      String?         // JSON array of competitor names
-  outreachAngles   String?         // JSON array of sales angles
-  manifestContext  String?         // Manifest 2026 specific context
+  talkingPoints    String? // JSON array of conversation starters
+  competitors      String? // JSON array of competitor names
+  outreachAngles   String? // JSON array of sales angles
+  manifestContext  String? // Manifest 2026 specific context
   updatedAt        DateTime?       @updatedAt
   target_accounts  target_accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
@@ -129,7 +129,7 @@ model message_templates {
   channel     OutreachChannel
   subject     String?
   template    String
-  tone        TemplateTone?   // AI voice tone for content generation
+  tone        TemplateTone? // AI voice tone for content generation
   isActive    Boolean         @default(true)
   isDefault   Boolean         @default(false) // Default template for this tone
   createdBy   String?

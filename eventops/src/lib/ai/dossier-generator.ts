@@ -290,7 +290,7 @@ Be specific and practical. Return ONLY valid JSON.`;
         }
 
         // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error(`Batch dossier error for ${accountId}:`, error);
