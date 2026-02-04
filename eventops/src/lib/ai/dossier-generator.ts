@@ -29,6 +29,11 @@ export interface DossierGenerationResult {
     };
     strategicQuestions?: string[];
     manifestOpportunities?: string[];
+    // Enhanced fields (Sprint 31B)
+    talkingPoints?: string[];
+    competitors?: string[];
+    outreachAngles?: string[];
+    manifestContext?: string;
   };
   error?: string;
   tokensUsed?: number;
@@ -96,7 +101,11 @@ Generate a comprehensive company dossier in JSON format with the following struc
     "operationalScale": "description of their operational footprint"
   },
   "strategicQuestions": ["question to ask at booth 1", "question 2", "question 3"],
-  "manifestOpportunities": ["opportunity 1", "opportunity 2", "opportunity 3"]
+  "manifestOpportunities": ["opportunity 1", "opportunity 2", "opportunity 3"],
+  "talkingPoints": ["conversation starter 1 based on recent news/achievements", "talking point 2", "talking point 3"],
+  "competitors": ["main competitor 1", "competitor 2", "competitor 3"],
+  "outreachAngles": ["compelling reason to talk 1", "angle 2 based on pain points", "angle 3 based on event context"],
+  "manifestContext": "Why meeting at Manifest 2026 is particularly relevant for this company - tie to logistics/supply chain themes"
 }
 
 Focus on actionable intelligence for trade show conversations. Estimate facility counts based on:
@@ -116,13 +125,14 @@ Be specific and practical. Return ONLY valid JSON.`;
         success: true,
         dossier,
       };
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`Dossier generation error for ${accountId}:`, error);
       return {
         accountId,
         companyName: 'Unknown',
         success: false,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }
@@ -130,7 +140,25 @@ Be specific and practical. Return ONLY valid JSON.`;
   /**
    * Build context string from company data
    */
-  private buildCompanyContext(company: any): string {
+  private buildCompanyContext(company: {
+    name: string;
+    website?: string | null;
+    industry?: string | null;
+    headquarters?: string | null;
+    company_dossiers?: {
+      companyOverview?: string | null;
+      rawData?: string | null;
+    } | null;
+    people?: Array<{
+      name: string;
+      title?: string | null;
+      email?: string | null;
+      isExecOps?: boolean | null;
+      isOps?: boolean | null;
+      isProc?: boolean | null;
+      isSales?: boolean | null;
+    }>;
+  }): string {
     const parts: string[] = [];
 
     parts.push(`Name: ${company.name}`);
@@ -165,9 +193,20 @@ Be specific and practical. Return ONLY valid JSON.`;
       }
     }
 
+    // Enhanced: Include known contacts with personas (Sprint 31B)
     if (company.people && company.people.length > 0) {
-      parts.push(`\nKey Contacts: ${company.people.length} people tracked`);
-      parts.push(`Sample roles: ${company.people.slice(0, 3).map((p: any) => p.title || p.name).join(', ')}`);
+      parts.push(`\nKey Contacts (${company.people.length} tracked):`);
+      const contactDetails = company.people.slice(0, 5).map((p) => {
+        const personas = [
+          p.isExecOps && 'ExecOps',
+          p.isOps && 'Operations',
+          p.isProc && 'Procurement',
+          p.isSales && 'Sales',
+        ].filter(Boolean);
+        const personaStr = personas.length > 0 ? ` [${personas.join(', ')}]` : '';
+        return `- ${p.name}${p.title ? ` - ${p.title}` : ''}${personaStr}`;
+      });
+      parts.push(contactDetails.join('\n'));
     }
 
     return parts.join('\n');
@@ -191,6 +230,11 @@ Be specific and practical. Return ONLY valid JSON.`;
         companySize: dossier.companySize,
         facilityCount: dossier.facilityIntelligence?.estimatedYardCount.toString(),
         operationalScale: dossier.facilityIntelligence?.operationalScale,
+        // Enhanced fields (Sprint 31B)
+        talkingPoints: dossier.talkingPoints ? JSON.stringify(dossier.talkingPoints) : null,
+        competitors: dossier.competitors ? JSON.stringify(dossier.competitors) : null,
+        outreachAngles: dossier.outreachAngles ? JSON.stringify(dossier.outreachAngles) : null,
+        manifestContext: dossier.manifestContext,
         rawData: JSON.stringify({
           facilityIntelligence: dossier.facilityIntelligence,
           strategicQuestions: dossier.strategicQuestions,
@@ -209,6 +253,11 @@ Be specific and practical. Return ONLY valid JSON.`;
         companySize: dossier.companySize,
         facilityCount: dossier.facilityIntelligence?.estimatedYardCount.toString(),
         operationalScale: dossier.facilityIntelligence?.operationalScale,
+        // Enhanced fields (Sprint 31B)
+        talkingPoints: dossier.talkingPoints ? JSON.stringify(dossier.talkingPoints) : null,
+        competitors: dossier.competitors ? JSON.stringify(dossier.competitors) : null,
+        outreachAngles: dossier.outreachAngles ? JSON.stringify(dossier.outreachAngles) : null,
+        manifestContext: dossier.manifestContext,
         rawData: JSON.stringify({
           facilityIntelligence: dossier.facilityIntelligence,
           strategicQuestions: dossier.strategicQuestions,
@@ -242,13 +291,14 @@ Be specific and practical. Return ONLY valid JSON.`;
 
         // Rate limiting
         await new Promise(resolve => setTimeout(resolve, delay));
-      } catch (error: any) {
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error(`Batch dossier error for ${accountId}:`, error);
         results.push({
           accountId,
           companyName: 'Unknown',
           success: false,
-          error: error.message,
+          error: errorMessage,
         });
       }
     }
