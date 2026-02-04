@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/ai/sentiment - Analyze sentiment of text (email, note, etc.)
+ * Supports both session auth and S2S auth for frontend proxy
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

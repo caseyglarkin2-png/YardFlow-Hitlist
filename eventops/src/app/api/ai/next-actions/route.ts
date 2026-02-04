@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/ai/next-actions - Get AI-recommended next actions for user
+ * Supports both session auth and S2S auth for frontend proxy
  */
-export async function GET(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+export async function GET(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
-  });
+  // For S2S calls, get user from x-user-id header; for session, use authResult
+  const userEmail = authResult.email || req.headers.get('x-user-email');
+  const user = userEmail ? await prisma.users.findUnique({
+    where: { email: userEmail },
+  }) : null;
 
   if (!user?.activeEventId) {
     return NextResponse.json({ error: 'No active event' }, { status: 400 });

@@ -1,16 +1,20 @@
 /**
  * API Route: Generate Company Dossier (Gemini Pro)
  * POST /api/ai/dossier/generate
+ * 
+ * Supports both session auth and S2S auth for frontend proxy
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { authServiceOrSession } from "@/lib/auth-service";
 import { prisma } from "@/lib/db";
 import { generateCompanyResearch } from "@/lib/ai-research";
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * POST /api/accounts/[id]/research - Generate AI company dossier
+ * Supports both session auth and S2S auth for frontend proxy
+ */
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,6 +49,7 @@ export async function POST(
     );
 
     // Save or update dossier
+    const researchedBy = authResult.email || authResult.userId;
     const dossier = await prisma.company_dossiers.upsert({
       where: { accountId: account.id },
       create: {
@@ -56,7 +61,7 @@ export async function POST(
         keyPainPoints: researchData.keyPainPoints || null,
         companySize: researchData.companySize || null,
         rawData: JSON.stringify(researchData),
-        researchedBy: session.user.email,
+        researchedBy,
         researchedAt: new Date(),
       },
       update: {
@@ -67,7 +72,7 @@ export async function POST(
         companySize: researchData.companySize || null,
         rawData: JSON.stringify(researchData),
         researchedAt: new Date(),
-        researchedBy: session.user.email,
+        researchedBy,
       },
     });
 
