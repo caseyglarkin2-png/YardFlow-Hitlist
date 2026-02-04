@@ -42,18 +42,13 @@ echo "📋 Test 2: Generate Email Content"
 echo "────────────────────────────────────"
 
 PAYLOAD='{
-  "companyName": "Test Logistics Inc",
-  "personName": "John Smith",
-  "context": {
-    "eventName": "Manifest 2026",
-    "eventLocation": "Las Vegas",
-    "companySize": "500 employees"
-  },
+  "type": "email",
   "tone": "professional",
-  "messageType": "email_initial",
-  "options": {
-    "includeCalendly": true,
-    "maxLength": 200
+  "goal": "Schedule a meeting at Manifest 2026",
+  "context": {
+    "prospectName": "John Smith",
+    "companyName": "Test Logistics Inc",
+    "title": "VP of Operations"
   }
 }'
 
@@ -109,16 +104,17 @@ echo ""
 echo "📋 Test 3: Multi-tone Generation"
 echo "────────────────────────────────────"
 
-for TONE in "friendly" "direct" "consultative"; do
+for TONE in "luis" "professional" "challenger"; do
     echo -n "  Testing tone '$TONE': "
     
     TONE_PAYLOAD=$(cat <<EOF
 {
-  "companyName": "Acme Freight",
-  "personName": "Jane Doe",
-  "context": {"eventName": "Manifest 2026"},
+  "type": "email",
   "tone": "$TONE",
-  "messageType": "email_initial"
+  "context": {
+    "prospectName": "Jane Doe",
+    "companyName": "Acme Freight"
+  }
 }
 EOF
 )
