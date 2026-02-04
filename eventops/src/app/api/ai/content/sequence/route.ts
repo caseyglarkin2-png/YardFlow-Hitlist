@@ -45,7 +45,9 @@ export async function POST(request: NextRequest) {
 
     logger.info('Sequence generated', {
       userId: authResult.userId,
-      stepCount: sequence?.steps?.length || 0,
+      hasEmail1: !!sequence?.email1,
+      hasFollowUp: !!sequence?.followUp,
+      hasLinkedin: !!sequence?.linkedin,
     });
 
     return NextResponse.json(sequence);
