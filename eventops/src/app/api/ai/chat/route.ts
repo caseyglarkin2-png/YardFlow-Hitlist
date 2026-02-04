@@ -279,8 +279,17 @@ export async function POST(request: NextRequest) {
 
     // Save to conversation store
     try {
-      await addMessage(conversationId, userId, 'user', message);
-      await addMessage(conversationId, userId, 'assistant', result.content);
+      await addMessage(conversationId, userId, {
+        role: 'user',
+        content: message,
+        timestamp: Date.now(),
+      });
+      await addMessage(conversationId, userId, {
+        role: 'assistant',
+        content: result.content,
+        timestamp: Date.now(),
+        action: parseResult.action,
+      });
     } catch (storeError) {
       // Non-fatal: log but continue
       logger.warn('Failed to save conversation', { conversationId, error: storeError });
