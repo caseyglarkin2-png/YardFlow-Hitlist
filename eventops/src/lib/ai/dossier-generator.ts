@@ -160,7 +160,7 @@ Be specific and practical. Return ONLY valid JSON.`;
         if (rawData.foundedYear) {
           parts.push(`Founded: ${rawData.foundedYear}`);
         }
-      } catch (e) {
+      } catch (_e) {
         // Ignore parse errors
       }
     }

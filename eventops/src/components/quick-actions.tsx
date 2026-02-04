@@ -19,7 +19,7 @@ interface Person {
 export function QuickActions() {
   const [topPeople, setTopPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
-  const [now, setNow] = useState(new Date());
+  const [_now, setNow] = useState(new Date());
 
   useEffect(() => {
     // Update time every minute for countdown

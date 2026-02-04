@@ -178,7 +178,7 @@ export class GeminiProClient {
 
     try {
       return JSON.parse(jsonText.trim());
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to parse Gemini JSON response:', text);
       throw new Error('Invalid JSON response from Gemini');
     }

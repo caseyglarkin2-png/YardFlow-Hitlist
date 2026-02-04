@@ -221,7 +221,7 @@ export async function findHubSpotContactByEmail(
     }
 
     return { found: false };
-  } catch (error) {
+  } catch (_error) {
     return { found: false };
   }
 }

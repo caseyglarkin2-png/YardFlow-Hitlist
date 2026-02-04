@@ -112,7 +112,7 @@ export function GenerateOutreachForm({
 
       if (!response.ok) throw new Error("Failed to generate outreach");
 
-      const result = await response.json();
+      const _result = await response.json();
 
       router.push("/dashboard/outreach");
       router.refresh();

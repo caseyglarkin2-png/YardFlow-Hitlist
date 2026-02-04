@@ -70,7 +70,7 @@ export function AssignDropdown({
       } else {
         throw new Error('Failed to assign');
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to assign. Please try again.',
@@ -101,7 +101,7 @@ export function AssignDropdown({
       } else {
         throw new Error('Failed to unassign');
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to unassign. Please try again.',

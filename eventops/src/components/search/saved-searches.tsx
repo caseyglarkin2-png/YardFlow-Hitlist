@@ -80,7 +80,7 @@ export function SavedSearches({ entityType, onLoad }: SavedSearchesProps) {
           description: 'Saved search has been removed.',
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error',
         description: 'Failed to delete search.',

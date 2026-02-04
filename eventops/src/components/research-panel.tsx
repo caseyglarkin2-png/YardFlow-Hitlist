@@ -8,7 +8,7 @@ interface ResearchPanelProps {
   companyDossierId: string | null;
 }
 
-export function ResearchPanel({ accountId, companyDossierId }: ResearchPanelProps) {
+export function ResearchPanel({ accountId: _accountId, companyDossierId }: ResearchPanelProps) {
   const router = useRouter();
   const [isResearching, setIsResearching] = useState<string | null>(null);
   const [results, setResults] = useState<any>(null);

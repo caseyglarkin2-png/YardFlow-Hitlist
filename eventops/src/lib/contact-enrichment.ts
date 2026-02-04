@@ -68,7 +68,7 @@ export async function enrichContact(
     timeout = 10000,
   } = options;
 
-  const startTime = Date.now();
+  const _startTime = Date.now();
   const sources: string[] = [];
   
   // Parse name
@@ -300,7 +300,7 @@ Respond with just the number (1-${patterns.length}) of the most likely pattern.`
 /**
  * Find social media profiles via web search
  */
-async function findSocialProfiles(name: string, companyName: string): Promise<{
+async function findSocialProfiles(name: string, _companyName: string): Promise<{
   linkedin: string | null;
   twitter: string | null;
   github: string | null;

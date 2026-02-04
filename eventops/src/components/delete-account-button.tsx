@@ -21,7 +21,7 @@ export function DeleteAccountButton({ accountId, accountName }: { accountId: str
 
       router.push('/dashboard/accounts');
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to delete account. Please try again.');
       setIsDeleting(false);
       setShowConfirm(false);

@@ -130,7 +130,7 @@ export function detectCompanyPattern(
 export function generateLinkedInProfileUrl(
   firstName: string,
   lastName: string,
-  companyName: string
+  _companyName: string
 ): LinkedInProfile {
   // LinkedIn profile URL pattern: linkedin.com/in/first-last
   const first = firstName.toLowerCase().trim().replace(/[^a-z]/g, '');

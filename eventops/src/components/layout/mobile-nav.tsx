@@ -9,7 +9,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },

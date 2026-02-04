@@ -148,7 +148,7 @@ export class ProspectingAgent {
       // 2. Filter by persona (simple title match for now)
       if (criteria.personas && criteria.personas.length > 0) {
         const titleLower = lead.title?.toLowerCase() || '';
-        const matchesPersona = criteria.personas.some((p) => titleLower.includes(p.toLowerCase()));
+        const _matchesPersona = criteria.personas.some((p) => titleLower.includes(p.toLowerCase()));
         // If persona filtering is strict, we might return false here.
         // For now, let's keep it loose as estimatedIcpScore usually handles the weighting.
       }
@@ -172,7 +172,7 @@ export class ProspectingAgent {
         // 1. Create or Find Target Account
         // We use the company name as a unique key for now (in absence of domain)
         // Ideally we'd have a clean domain, but for prospecting raw leads, name is often all we have.
-        const account = await prisma.target_accounts.upsert({
+        const _account = await prisma.target_accounts.upsert({
           where: {
             // This assumes we have a unique constraint or logic for ID.
             // Since ID is a CUID/UUID usually, we can't upsert by name directly unless name is @unique.

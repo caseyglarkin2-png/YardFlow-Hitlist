@@ -196,7 +196,7 @@ async function verifyDomainExists(domain: string): Promise<boolean> {
     
     const data = await response.json();
     return data.Answer && data.Answer.length > 0;
-  } catch (error) {
+  } catch (_error) {
     // If verification fails, assume it might exist (don't penalize)
     return false;
   }

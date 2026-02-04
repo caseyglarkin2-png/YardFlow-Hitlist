@@ -20,7 +20,6 @@ import {
   type ContentContext,
 } from '@/lib/ai/content-generator';
 import { VOICE_CONFIGS } from '@/lib/ai/voiceConfigs';
-import type { VoiceTone } from '@/lib/ai/voiceConfigs';
 
 export const dynamic = 'force-dynamic';
 

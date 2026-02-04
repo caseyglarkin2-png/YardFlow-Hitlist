@@ -8,7 +8,6 @@ import {
   TrendingUp, 
   Mail, 
   Phone, 
-  Calendar, 
   Linkedin, 
   Target,
   Flame,
@@ -86,7 +85,7 @@ export default function TopTargetsDashboard() {
     return colors[action] || 'bg-gray-100 text-gray-800';
   }
 
-  async function takeAction(target: TopTarget, action: string) {
+  async function _takeAction(target: TopTarget, action: string) {
     // Implement action handling
     console.log('Taking action:', action, 'for', target.name);
   }

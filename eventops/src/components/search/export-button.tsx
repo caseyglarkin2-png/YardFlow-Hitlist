@@ -34,7 +34,7 @@ export function ExportSearchButton({
         title: 'Export successful',
         description: `Downloaded ${data.length} results to ${filename}`,
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Export failed',
         description: 'There was an error exporting the data.',

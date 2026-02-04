@@ -56,7 +56,7 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
       }
       
       onUpdate();
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Sync failed', variant: 'destructive' });
     } finally {
       setSyncing(false);
@@ -74,7 +74,7 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
       });
       
       onUpdate();
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Check failed', variant: 'destructive' });
     }
   };

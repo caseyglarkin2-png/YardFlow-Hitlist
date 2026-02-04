@@ -31,7 +31,7 @@ export function ScoreManager({ accountId, currentScore }: Props) {
       const data = await response.json();
       setBreakdown(data.breakdown);
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to calculate score');
     } finally {
       setIsCalculating(false);
@@ -59,7 +59,7 @@ export function ScoreManager({ accountId, currentScore }: Props) {
       setShowOverrideForm(false);
       setOverrideNotes('');
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to override score');
     } finally {
       setIsOverriding(false);
