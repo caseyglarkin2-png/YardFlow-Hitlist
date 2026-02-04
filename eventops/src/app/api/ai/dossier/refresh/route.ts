@@ -4,6 +4,7 @@
  *
  * Force-refresh a company dossier even if cached.
  * Regenerates all dossier fields including enhanced Sprint 31B fields.
+ * Returns frontend-compatible format for GTM-YardFlow.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -12,6 +13,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db';
 import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
+import { transformToFrontendResponse } from '@/lib/ai/dossier-transformer';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,24 +107,29 @@ export async function POST(request: NextRequest) {
       hasOutreachAngles: !!result.dossier.outreachAngles?.length,
     });
 
+    // Transform to frontend-compatible format
+    const frontendResponse = transformToFrontendResponse(result, {
+      website: account.website,
+      headquarters: account.headquarters,
+    });
+
     return NextResponse.json({
       refreshed: true,
       accountId,
       companyName: account.name,
-      dossier: result.dossier,
       previousAge: previousAge.daysOld,
-      newFields: {
-        talkingPoints: result.dossier.talkingPoints?.length || 0,
-        competitors: result.dossier.competitors?.length || 0,
-        outreachAngles: result.dossier.outreachAngles?.length || 0,
-        hasManifestContext: !!result.dossier.manifestContext,
-      },
+      ...frontendResponse,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Dossier refresh error', { error: errorMessage });
     return NextResponse.json(
-      { error: 'Failed to refresh dossier', details: errorMessage },
+      { 
+        success: false,
+        error: 'Failed to refresh dossier', 
+        details: errorMessage,
+        researchedAt: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }

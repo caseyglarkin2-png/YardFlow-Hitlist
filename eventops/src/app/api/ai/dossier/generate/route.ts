@@ -2,12 +2,16 @@
  * API Route: Generate Company Dossier (Gemini Pro)
  * POST /api/ai/dossier/generate
  *
- * Supports both session auth and S2S auth for frontend proxy
+ * Returns frontend-compatible dossier format for GTM-YardFlow's DossierPanel.
+ * Supports both session auth and S2S auth for frontend proxy.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
+import { transformToFrontendResponse } from '@/lib/ai/dossier-transformer';
+import { prisma } from '@/lib/db';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +28,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'accountId is required' }, { status: 400 });
     }
 
+    // Fetch account data for transformation
+    const account = await prisma.target_accounts.findUnique({
+      where: { id: accountId },
+      select: { website: true, headquarters: true },
+    });
+
     const generator = new AIDossierGenerator();
     const result = await generator.generateDossier(accountId);
 
@@ -32,11 +42,30 @@ export async function POST(request: NextRequest) {
       await generator.saveDossier(accountId, result.dossier);
     }
 
-    return NextResponse.json(result);
+    // Transform to frontend-compatible format
+    const frontendResponse = transformToFrontendResponse(result, {
+      website: account?.website,
+      headquarters: account?.headquarters,
+    });
+
+    logger.info('Dossier generated', {
+      userId: authResult.userId,
+      accountId,
+      success: result.success,
+      confidence: frontendResponse.confidence?.overall,
+    });
+
+    return NextResponse.json(frontendResponse);
   } catch (error) {
-    console.error('Dossier generation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate dossier';
+    logger.error('Dossier generation error', { error: errorMessage });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate dossier' },
+      { 
+        success: false, 
+        data: null, 
+        error: errorMessage,
+        researchedAt: new Date().toISOString(),
+      },
       { status: 500 }
     );
   }

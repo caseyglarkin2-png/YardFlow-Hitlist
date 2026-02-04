@@ -91,3 +91,16 @@ export interface BrainResponse {
     fallbackUsed?: boolean;
   };
 }
+
+/**
+ * RailwayAIAction - Type alias for GTM-YardFlow frontend compatibility
+ * The frontend uses this name for type-safe action handling
+ */
+export type RailwayAIAction = BrainAction;
+
+/**
+ * RailwayAIResponse - Full response type for GTM-YardFlow integration
+ */
+export interface RailwayAIResponse extends BrainResponse {
+  // Alias for frontend compatibility
+}
