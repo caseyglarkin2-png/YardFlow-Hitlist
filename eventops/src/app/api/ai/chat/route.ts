@@ -241,7 +241,7 @@ export async function POST(request: NextRequest) {
     if (providedConversationId) {
       const storedConvo = await getConversation(providedConversationId, userId);
       if (storedConvo) {
-        conversationHistory = getMessagesForContext(storedConvo.messages, 6);
+        conversationHistory = getMessagesForContext(storedConvo, 6);
       }
     }
 
