@@ -16,9 +16,11 @@ export async function GET(req: NextRequest) {
 
   // For S2S calls, get user from x-user-id header; for session, use authResult
   const userEmail = authResult.email || req.headers.get('x-user-email');
-  const user = userEmail ? await prisma.users.findUnique({
-    where: { email: userEmail },
-  }) : null;
+  const user = userEmail
+    ? await prisma.users.findUnique({
+        where: { email: userEmail },
+      })
+    : null;
 
   if (!user?.activeEventId) {
     return NextResponse.json({ error: 'No active event' }, { status: 400 });

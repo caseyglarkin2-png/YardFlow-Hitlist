@@ -81,8 +81,13 @@ export interface ParseResult {
 
 // Full brain response structure
 export interface BrainResponse {
-  message: string;
+  response: string; // The AI's text response
   action?: BrainAction;
+  confidence?: number; // 0-1, how confident in the parsed action
+  conversationId?: string; // For conversation continuity
   suggestions?: string[];
-  confidence?: number;
+  metadata?: {
+    provider?: string;
+    fallbackUsed?: boolean;
+  };
 }

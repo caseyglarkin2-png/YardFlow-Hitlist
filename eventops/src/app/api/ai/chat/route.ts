@@ -5,6 +5,7 @@
  * General-purpose AI chat endpoint for the Brain feature.
  * Supports context-aware conversations about accounts, people, and platform features.
  * Uses unified AI provider with automatic Gemini → OpenAI fallback.
+ * Returns parsed actions for frontend navigation/filtering.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -13,11 +14,20 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { generateContent } from '@/lib/ai/provider';
 import { prisma } from '@/lib/db';
+import { parseActionWithConfidence } from '@/lib/ai/action-parser';
+import {
+  getConversation,
+  addMessage,
+  generateConversationId,
+  getMessagesForContext,
+} from '@/lib/ai/conversation-store';
+import type { BrainResponse } from '@/types/brain-actions';
 
 export const dynamic = 'force-dynamic';
 
 const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Message is required').max(2000, 'Message too long'),
+  conversationId: z.string().optional(), // For conversation continuity
   context: z
     .object({
       accountId: z.string().optional(),
@@ -50,7 +60,28 @@ You help users with:
 - ROI calculations for yard management solutions
 
 Be concise, actionable, and focused on sales enablement. You have access to account and contact data.
-Always suggest next steps when appropriate.`;
+Always suggest next steps when appropriate.
+
+NAVIGATION ACTIONS:
+When the user wants to navigate, use phrases like:
+- "I'll take you to the [destination]" (dashboard, prospects, sequences, accounts, import)
+- "Let me show you the [page]"
+- "Go to [page]"
+
+FILTER ACTIONS:
+When filtering prospects, use phrases like:
+- "I'll filter by Tier [1/2/3]"
+- "Showing prospects with/without email"
+
+SEARCH ACTIONS:
+When searching, use phrases like:
+- "I'll search for [query]"
+- "Looking for [term]"
+
+RESEARCH ACTIONS:
+When researching a company, use phrases like:
+- "I'll research [company name]"
+- "Let me analyze [company]"`;
 
   if (context?.pageContext) {
     const contextHints: Record<string, string> = {
@@ -189,6 +220,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userId = authResult.userId;
     const body = await request.json();
     const validationResult = ChatRequestSchema.safeParse(body);
 
@@ -199,10 +231,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, context } = validationResult.data;
+    const { message, conversationId: providedConversationId, context } = validationResult.data;
+
+    // Get or create conversation
+    const conversationId = providedConversationId || generateConversationId();
+    let conversationHistory = context?.conversationHistory;
+
+    // If conversationId provided, try to load from store
+    if (providedConversationId) {
+      const storedConvo = await getConversation(providedConversationId, userId);
+      if (storedConvo) {
+        conversationHistory = getMessagesForContext(storedConvo.messages, 6);
+      }
+    }
 
     logger.info('AI Chat request', {
-      userId: authResult.userId,
+      userId,
+      conversationId,
+      isNewConversation: !providedConversationId,
       hasAccountContext: !!context?.accountId,
       hasPersonContext: !!context?.personId,
       pageContext: context?.pageContext,
@@ -216,7 +262,7 @@ export async function POST(request: NextRequest) {
       systemPrompt,
       message,
       contextData,
-      context?.conversationHistory
+      conversationHistory
     );
 
     // Generate response
@@ -225,23 +271,46 @@ export async function POST(request: NextRequest) {
       maxTokens: 800,
     });
 
+    // Parse action from response
+    const parseResult = parseActionWithConfidence(result.content);
+
     // Extract suggestions from response
     const suggestions = extractSuggestions(result.content);
 
+    // Save to conversation store
+    try {
+      await addMessage(conversationId, userId, 'user', message);
+      await addMessage(conversationId, userId, 'assistant', result.content);
+    } catch (storeError) {
+      // Non-fatal: log but continue
+      logger.warn('Failed to save conversation', { conversationId, error: storeError });
+    }
+
     logger.info('AI Chat response generated', {
-      userId: authResult.userId,
+      userId,
+      conversationId,
       provider: result.provider,
       fallbackUsed: result.fallbackUsed,
       responseLength: result.content.length,
       suggestionsCount: suggestions.length,
+      hasAction: !!parseResult.action,
+      actionType: parseResult.action?.type,
+      actionConfidence: parseResult.confidence,
     });
 
-    return NextResponse.json({
+    const response: BrainResponse = {
       response: result.content,
+      action: parseResult.action,
+      confidence: parseResult.confidence,
+      conversationId,
       suggestions,
-      provider: result.provider,
-      fallbackUsed: result.fallbackUsed,
-    });
+      metadata: {
+        provider: result.provider,
+        fallbackUsed: result.fallbackUsed,
+      },
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('AI Chat error', { error: errorMessage });
@@ -273,10 +342,15 @@ export async function GET(request: NextRequest) {
         'icp-analysis',
         'roi-calculation',
         'general-assistance',
+        'navigation-actions',
+        'filter-actions',
+        'search-actions',
+        'conversation-memory',
       ],
       maxMessageLength: 2000,
       maxHistoryMessages: 6,
       providers: ['gemini', 'openai'],
+      actions: ['navigate', 'filter', 'search', 'research', 'email', 'explain', 'select'],
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

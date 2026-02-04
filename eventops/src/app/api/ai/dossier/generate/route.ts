@@ -1,7 +1,7 @@
 /**
  * API Route: Generate Company Dossier (Gemini Pro)
  * POST /api/ai/dossier/generate
- * 
+ *
  * Supports both session auth and S2S auth for frontend proxy
  */
 
