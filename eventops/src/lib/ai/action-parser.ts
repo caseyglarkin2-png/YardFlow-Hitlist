@@ -101,11 +101,13 @@ export function parseActionFromResponse(response: string): BrainAction | undefin
   const navMatch = response.match(ACTION_PATTERNS.navigate);
   if (navMatch) {
     const dest = normalizeDestination(navMatch[2]);
-    return {
-      type: 'navigate',
-      tab: dest, // GTM-YardFlow expects 'tab'
-      destination: dest, // Backward compatibility
-    };
+    if (dest) {
+      return {
+        type: 'navigate',
+        tab: dest, // GTM-YardFlow expects 'tab'
+        destination: dest, // Backward compatibility
+      };
+    }
   }
 
   // Check for filter
