@@ -164,6 +164,9 @@ if (!session?.user?.id) {
 | State manager         | `src/lib/agents/state-manager.ts` |
 | API Routes            | `src/app/api/**/route.ts`         |
 | Webhooks              | `src/app/api/webhooks/**/*.ts`    |
+| **AI Provider**       | `src/lib/ai/provider.ts`          |
+| **AI Dossier Gen**    | `src/lib/ai/dossier-generator.ts` |
+| **AI Chat Endpoint**  | `src/app/api/ai/chat/route.ts`    |
 
 ## ⚠️ Common Pitfalls
 
@@ -173,6 +176,40 @@ if (!session?.user?.id) {
 4. **Environment Variables**: S2S calls fail without `CRON_SECRET` or `SERVICE_TO_SERVICE_SECRET`. Ensure `SENDGRID_API_KEY` is present for email features.
 5. **Prisma Model Access**: Use lowercase for Prisma client access (`prisma.meeting` not `prisma.Meeting`), even if model is defined as `model Meeting`. The `@@map("meetings")` directive maps to table name.
 6. **Prisma Enums**: Import enums from `@prisma/client` (e.g., `import { OutreachStatus } from '@prisma/client'`), don't use string literals.
+
+---
+
+## 🤖 AI Endpoints (Brain System)
+
+This backend powers the "Brain" AI assistant in the GTM-YardFlow frontend. **All AI API keys live here, not in Vercel.**
+
+### AI Provider Architecture
+- **Primary**: Gemini Pro via `GEMINI_API_KEY`
+- **Fallback**: OpenAI via `OPENAI_API_KEY`  
+- **Unified Provider**: `src/lib/ai/provider.ts` handles fallback automatically
+
+### AI Endpoints (S2S Auth Required)
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/ai/chat` | GET/POST | Brain chat with context |
+| `/api/ai/dossier/generate` | POST | Generate company dossiers |
+| `/api/ai/content/generate` | POST | Email/content generation |
+| `/api/ai/content/sequence` | POST | Multi-step email sequences |
+| `/api/ai/score-icp` | POST | ICP scoring |
+| `/api/ai/sentiment` | POST | Sentiment analysis |
+| `/api/accounts/[id]/research` | POST | Company research |
+
+### Cross-Repo Integration (GTM-YardFlow)
+The Vercel frontend proxies all AI calls through Railway:
+```
+[GTM-YardFlow] → POST /api/ai/chat (Vercel proxy)
+              → Authorization: Bearer RAILWAY_API_SECRET
+              → [Railway] /api/ai/chat
+              → [Gemini/OpenAI with fallback]
+              → Response
+```
+
+**Critical**: GTM-YardFlow has NO AI API keys. All AI routes through Railway.
 
 ---
 
