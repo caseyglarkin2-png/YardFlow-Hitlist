@@ -1,16 +1,21 @@
 /**
  * API Route: Generate Multi-Channel Sequence
  * POST /api/ai/content/sequence
+ * 
+ * Supports both session auth (internal) and S2S auth (frontend proxy)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { BrandVoiceContentGenerator } from '@/lib/ai/brand-voice-generator';
+import { logger } from '@/lib/logger';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -23,6 +28,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    logger.info('Generating sequence', {
+      userId: authResult.userId,
+      companyName,
+      recipientName,
+    });
+
     const generator = new BrandVoiceContentGenerator();
     const sequence = await generator.generateSequence({
       recipientName,
@@ -32,11 +43,17 @@ export async function POST(request: NextRequest) {
       tone,
     });
 
+    logger.info('Sequence generated', {
+      userId: authResult.userId,
+      stepCount: sequence?.steps?.length || 0,
+    });
+
     return NextResponse.json(sequence);
   } catch (error) {
-    console.error('Sequence generation error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to generate sequence';
+    logger.error('Sequence generation error', { error: message });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate sequence' },
+      { error: message },
       { status: 500 }
     );
   }

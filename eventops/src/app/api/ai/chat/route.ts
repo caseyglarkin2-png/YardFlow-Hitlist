@@ -1,7 +1,7 @@
 /**
  * API Route: AI Chat (Brain Feature)
  * POST /api/ai/chat
- * 
+ *
  * General-purpose AI chat endpoint for the Brain feature.
  * Supports context-aware conversations about accounts, people, and platform features.
  * Uses unified AI provider with automatic Gemini → OpenAI fallback.
@@ -18,15 +18,21 @@ export const dynamic = 'force-dynamic';
 
 const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Message is required').max(2000, 'Message too long'),
-  context: z.object({
-    accountId: z.string().optional(),
-    personId: z.string().optional(),
-    pageContext: z.string().optional(), // e.g., 'dashboard', 'prospects', 'sequences'
-    conversationHistory: z.array(z.object({
-      role: z.enum(['user', 'assistant']),
-      content: z.string(),
-    })).optional(),
-  }).optional(),
+  context: z
+    .object({
+      accountId: z.string().optional(),
+      personId: z.string().optional(),
+      pageContext: z.string().optional(), // e.g., 'dashboard', 'prospects', 'sequences'
+      conversationHistory: z
+        .array(
+          z.object({
+            role: z.enum(['user', 'assistant']),
+            content: z.string(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
 });
 
 type ChatRequest = z.infer<typeof ChatRequestSchema>;
@@ -48,10 +54,14 @@ Always suggest next steps when appropriate.`;
 
   if (context?.pageContext) {
     const contextHints: Record<string, string> = {
-      dashboard: 'The user is on the dashboard. Help them understand metrics and prioritize actions.',
-      prospects: 'The user is viewing prospects. Help with filtering, prioritization, and outreach strategies.',
-      sequences: 'The user is managing email sequences. Help with timing, content, and optimization.',
-      accounts: 'The user is viewing account details. Help with research, scoring, and engagement strategies.',
+      dashboard:
+        'The user is on the dashboard. Help them understand metrics and prioritize actions.',
+      prospects:
+        'The user is viewing prospects. Help with filtering, prioritization, and outreach strategies.',
+      sequences:
+        'The user is managing email sequences. Help with timing, content, and optimization.',
+      accounts:
+        'The user is viewing account details. Help with research, scoring, and engagement strategies.',
       settings: 'The user is in settings. Help with configuration and best practices.',
     };
     systemPrompt += `\n\nContext: ${contextHints[context.pageContext] || 'General platform navigation.'}`;
@@ -103,12 +113,16 @@ Current Contact: ${person.name}
 - Title: ${person.title || 'Unknown'}
 - Company: ${person.target_accounts?.name || 'Unknown'}
 - Email: ${person.email || 'N/A'}
-- Personas: ${[
-  person.isExecOps && 'ExecOps',
-  person.isOps && 'Ops',
-  person.isProc && 'Procurement',
-  person.isSales && 'Sales',
-].filter(Boolean).join(', ') || 'None'}`);
+- Personas: ${
+          [
+            person.isExecOps && 'ExecOps',
+            person.isOps && 'Ops',
+            person.isProc && 'Procurement',
+            person.isSales && 'Sales',
+          ]
+            .filter(Boolean)
+            .join(', ') || 'None'
+        }`);
       }
     } catch (error) {
       logger.warn('Failed to fetch person context', { personId: context.personId, error });
@@ -135,7 +149,8 @@ function buildMessages(
 
   if (conversationHistory && conversationHistory.length > 0) {
     fullPrompt += '\n\n--- CONVERSATION HISTORY ---';
-    for (const msg of conversationHistory.slice(-6)) { // Last 6 messages for context
+    for (const msg of conversationHistory.slice(-6)) {
+      // Last 6 messages for context
       fullPrompt += `\n${msg.role.toUpperCase()}: ${msg.content}`;
     }
     fullPrompt += '\n--- END HISTORY ---';
@@ -151,11 +166,11 @@ function buildMessages(
  */
 function extractSuggestions(response: string): string[] {
   const suggestions: string[] = [];
-  
+
   // Look for bullet points or numbered lists
   const bulletMatches = response.match(/[-•]\s+(.+)/g);
   if (bulletMatches) {
-    suggestions.push(...bulletMatches.slice(0, 3).map(m => m.replace(/^[-•]\s+/, '')));
+    suggestions.push(...bulletMatches.slice(0, 3).map((m) => m.replace(/^[-•]\s+/, '')));
   }
 
   // Look for "you should" or "I recommend" phrases
@@ -230,7 +245,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('AI Chat error', { error: errorMessage });
-    
+
     return NextResponse.json(
       { error: 'Failed to generate response', details: errorMessage },
       { status: 500 }
@@ -242,24 +257,33 @@ export async function POST(request: NextRequest) {
  * GET - Health check and capabilities
  */
 export async function GET(request: NextRequest) {
-  const authResult = await authServiceOrSession(request);
-  if (!authResult) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  try {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  return NextResponse.json({
-    status: 'ready',
-    capabilities: [
-      'account-research',
-      'contact-insights',
-      'email-generation',
-      'sequence-optimization',
-      'icp-analysis',
-      'roi-calculation',
-      'general-assistance',
-    ],
-    maxMessageLength: 2000,
-    maxHistoryMessages: 6,
-    providers: ['gemini', 'openai'],
-  });
+    return NextResponse.json({
+      status: 'ready',
+      capabilities: [
+        'account-research',
+        'contact-insights',
+        'email-generation',
+        'sequence-optimization',
+        'icp-analysis',
+        'roi-calculation',
+        'general-assistance',
+      ],
+      maxMessageLength: 2000,
+      maxHistoryMessages: 6,
+      providers: ['gemini', 'openai'],
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('AI Chat GET error', { error: errorMessage });
+    return NextResponse.json(
+      { error: 'Failed to get capabilities', details: errorMessage },
+      { status: 500 }
+    );
+  }
 }
