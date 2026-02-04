@@ -1,6 +1,8 @@
 /**
  * API Route: Generate Content (Brand Voice)
  * POST /api/ai/content/generate
+ * 
+ * Uses unified AI provider with automatic fallback (Gemini → OpenAI)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -8,7 +10,7 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
-import { getGeminiClient } from '@/lib/ai/gemini-client';
+import { generateContent } from '@/lib/ai/provider';
 import {
   buildPrompt,
   buildLuisRepairPrompt,
@@ -128,25 +130,27 @@ export async function POST(request: NextRequest) {
     };
 
     const { prompt, promptVersion } = buildPrompt(contentContext);
-    const gemini = getGeminiClient();
 
-    const rawResponse = await gemini.generateContent(prompt, {
+    // Use unified provider with automatic fallback
+    const result = await generateContent(prompt, {
       temperature: 0.3,
-      maxOutputTokens: 300,
+      maxTokens: 300,
     });
 
-    let generated = parseModelJson(rawResponse);
+    let generated = parseModelJson(result.content);
+    const providerUsed = result.provider;
+    const fallbackUsed = result.fallbackUsed;
 
     let validationIssues: string[] = [];
     if (tone === 'luis' && calendlyLink) {
       const issues = validateLuisOutput(generated.content, calendlyLink);
       if (issues.length > 0) {
         const repairPrompt = buildLuisRepairPrompt(contentContext, calendlyLink);
-        const repairedResponse = await gemini.generateContent(repairPrompt, {
+        const repairResult = await generateContent(repairPrompt, {
           temperature: 0.2,
-          maxOutputTokens: 200,
+          maxTokens: 200,
         });
-        generated = parseModelJson(repairedResponse);
+        generated = parseModelJson(repairResult.content);
 
         const enforced = enforceLuisConstraints(generated.content, calendlyLink);
         generated = { ...generated, content: enforced.content };
@@ -161,20 +165,50 @@ export async function POST(request: NextRequest) {
       type: parsed.data.type,
       promptVersion,
       latencyMs,
+      provider: providerUsed,
+      fallbackUsed,
       validationIssues,
     });
 
     return NextResponse.json({
       subject: generated.subject,
       content: generated.content,
+      provider: providerUsed,
+      ...(fallbackUsed && { fallbackUsed: true }),
     });
-  } catch (error) {
+  } catch (error: unknown) {
     const latencyMs = Date.now() - startedAt;
+    
+    // Check if it's a rate limit error
+    const isRateLimited = error && typeof error === 'object' && 'isRateLimited' in error;
+    const retryAfterSeconds = isRateLimited && 'retryAfterSeconds' in error 
+      ? (error as { retryAfterSeconds: number }).retryAfterSeconds 
+      : undefined;
+
     logger.error('AI content generate error', {
       requestId,
       latencyMs,
       error: error instanceof Error ? error.message : 'unknown_error',
+      isRateLimited,
+      retryAfterSeconds,
     });
+
+    if (isRateLimited) {
+      return NextResponse.json(
+        { 
+          error: 'rate_limited', 
+          message: 'All AI providers are rate limited. Please try again later.',
+          retryAfterSeconds,
+        },
+        { 
+          status: 429,
+          headers: retryAfterSeconds 
+            ? { 'Retry-After': String(retryAfterSeconds) }
+            : {},
+        }
+      );
+    }
+
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
 }
