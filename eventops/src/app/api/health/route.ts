@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getRedisConnection } from '@/lib/queue/client';
 import { emailQueue, enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib/queue/queues';
+import { checkAIHealth } from '@/lib/ai/provider';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,7 @@ const REQUIRED_ENV_VARS = ['DATABASE_URL', 'AUTH_SECRET', 'REDIS_URL'];
 // OPTIONAL: Features degraded but app still works
 const OPTIONAL_ENV_VARS = [
   'GEMINI_API_KEY',
+  'OPENAI_API_KEY',
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'SENDGRID_API_KEY',
@@ -131,7 +133,7 @@ export async function GET() {
 
   // Run checks in parallel but catch all errors individually
   // We want to return a 200/503 response, not a 500 runtime exception
-  let dbCheck, redisCheck, queueCheck, workerCheck, emailCheck;
+  let dbCheck, redisCheck, queueCheck, workerCheck, emailCheck, aiCheck;
 
   try {
     dbCheck = await checkDatabase();
@@ -158,6 +160,11 @@ export async function GET() {
   } catch (e) {
     emailCheck = { status: 'fatal', error: String(e) };
   }
+  try {
+    aiCheck = await checkAIHealth();
+  } catch (e) {
+    aiCheck = { status: 'fatal', error: String(e) };
+  }
 
   // Healthy = DB + Redis + Worker + Critical Env Vars
   const healthy =
@@ -181,6 +188,7 @@ export async function GET() {
       worker: workerCheck,
       queues: queueCheck,
       email: emailCheck,
+      ai: aiCheck,
     },
     timestamp: new Date().toISOString(),
   };
