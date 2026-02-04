@@ -25,9 +25,19 @@ import type { BrainResponse } from '@/types/brain-actions';
 
 export const dynamic = 'force-dynamic';
 
+// Message in GTM-YardFlow format
+const MessageSchema = z.object({
+  role: z.enum(['system', 'user', 'assistant']),
+  content: z.string(),
+});
+
 const ChatRequestSchema = z.object({
-  message: z.string().min(1, 'Message is required').max(2000, 'Message too long'),
-  conversationId: z.string().optional(), // For conversation continuity
+  // Our original format - single message string
+  message: z.string().min(1).max(2000).optional(),
+  // GTM-YardFlow format - messages array
+  messages: z.array(MessageSchema).optional(),
+  // Conversation continuity
+  conversationId: z.string().optional(),
   context: z
     .object({
       accountId: z.string().optional(),
@@ -43,7 +53,10 @@ const ChatRequestSchema = z.object({
         .optional(),
     })
     .optional(),
-});
+}).refine(
+  (data) => data.message || (data.messages && data.messages.length > 0),
+  { message: 'Either message or messages is required' }
+);
 
 type ChatRequest = z.infer<typeof ChatRequestSchema>;
 
@@ -231,7 +244,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, conversationId: providedConversationId, context } = validationResult.data;
+    const { message, messages, conversationId: providedConversationId, context } = validationResult.data;
+
+    // Extract the actual user message - support both formats
+    let userMessage: string;
+    let systemPromptFromMessages: string | undefined;
+    
+    if (messages && messages.length > 0) {
+      // GTM-YardFlow format: array of messages
+      // Find the last user message
+      const userMessages = messages.filter(m => m.role === 'user');
+      const systemMessages = messages.filter(m => m.role === 'system');
+      
+      if (userMessages.length === 0) {
+        return NextResponse.json({ error: 'No user message in messages array' }, { status: 400 });
+      }
+      
+      userMessage = userMessages[userMessages.length - 1].content;
+      systemPromptFromMessages = systemMessages.length > 0 ? systemMessages[0].content : undefined;
+    } else if (message) {
+      // Our original format: single message string
+      userMessage = message;
+    } else {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
 
     // Get or create conversation
     const conversationId = providedConversationId || generateConversationId();
@@ -252,13 +288,14 @@ export async function POST(request: NextRequest) {
       hasAccountContext: !!context?.accountId,
       hasPersonContext: !!context?.personId,
       pageContext: context?.pageContext,
-      messageLength: message.length,
+      messageLength: userMessage.length,
+      format: messages ? 'gtm-messages-array' : 'railway-message-string',
     });
 
-    // Build prompts
-    const systemPrompt = buildSystemPrompt(context);
+    // Build prompts - use GTM system prompt if provided, otherwise build our own
+    const systemPrompt = systemPromptFromMessages || buildSystemPrompt(context);
     const contextData = await fetchContextData(context);
-    const fullPrompt = buildMessages(systemPrompt, message, contextData, conversationHistory);
+    const fullPrompt = buildMessages(systemPrompt, userMessage, contextData, conversationHistory);
 
     // Generate response
     const result = await generateContent(fullPrompt, {
@@ -276,7 +313,7 @@ export async function POST(request: NextRequest) {
     try {
       await addMessage(conversationId, userId, {
         role: 'user',
-        content: message,
+        content: userMessage,
         timestamp: Date.now(),
       });
       await addMessage(conversationId, userId, {

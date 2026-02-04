@@ -19,7 +19,8 @@ export type BrainActionType =
 // Navigate to a specific page/tab
 export interface NavigateAction {
   type: 'navigate';
-  destination: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts';
+  tab: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts';
+  destination?: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts'; // Alias for backward compat
 }
 
 // Apply filters to the current view

@@ -100,9 +100,11 @@ export function parseActionFromResponse(response: string): BrainAction | undefin
   // Check for navigation first (most specific)
   const navMatch = response.match(ACTION_PATTERNS.navigate);
   if (navMatch) {
+    const dest = normalizeDestination(navMatch[2]);
     return {
       type: 'navigate',
-      destination: normalizeDestination(navMatch[2]),
+      tab: dest, // GTM-YardFlow expects 'tab'
+      destination: dest, // Backward compatibility
     };
   }
 

@@ -21,26 +21,27 @@ describe('parseActionFromResponse', () => {
   describe('navigation', () => {
     it('parses "go to prospects"', () => {
       const action = parseActionFromResponse("I'll go to prospects to show you the list");
-      expect(action).toEqual({ type: 'navigate', destination: 'prospects' });
+      expect(action).toEqual({ type: 'navigate', tab: 'prospects', destination: 'prospects' });
     });
 
     it('parses "show me the dashboard"', () => {
       const action = parseActionFromResponse('Let me show you the dashboard');
-      expect(action).toEqual({ type: 'navigate', destination: 'dashboard' });
+      expect(action).toEqual({ type: 'navigate', tab: 'dashboard', destination: 'dashboard' });
     });
 
     it('parses "navigate to accounts"', () => {
       const action = parseActionFromResponse("I'll navigate to accounts now");
-      expect(action).toEqual({ type: 'navigate', destination: 'accounts' });
+      expect(action).toEqual({ type: 'navigate', tab: 'accounts', destination: 'accounts' });
     });
 
     it('parses "open sequences"', () => {
       const action = parseActionFromResponse('Let me open sequences for you');
-      expect(action).toEqual({ type: 'navigate', destination: 'sequences' });
+      expect(action).toEqual({ type: 'navigate', tab: 'sequences', destination: 'sequences' });
     });
 
     it('handles destination aliases', () => {
       const action = parseActionFromResponse("I'll go to companies") as NavigateAction;
+      expect(action?.tab).toBe('accounts');
       expect(action?.destination).toBe('accounts');
     });
   });
