@@ -26,7 +26,7 @@ export interface GeminiResponse {
 export class GeminiProClient {
   private apiKey: string;
   private baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
-  private model = 'gemini-1.5-flash';
+  private model = 'gemini-2.0-flash';
 
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.GEMINI_API_KEY || '';
