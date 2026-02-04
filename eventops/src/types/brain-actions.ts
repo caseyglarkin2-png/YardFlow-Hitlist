@@ -100,7 +100,6 @@ export type RailwayAIAction = BrainAction;
 
 /**
  * RailwayAIResponse - Full response type for GTM-YardFlow integration
+ * Type alias for frontend compatibility
  */
-export interface RailwayAIResponse extends BrainResponse {
-  // Alias for frontend compatibility
-}
+export type RailwayAIResponse = BrainResponse;
