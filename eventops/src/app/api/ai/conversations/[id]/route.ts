@@ -12,6 +12,7 @@ import {
   clearConversation,
   getConversationSummary,
 } from '@/lib/ai/conversation-store';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +52,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/conversations/[id]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to get conversation', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to get conversation', details: errorMessage },
@@ -88,6 +94,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ success: true, conversationId });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/conversations/[id]',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to delete conversation', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to delete conversation', details: errorMessage },

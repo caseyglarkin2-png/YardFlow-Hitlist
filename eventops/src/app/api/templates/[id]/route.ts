@@ -10,6 +10,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { TemplateTone, OutreachChannel } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ template });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/templates/[id]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Template fetch failed', { requestId, id, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
@@ -121,6 +127,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ template: updated });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/templates/[id]',
+      method: 'PATCH',
+      userId: authResult?.userId,
+    });
     logger.error('Template update failed', { requestId, id, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
@@ -155,6 +166,11 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     return NextResponse.json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/templates/[id]',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     logger.error('Template delete failed', { requestId, id, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,11 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/email/test',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to send test email', {
       error: err instanceof Error ? err.message : String(err),
     });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 interface BatchProspect {
   email: string;
@@ -146,6 +147,14 @@ export async function POST(request: NextRequest) {
       errors,
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/prospects/batch',
+      method: 'POST',
+    });
+    captureRouteError(err, {
+      route: '/api/prospects/batch',
+      method: 'POST',
+    });
     logger.error('Batch prospect operation failed', { error: String(err) });
     return NextResponse.json(
       {

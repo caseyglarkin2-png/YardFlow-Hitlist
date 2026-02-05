@@ -8,6 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { getAgentOrchestrator } from '@/lib/agents/orchestrator';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(
   request: NextRequest,
@@ -37,6 +38,11 @@ export async function GET(
 
     return NextResponse.json(status);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/agents/workflow/[workflowId]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to get workflow status', { error, workflowId });
     return NextResponse.json({ error: 'Failed to get workflow status' }, { status: 500 });
   }
@@ -83,6 +89,11 @@ export async function POST(
       task: result,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/agents/workflow/[workflowId]',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to retry task', { error, workflowId });
     return NextResponse.json({ error: 'Failed to retry task' }, { status: 500 });
   }

@@ -12,6 +12,7 @@ import {
   generateConversationId,
   saveConversation,
 } from '@/lib/ai/conversation-store';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/conversations',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to list conversations', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to list conversations', details: errorMessage },
@@ -79,6 +85,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/conversations',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to create conversation', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to create conversation', details: errorMessage },

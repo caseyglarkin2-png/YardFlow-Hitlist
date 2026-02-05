@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { subDays, startOfDay, endOfDay, format } from 'date-fns';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // GET /api/dashboards/stats - Dashboard statistics
 export async function GET(request: NextRequest) {
@@ -163,6 +164,11 @@ export async function GET(request: NextRequest) {
       recentActivity: activityFeed,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/dashboards/stats',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
   }

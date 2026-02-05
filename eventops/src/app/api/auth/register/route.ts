@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { hashPassword } from '@/lib/password';
 import { logger } from '@/lib/logger';
 import { randomUUID } from 'crypto';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,6 +94,10 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/auth/register',
+      method: 'POST',
+    });
     logger.error('Error creating user', { error });
     return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
   }

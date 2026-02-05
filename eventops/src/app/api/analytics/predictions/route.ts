@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // GET /api/analytics/predictions - Predictive analytics
 export async function GET(request: NextRequest) {
@@ -144,6 +145,11 @@ export async function GET(request: NextRequest) {
       });
     }
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/analytics/predictions',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error generating predictions:', error);
     return NextResponse.json({ error: 'Failed to generate predictions' }, { status: 500 });
   }

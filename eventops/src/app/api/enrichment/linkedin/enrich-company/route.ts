@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { LinkedInExtractor } from '@/lib/enrichment/linkedin-extractor';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +29,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/linkedin/enrich-company',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('LinkedIn company enrichment error:', error);
     return NextResponse.json(
       {

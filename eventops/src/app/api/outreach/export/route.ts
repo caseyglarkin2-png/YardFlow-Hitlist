@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +96,11 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/export',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error exporting outreach:', error);
     return NextResponse.json({ error: 'Failed to export outreach' }, { status: 500 });
   }

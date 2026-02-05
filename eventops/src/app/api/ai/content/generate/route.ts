@@ -20,6 +20,7 @@ import {
   type ContentContext,
 } from '@/lib/ai/content-generator';
 import { VOICE_CONFIGS } from '@/lib/ai/voiceConfigs';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -185,6 +186,11 @@ export async function POST(request: NextRequest) {
         ? (error as { retryAfterSeconds: number }).retryAfterSeconds
         : undefined;
 
+    captureRouteError(error, {
+      route: '/api/ai/content/generate',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('AI content generate error', {
       requestId,
       latencyMs,

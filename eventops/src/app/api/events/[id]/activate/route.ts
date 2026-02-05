@@ -2,6 +2,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     return redirect('/dashboard/events');
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/events/[id]/activate',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error activating event:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

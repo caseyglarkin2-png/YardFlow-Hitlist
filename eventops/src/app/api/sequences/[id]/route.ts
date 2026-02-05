@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ sequence });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sequences/[id]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Error fetching sequence', { error });
     return NextResponse.json({ error: 'Failed to fetch sequence' }, { status: 500 });
   }
@@ -137,6 +143,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ sequence });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sequences/[id]',
+      method: 'PUT',
+      userId: authResult?.userId,
+    });
     logger.error('Error updating sequence', { id, error });
     return NextResponse.json({ error: 'Failed to update sequence' }, { status: 500 });
   }
@@ -182,6 +193,11 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sequences/[id]',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     logger.error('Error deleting sequence', { id, error });
     return NextResponse.json({ error: 'Failed to delete sequence' }, { status: 500 });
   }

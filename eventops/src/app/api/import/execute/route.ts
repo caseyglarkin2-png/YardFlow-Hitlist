@@ -1,6 +1,7 @@
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +98,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ created });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/import/execute',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error executing import:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

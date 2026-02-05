@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Transparent 1x1 pixel GIF
 const TRACKING_PIXEL = Buffer.from(
@@ -57,6 +58,10 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/track',
+      method: 'GET',
+    });
     console.error('Error tracking email open:', error);
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +89,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     return NextResponse.json(person);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/people/[id]/assign',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error assigning person:', error);
     return NextResponse.json({ error: 'Failed to assign person' }, { status: 500 });
   }
@@ -131,6 +137,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json(person);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/people/[id]/assign',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error unassigning person:', error);
     return NextResponse.json({ error: 'Failed to unassign person' }, { status: 500 });
   }

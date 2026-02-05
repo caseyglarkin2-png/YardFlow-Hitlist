@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { emailQueue } from '@/lib/queue/queues';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,6 +84,10 @@ export async function GET(request: NextRequest) {
       lastSentAt: checks.lastSentAt,
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/email/health',
+      method: 'GET',
+    });
     logger.error('Email health check failed', { error: String(err) });
     return NextResponse.json({
       status: 'unhealthy',

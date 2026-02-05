@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { generateContactInsights, getPersonaLabel } from '@/lib/ai-contact-insights';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,6 +104,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       insights,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/contact/[id]/insights',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error generating contact insights:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
@@ -138,6 +144,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ insights });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/contact/[id]/insights',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching contact insights:', error);
     return NextResponse.json({ error: 'Failed to fetch contact insights' }, { status: 500 });
   }

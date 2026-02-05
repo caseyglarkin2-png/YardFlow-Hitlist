@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 interface EnrollmentMetrics {
   emailsSent: number;
@@ -91,6 +92,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json(result);
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/enrollments/[id]',
+      method: 'GET',
+    });
     logger.error('Failed to fetch enrollment', { id, error: String(err) });
     return NextResponse.json(
       {
@@ -146,6 +151,10 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/enrollments/[id]',
+      method: 'DELETE',
+    });
     logger.error('Failed to stop enrollment', { id, error: String(err) });
     return NextResponse.json(
       {

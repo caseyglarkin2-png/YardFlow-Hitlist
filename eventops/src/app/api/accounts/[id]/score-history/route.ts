@@ -1,6 +1,7 @@
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({ history });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts/[id]/score-history',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching score history:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

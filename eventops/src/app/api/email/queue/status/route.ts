@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { getRedisConnection } from '@/lib/queue/client';
 import { emailQueue } from '@/lib/queue/queues';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,6 +80,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(status);
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/email/queue/status',
+      method: 'GET',
+    });
     logger.error('Failed to get queue status', { error: String(err) });
     return NextResponse.json(
       {

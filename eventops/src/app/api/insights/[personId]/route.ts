@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 import OpenAI from 'openai';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Lazy initialization to avoid build-time API key validation
 let openaiClient: OpenAI | null = null;
@@ -135,6 +136,11 @@ Provide insights in JSON format:
 
     return NextResponse.json(insights);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/insights/[personId]',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error generating insights:', error);
     return NextResponse.json(
       {

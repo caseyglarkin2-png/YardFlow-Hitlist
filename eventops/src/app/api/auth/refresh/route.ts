@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,10 @@ export async function POST(_request: NextRequest) {
       expiresAt: session.expires,
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/auth/refresh',
+      method: 'POST',
+    });
     logger.error('Session refresh failed', { error: String(err) });
     return NextResponse.json({
       error: 'INTERNAL_ERROR',

@@ -2,6 +2,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 const eventSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -46,6 +47,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    captureRouteError(error, {
+      route: '/api/events',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error creating event:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -64,6 +70,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(events);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/events',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching events:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

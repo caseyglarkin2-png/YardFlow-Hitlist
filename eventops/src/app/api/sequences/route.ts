@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -51,6 +52,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ sequences });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sequences',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Error fetching sequences', { error });
     return NextResponse.json({ error: 'Failed to fetch sequences' }, { status: 500 });
   }
@@ -141,6 +147,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ sequence }, { status: 201 });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sequences',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Error creating sequence', { error });
     return NextResponse.json({ error: 'Failed to create sequence' }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +58,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       metrics,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/campaigns/[id]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching campaign:', error);
     return NextResponse.json({ error: 'Failed to fetch campaign' }, { status: 500 });
   }
@@ -90,6 +96,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     return NextResponse.json(campaign);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/campaigns/[id]',
+      method: 'PATCH',
+      userId: authResult?.userId,
+    });
     console.error('Error updating campaign:', error);
     return NextResponse.json({ error: 'Failed to update campaign' }, { status: 500 });
   }
@@ -112,6 +123,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/campaigns/[id]',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error deleting campaign:', error);
     return NextResponse.json({ error: 'Failed to delete campaign' }, { status: 500 });
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,11 @@ export async function GET(request: NextRequest) {
       { status: 401 }
     );
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/auth/session',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Session check failed', { error: String(err) });
     return NextResponse.json(
       {

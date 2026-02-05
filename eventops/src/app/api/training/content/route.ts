@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,11 @@ export async function GET(req: NextRequest) {
       success: true,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/training/content',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching content:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch content' },

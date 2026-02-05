@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // GET /api/analytics/funnel - Conversion funnel analysis
 export async function GET(request: NextRequest) {
@@ -128,6 +129,11 @@ export async function GET(request: NextRequest) {
       overallConversion: totalAccounts > 0 ? (meetingsCompleted / totalAccounts) * 100 : 0,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/analytics/funnel',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching funnel:', error);
     return NextResponse.json({ error: 'Failed to fetch funnel data' }, { status: 500 });
   }

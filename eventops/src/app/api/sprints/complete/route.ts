@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { sendSprintCompletionEmail, type SprintMetrics } from '@/lib/email/sprint-completion';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,6 +80,11 @@ export async function POST(request: NextRequest) {
       sprintName: metrics.sprintName,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sprints/complete',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Sprint completion error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Sprint completion failed' },

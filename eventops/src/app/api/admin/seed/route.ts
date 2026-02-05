@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -99,6 +100,10 @@ export async function POST(request: Request) {
       event: { name: event.name, id: event.id },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/admin/seed',
+      method: 'POST',
+    });
     console.error('Seed error:', error);
     return NextResponse.json(
       {

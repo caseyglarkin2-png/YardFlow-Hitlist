@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { abTestingEngine } from '@/lib/testing/ab-testing-engine';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,11 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
 
     return NextResponse.json(analysis);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/testing/ab/[testId]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('A/B test analysis failed', { error });
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
   }
@@ -54,6 +60,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ testId });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/testing/ab/[testId]',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('A/B test creation failed', { error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Creation failed' },

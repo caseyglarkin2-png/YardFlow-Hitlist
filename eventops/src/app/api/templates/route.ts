@@ -9,6 +9,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { TemplateTone, OutreachChannel } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,6 +97,11 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/templates',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Template list failed', { requestId, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }
@@ -159,6 +165,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ template: newTemplate }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/templates',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Template creation failed', { requestId, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
   }

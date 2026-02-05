@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { google } from 'googleapis';
 import { getGoogleClient } from '@/lib/google/auth';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,11 @@ export async function GET(req: NextRequest) {
       success: true,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/training/drive/list',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error listing Drive files:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to list files' },

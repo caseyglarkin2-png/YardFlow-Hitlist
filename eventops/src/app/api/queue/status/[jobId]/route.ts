@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +57,11 @@ export async function GET(req: NextRequest, { params }: { params: { jobId: strin
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/queue/status/[jobId]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Error fetching job status', { jobId: params.jobId, error });
     return NextResponse.json({ error: 'Failed to fetch job status' }, { status: 500 });
   }

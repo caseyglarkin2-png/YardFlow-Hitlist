@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       })),
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/campaigns/[id]/status',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Failed to fetch campaign status', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }

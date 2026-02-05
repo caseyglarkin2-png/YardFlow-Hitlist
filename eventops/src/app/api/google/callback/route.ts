@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getOAuth2Client } from '@/lib/google/auth';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -56,6 +57,10 @@ export async function GET(request: Request) {
       new URL('/dashboard/settings/integrations?success=true', process.env.AUTH_URL || '')
     );
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/google/callback',
+      method: 'GET',
+    });
     console.error('Google OAuth callback error:', error);
     return NextResponse.redirect(
       new URL(

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { EmailPatternDetector } from '@/lib/enrichment/email-pattern-detector';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +31,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/patterns/detect',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Pattern detection error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to detect patterns' },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 /**
  * POST /api/enrollments/[id]/pause
@@ -90,6 +91,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json(result);
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/enrollments/[id]/pause',
+      method: 'POST',
+    });
     logger.error('Failed to pause enrollment', { id, error: String(err) });
     return NextResponse.json(
       {

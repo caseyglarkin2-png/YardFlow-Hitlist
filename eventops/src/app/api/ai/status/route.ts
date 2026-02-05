@@ -11,6 +11,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { getRedisConnection } from '@/lib/queue/client';
 import { AI_USAGE_PREFIX, AI_ERRORS_PREFIX } from '@/lib/ai/usage-tracker';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,6 +125,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/status',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('AI status check failed', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to get AI status', details: errorMessage },

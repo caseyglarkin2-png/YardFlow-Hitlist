@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 const TRACKING_PIXEL = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
@@ -38,6 +39,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/tracking/open',
+      method: 'GET',
+    });
     logger.error('Error tracking email open', { error });
     
     return new NextResponse(TRACKING_PIXEL, {

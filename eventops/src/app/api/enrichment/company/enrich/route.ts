@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { CompanyEnrichmentOrchestrator } from '@/lib/enrichment/company-enrichment-orchestrator';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,6 +39,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/company/enrich',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Company enrichment error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to enrich company' },

@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { performanceAnalytics } from '@/lib/analytics/performance-analytics';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,11 @@ export async function GET(request: NextRequest, { params }: { params: { sequence
 
     return NextResponse.json(metrics);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/analytics/campaigns/[sequenceId]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Campaign metrics failed', { error });
     return NextResponse.json({ error: 'Metrics failed' }, { status: 500 });
   }

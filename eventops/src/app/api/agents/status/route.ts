@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { agentStateManager, AgentType, AgentTaskStatus } from '@/lib/agents/state-manager';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(request: Request) {
   const authResult = await authServiceOrSession(request);
@@ -60,6 +61,11 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/agents/status',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to retrieve agent status', {
       error,
       userId: authResult.userId,
@@ -99,6 +105,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/agents/status',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Agent status update error', { error: err });
     return NextResponse.json(
       { error: 'Internal Server Error', details: err instanceof Error ? err.message : String(err) },

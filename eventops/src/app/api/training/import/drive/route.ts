@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { google } from 'googleapis';
 import { getGoogleClient } from '@/lib/google/auth';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +65,11 @@ export async function POST(req: NextRequest) {
           type: content.type,
         });
       } catch (error) {
+        captureRouteError(error, {
+          route: '/api/training/import/drive',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         console.error(`Error importing file ${fileId}:`, error);
       }
     }
@@ -74,6 +80,11 @@ export async function POST(req: NextRequest) {
       count: imported.length,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/training/import/drive',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error importing from Drive:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Import failed' },

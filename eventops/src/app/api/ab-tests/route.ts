@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ tests });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/ab-tests',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching AB tests:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch AB tests' },
@@ -96,6 +102,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ test }, { status: 201 });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/ab-tests',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error creating AB test:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create AB test' },

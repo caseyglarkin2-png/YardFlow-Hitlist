@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { syncCalendarEvents } from '@/lib/google/calendar';
 import { googleCircuitBreaker } from '@/lib/google/circuit-breaker';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/google/calendar/sync',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
+    captureRouteError(error, {
+      route: '/api/google/calendar/sync',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Calendar sync error:', error);
 
     const cbStatus = googleCircuitBreaker.getStatus(authResult.userId);

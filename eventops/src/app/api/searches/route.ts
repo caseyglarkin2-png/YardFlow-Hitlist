@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(savedSearches);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/searches',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching saved searches:', error);
     return NextResponse.json({ error: 'Failed to fetch saved searches' }, { status: 500 });
   }
@@ -88,6 +94,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(savedSearch, { status: 201 });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/searches',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error creating saved search:', error);
     return NextResponse.json({ error: 'Failed to create saved search' }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Classify operational scale and competitive positioning
 export async function POST(req: NextRequest) {
@@ -119,6 +120,11 @@ Format as JSON:
       message: 'Competitive analysis completed',
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/competitive',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error analyzing company:', error);
     return NextResponse.json({ error: 'Failed to analyze company' }, { status: 500 });
   }

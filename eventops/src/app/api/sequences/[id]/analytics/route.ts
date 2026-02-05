@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -135,6 +136,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ analytics });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/sequences/[id]/analytics',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Error fetching sequence analytics', { error });
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }

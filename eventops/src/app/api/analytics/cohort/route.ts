@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // GET /api/analytics/cohort - Cohort analysis
 export async function GET(request: NextRequest) {
@@ -180,6 +181,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ cohorts, groupBy, metric });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/analytics/cohort',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching cohort data:', error);
     return NextResponse.json({ error: 'Failed to fetch cohort data' }, { status: 500 });
   }

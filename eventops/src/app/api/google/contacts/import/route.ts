@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { importGoogleContacts } from '@/lib/google/contacts';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/google/contacts/import',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Contacts import error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Contacts import failed' },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { syncHubSpotContacts, SyncContactsOptions } from '@/lib/hubspot/sync-contacts';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
+    captureRouteError(error, {
+      route: '/api/hubspot/sync/contacts',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('HubSpot sync API error', {
       error: errorMessage,
       stack: error instanceof Error ? error.stack : undefined,

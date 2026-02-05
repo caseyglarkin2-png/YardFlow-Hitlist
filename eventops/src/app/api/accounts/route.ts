@@ -7,6 +7,7 @@ import {
 } from '@/lib/pagination';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 const accountSchema = z.object({
   name: z.string().min(1, 'Company name is required'),
@@ -68,6 +69,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    captureRouteError(error, {
+      route: '/api/accounts',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error creating account:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -116,6 +122,11 @@ export async function GET(request: NextRequest) {
     const response = buildPaginatedResponse(accounts, limit!, total);
     return NextResponse.json(response);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching accounts:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

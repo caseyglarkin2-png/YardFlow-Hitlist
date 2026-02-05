@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +49,11 @@ export async function GET(request: NextRequest) {
       dossier: parsedDossier,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/ai/dossier',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching dossier:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch dossier' },

@@ -13,6 +13,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(request: Request) {
   const authResult = await authServiceOrSession(request);
@@ -141,6 +142,11 @@ export async function GET(request: Request) {
       recentTasks,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/agents/monitor',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Agent monitoring failed', { error });
     return NextResponse.json({ error: 'Failed to fetch monitoring data' }, { status: 500 });
   }

@@ -11,6 +11,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { sendEmail } from '@/lib/sendgrid';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,6 +132,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/email/send',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Email send error', { error: errorMessage });
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }

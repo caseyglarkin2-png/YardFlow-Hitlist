@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,11 @@ export async function GET(request: NextRequest) {
       offset,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/activity/stream',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching activity stream:', error);
     return NextResponse.json({ error: 'Failed to fetch activity stream' }, { status: 500 });
   }

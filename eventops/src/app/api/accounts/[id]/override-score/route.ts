@@ -2,6 +2,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { updateAccountScore } from '@/lib/icp-calculator';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: 'Invalid input', details: error.errors }, { status: 400 });
     }
 
+    captureRouteError(error, {
+      route: '/api/accounts/[id]/override-score',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error overriding score:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

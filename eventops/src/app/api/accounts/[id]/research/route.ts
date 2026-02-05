@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { generateCompanyResearch } from '@/lib/ai-research';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,6 +76,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       cached: false,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts/[id]/research',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error generating research:', error);
     return NextResponse.json({ error: 'Failed to generate research' }, { status: 500 });
   }

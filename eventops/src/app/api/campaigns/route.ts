@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ campaigns });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/campaigns',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching campaigns:', error);
     return NextResponse.json({ error: 'Failed to fetch campaigns' }, { status: 500 });
   }
@@ -101,6 +107,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(campaign, { status: 201 });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/campaigns',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error creating campaign:', error);
     return NextResponse.json({ error: 'Failed to create campaign' }, { status: 500 });
   }

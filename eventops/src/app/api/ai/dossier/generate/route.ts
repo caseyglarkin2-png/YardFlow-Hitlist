@@ -12,6 +12,7 @@ import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
 import { transformToFrontendResponse } from '@/lib/ai/dossier-transformer';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(frontendResponse);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to generate dossier';
+    captureRouteError(error, {
+      route: '/api/ai/dossier/generate',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Dossier generation error', { error: errorMessage });
     return NextResponse.json(
       { 

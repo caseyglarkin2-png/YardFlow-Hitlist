@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { generateStrategicQuestions } from '@/lib/manifest/strategic-questions';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/manifest/questions',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Strategic questions generation failed', {
       error,
       userId: authResult.userId,
@@ -87,6 +93,11 @@ export async function GET(request: NextRequest) {
       { status: 404 }
     );
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/manifest/questions',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to fetch strategic questions', {
       error,
       userId: authResult.userId,

@@ -14,6 +14,7 @@ import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db';
 import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
 import { transformToFrontendResponse } from '@/lib/ai/dossier-transformer';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +123,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/dossier/refresh',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Dossier refresh error', { error: errorMessage });
     return NextResponse.json(
       { 

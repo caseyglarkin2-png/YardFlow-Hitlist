@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 /**
  * Track email opens via tracking pixel
@@ -36,6 +37,10 @@ export async function GET(
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/track/[outreachId]/open',
+      method: 'GET',
+    });
     console.error('Error tracking email open:', error);
     
     // Still return pixel even on error

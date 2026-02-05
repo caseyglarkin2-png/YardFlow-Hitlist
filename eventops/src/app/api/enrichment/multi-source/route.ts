@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { enrichContact, batchEnrichContacts } from '@/lib/contact-enrichment';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(request: NextRequest) {
   const authResult = await authServiceOrSession(request);
@@ -55,6 +56,11 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/multi-source',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Enrichment error:', error);
     return NextResponse.json(
       {

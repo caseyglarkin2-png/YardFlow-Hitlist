@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { getAgentOrchestrator } from '@/lib/agents/orchestrator';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/workflows/launch',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Workflow launch failed', { error });
     return NextResponse.json({ error: 'Workflow launch failed' }, { status: 500 });
   }

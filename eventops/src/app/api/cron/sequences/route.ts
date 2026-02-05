@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { addSequenceJob } from '@/lib/queue/queues';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,6 +105,10 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         errors.push(`Enrollment ${enrollment.id}: ${message}`);
+        captureRouteError(error, {
+          route: '/api/cron/sequences',
+          method: 'GET',
+        });
         logger.error('Cron: Error processing enrollment', {
           enrollmentId: enrollment.id,
           error: message,
@@ -130,6 +135,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/cron/sequences',
+      method: 'GET',
+    });
     logger.error('Cron: Sequence job failed', { error: message });
     return NextResponse.json(
       {

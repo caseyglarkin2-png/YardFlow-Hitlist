@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { guessContactEmail } from '@/lib/email-scraper';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,6 +119,11 @@ export async function POST(req: NextRequest) {
       detectedFromKnownEmails: knownEmails.length > 0,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/smart-guess',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Smart email guess error:', error);
     return NextResponse.json(
       {
@@ -241,6 +247,11 @@ export async function PUT(req: NextRequest) {
       results,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/smart-guess',
+      method: 'PUT',
+      userId: authResult?.userId,
+    });
     console.error('Batch smart guess error:', error);
     return NextResponse.json(
       {

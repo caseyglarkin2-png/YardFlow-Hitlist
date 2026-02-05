@@ -13,6 +13,7 @@ import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/db';
 import { getRedisConnection } from '@/lib/queue/client';
 import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -205,6 +206,11 @@ export async function POST(request: NextRequest) {
           generatedAt: new Date().toISOString(),
         });
       } catch (error) {
+        captureRouteError(error, {
+          route: '/api/ai/research/batch',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         logger.error('Failed to research account', {
           accountId,
           error: error instanceof Error ? error.message : 'Unknown',
@@ -242,6 +248,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/research/batch',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Batch research error', { error: errorMessage });
 
     return NextResponse.json(
@@ -280,6 +291,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/ai/research/batch',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Rate limit check error', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to get rate limit', details: errorMessage },

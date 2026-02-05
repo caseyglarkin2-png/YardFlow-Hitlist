@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 /**
  * POST /api/users/from-firebase
@@ -89,6 +90,11 @@ export async function POST(request: NextRequest) {
       isNewUser,
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/users/from-firebase',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to create/link Firebase user', { error: String(err) });
     return NextResponse.json(
       {

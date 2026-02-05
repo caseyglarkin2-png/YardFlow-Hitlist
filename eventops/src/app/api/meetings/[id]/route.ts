@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 import OpenAI from 'openai';
 import { AlertManager } from '@/lib/alerts/alert-manager';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Lazy initialization to avoid build-time API key validation
 let openaiClient: OpenAI | null = null;
@@ -228,6 +229,11 @@ Keep it concise and actionable.`;
       meeting,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/meetings/[id]',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error generating prep doc:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(

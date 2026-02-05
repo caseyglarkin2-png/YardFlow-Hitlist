@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { BrandVoiceContentGenerator } from '@/lib/ai/brand-voice-generator';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(sequence);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to generate sequence';
+    captureRouteError(error, {
+      route: '/api/ai/content/sequence',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Sequence generation error', { error: message });
     return NextResponse.json({ error: message }, { status: 500 });
   }

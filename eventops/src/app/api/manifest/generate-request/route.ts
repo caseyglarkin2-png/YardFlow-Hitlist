@@ -6,6 +6,7 @@ import {
   type ManifestRequestInput,
 } from '@/lib/manifest/meeting-request-generator';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,6 +51,11 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/manifest/generate-request',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Manifest meeting request generation failed', {
       error,
       userId: authResult.userId,

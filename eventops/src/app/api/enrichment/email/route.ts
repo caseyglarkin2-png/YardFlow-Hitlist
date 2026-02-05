@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { findEmail, validateEmailFormat } from '@/lib/email-enrichment';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,6 +82,11 @@ export async function POST(req: NextRequest) {
       source: result.source,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/email',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Email enrichment error:', error);
     return NextResponse.json(
       {
@@ -174,6 +180,11 @@ export async function PUT(req: NextRequest) {
       results,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/email',
+      method: 'PUT',
+      userId: authResult?.userId,
+    });
     console.error('Batch enrichment error:', error);
     return NextResponse.json(
       {

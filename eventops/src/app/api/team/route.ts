@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(users);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/team',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching team:', error);
     return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 });
   }
@@ -93,6 +99,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(user);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/team',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error inviting team member:', error);
     return NextResponse.json({ error: 'Failed to invite team member' }, { status: 500 });
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { OutreachStatus } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,11 @@ export async function PATCH(req: NextRequest) {
       message: `Updated ${result.count} outreach messages`,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/bulk',
+      method: 'PATCH',
+      userId: authResult?.userId,
+    });
     console.error('Error bulk updating outreach:', error);
     return NextResponse.json({ error: 'Failed to update outreach' }, { status: 500 });
   }
@@ -62,6 +68,11 @@ export async function DELETE(req: NextRequest) {
       message: `Deleted ${result.count} outreach messages`,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/bulk',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error bulk deleting outreach:', error);
     return NextResponse.json({ error: 'Failed to delete outreach' }, { status: 500 });
   }

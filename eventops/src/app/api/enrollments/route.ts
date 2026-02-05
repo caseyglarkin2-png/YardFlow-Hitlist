@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { enrollContact } from '@/lib/outreach/sequence-engine';
 import { authServiceOrSession, requireAuth } from '@/lib/auth-service';
 import { Prisma } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 /**
  * GET /api/enrollments
@@ -96,6 +97,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrollments',
+      method: 'GET',
+    });
     logger.error('Error fetching enrollments', { error });
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
@@ -131,6 +136,10 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrollments',
+      method: 'POST',
+    });
     logger.error('Error creating enrollment', { error });
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

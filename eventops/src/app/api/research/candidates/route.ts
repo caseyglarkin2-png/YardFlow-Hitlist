@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,6 +88,11 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/candidates',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error getting research candidates:', error);
     return NextResponse.json({ error: 'Failed to get candidates' }, { status: 500 });
   }

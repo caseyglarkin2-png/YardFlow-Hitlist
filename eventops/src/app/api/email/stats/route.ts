@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -191,6 +192,11 @@ export async function GET(request: NextRequest) {
       ...(dailyData ? { daily: dailyData } : {}),
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/email/stats',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to get email stats', { error });
     return NextResponse.json({ error: 'Failed to retrieve email statistics' }, { status: 500 });
   }

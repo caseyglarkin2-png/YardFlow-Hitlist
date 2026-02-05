@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { OutreachStatus } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,11 @@ export async function POST(request: NextRequest) {
       status: newStatus,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/activity',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error tracking email activity:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

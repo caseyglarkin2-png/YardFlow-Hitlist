@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     return NextResponse.json(user);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/team/[id]',
+      method: 'PATCH',
+      userId: authResult?.userId,
+    });
     console.error('Error updating team member:', error);
     return NextResponse.json({ error: 'Failed to update team member' }, { status: 500 });
   }
@@ -70,6 +76,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/team/[id]',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error removing team member:', error);
     return NextResponse.json({ error: 'Failed to remove team member' }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,6 +33,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.redirect(decodeURIComponent(url));
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/tracking/click',
+      method: 'GET',
+    });
     logger.error('Error tracking email click', { error });
     
     const url = new URL(req.url).searchParams.get('url');

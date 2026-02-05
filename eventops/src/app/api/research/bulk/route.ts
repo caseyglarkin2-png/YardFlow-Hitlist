@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { researchQueue } from '@/lib/research-queue';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,11 @@ export async function POST(req: NextRequest) {
       message: `${result.queued} accounts queued for research`,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/bulk',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error starting bulk research:', error);
     return NextResponse.json({ error: 'Failed to start bulk research' }, { status: 500 });
   }
@@ -52,6 +58,11 @@ export async function GET(req: NextRequest) {
     const status = researchQueue.getStatus();
     return NextResponse.json(status);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/bulk',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error getting bulk research status:', error);
     return NextResponse.json({ error: 'Failed to get status' }, { status: 500 });
   }
@@ -71,6 +82,11 @@ export async function DELETE(req: NextRequest) {
     researchQueue.clearResults();
     return NextResponse.json({ success: true, message: 'Results cleared' });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/bulk',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error clearing results:', error);
     return NextResponse.json({ error: 'Failed to clear results' }, { status: 500 });
   }

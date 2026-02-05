@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 import { generateCompanyResearch } from '@/lib/ai-research';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,6 +104,11 @@ export async function POST(req: NextRequest) {
         console.log(`Research updated for ${account.name}`);
       }
     } catch (error) {
+      captureRouteError(error, {
+        route: '/api/research/refresh',
+        method: 'POST',
+        userId: authResult?.userId,
+      });
       console.error(`Error refreshing ${accountId}:`, error);
       results.push({
         accountId,

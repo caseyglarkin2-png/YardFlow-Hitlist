@@ -6,6 +6,7 @@ import {
   generateSimpleManifestRequest,
 } from '@/lib/manifest-generator';
 import { getPersonaLabel } from '@/lib/ai-contact-insights';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,6 +84,11 @@ export async function POST(req: NextRequest) {
           success: true,
         });
       } catch (error) {
+        captureRouteError(error, {
+          route: '/api/manifest/generate',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         console.error(`Error generating Manifest request for ${person.name}:`, error);
         results.push({
           personId: person.id,
@@ -103,6 +109,11 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/manifest/generate',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error generating Manifest requests:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(

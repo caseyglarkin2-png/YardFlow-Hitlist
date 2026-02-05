@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { Prisma } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 interface SearchFilters {
   tier?: string[];
@@ -135,6 +136,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/prospects/search',
+      method: 'POST',
+    });
     logger.error('Prospect search failed', { error: String(err) });
     return NextResponse.json({
       error: 'INTERNAL_ERROR',

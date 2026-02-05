@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,6 +86,11 @@ export async function POST(req: NextRequest) {
           duration: content.duration,
         });
       } catch (error) {
+        captureRouteError(error, {
+          route: '/api/training/import/hubspot',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         console.error(`Error importing call ${engagement.engagement.id}:`, error);
       }
     }
@@ -95,6 +101,11 @@ export async function POST(req: NextRequest) {
       count: imported.length,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/training/import/hubspot',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error importing from HubSpot:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Import failed' },

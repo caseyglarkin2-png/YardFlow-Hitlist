@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,6 +103,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/queue/stats',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('Error fetching queue stats', { error });
     return NextResponse.json({ error: 'Failed to fetch queue stats' }, { status: 500 });
   }

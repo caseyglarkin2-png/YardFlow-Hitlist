@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -167,6 +168,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/ai/sentiment',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Sentiment analysis error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Analysis failed' },

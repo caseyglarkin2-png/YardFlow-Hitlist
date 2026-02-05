@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
 import { Prisma } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 /**
  * GET /api/prospects
@@ -89,6 +90,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/prospects',
+      method: 'GET',
+    });
     logger.error('Failed to fetch prospects', { error: String(err) });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
@@ -207,6 +212,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/prospects',
+      method: 'POST',
+    });
     logger.error('Failed to create prospect', { error: String(err) });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json(

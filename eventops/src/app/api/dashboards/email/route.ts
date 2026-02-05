@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { Prisma } from '@prisma/client';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -140,6 +141,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, {
+      route: '/api/dashboards/email',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     logger.error('[dashboards/email] Error generating dashboard data', { error: message });
     return NextResponse.json({ error: message }, { status: 500 });
   }

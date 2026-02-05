@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 /**
  * POST /api/email/queue/retry/[id]
@@ -69,6 +70,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       message: 'Email requeued for sending',
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/email/queue/retry/[id]',
+      method: 'POST',
+    });
     logger.error('Failed to retry email', { id, error: String(err) });
     return NextResponse.json(
       {

@@ -1,6 +1,7 @@
 import { authServiceOrSession } from '@/lib/auth-service';
 import { calculateICPScore, updateAccountScore } from '@/lib/icp-calculator';
 import { NextRequest, NextResponse } from 'next/server';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -25,6 +26,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       breakdown,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts/[id]/calculate-score',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error calculating score:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

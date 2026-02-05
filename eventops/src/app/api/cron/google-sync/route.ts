@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { syncCalendarEvents } from '@/lib/google/calendar';
 import { logGoogleAPICall } from '@/lib/google/telemetry';
 import { getGlobalSyncEnabled } from '@/lib/google/sync-state';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -61,6 +62,10 @@ export async function GET(request: Request) {
           skipped: result.skipped,
         });
       } catch (error) {
+        captureRouteError(error, {
+          route: '/api/cron/google-sync',
+          method: 'GET',
+        });
         console.error(`Sync failed for user ${user.id}:`, error);
 
         results.push({
@@ -113,6 +118,10 @@ export async function GET(request: Request) {
       results,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/cron/google-sync',
+      method: 'GET',
+    });
     console.error('Cron sync error:', error);
     return NextResponse.json(
       {

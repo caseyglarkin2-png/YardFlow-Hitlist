@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { calculateRoiUnified } from '@/lib/roi/calculator-integration';
 import { getPersonaLabel } from '@/lib/ai-contact-insights';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +91,11 @@ export async function POST(req: NextRequest) {
       result: roiResult,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/roi/calculate',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error calculating ROI:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
@@ -131,6 +137,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ roiCalculation });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/roi/calculate',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching ROI calculation:', error);
     return NextResponse.json({ error: 'Failed to fetch ROI calculation' }, { status: 500 });
   }

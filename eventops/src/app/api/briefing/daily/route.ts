@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -227,6 +228,11 @@ export async function GET(req: NextRequest) {
       needsFollowUp,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/briefing/daily',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Daily briefing error:', error);
     return NextResponse.json({ error: 'Failed to generate daily briefing' }, { status: 500 });
   }

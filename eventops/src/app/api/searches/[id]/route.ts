@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(savedSearch);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/searches/[id]',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching saved search:', error);
     return NextResponse.json({ error: 'Failed to fetch saved search' }, { status: 500 });
   }
@@ -86,6 +92,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     return NextResponse.json(updated);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/searches/[id]',
+      method: 'PATCH',
+      userId: authResult?.userId,
+    });
     console.error('Error updating saved search:', error);
     return NextResponse.json({ error: 'Failed to update saved search' }, { status: 500 });
   }
@@ -126,6 +137,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/searches/[id]',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error deleting saved search:', error);
     return NextResponse.json({ error: 'Failed to delete saved search' }, { status: 500 });
   }

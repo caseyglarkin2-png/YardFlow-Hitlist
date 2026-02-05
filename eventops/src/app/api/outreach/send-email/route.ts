@@ -6,6 +6,7 @@ import { logger } from '@/lib/logger';
 import { isValidEmail } from '@/lib/sendgrid';
 import { getRedisConnection } from '@/lib/queue/client';
 import crypto from 'crypto';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -301,6 +302,11 @@ export async function POST(req: NextRequest) {
     const sgError =
       err.response?.body?.errors?.[0]?.message || err.message || 'Unknown SendGrid error';
 
+    captureRouteError(error, {
+      route: '/api/outreach/send-email',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('SendGrid send failed', {
       errorId,
       outreachId,

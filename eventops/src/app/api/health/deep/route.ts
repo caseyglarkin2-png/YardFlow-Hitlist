@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getRedisClient } from '@/lib/redis-cache';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,10 @@ export async function GET(request: NextRequest) {
     await prisma.$queryRaw`SELECT 1`;
     status.database = 'healthy';
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/health/deep',
+      method: 'GET',
+    });
     logger.error('Health check failed: Database', { error });
     status.database = 'unhealthy';
     isHealthy = false;
@@ -55,6 +60,10 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/health/deep',
+      method: 'GET',
+    });
     logger.error('Health check failed: Redis', { error });
     status.redis = 'unhealthy';
     isHealthy = false;

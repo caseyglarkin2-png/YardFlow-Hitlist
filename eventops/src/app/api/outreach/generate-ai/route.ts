@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { people } from '@prisma/client';
 import { generateCompanyResearch, generatePersonalizedOutreach } from '@/lib/ai-research';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,6 +155,11 @@ export async function POST(req: NextRequest) {
           success: true,
         });
       } catch (error) {
+        captureRouteError(error, {
+          route: '/api/outreach/generate-ai',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         console.error(`Error generating outreach for ${person.name}:`, error);
         results.push({
           personId: person.id,
@@ -172,6 +178,11 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/outreach/generate-ai',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error generating AI outreach:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(

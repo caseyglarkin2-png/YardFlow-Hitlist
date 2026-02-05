@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { AgentOrchestrator } from '@/lib/agents/orchestrator';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,6 +28,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/agents/control',
+      method: 'POST',
+    });
     logger.error('Agent control error', { error });
     return NextResponse.json(
       {

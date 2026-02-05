@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -176,6 +177,11 @@ ${activitiesCsv}
       });
     }
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/export/full',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Export error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Export failed' },

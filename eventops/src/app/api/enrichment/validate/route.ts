@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { EmailValidator } from '@/lib/enrichment/email-validator';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +31,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'email or emails array is required' }, { status: 400 });
     }
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/enrichment/validate',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Email validation error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to validate email' },

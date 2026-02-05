@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { disconnectGoogle } from '@/lib/google/auth';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/google/disconnect',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Google disconnect error:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Disconnect failed' },

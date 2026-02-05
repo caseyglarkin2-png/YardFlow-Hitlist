@@ -1,6 +1,7 @@
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Force dynamic rendering - never statically generate this route
 export const dynamic = 'force-dynamic';
@@ -96,6 +97,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ results });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/import/check-duplicates',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error checking duplicates:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

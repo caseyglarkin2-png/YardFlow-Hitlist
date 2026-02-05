@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // POST /api/accounts/[id]/assign - Assign account to user
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -98,6 +99,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     return NextResponse.json(account);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts/[id]/assign',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error assigning account:', error);
     return NextResponse.json({ error: 'Failed to assign account' }, { status: 500 });
   }
@@ -144,6 +150,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json(account);
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts/[id]/assign',
+      method: 'DELETE',
+      userId: authResult?.userId,
+    });
     console.error('Error unassigning account:', error);
     return NextResponse.json({ error: 'Failed to unassign account' }, { status: 500 });
   }

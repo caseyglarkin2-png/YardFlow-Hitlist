@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Enhanced facility count research using AI
 export async function POST(req: NextRequest) {
@@ -106,6 +107,11 @@ Format as JSON:
       message: 'Facility research completed',
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/facilities',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error researching facility count:', error);
     return NextResponse.json({ error: 'Failed to research facility count' }, { status: 500 });
   }

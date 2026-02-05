@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -124,6 +125,11 @@ export async function POST(request: NextRequest) {
       action,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/accounts/bulk',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Bulk action error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

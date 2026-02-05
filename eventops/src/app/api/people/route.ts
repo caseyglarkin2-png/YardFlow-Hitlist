@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { autoRecalculateScore } from '@/lib/auto-recalculate';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 const personSchema = z.object({
   accountId: z.string().min(1, 'Account is required'),
@@ -90,6 +91,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    captureRouteError(error, {
+      route: '/api/people',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error creating person:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -172,6 +178,11 @@ export async function GET(request: NextRequest) {
       pagination: { limit, skip, total, hasMore: people.length === limit },
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/people',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     console.error('Error fetching people:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 // Generate location mapping data for visualization
 export async function POST(req: NextRequest) {
@@ -113,6 +114,11 @@ Format as JSON with arrays of locations:
       message: 'Location mapping completed',
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/research/locations',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     console.error('Error mapping locations:', error);
     return NextResponse.json({ error: 'Failed to map locations' }, { status: 500 });
   }

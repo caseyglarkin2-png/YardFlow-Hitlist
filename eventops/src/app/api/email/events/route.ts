@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +89,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (err) {
+    captureRouteError(err, {
+      route: '/api/email/events',
+      method: 'GET',
+    });
     logger.error('Failed to get email events', { error: String(err) });
     return NextResponse.json(
       {

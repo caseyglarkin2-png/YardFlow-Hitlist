@@ -3,6 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { agentQueue } from '@/lib/queue/queues';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 const triggerSchema = z.object({
   action: z.enum([
@@ -54,6 +55,11 @@ export async function POST(request: Request) {
       message: `Agent action '${action}' triggered successfully`,
     });
   } catch (error) {
+    captureRouteError(error, {
+      route: '/api/agents/trigger',
+      method: 'POST',
+      userId: authResult?.userId,
+    });
     logger.error('Failed to trigger agent', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

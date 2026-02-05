@@ -6,6 +6,7 @@ import { logger } from '@/lib/logger';
 import { sendBulkEmails, isValidEmail } from '@/lib/sendgrid';
 import { OutreachStatus } from '@prisma/client';
 import crypto from 'crypto';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -199,6 +200,11 @@ export async function POST(req: NextRequest) {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
+      captureRouteError(error, {
+        route: '/api/outreach/send-bulk',
+        method: 'POST',
+        userId: authResult?.userId,
+      });
       logger.error('[send-bulk] Bulk send error', { errorId, error: message });
 
       // All failed
