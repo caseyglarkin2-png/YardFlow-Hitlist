@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export const dynamic = 'force-dynamic';
 
 // PATCH /api/team/[id] - Update team member role
 export async function PATCH(
@@ -8,13 +10,13 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const currentUser = await prisma.users.findUnique({
-      where: { email: session.user.email },
+      where: { id: authResult.userId },
     });
 
     if (currentUser?.role !== 'ADMIN') {
@@ -59,13 +61,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const currentUser = await prisma.users.findUnique({
-      where: { email: session.user.email },
+      where: { id: authResult.userId },
     });
 
     if (currentUser?.role !== 'ADMIN') {

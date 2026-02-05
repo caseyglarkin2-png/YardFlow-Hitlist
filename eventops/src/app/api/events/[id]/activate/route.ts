@@ -1,7 +1,9 @@
-import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,

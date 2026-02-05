@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -13,8 +13,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -74,8 +74,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -110,8 +110,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

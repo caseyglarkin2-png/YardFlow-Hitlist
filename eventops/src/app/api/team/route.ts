@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export const dynamic = 'force-dynamic';
 
 // GET /api/team - List team members
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const currentUser = await prisma.users.findUnique({
-      where: { email: session.user.email },
+      where: { id: authResult.userId },
     });
 
     if (currentUser?.role !== 'ADMIN') {
@@ -53,13 +55,13 @@ export async function GET(request: NextRequest) {
 // POST /api/team - Invite team member
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const currentUser = await prisma.users.findUnique({
-      where: { email: session.user.email },
+      where: { id: authResult.userId },
     });
 
     if (currentUser?.role !== 'ADMIN') {
