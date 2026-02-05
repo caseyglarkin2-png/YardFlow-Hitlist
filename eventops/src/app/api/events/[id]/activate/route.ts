@@ -10,8 +10,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -28,7 +28,7 @@ export async function POST(
 
     // Update user's active event
     await prisma.users.update({
-      where: { id: session.user.id },
+      where: { id: authResult.userId },
       data: { activeEventId: eventId },
     });
 

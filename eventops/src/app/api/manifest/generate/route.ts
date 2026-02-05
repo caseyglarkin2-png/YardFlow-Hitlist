@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { authServiceOrSession } from "@/lib/auth-service";
 import { prisma } from "@/lib/db";
 import { generateManifestMeetingRequest, generateSimpleManifestRequest } from "@/lib/manifest-generator";
 import { getPersonaLabel } from "@/lib/ai-contact-insights";
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
           personName: person.name,
           companyName: person.target_accounts.name,
           success: false,
-          error: (error as Error).message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
