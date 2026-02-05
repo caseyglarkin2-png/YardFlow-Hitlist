@@ -7,8 +7,9 @@ import { enrollContact } from '@/lib/outreach/sequence-engine';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  
   try {
-    const { id } = await params;
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     logger.info('Bulk enrollment completed', {
       sequenceId: id,
       userId: authResult.userId,
+      userEmail: authResult.email,
       enrolledCount: results.enrolled.length,
       skippedCount: results.skipped.length,
     });
@@ -89,7 +91,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       skipped: results.skipped,
     });
   } catch (error) {
-    const { id } = await params;
     logger.error('Error enrolling contacts', { sequenceId: id, error });
     return NextResponse.json({ error: 'Failed to enroll contacts' }, { status: 500 });
   }
