@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import { db as prisma } from '@/lib/db';
+import { authServiceOrSession } from '@/lib/auth-service';
+import { prisma } from '@/lib/db';
 
 // POST /api/accounts/[id]/assign - Assign account to user
 export async function POST(
@@ -8,17 +8,20 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const currentUser = await prisma.users.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!currentUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    // For session auth, lookup user by email. For S2S, use userId directly.
+    let currentUserId = authResult.userId;
+    if (authResult.type === 'session' && authResult.email) {
+      const currentUser = await prisma.users.findUnique({
+        where: { email: authResult.email },
+      });
+      if (currentUser) {
+        currentUserId = currentUser.id;
+      }
     }
 
     const body = await request.json();
@@ -55,7 +58,7 @@ export async function POST(
     await prisma.activities.create({
       data: {
         id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        userId: currentUser.id,
+        userId: currentUserId,
         entityType: 'account',
         entityId: params.id,
         action: 'ASSIGNED',
@@ -69,7 +72,7 @@ export async function POST(
     });
 
     // Create notification for assignee
-    if (userId !== currentUser.id) {
+    if (userId !== currentUserId) {
       await prisma.notifications.create({
         data: {
           userId: userId,
@@ -101,17 +104,20 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const currentUser = await prisma.users.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!currentUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    // For session auth, lookup user by email. For S2S, use userId directly.
+    let currentUserId = authResult.userId;
+    if (authResult.type === 'session' && authResult.email) {
+      const currentUser = await prisma.users.findUnique({
+        where: { email: authResult.email },
+      });
+      if (currentUser) {
+        currentUserId = currentUser.id;
+      }
     }
 
     const account = await prisma.target_accounts.update({
@@ -123,7 +129,7 @@ export async function DELETE(
     await prisma.activities.create({
       data: {
         id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        userId: currentUser.id,
+        userId: currentUserId,
         entityType: 'account',
         entityId: params.id,
         action: 'UNASSIGNED',

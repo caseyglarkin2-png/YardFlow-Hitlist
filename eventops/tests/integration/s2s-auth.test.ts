@@ -133,4 +133,104 @@ describe('S2S Authentication', () => {
       }
     }, 15000);
   });
+
+  describe('Critical S2S Endpoints', () => {
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/people',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/people`, {
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200, not 401/403
+        expect(res.status).toBe(200);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/sequences',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/sequences`, {
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200, not 401/403
+        expect(res.status).toBe(200);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/templates',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/templates`, {
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200, not 401/403
+        expect(res.status).toBe(200);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/outreach POST',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/outreach`, {
+          method: 'POST',
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            personId: 'test-person-id',
+            channel: 'EMAIL',
+            message: 'Integration test message',
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200 or 404 (person not found), not 401/403
+        expect([200, 201, 404, 400]).toContain(res.status);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/outreach/activity',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/outreach/activity`, {
+          method: 'POST',
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            outreachId: 'test-outreach-id',
+            type: 'OPENED',
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200 or 404 (outreach not found), not 401/403
+        expect([200, 404, 400]).toContain(res.status);
+      },
+      15000
+    );
+  });
 });

@@ -1,4 +1,29 @@
 import { PROMPT_VERSION, VOICE_CONFIGS, type VoiceTone } from '@/lib/ai/voiceConfigs';
+import { logger } from '@/lib/logger';
+
+/**
+ * Sanitize content to ensure FreightRoll branding is always used.
+ * Replaces any occurrence of "YardFlow" (case-insensitive) with "FreightRoll".
+ * Logs when replacement happens for monitoring.
+ */
+export function sanitizeFreightRollContent(content: string): {
+  content: string;
+  wasModified: boolean;
+} {
+  const regex = /yardflow/gi;
+  const wasModified = regex.test(content);
+  
+  if (wasModified) {
+    logger.warn('[content-generator] YardFlow found in generated content - sanitizing', {
+      originalLength: content.length,
+    });
+  }
+  
+  return {
+    content: content.replace(/yardflow/gi, 'FreightRoll'),
+    wasModified,
+  };
+}
 
 export type ContentContext = {
   prospectName: string;
@@ -59,7 +84,14 @@ export function parseModelJson(text: string): GeneratedContent {
     throw new Error('Invalid model response: missing subject or content');
   }
 
-  return { subject, content };
+  // Sanitize YardFlow references to FreightRoll
+  const subjectSanitized = sanitizeFreightRollContent(subject);
+  const contentSanitized = sanitizeFreightRollContent(content);
+  
+  return { 
+    subject: subjectSanitized.content, 
+    content: contentSanitized.content 
+  };
 }
 
 export function validateFreightRollOutput(

@@ -29,7 +29,7 @@ I noticed Acme Waste is expanding operations. At Manifest, we're showcasing rout
 Stop by Booth 247 to see live demos.
 
 Best,
-YardFlow Team
+FreightRoll Team
 
 ---FOLLOW_UP---
 Follow up 3 days after Manifest if no response`;
@@ -100,7 +100,7 @@ Follow up 3 days after Manifest if no response`;
 
   describe('generatePhoneScript', () => {
     test('generates script with objection handlers', async () => {
-      const mockPhoneScript = `Opening: Hi John, this is [Name] from YardFlow. Do you have 2 minutes?
+      const mockPhoneScript = `Opening: Hi John, this is [Name] from FreightRoll. Do you have 2 minutes?
 
 Value Prop: We help waste management companies like Acme Waste cut routing costs by 20%.
 
@@ -199,7 +199,7 @@ Best regards`;
 
 Hi John,
 
-Noticed Acme Waste recently expanded to 3 new facilities. YardFlow helps companies at your scale cut routing costs 20%.
+Noticed Acme Waste recently expanded to 3 new facilities. FreightRoll helps companies at your scale cut routing costs 20%.
 
 Visit Booth 247 at Manifest.`;
 

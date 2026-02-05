@@ -1,0 +1,166 @@
+/**
+ * Startup Health Checks
+ * 
+ * Run on worker startup to verify critical dependencies are available.
+ * Fails fast if essential services are unreachable.
+ */
+
+import { logger } from '@/lib/logger';
+
+/**
+ * Check if database is reachable
+ */
+export async function verifyDatabase(): Promise<boolean> {
+  try {
+    // Dynamic import to avoid top-level instantiation
+    const { prisma } = await import('@/lib/db');
+    await prisma.$queryRaw`SELECT 1`;
+    logger.info('[startup] Database connection verified');
+    return true;
+  } catch (error) {
+    logger.error('[startup] Database connection FAILED', { 
+      error: error instanceof Error ? error.message : String(error) 
+    });
+    return false;
+  }
+}
+
+/**
+ * Check if Redis is reachable
+ */
+export async function verifyRedis(): Promise<boolean> {
+  try {
+    // Dynamic import to avoid top-level instantiation
+    const { getRedisConnection } = await import('@/lib/queue/client');
+    const redis = getRedisConnection();
+    const pong = await redis.ping();
+    
+    if (pong === 'PONG') {
+      logger.info('[startup] Redis connection verified');
+      return true;
+    } else {
+      logger.error('[startup] Redis ping returned unexpected response', { pong });
+      return false;
+    }
+  } catch (error) {
+    logger.error('[startup] Redis connection FAILED', { 
+      error: error instanceof Error ? error.message : String(error) 
+    });
+    return false;
+  }
+}
+
+/**
+ * Check if SendGrid is configured
+ */
+export function verifySendGrid(): boolean {
+  const hasKey = !!process.env.SENDGRID_API_KEY;
+  if (hasKey) {
+    logger.info('[startup] SendGrid API key configured');
+  } else {
+    logger.warn('[startup] SendGrid API key NOT configured - email sending disabled');
+  }
+  return hasKey;
+}
+
+/**
+ * Check if AI provider is configured
+ */
+export function verifyAIProvider(): boolean {
+  const hasGemini = !!process.env.GEMINI_API_KEY;
+  const hasOpenAI = !!process.env.OPENAI_API_KEY;
+  
+  if (hasGemini) {
+    logger.info('[startup] Gemini API key configured (primary)');
+  }
+  if (hasOpenAI) {
+    logger.info('[startup] OpenAI API key configured (fallback)');
+  }
+  
+  if (!hasGemini && !hasOpenAI) {
+    logger.error('[startup] NO AI providers configured - AI features disabled');
+    return false;
+  }
+  
+  return true;
+}
+
+/**
+ * Check required environment variables
+ */
+export function verifyEnvironment(): { valid: boolean; missing: string[] } {
+  const required = [
+    'DATABASE_URL',
+    'REDIS_URL',
+    'AUTH_SECRET',
+  ];
+  
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    logger.error('[startup] Missing required environment variables', { missing });
+    return { valid: false, missing };
+  }
+  
+  logger.info('[startup] Environment variables verified');
+  return { valid: true, missing: [] };
+}
+
+export interface StartupResult {
+  database: boolean;
+  redis: boolean;
+  sendgrid: boolean;
+  ai: boolean;
+  environment: { valid: boolean; missing: string[] };
+  ready: boolean;
+}
+
+/**
+ * Run all startup checks
+ * Returns comprehensive status object
+ */
+export async function runStartupChecks(): Promise<StartupResult> {
+  logger.info('[startup] Running startup health checks...');
+  
+  const environment = verifyEnvironment();
+  
+  // If critical env vars missing, don't try connections
+  if (!environment.valid) {
+    return {
+      database: false,
+      redis: false,
+      sendgrid: false,
+      ai: false,
+      environment,
+      ready: false,
+    };
+  }
+  
+  const [database, redis] = await Promise.all([
+    verifyDatabase(),
+    verifyRedis(),
+  ]);
+  
+  const sendgrid = verifySendGrid();
+  const ai = verifyAIProvider();
+  
+  const ready = database && redis; // Core services must be up
+  
+  if (ready) {
+    logger.info('[startup] All critical checks passed - system ready');
+  } else {
+    logger.error('[startup] Critical checks failed - system NOT ready', {
+      database,
+      redis,
+    });
+  }
+  
+  return {
+    database,
+    redis,
+    sendgrid,
+    ai,
+    environment,
+    ready,
+  };
+}

@@ -32,14 +32,14 @@ export class BrandVoiceContentGenerator {
 
   constructor(apiKey?: string) {
     this.gemini = new GeminiProClient(apiKey);
-    this.brandVoice = this.getYardFlowBrandVoice();
+    this.brandVoice = this.getFreightRollBrandVoice();
   }
 
   /**
-   * Get YardFlow brand voice guidelines
+   * Get FreightRoll brand voice guidelines
    */
-  private getYardFlowBrandVoice(): string {
-    return `YardFlow Brand Voice Guidelines:
+  private getFreightRollBrandVoice(): string {
+    return `FreightRoll Brand Voice Guidelines:
 
 TONE: Professional yet approachable. We're industry experts who speak plainly.
 
