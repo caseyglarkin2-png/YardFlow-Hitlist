@@ -8,6 +8,7 @@
  * Returns parsed actions for frontend navigation/filtering.
  */
 
+import { captureRouteError } from '@/lib/sentry-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authServiceOrSession } from '@/lib/auth-service';
@@ -354,6 +355,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, { route: '/api/ai/chat', method: 'POST' });
     logger.error('AI Chat error', { error: errorMessage });
 
     return NextResponse.json(
@@ -395,6 +397,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    captureRouteError(error, { route: '/api/ai/chat', method: 'GET' });
     logger.error('AI Chat GET error', { error: errorMessage });
     return NextResponse.json(
       { error: 'Failed to get capabilities', details: errorMessage },

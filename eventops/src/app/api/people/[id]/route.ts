@@ -1,8 +1,11 @@
-import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { autoRecalculateScore } from '@/lib/auto-recalculate';
+import { captureRouteError } from '@/lib/sentry-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic';
 
 const personUpdateSchema = z.object({
   accountId: z.string().optional(),
@@ -25,8 +28,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -48,6 +51,7 @@ export async function GET(
 
     return NextResponse.json({ person });
   } catch (error) {
+    captureRouteError(error, { route: '/api/people/[id]', method: 'GET', userId: undefined });
     console.error('Error fetching person:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -61,8 +65,8 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -89,7 +93,7 @@ export async function PATCH(
     });
 
     // Auto-recalculate account score
-    await autoRecalculateScore(person.accountId, session.user.email || undefined);
+    await autoRecalculateScore(person.accountId, authResult.email || authResult.userId);
 
     return NextResponse.json(person);
   } catch (error) {
@@ -99,6 +103,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
+    captureRouteError(error, { route: '/api/people/[id]', method: 'PATCH' });
     console.error('Error updating person:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -112,8 +117,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -132,10 +137,11 @@ export async function DELETE(
     });
 
     // Auto-recalculate account score
-    await autoRecalculateScore(person.accountId, session.user.email || undefined);
+    await autoRecalculateScore(person.accountId, authResult.email || authResult.userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, { route: '/api/people/[id]', method: 'DELETE' });
     console.error('Error deleting person:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

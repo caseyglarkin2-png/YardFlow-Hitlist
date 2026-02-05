@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 import { enrollContact } from '@/lib/outreach/sequence-engine';
 
 export const dynamic = 'force-dynamic';
@@ -91,6 +92,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       skipped: results.skipped,
     });
   } catch (error) {
+    captureRouteError(error, { route: '/api/sequences/[id]/enroll', method: 'POST', extras: { sequenceId: id } });
     logger.error('Error enrolling contacts', { sequenceId: id, error });
     return NextResponse.json({ error: 'Failed to enroll contacts' }, { status: 500 });
   }

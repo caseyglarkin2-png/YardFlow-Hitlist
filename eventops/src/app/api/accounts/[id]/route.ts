@@ -1,7 +1,10 @@
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { captureRouteError } from '@/lib/sentry-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+
+export const dynamic = 'force-dynamic';
 
 const accountUpdateSchema = z.object({
   name: z.string().min(1, 'Company name is required').optional(),
@@ -35,6 +38,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(account);
   } catch (error) {
+    captureRouteError(error, { route: '/api/accounts/[id]', method: 'GET' });
     console.error('Error fetching account:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -70,6 +74,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         { status: 400 }
       );
     }
+    captureRouteError(error, { route: '/api/accounts/[id]', method: 'PATCH' });
     console.error('Error updating account:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -88,6 +93,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    captureRouteError(error, { route: '/api/accounts/[id]', method: 'DELETE' });
     console.error('Error deleting account:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

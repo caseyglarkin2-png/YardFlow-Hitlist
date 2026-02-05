@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { captureRouteError } from '@/lib/sentry-utils';
 import { OutreachChannel, OutreachStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(outreach, { status: 201 });
   } catch (error) {
+    captureRouteError(error, { route: '/api/outreach', method: 'POST', extras: { requestId } });
     logger.error('[outreach] Failed to create outreach', { requestId, error });
     return NextResponse.json(
       {
@@ -148,6 +150,7 @@ export async function GET(req: NextRequest) {
       pagination: { limit, skip, total, hasMore: outreach.length === limit },
     });
   } catch (error) {
+    captureRouteError(error, { route: '/api/outreach', method: 'GET' });
     logger.error('[outreach] Failed to list outreach', { error });
     return NextResponse.json({ error: 'Failed to list outreach' }, { status: 500 });
   }
