@@ -18,7 +18,9 @@ const CreateOutreachSchema = z.object({
   subject: z.string().optional(),
   message: z.string().min(1, 'message is required'),
   templateId: z.string().optional(),
-  status: z.enum(['DRAFT', 'SCHEDULED', 'SENT', 'OPENED', 'CLICKED', 'RESPONDED', 'BOUNCED']).optional(),
+  status: z
+    .enum(['DRAFT', 'SCHEDULED', 'SENT', 'OPENED', 'CLICKED', 'RESPONDED', 'BOUNCED'])
+    .optional(),
 });
 
 /**
@@ -92,7 +94,10 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     logger.error('[outreach] Failed to create outreach', { requestId, error });
     return NextResponse.json(
-      { error: 'Failed to create outreach', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to create outreach',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

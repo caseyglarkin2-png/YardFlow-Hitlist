@@ -144,7 +144,9 @@ export function isServiceAuth(authResult: AuthResult): boolean {
  */
 export async function getUserIdFromAuth(
   authResult: AuthResult,
-  prismaClient?: { user: { findUnique: (args: { where: { email: string } }) => Promise<{ id: string } | null> } }
+  prismaClient?: {
+    user: { findUnique: (args: { where: { email: string } }) => Promise<{ id: string } | null> };
+  }
 ): Promise<string | null> {
   if (!authResult) return null;
 

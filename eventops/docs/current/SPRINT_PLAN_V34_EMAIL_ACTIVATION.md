@@ -11,13 +11,13 @@
 
 ## Implementation Status
 
-| Sprint | Status | Commits |
-|--------|--------|---------|
-| 34A Email Pipeline | ✅ Complete | Endpoints verified + verification script `881982a` |
-| 34B Voice Hardening | ✅ Complete | `dfd6882` |
-| 34C S2S Auth | ✅ Complete | `dfd6882` |
-| 34D Console Errors | ✅ Complete | GTM integration guide `881982a` |
-| 34E Production | ✅ Complete | `dfd6882` |
+| Sprint              | Status      | Commits                                            |
+| ------------------- | ----------- | -------------------------------------------------- |
+| 34A Email Pipeline  | ✅ Complete | Endpoints verified + verification script `881982a` |
+| 34B Voice Hardening | ✅ Complete | `dfd6882`                                          |
+| 34C S2S Auth        | ✅ Complete | `dfd6882`                                          |
+| 34D Console Errors  | ✅ Complete | GTM integration guide `881982a`                    |
+| 34E Production      | ✅ Complete | `dfd6882`                                          |
 
 ---
 
@@ -33,11 +33,12 @@ See: [GTM_INTEGRATION_FIX_V34.md](../../../docs/current/GTM_INTEGRATION_FIX_V34.
 This sprint plan addresses critical blockers preventing Manifest 2026 outreach:
 
 1. **Email Sending**: Frontend can't send emails (403 errors, missing endpoints)
-2. **Branding**: AI generates "YardFlow" instead of "FreightRoll" 
+2. **Branding**: AI generates "YardFlow" instead of "FreightRoll"
 3. **Auth Issues**: Multiple routes use session-only auth, breaking S2S
 4. **Console Errors**: 500/403 errors polluting frontend console
 
 **Review Notes**:
+
 - T34A.2 removed: `/api/email/send` already exists
 - T34B.2 expanded: `brand-voice-generator.ts` contains literal "YardFlow"
 - T34C.1 split: Too large for single commit
@@ -57,17 +58,20 @@ This sprint plan addresses critical blockers preventing Manifest 2026 outreach:
 **Problem**: Email sending may fail if SendGrid not properly configured
 
 **Tasks**:
+
 1. SSH into Railway or check environment: verify `SENDGRID_API_KEY` is set
 2. Log into SendGrid dashboard
 3. Check Settings → Sender Authentication for verified domains/senders
 4. Document which sender addresses are verified
 
 **Expected Verified Senders**:
+
 - `jake@freightroll.com`
-- `casey@freightroll.com`  
+- `casey@freightroll.com`
 - `team@freightroll.com`
 
 **Validation**:
+
 ```bash
 curl -s "$RAILWAY_URL/api/email/health" -H "Authorization: Bearer $CRON_SECRET" | jq '.status'
 # Expected: "ok"
@@ -88,12 +92,14 @@ curl -s "$RAILWAY_URL/api/email/health" -H "Authorization: Bearer $CRON_SECRET" 
 **Note**: Endpoint already exists at `src/app/api/email/send/route.ts`
 
 **Tasks**:
+
 1. Review existing `/api/email/send` implementation
 2. Test with actual SendGrid call (not mock)
 3. Verify email arrives in test inbox
 4. Check outreach record created in database
 
 **Validation**:
+
 ```bash
 curl -X POST "$RAILWAY_URL/api/email/send" \
   -H "Authorization: Bearer $CRON_SECRET" \
@@ -120,16 +126,19 @@ curl -X POST "$RAILWAY_URL/api/email/send" \
 **Problem**: Frontend uses outreachId-based send flow
 
 **Current Flow**:
-1. Create outreach record: `POST /api/outreach` 
+
+1. Create outreach record: `POST /api/outreach`
 2. Send email: `POST /api/outreach/send-email { outreachId }`
 
 **Tasks**:
+
 1. Create test outreach record via API
 2. Call send-email with that outreachId
 3. Verify email arrives
 4. Verify outreach status updated to SENT
 
 **Validation**:
+
 ```bash
 # Step 1: Create outreach
 OUTREACH_ID=$(curl -s -X POST "$RAILWAY_URL/api/outreach" \
@@ -163,6 +172,7 @@ curl -X POST "$RAILWAY_URL/api/outreach/send-email" \
 **Problem**: Need delivery tracking (opened, clicked, bounced)
 
 **Tasks**:
+
 1. Review `/api/webhooks/sendgrid/route.ts` exists and handles events
 2. Verify event mapping: delivered → SENT, opened → OPENED, clicked → CLICKED
 3. Test with SendGrid's "Test Webhook" feature in dashboard
@@ -178,6 +188,7 @@ curl -X POST "$RAILWAY_URL/api/outreach/send-email" \
 | `spamreport` | BOUNCED |
 
 **Validation**:
+
 ```bash
 # Simulate webhook event
 curl -X POST "$RAILWAY_URL/api/webhooks/sendgrid" \
@@ -203,17 +214,19 @@ curl -X POST "$RAILWAY_URL/api/webhooks/sendgrid" \
 **Problem**: Even with prompts, AI sometimes ignores "never mention YardFlow"
 
 **Tasks**:
+
 1. Add `sanitizeFreightRollContent()` function in `content-generator.ts`
 2. Replace any occurrence of "YardFlow" with "FreightRoll" (case-insensitive)
 3. Log when replacement happens for monitoring
 4. Apply to all content generation output
 
 **Implementation**:
+
 ```typescript
 // src/lib/ai/content-generator.ts
-export function sanitizeFreightRollContent(content: string): { 
-  content: string; 
-  wasModified: boolean 
+export function sanitizeFreightRollContent(content: string): {
+  content: string;
+  wasModified: boolean;
 } {
   const regex = /yardflow/gi;
   const wasModified = regex.test(content);
@@ -225,6 +238,7 @@ export function sanitizeFreightRollContent(content: string): {
 ```
 
 **Validation**:
+
 ```bash
 # Generate content and check output
 curl -X POST "$RAILWAY_URL/api/ai/content/generate" \
@@ -248,17 +262,20 @@ curl -X POST "$RAILWAY_URL/api/ai/content/generate" \
 **Problem**: `src/lib/ai/brand-voice-generator.ts` line 42 contains literal "YardFlow Brand Voice Guidelines"
 
 **Tasks**:
+
 1. Open `src/lib/ai/brand-voice-generator.ts`
 2. Replace all user-facing "YardFlow" with "FreightRoll"
 3. Audit other prompts in the file
 4. Run lint to ensure no regressions
 
 **Files to Modify**:
+
 - `src/lib/ai/brand-voice-generator.ts`
 - `src/lib/ai/dossier-generator.ts` (if contains YardFlow)
 - `src/lib/ai/sequence-generator.ts` (if contains YardFlow)
 
 **Validation**:
+
 ```bash
 grep -ri "yardflow" src/lib/ai/*.ts | grep -v "// YardFlow" | grep -v ".test.ts"
 # Expected: Only comments and URLs, no user-facing strings
@@ -277,11 +294,13 @@ grep -ri "yardflow" src/lib/ai/*.ts | grep -v "// YardFlow" | grep -v ".test.ts"
 **Problem**: Existing `tests/agents/voice-configs.test.ts` doesn't verify YardFlow absence
 
 **Tasks**:
+
 1. Open existing `tests/agents/voice-configs.test.ts`
 2. Add test case: "generated content contains no YardFlow"
 3. Test all 3 tones: freightroll, professional, challenger
 
 **Implementation**:
+
 ```typescript
 describe('FreightRoll voice generation', () => {
   it.each(['freightroll', 'professional', 'challenger'])(
@@ -314,11 +333,13 @@ describe('FreightRoll voice generation', () => {
 **Problem**: Unknown which routes use session-only auth()
 
 **Tasks**:
+
 1. Run grep to find all `auth()` usages
 2. Categorize: needs S2S vs session-only by design
 3. Document findings
 
 **Command**:
+
 ```bash
 grep -rn "await auth()" src/app/api/ --include="*.ts" | grep -v authServiceOrSession
 ```
@@ -346,17 +367,20 @@ grep -rn "await auth()" src/app/api/ --include="*.ts" | grep -v authServiceOrSes
 **Problem**: Account routes may use session-only auth
 
 **Routes to Check**:
+
 - `/api/accounts/[id]/route.ts`
 - `/api/accounts/[id]/assign/route.ts`
 - `/api/accounts/[id]/calculate-score/route.ts`
 
 **Tasks**:
+
 1. Check each route's auth pattern
 2. Replace `auth()` with `authServiceOrSession()` where needed
 3. Update import statements
 4. Test both session and S2S access
 
 **Validation**:
+
 ```bash
 curl "$RAILWAY_URL/api/accounts/test-id" \
   -H "x-service-key: $S2S_SECRET"
@@ -376,6 +400,7 @@ curl "$RAILWAY_URL/api/accounts/test-id" \
 **Problem**: Existing S2S tests don't cover all critical endpoints
 
 **Tasks**:
+
 1. Open `tests/integration/s2s-auth.test.ts`
 2. Add coverage for:
    - `/api/people` (GET)
@@ -397,17 +422,19 @@ curl "$RAILWAY_URL/api/accounts/test-id" \
 **Priority**: P2 | **Effort**: 15 min | **Dependencies**: T34C.1a
 
 **Tasks**:
+
 1. Open `docs/current/RAILWAY_API_CONTRACT.md`
 2. Add "Auth Type" column to endpoint table
 3. Mark each endpoint: S2S, Session, Both, None
 
 **Format**:
+
 ```markdown
-| Endpoint | Method | Auth Type | Description |
-|----------|--------|-----------|-------------|
-| /api/health | GET | None | No auth required |
-| /api/ai/chat | POST | S2S | Requires x-service-key |
-| /api/team | GET | Session | Internal UI only |
+| Endpoint     | Method | Auth Type | Description            |
+| ------------ | ------ | --------- | ---------------------- |
+| /api/health  | GET    | None      | No auth required       |
+| /api/ai/chat | POST   | S2S       | Requires x-service-key |
+| /api/team    | GET    | Session   | Internal UI only       |
 ```
 
 **Validation**: Document updated and reviewed
@@ -432,12 +459,14 @@ curl "$RAILWAY_URL/api/accounts/test-id" \
 **Note**: Path is `/api/auth/session`, NOT `/api/oauth/session`
 
 **Tasks**:
+
 1. Check `/api/auth/session/route.ts` exists
 2. Ensure returns JSON on error (not HTML)
 3. Add try-catch wrapper if missing
 4. Test with various auth states
 
 **Validation**:
+
 ```bash
 curl -s "$RAILWAY_URL/api/auth/session" | jq '.'
 # Expected: Valid JSON (even if empty or error)
@@ -456,12 +485,14 @@ curl -s "$RAILWAY_URL/api/auth/session" | jq '.'
 **Problem**: Frontend shows `/api/railway/templates` 403 Forbidden
 
 **Tasks**:
+
 1. Verify `/api/templates/route.ts` uses authServiceOrSession (it does)
 2. Add debug logging at auth check point
 3. Check frontend is sending correct header format
 4. Verify Bearer token vs x-service-key usage
 
 **Debug Code**:
+
 ```typescript
 // Temporary logging in templates route
 logger.info('[templates] Auth attempt', {
@@ -487,11 +518,13 @@ logger.info('[templates] Auth attempt', {
 **Note**: Already fixed `activity/route.ts` to use authServiceOrSession in commit f784087
 
 **Tasks**:
+
 1. Verify fix deployed (check Railway build log)
 2. Test endpoint directly
 3. Confirm frontend call works
 
 **Validation**:
+
 ```bash
 curl -X POST "$RAILWAY_URL/api/outreach/activity" \
   -H "Authorization: Bearer $CRON_SECRET" \
@@ -518,12 +551,14 @@ curl -X POST "$RAILWAY_URL/api/outreach/activity" \
 **Problem**: Hard to correlate frontend errors with backend logs
 
 **Tasks**:
+
 1. Generate requestId at start of each handler
 2. Add to all log messages
 3. Return in response header: `X-Request-Id`
 4. Frontend can display in error messages
 
 **Implementation**:
+
 ```typescript
 // Standard pattern for all routes
 const requestId = crypto.randomUUID().slice(0, 12);
@@ -547,11 +582,13 @@ return NextResponse.json(data, {
 **Priority**: P1 | **Effort**: 15 min | **Dependencies**: None
 
 **Tasks**:
+
 1. In `start-worker.sh` or worker init, add DB ping
 2. Fail fast if DB unreachable
 3. Log success/failure
 
 **Implementation**:
+
 ```typescript
 // src/lib/startup-checks.ts
 export async function verifyDatabase(): Promise<boolean> {
@@ -579,6 +616,7 @@ export async function verifyDatabase(): Promise<boolean> {
 **Priority**: P1 | **Effort**: 10 min | **Dependencies**: None
 
 **Tasks**:
+
 1. Add Redis ping to startup checks
 2. Fail fast if Redis unreachable
 3. Log success/failure
@@ -593,13 +631,13 @@ export async function verifyDatabase(): Promise<boolean> {
 
 ## Success Criteria
 
-| Metric | Target | Validation Method |
-|--------|--------|-------------------|
-| Email sends work | 100% success | Send 5 test emails, all arrive |
+| Metric                 | Target        | Validation Method                 |
+| ---------------------- | ------------- | --------------------------------- | ------------- |
+| Email sends work       | 100% success  | Send 5 test emails, all arrive    |
 | No YardFlow in content | 0 occurrences | Generate all 3 tones, grep output |
-| Console errors | 0 red errors | Load frontend, check devtools |
-| S2S endpoints | All working | Run S2S test suite |
-| Health check | All green | `curl /api/health | jq '.status'` |
+| Console errors         | 0 red errors  | Load frontend, check devtools     |
+| S2S endpoints          | All working   | Run S2S test suite                |
+| Health check           | All green     | `curl /api/health                 | jq '.status'` |
 
 ---
 
@@ -607,7 +645,7 @@ export async function verifyDatabase(): Promise<boolean> {
 
 If critical issues found:
 
-1. **Email sending broken**: 
+1. **Email sending broken**:
    - Check SendGrid dashboard for API errors
    - Verify SENDGRID_API_KEY in Railway env
 
@@ -624,9 +662,11 @@ If critical issues found:
 ## Files Modified Summary
 
 ### New Files (Created)
+
 - `src/lib/startup-checks.ts` ✅ Created
 
 ### Modified Files (Committed)
+
 - `src/lib/ai/content-generator.ts` ✅ Added sanitizer with space/hyphen/possessive support
 - `src/lib/ai/brand-voice-generator.ts` ✅ Renamed to FreightRoll
 - `src/app/api/accounts/[id]/route.ts` ✅ S2S auth
@@ -637,6 +677,7 @@ If critical issues found:
 - `docs/current/RAILWAY_API_CONTRACT.md` ✅ Auth type table
 
 ### Files Planned (Not Yet Created)
+
 - `tests/integration/outreach-send-flow.test.ts` - Awaiting production testing
 - `tests/integration/request-id.test.ts` - X-Request-Id already in middleware
 
@@ -645,7 +686,9 @@ If critical issues found:
 ## Implementation Notes
 
 ### Sanitizer Enhancement
+
 The `sanitizeFreightRollContent()` function now handles:
+
 - Basic: `YardFlow` → `FreightRoll`
 - Case-insensitive: `yardflow`, `YARDFLOW`, `yArDfLoW`
 - With space: `Yard Flow` → `FreightRoll`
@@ -655,7 +698,9 @@ The `sanitizeFreightRollContent()` function now handles:
 Applied at the model output parsing stage to catch any AI generation issues.
 
 ### S2S Auth Pattern
+
 All fixed routes now follow this pattern:
+
 ```typescript
 const authResult = await authServiceOrSession(request);
 if (!authResult) {
@@ -668,13 +713,13 @@ if (!authResult) {
 
 ## Sprint Timeline Summary
 
-| Sprint | Duration | Deliverable |
-|--------|----------|-------------|
-| 34A | 2 hours | Email sending works end-to-end |
-| 34B | 1.5 hours | All content says FreightRoll |
-| 34C | 2 hours | All S2S endpoints working |
-| 34D | 1.5 hours | Zero console errors |
-| 34E | 1 hour | Production observability |
+| Sprint | Duration  | Deliverable                    |
+| ------ | --------- | ------------------------------ |
+| 34A    | 2 hours   | Email sending works end-to-end |
+| 34B    | 1.5 hours | All content says FreightRoll   |
+| 34C    | 2 hours   | All S2S endpoints working      |
+| 34D    | 1.5 hours | Zero console errors            |
+| 34E    | 1 hour    | Production observability       |
 
 **Total Estimated Effort**: 8 hours
 

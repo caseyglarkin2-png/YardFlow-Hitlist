@@ -2,10 +2,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { calculateICPScore, updateAccountScore } from '@/lib/icp-calculator';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -29,9 +26,6 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error calculating score:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

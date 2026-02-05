@@ -70,7 +70,9 @@ describe('sanitizeFreightRollContent', () => {
   it('handles possessive forms', () => {
     const input = "YardFlow's technology is innovative. Check Yard Flow's docs.";
     const result = sanitizeFreightRollContent(input);
-    expect(result.content).toBe("FreightRoll's technology is innovative. Check FreightRoll's docs.");
+    expect(result.content).toBe(
+      "FreightRoll's technology is innovative. Check FreightRoll's docs."
+    );
     expect(result.wasModified).toBe(true);
   });
 
@@ -96,7 +98,7 @@ This is from YardFlow. We at YardFlow appreciate your business.
 
 Best,
 The YardFlow Team`;
-    
+
     const result = sanitizeFreightRollContent(input);
     expect(result.content).not.toContain('YardFlow');
     expect(result.content.match(/FreightRoll/g)!.length).toBe(4);

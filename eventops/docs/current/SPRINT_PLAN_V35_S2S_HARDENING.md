@@ -13,6 +13,7 @@
 This sprint extends S2S authentication to 12+ additional API routes identified in Sprint 34 review as missing S2S support - these routes return 403 when GTM-YardFlow calls them. Additionally, we enhanced worker reliability with startup health checks and improved cross-repo documentation.
 
 **Key Deliverables**:
+
 1. **S2S Auth**: 12 additional routes now support both session and S2S auth
 2. **Worker Startup**: Integrated `runStartupChecks()` - fails fast if DB/Redis unavailable
 3. **SendGrid Verification**: Actual API connectivity check, not just key presence
@@ -22,17 +23,17 @@ This sprint extends S2S authentication to 12+ additional API routes identified i
 
 ## Implementation Status
 
-| Task | Status | Files Modified |
-|------|--------|----------------|
-| T35A.1 Audit routes | ✅ Complete | Documentation only |
-| T35A.2 Fix /api/integrations | ✅ Complete | `integrations/route.ts` |
-| T35A.3 Fix /api/reports/* | ✅ Complete | `reports/schedule/route.ts`, `reports/pdf/route.ts` |
-| T35A.4 Fix /api/ab-tests/* | ✅ Complete | `ab-tests/route.ts`, `ab-tests/[id]/route.ts` |
-| T35A.5 Fix /api/enrichment/* | ✅ Complete | 8 enrichment routes |
-| T35B.1 SendGrid connectivity | ✅ Complete | `startup-checks.ts` |
-| T35B.2 Worker integration | ✅ Complete | `queue/workers.ts` |
-| T35C.1 Error code reference | ✅ Complete | `GTM_INTEGRATION_FIX_V34.md` |
-| T35C.2 S2S auth tests | ✅ Complete | `s2s-auth.test.ts` |
+| Task                          | Status      | Files Modified                                      |
+| ----------------------------- | ----------- | --------------------------------------------------- |
+| T35A.1 Audit routes           | ✅ Complete | Documentation only                                  |
+| T35A.2 Fix /api/integrations  | ✅ Complete | `integrations/route.ts`                             |
+| T35A.3 Fix /api/reports/\*    | ✅ Complete | `reports/schedule/route.ts`, `reports/pdf/route.ts` |
+| T35A.4 Fix /api/ab-tests/\*   | ✅ Complete | `ab-tests/route.ts`, `ab-tests/[id]/route.ts`       |
+| T35A.5 Fix /api/enrichment/\* | ✅ Complete | 8 enrichment routes                                 |
+| T35B.1 SendGrid connectivity  | ✅ Complete | `startup-checks.ts`                                 |
+| T35B.2 Worker integration     | ✅ Complete | `queue/workers.ts`                                  |
+| T35C.1 Error code reference   | ✅ Complete | `GTM_INTEGRATION_FIX_V34.md`                        |
+| T35C.2 S2S auth tests         | ✅ Complete | `s2s-auth.test.ts`                                  |
 
 ---
 
@@ -45,8 +46,9 @@ This sprint extends S2S authentication to 12+ additional API routes identified i
 Found 100+ routes using plain `auth()` instead of `authServiceOrSession`. Prioritized routes that GTM-YardFlow needs to call.
 
 **Routes Requiring S2S (Fixed)**:
+
 - `/api/integrations` - GET/POST
-- `/api/reports/schedule` - GET/POST  
+- `/api/reports/schedule` - GET/POST
 - `/api/reports/pdf` - POST
 - `/api/ab-tests` - GET/POST
 - `/api/ab-tests/[id]` - GET/PUT/POST
@@ -60,6 +62,7 @@ Found 100+ routes using plain `auth()` instead of `authServiceOrSession`. Priori
 - `/api/enrichment/multi-source` - POST
 
 **Routes Intentionally Session-Only** (not fixed):
+
 - `/api/google/*` - OAuth flows require user session
 - `/api/team/*` - Internal admin only
 - `/api/auth/*` - Session management
@@ -74,6 +77,7 @@ Found 100+ routes using plain `auth()` instead of `authServiceOrSession`. Priori
 **File**: `src/app/api/integrations/route.ts`
 
 **Changes**:
+
 ```typescript
 // Before
 import { auth } from '@/auth';
@@ -93,10 +97,12 @@ if (!authResult) { ... }
 **Priority**: P0 | **Effort**: 20 min | **Status**: ✅ Complete
 
 **Files**:
+
 - `src/app/api/reports/schedule/route.ts`
 - `src/app/api/reports/pdf/route.ts`
 
 **Pattern Applied**:
+
 ```typescript
 import { authServiceOrSession } from '@/lib/auth-service';
 
@@ -105,10 +111,10 @@ export async function GET/POST(req: NextRequest) {
   if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // Get user from auth result for queries requiring user context
-  const userId = authResult.type === 'session' 
-    ? authResult.userId 
+  const userId = authResult.type === 'session'
+    ? authResult.userId
     : req.headers.get('x-user-id') || authResult.userId;
   ...
 }
@@ -121,6 +127,7 @@ export async function GET/POST(req: NextRequest) {
 **Priority**: P0 | **Effort**: 25 min | **Status**: ✅ Complete
 
 **Files**:
+
 - `src/app/api/ab-tests/route.ts` (GET, POST)
 - `src/app/api/ab-tests/[id]/route.ts` (GET, PUT, POST)
 
@@ -133,6 +140,7 @@ Both routes now support S2S auth with user context passthrough.
 **Priority**: P0 | **Effort**: 45 min | **Status**: ✅ Complete
 
 **Files Modified** (8 routes):
+
 - `enrichment/patterns/apply/route.ts`
 - `enrichment/patterns/batch/route.ts`
 - `enrichment/patterns/detect/route.ts`
@@ -155,6 +163,7 @@ Both routes now support S2S auth with user context passthrough.
 **Before**: Only checked if `SENDGRID_API_KEY` env var was set.
 
 **After**: Added `verifySendGridConnectivity()` that makes actual API call:
+
 ```typescript
 export async function verifySendGridConnectivity(): Promise<{
   configured: boolean;
@@ -164,14 +173,16 @@ export async function verifySendGridConnectivity(): Promise<{
   const response = await fetch('https://api.sendgrid.com/v3/user/credits', {
     headers: { Authorization: `Bearer ${apiKey}` },
   });
-  
+
   if (response.ok) return { configured: true, connected: true };
-  if (response.status === 401) return { configured: true, connected: false, error: 'Invalid API key' };
+  if (response.status === 401)
+    return { configured: true, connected: false, error: 'Invalid API key' };
   // ...
 }
 ```
 
 **Updated StartupResult Interface**:
+
 ```typescript
 export interface StartupResult {
   database: boolean;
@@ -196,6 +207,7 @@ export interface StartupResult {
 **File**: `src/lib/queue/workers.ts`
 
 **Changes**:
+
 ```typescript
 // Before
 function startWorkers() {
@@ -206,13 +218,13 @@ function startWorkers() {
 }
 startWorkers();
 
-// After  
+// After
 async function startWorkers() {
   try {
     // Run startup health checks before starting workers
     const { runStartupChecks } = await import('@/lib/startup-checks');
     const checkResult = await runStartupChecks();
-    
+
     if (!checkResult.ready) {
       logger.error('Startup checks failed - cannot start workers', {
         database: checkResult.database,
@@ -222,7 +234,7 @@ async function startWorkers() {
       });
       process.exit(1);
     }
-    
+
     logger.info('Startup checks passed', {
       database: checkResult.database,
       redis: checkResult.redis,
@@ -276,7 +288,7 @@ startWorkers().catch((err) => {
        if (response.ok) return response;
        if (response.status === 429 || response.status === 503) {
          const delay = Math.pow(2, i) * 1000;
-         await new Promise(resolve => setTimeout(resolve, delay));
+         await new Promise((resolve) => setTimeout(resolve, delay));
          continue;
        }
        throw new Error(`API error: ${response.status}`);
@@ -293,6 +305,7 @@ startWorkers().catch((err) => {
 **File**: `tests/integration/s2s-auth.test.ts`
 
 **Added Test Cases** (6 new tests):
+
 ```typescript
 describe('Sprint 35: New S2S Endpoints', () => {
   it('should accept S2S auth on /api/integrations');
@@ -311,29 +324,30 @@ describe('Sprint 35: New S2S Endpoints', () => {
 ## Files Modified Summary
 
 ### New Files
+
 _None_
 
 ### Modified Files
 
-| File | Changes |
-|------|---------|
-| `src/app/api/integrations/route.ts` | S2S auth (GET, POST) |
-| `src/app/api/reports/schedule/route.ts` | S2S auth (GET, POST) |
-| `src/app/api/reports/pdf/route.ts` | S2S auth (POST) |
-| `src/app/api/ab-tests/route.ts` | S2S auth (GET, POST) |
-| `src/app/api/ab-tests/[id]/route.ts` | S2S auth (GET, PUT, POST) |
-| `src/app/api/enrichment/patterns/apply/route.ts` | S2S auth |
-| `src/app/api/enrichment/patterns/batch/route.ts` | S2S auth |
-| `src/app/api/enrichment/patterns/detect/route.ts` | S2S auth |
-| `src/app/api/enrichment/smart-guess/route.ts` | S2S auth (POST, PUT) |
-| `src/app/api/enrichment/validate/route.ts` | S2S auth |
-| `src/app/api/enrichment/linkedin/enrich-all/route.ts` | S2S auth |
-| `src/app/api/enrichment/linkedin/enrich-company/route.ts` | S2S auth |
-| `src/app/api/enrichment/multi-source/route.ts` | S2S auth |
-| `src/lib/startup-checks.ts` | SendGrid connectivity check |
-| `src/lib/queue/workers.ts` | Startup check integration |
-| `docs/current/GTM_INTEGRATION_FIX_V34.md` | Error code reference |
-| `tests/integration/s2s-auth.test.ts` | 6 new endpoint tests |
+| File                                                      | Changes                     |
+| --------------------------------------------------------- | --------------------------- |
+| `src/app/api/integrations/route.ts`                       | S2S auth (GET, POST)        |
+| `src/app/api/reports/schedule/route.ts`                   | S2S auth (GET, POST)        |
+| `src/app/api/reports/pdf/route.ts`                        | S2S auth (POST)             |
+| `src/app/api/ab-tests/route.ts`                           | S2S auth (GET, POST)        |
+| `src/app/api/ab-tests/[id]/route.ts`                      | S2S auth (GET, PUT, POST)   |
+| `src/app/api/enrichment/patterns/apply/route.ts`          | S2S auth                    |
+| `src/app/api/enrichment/patterns/batch/route.ts`          | S2S auth                    |
+| `src/app/api/enrichment/patterns/detect/route.ts`         | S2S auth                    |
+| `src/app/api/enrichment/smart-guess/route.ts`             | S2S auth (POST, PUT)        |
+| `src/app/api/enrichment/validate/route.ts`                | S2S auth                    |
+| `src/app/api/enrichment/linkedin/enrich-all/route.ts`     | S2S auth                    |
+| `src/app/api/enrichment/linkedin/enrich-company/route.ts` | S2S auth                    |
+| `src/app/api/enrichment/multi-source/route.ts`            | S2S auth                    |
+| `src/lib/startup-checks.ts`                               | SendGrid connectivity check |
+| `src/lib/queue/workers.ts`                                | Startup check integration   |
+| `docs/current/GTM_INTEGRATION_FIX_V34.md`                 | Error code reference        |
+| `tests/integration/s2s-auth.test.ts`                      | 6 new endpoint tests        |
 
 ---
 
@@ -341,15 +355,15 @@ _None_
 
 These routes intentionally use session-only auth:
 
-| Route | Reason |
-|-------|--------|
-| `/api/google/*` | OAuth requires user session |
-| `/api/team/*` | Internal admin only |
-| `/api/auth/*` | Session management |
-| `/api/admin/*` | Admin tools |
-| `/api/notifications/*` | User-specific UI |
-| `/api/presence/*` | Real-time UI features |
-| `/api/webhooks/*` (management) | Internal config |
+| Route                          | Reason                      |
+| ------------------------------ | --------------------------- |
+| `/api/google/*`                | OAuth requires user session |
+| `/api/team/*`                  | Internal admin only         |
+| `/api/auth/*`                  | Session management          |
+| `/api/admin/*`                 | Admin tools                 |
+| `/api/notifications/*`         | User-specific UI            |
+| `/api/presence/*`              | Real-time UI features       |
+| `/api/webhooks/*` (management) | Internal config             |
 
 ---
 
@@ -359,7 +373,7 @@ These routes intentionally use session-only auth:
 # 1. Run lint
 cd eventops && npm run lint
 
-# 2. Run tests  
+# 2. Run tests
 cd eventops && npm test
 
 # 3. Verify S2S auth coverage

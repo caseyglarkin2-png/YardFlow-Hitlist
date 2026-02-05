@@ -4,7 +4,7 @@ import { enrichContact, batchEnrichContacts } from '@/lib/contact-enrichment';
 
 export async function POST(request: NextRequest) {
   const authResult = await authServiceOrSession(request);
-  
+
   if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -31,15 +31,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const enriched = await enrichContact(
-        contact.name,
-        contact.companyName,
-        options || {}
-      );
+      const enriched = await enrichContact(contact.name, contact.companyName, options || {});
 
-      return NextResponse.json({ 
-        success: true, 
-        contact: enriched 
+      return NextResponse.json({
+        success: true,
+        contact: enriched,
       });
     }
 
@@ -51,8 +47,8 @@ export async function POST(request: NextRequest) {
       contacts: enriched,
       summary: {
         total: enriched.length,
-        withEmail: enriched.filter(c => c.email).length,
-        withLinkedIn: enriched.filter(c => c.linkedInUrl).length,
+        withEmail: enriched.filter((c) => c.email).length,
+        withLinkedIn: enriched.filter((c) => c.linkedInUrl).length,
         averageQuality: Math.round(
           enriched.reduce((sum, c) => sum + c.dataQualityScore, 0) / enriched.length
         ),
@@ -61,7 +57,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Enrichment error:', error);
     return NextResponse.json(
-      { error: 'Enrichment failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Enrichment failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

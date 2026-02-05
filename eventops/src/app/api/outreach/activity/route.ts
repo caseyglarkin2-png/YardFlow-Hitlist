@@ -13,9 +13,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get userId from auth result
-    const userId = authResult.type === 'session' 
-      ? authResult.userId 
-      : request.headers.get('x-user-id') || authResult.userId;
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : request.headers.get('x-user-id') || authResult.userId;
 
     const body = await request.json();
     const { outreachId, type, metadata } = body;

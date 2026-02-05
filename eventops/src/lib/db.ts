@@ -40,12 +40,24 @@ function createPrismaClient(): PrismaClient {
   });
 }
 
-// Lazy initialization
-export const db = globalForPrisma.prisma ?? createPrismaClient();
-
-if (env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = db;
+/**
+ * Get Prisma client (lazy initialization)
+ * Connection is only created on first access, not at module load
+ */
+function getPrismaClient(): PrismaClient {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
+  return globalForPrisma.prisma;
 }
+
+// Lazy initialization via getter - connection created on first use, not import
+// This prevents crashes during worker startup before health server is ready
+export const db = new Proxy({} as PrismaClient, {
+  get(_, prop) {
+    return getPrismaClient()[prop as keyof PrismaClient];
+  },
+});
 
 // Alias for convenience
 export const prisma = db;
@@ -55,7 +67,9 @@ export const prisma = db;
  * Call this on app shutdown
  */
 export async function disconnectPrisma(): Promise<void> {
-  await db.$disconnect();
+  if (globalForPrisma.prisma) {
+    await globalForPrisma.prisma.$disconnect();
+  }
   if (globalForPrisma.pool) {
     await globalForPrisma.pool.end();
     logger.info('🔌 Prisma Client and pg pool disconnected');

@@ -1,6 +1,6 @@
 /**
  * Startup Health Checks
- * 
+ *
  * Run on worker startup to verify critical dependencies are available.
  * Fails fast if essential services are unreachable.
  */
@@ -18,8 +18,8 @@ export async function verifyDatabase(): Promise<boolean> {
     logger.info('[startup] Database connection verified');
     return true;
   } catch (error) {
-    logger.error('[startup] Database connection FAILED', { 
-      error: error instanceof Error ? error.message : String(error) 
+    logger.error('[startup] Database connection FAILED', {
+      error: error instanceof Error ? error.message : String(error),
     });
     return false;
   }
@@ -34,7 +34,7 @@ export async function verifyRedis(): Promise<boolean> {
     const { getRedisConnection } = await import('@/lib/queue/client');
     const redis = getRedisConnection();
     const pong = await redis.ping();
-    
+
     if (pong === 'PONG') {
       logger.info('[startup] Redis connection verified');
       return true;
@@ -43,8 +43,8 @@ export async function verifyRedis(): Promise<boolean> {
       return false;
     }
   } catch (error) {
-    logger.error('[startup] Redis connection FAILED', { 
-      error: error instanceof Error ? error.message : String(error) 
+    logger.error('[startup] Redis connection FAILED', {
+      error: error instanceof Error ? error.message : String(error),
     });
     return false;
   }
@@ -73,12 +73,12 @@ export async function verifySendGridConnectivity(): Promise<{
   error?: string;
 }> {
   const apiKey = process.env.SENDGRID_API_KEY;
-  
+
   if (!apiKey) {
     logger.warn('[startup] SendGrid API key NOT configured - skipping connectivity check');
     return { configured: false, connected: false };
   }
-  
+
   try {
     // Check API key validity by requesting account info
     const response = await fetch('https://api.sendgrid.com/v3/user/credits', {
@@ -88,7 +88,7 @@ export async function verifySendGridConnectivity(): Promise<{
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (response.ok) {
       logger.info('[startup] SendGrid API connectivity verified');
       return { configured: true, connected: true };
@@ -100,9 +100,9 @@ export async function verifySendGridConnectivity(): Promise<{
       return { configured: true, connected: false, error: 'Insufficient permissions (403)' };
     } else {
       const text = await response.text();
-      logger.warn('[startup] SendGrid API returned unexpected status', { 
-        status: response.status, 
-        body: text.slice(0, 200) 
+      logger.warn('[startup] SendGrid API returned unexpected status', {
+        status: response.status,
+        body: text.slice(0, 200),
       });
       // Other non-OK status codes are treated as connectivity issues
       return { configured: true, connected: false, error: `Status ${response.status}` };
@@ -111,10 +111,10 @@ export async function verifySendGridConnectivity(): Promise<{
     logger.error('[startup] SendGrid API connectivity FAILED', {
       error: error instanceof Error ? error.message : String(error),
     });
-    return { 
-      configured: true, 
-      connected: false, 
-      error: error instanceof Error ? error.message : 'Connection failed' 
+    return {
+      configured: true,
+      connected: false,
+      error: error instanceof Error ? error.message : 'Connection failed',
     };
   }
 }
@@ -125,19 +125,19 @@ export async function verifySendGridConnectivity(): Promise<{
 export function verifyAIProvider(): boolean {
   const hasGemini = !!process.env.GEMINI_API_KEY;
   const hasOpenAI = !!process.env.OPENAI_API_KEY;
-  
+
   if (hasGemini) {
     logger.info('[startup] Gemini API key configured (primary)');
   }
   if (hasOpenAI) {
     logger.info('[startup] OpenAI API key configured (fallback)');
   }
-  
+
   if (!hasGemini && !hasOpenAI) {
     logger.error('[startup] NO AI providers configured - AI features disabled');
     return false;
   }
-  
+
   return true;
 }
 
@@ -145,19 +145,15 @@ export function verifyAIProvider(): boolean {
  * Check required environment variables
  */
 export function verifyEnvironment(): { valid: boolean; missing: string[] } {
-  const required = [
-    'DATABASE_URL',
-    'REDIS_URL',
-    'AUTH_SECRET',
-  ];
-  
-  const missing = required.filter(key => !process.env[key]);
-  
+  const required = ['DATABASE_URL', 'REDIS_URL', 'AUTH_SECRET'];
+
+  const missing = required.filter((key) => !process.env[key]);
+
   if (missing.length > 0) {
     logger.error('[startup] Missing required environment variables', { missing });
     return { valid: false, missing };
   }
-  
+
   logger.info('[startup] Environment variables verified');
   return { valid: true, missing: [] };
 }
@@ -181,9 +177,9 @@ export interface StartupResult {
  */
 export async function runStartupChecks(): Promise<StartupResult> {
   logger.info('[startup] Running startup health checks...');
-  
+
   const environment = verifyEnvironment();
-  
+
   // If critical env vars missing, don't try connections
   if (!environment.valid) {
     return {
@@ -195,17 +191,17 @@ export async function runStartupChecks(): Promise<StartupResult> {
       ready: false,
     };
   }
-  
+
   const [database, redis, sendgrid] = await Promise.all([
     verifyDatabase(),
     verifyRedis(),
     verifySendGridConnectivity(),
   ]);
-  
+
   const ai = verifyAIProvider();
-  
+
   const ready = database && redis; // Core services must be up
-  
+
   if (ready) {
     logger.info('[startup] All critical checks passed - system ready');
   } else {
@@ -214,7 +210,7 @@ export async function runStartupChecks(): Promise<StartupResult> {
       redis,
     });
   }
-  
+
   return {
     database,
     redis,

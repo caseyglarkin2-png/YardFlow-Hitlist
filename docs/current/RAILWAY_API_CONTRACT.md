@@ -19,30 +19,30 @@ Optional header for S2S: `x-user-id: <userId>` to impersonate user context.
 
 ### Auth Type Summary
 
-| Endpoint | Method | Auth Type | Description |
-|----------|--------|-----------|-------------|
-| `/api/health` | GET | None | Public health check |
-| `/api/ai/chat` | GET/POST | S2S | Brain chat endpoint |
-| `/api/ai/content/generate` | POST | S2S | Generate email content |
-| `/api/ai/dossier/generate` | POST | S2S | Company research dossier |
-| `/api/ai/score-icp` | POST | S2S | ICP scoring |
-| `/api/email/send` | POST | S2S | Send single email |
-| `/api/email/analytics` | GET | S2S | Email performance stats |
-| `/api/email/health` | GET | S2S | Email service health |
-| `/api/accounts` | GET | S2S | List accounts |
-| `/api/accounts/[id]` | GET/PATCH/DELETE | S2S | Account CRUD |
-| `/api/accounts/[id]/assign` | POST/DELETE | S2S | Assign account to user |
-| `/api/accounts/[id]/calculate-score` | POST | S2S | Calculate ICP score |
-| `/api/people` | GET | S2S | List people |
-| `/api/sequences` | GET | S2S | List sequences |
-| `/api/templates` | GET | S2S | List templates |
-| `/api/outreach` | GET/POST | S2S | Outreach CRUD |
-| `/api/outreach/send-email` | POST | S2S | Send via outreach record |
-| `/api/outreach/activity` | POST | S2S | Track email activity |
-| `/api/auth/session` | GET | Both | Session info |
-| `/api/team/*` | ALL | Session | Team management (internal) |
-| `/api/reports/*` | ALL | Session | Reports (internal) |
-| `/api/integrations/*` | ALL | Session | Integrations (internal) |
+| Endpoint                             | Method           | Auth Type | Description                |
+| ------------------------------------ | ---------------- | --------- | -------------------------- |
+| `/api/health`                        | GET              | None      | Public health check        |
+| `/api/ai/chat`                       | GET/POST         | S2S       | Brain chat endpoint        |
+| `/api/ai/content/generate`           | POST             | S2S       | Generate email content     |
+| `/api/ai/dossier/generate`           | POST             | S2S       | Company research dossier   |
+| `/api/ai/score-icp`                  | POST             | S2S       | ICP scoring                |
+| `/api/email/send`                    | POST             | S2S       | Send single email          |
+| `/api/email/analytics`               | GET              | S2S       | Email performance stats    |
+| `/api/email/health`                  | GET              | S2S       | Email service health       |
+| `/api/accounts`                      | GET              | S2S       | List accounts              |
+| `/api/accounts/[id]`                 | GET/PATCH/DELETE | S2S       | Account CRUD               |
+| `/api/accounts/[id]/assign`          | POST/DELETE      | S2S       | Assign account to user     |
+| `/api/accounts/[id]/calculate-score` | POST             | S2S       | Calculate ICP score        |
+| `/api/people`                        | GET              | S2S       | List people                |
+| `/api/sequences`                     | GET              | S2S       | List sequences             |
+| `/api/templates`                     | GET              | S2S       | List templates             |
+| `/api/outreach`                      | GET/POST         | S2S       | Outreach CRUD              |
+| `/api/outreach/send-email`           | POST             | S2S       | Send via outreach record   |
+| `/api/outreach/activity`             | POST             | S2S       | Track email activity       |
+| `/api/auth/session`                  | GET              | Both      | Session info               |
+| `/api/team/*`                        | ALL              | Session   | Team management (internal) |
+| `/api/reports/*`                     | ALL              | Session   | Reports (internal)         |
+| `/api/integrations/*`                | ALL              | Session   | Integrations (internal)    |
 
 ---
 
@@ -515,4 +515,4 @@ Headers: `Retry-After: 30`
 | 2026-02-05 | Removed `luis` tone, now `freightroll` only |
 | 2026-02-05 | Email analytics returns rates as decimals   |
 | 2026-02-05 | Added Auth Type Summary table (Sprint 34)   |
-| 2026-02-05 | Fixed S2S auth on /api/accounts/* routes    |
+| 2026-02-05 | Fixed S2S auth on /api/accounts/\* routes   |

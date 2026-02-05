@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  * POST /api/enrichment/smart-guess
  * Use pattern matching to guess email and LinkedIn profile
  * No external API required - completely free
- * 
+ *
  * Body: { personId: string }
  */
 export async function POST(req: NextRequest) {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     // Get person with account data
     const person = await prisma.people.findUnique({
       where: { id: personId },
-      include: { 
+      include: {
         target_accounts: {
           include: {
             company_dossiers: true, // For facility count and size data
@@ -48,15 +48,22 @@ export async function POST(req: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     if (!firstName || !lastName) {
-      return NextResponse.json({
-        success: false,
-        error: 'Cannot parse first/last name from: ' + person.name,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Cannot parse first/last name from: ' + person.name,
+        },
+        { status: 400 }
+      );
     }
 
     // Get domain from account
-    const domain = person.target_accounts?.website || 
-                   person.target_accounts?.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
+    const domain =
+      person.target_accounts?.website ||
+      person.target_accounts?.name
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9]/g, '') + '.com';
 
     // Determine company size for pattern scoring
     let companySize = 'Medium';
@@ -88,7 +95,7 @@ export async function POST(req: NextRequest) {
       domain,
       person.target_accounts?.name || '',
       companySize,
-      knownEmails.filter(e => e.email).map(e => ({ name: e.name, email: e.email! }))
+      knownEmails.filter((e) => e.email).map((e) => ({ name: e.name, email: e.email! }))
     );
 
     // Update person record
@@ -110,11 +117,13 @@ export async function POST(req: NextRequest) {
       linkedinSearchUrl: guess.linkedinSearchUrl,
       detectedFromKnownEmails: knownEmails.length > 0,
     });
-
   } catch (error) {
     console.error('Smart email guess error:', error);
     return NextResponse.json(
-      { error: 'Failed to guess email', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to guess email',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -123,7 +132,7 @@ export async function POST(req: NextRequest) {
 /**
  * PUT /api/enrichment/smart-guess/batch
  * Bulk process multiple contacts
- * 
+ *
  * Body: { personIds: string[] }
  */
 export async function PUT(req: NextRequest) {
@@ -146,7 +155,7 @@ export async function PUT(req: NextRequest) {
     // Get all people with their accounts
     const people = await prisma.people.findMany({
       where: { id: { in: personIds } },
-      include: { 
+      include: {
         target_accounts: {
           include: { company_dossiers: true },
         },
@@ -168,8 +177,12 @@ export async function PUT(req: NextRequest) {
         continue;
       }
 
-      const domain = person.target_accounts?.website || 
-                     person.target_accounts?.name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') + '.com';
+      const domain =
+        person.target_accounts?.website ||
+        person.target_accounts?.name
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .replace(/[^a-z0-9]/g, '') + '.com';
 
       let companySize = 'Medium';
       if (person.target_accounts?.company_dossiers?.facilityCount) {
@@ -196,7 +209,7 @@ export async function PUT(req: NextRequest) {
         domain,
         person.target_accounts?.name || '',
         companySize,
-        knownEmails.filter(e => e.email).map(e => ({ name: e.name, email: e.email! }))
+        knownEmails.filter((e) => e.email).map((e) => ({ name: e.name, email: e.email! }))
       );
 
       // Update in database
@@ -218,7 +231,7 @@ export async function PUT(req: NextRequest) {
       });
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
 
     return NextResponse.json({
       success: true,
@@ -227,11 +240,13 @@ export async function PUT(req: NextRequest) {
       failed: results.length - successCount,
       results,
     });
-
   } catch (error) {
     console.error('Batch smart guess error:', error);
     return NextResponse.json(
-      { error: 'Failed to process batch', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to process batch',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

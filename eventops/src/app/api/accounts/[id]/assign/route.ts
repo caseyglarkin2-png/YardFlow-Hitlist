@@ -3,10 +3,7 @@ import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 
 // POST /api/accounts/[id]/assign - Assign account to user
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -17,7 +14,7 @@ export async function POST(
     let currentUserId = authResult.userId;
     let currentUserName: string | null = null;
     let currentUserEmail: string | null = authResult.email || null;
-    
+
     if (authResult.type === 'session' && authResult.email) {
       const currentUser = await prisma.users.findUnique({
         where: { email: authResult.email },
@@ -42,10 +39,7 @@ export async function POST(
     const { userId } = body;
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
     // Verify the target user exists
@@ -105,18 +99,12 @@ export async function POST(
     return NextResponse.json(account);
   } catch (error) {
     console.error('Error assigning account:', error);
-    return NextResponse.json(
-      { error: 'Failed to assign account' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to assign account' }, { status: 500 });
   }
 }
 
 // DELETE /api/accounts/[id]/assign - Unassign account
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -157,9 +145,6 @@ export async function DELETE(
     return NextResponse.json(account);
   } catch (error) {
     console.error('Error unassigning account:', error);
-    return NextResponse.json(
-      { error: 'Failed to unassign account' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to unassign account' }, { status: 500 });
   }
 }

@@ -30,7 +30,9 @@ describe('S2S Authentication', () => {
       }
     } catch (error) {
       serverAvailable = false;
-      console.warn(`[S2S Tests] Server unavailable: ${error instanceof Error ? error.message : 'unknown error'}`);
+      console.warn(
+        `[S2S Tests] Server unavailable: ${error instanceof Error ? error.message : 'unknown error'}`
+      );
     }
   });
 
@@ -40,7 +42,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const res = await fetch(`${RAILWAY_URL}/api/health`, {
         signal: AbortSignal.timeout(10000),
       });
@@ -59,7 +61,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -79,7 +81,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const gtmOrigin = 'https://gtm-yard-flow.vercel.app';
 
       const res = await fetch(`${RAILWAY_URL}/api/health`, {
@@ -105,7 +107,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
         signal: AbortSignal.timeout(10000),
       });
@@ -119,7 +121,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
         headers: {
           'x-service-key': 'invalid-key-12345',
@@ -135,7 +137,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
         headers: {
           'x-service-key': '',
@@ -153,7 +155,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
         method: 'OPTIONS',
         headers: {
@@ -175,7 +177,7 @@ describe('S2S Authentication', () => {
         skip();
         return;
       }
-      
+
       const res = await fetch(`${RAILWAY_URL}/api/accounts`, {
         method: 'OPTIONS',
         headers: {
@@ -201,7 +203,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/people`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -223,7 +225,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/sequences`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -245,7 +247,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/templates`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -267,7 +269,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/outreach`, {
           method: 'POST',
           headers: {
@@ -296,7 +298,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/outreach/activity`, {
           method: 'POST',
           headers: {
@@ -326,7 +328,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/integrations`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -350,7 +352,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/reports/schedule`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -374,7 +376,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/ab-tests`, {
           headers: {
             'x-service-key': SERVICE_SECRET,
@@ -396,7 +398,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/enrichment/validate`, {
           method: 'POST',
           headers: {
@@ -423,7 +425,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/enrichment/patterns/detect`, {
           method: 'POST',
           headers: {
@@ -450,7 +452,7 @@ describe('S2S Authentication', () => {
           skip();
           return;
         }
-        
+
         const res = await fetch(`${RAILWAY_URL}/api/enrichment/smart-guess`, {
           method: 'POST',
           headers: {

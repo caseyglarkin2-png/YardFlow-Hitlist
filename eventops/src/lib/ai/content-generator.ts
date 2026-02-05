@@ -15,15 +15,15 @@ export function sanitizeFreightRollContent(content: string): {
   const sanitized = content.replace(/yard[\s-]?flow('s)?/gi, (match) => {
     return match.toLowerCase().endsWith("'s") ? "FreightRoll's" : 'FreightRoll';
   });
-  
+
   const wasModified = sanitized !== content;
-  
+
   if (wasModified) {
     logger.warn('[content-generator] YardFlow found in generated content - sanitizing', {
       originalLength: content.length,
     });
   }
-  
+
   return { content: sanitized, wasModified };
 }
 
@@ -89,10 +89,10 @@ export function parseModelJson(text: string): GeneratedContent {
   // Sanitize YardFlow references to FreightRoll
   const subjectSanitized = sanitizeFreightRollContent(subject);
   const contentSanitized = sanitizeFreightRollContent(content);
-  
-  return { 
-    subject: subjectSanitized.content, 
-    content: contentSanitized.content 
+
+  return {
+    subject: subjectSanitized.content,
+    content: contentSanitized.content,
   };
 }
 
