@@ -124,7 +124,16 @@ Agents (in `src/lib/agents`) are long-running stateful processes.
 - **State**: Use `AgentStateManager` to persist headers and task status.
 - **Progress**: Agents **must** report progress % during execution via `agentStateManager.updateTaskStatus`.
 
-### 5. Worker Integrity
+### 5. FreightRoll Branding (Critical)
+
+**Until after Manifest 2026, all customer-facing content must use "FreightRoll" branding, NOT "YardFlow".**
+
+- Voice configs in `src/lib/ai/voiceConfigs.ts` enforce this in prompts
+- `sanitizeFreightRollContent()` in `content-generator.ts` catches any AI slips
+- Sign-offs should be "The FreightRoll Team" or "FreightRoll"
+- The [Content Hub](https://flow-state-klbt.vercel.app/) is branded YardFlow but output must say FreightRoll
+
+### 6. Worker Integrity
 
 - **Heartbeat**: The `getHeartbeatWorker` runs every 60s.
 - **Self-Healing**: Workers include a `setInterval` loop to re-assert critical jobs.
@@ -142,30 +151,23 @@ Agents (in `src/lib/agents`) are long-running stateful processes.
 - **Location**: `eventops/tests/`.
 - **Mocking**: Use `vi.mock('@/lib/db', ...)` for database isolation.
 
-## 🔐 Authentication Patterns
+## 🔐 Authentication
 
-### Service-to-Service (S2S)
-
-Used for communication between the Vercel Frontend (`GTM-YardFlow`) and this Railway Backend.
-
-- **Primary Method**: `Authorization: Bearer <CRON_SECRET>` (Preferred for automated jobs/webhooks).
-- **Secondary Method**: `x-service-key: <SERVICE_TO_SERVICE_SECRET>` (Internal services).
-- **Context Headers**: `x-user-id` (optional) can be passed to impersonate users.
-- Handled transparently by `authServiceOrSession`.
-
-### NextAuth v5 (Internal)
-
-Used for direct dashboard access and internal tools.
+All API routes use `authServiceOrSession(req)` which handles both S2S and user sessions automatically:
 
 ```typescript
-// ✅ Session check pattern
-import { auth } from "@/auth";
+import { authServiceOrSession } from "@/lib/auth-service";
 
-const session = await auth();
-if (!session?.user?.id) {
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // authResult.userId is available
 }
 ```
+
+**S2S from GTM-YardFlow**: Uses `Authorization: Bearer <CRON_SECRET>` header with optional `x-user-id` for context.
 
 ## 📁 Key File Locations
 
