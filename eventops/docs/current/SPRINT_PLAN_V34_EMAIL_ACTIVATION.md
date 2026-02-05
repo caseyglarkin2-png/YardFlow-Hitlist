@@ -1,10 +1,23 @@
 # Sprint Plan V34: Email Activation & Platform Stability
 
 **Created**: February 5, 2026  
-**Status**: Active  
+**Updated**: February 5, 2026  
+**Status**: PARTIALLY COMPLETE  
 **Goal**: Enable email sending from frontend, eliminate YardFlow branding, fix all console errors  
 **Primary Repo**: YardFlow-Hitlist (Railway Backend)  
 **Frontend Repo**: GTM-YardFlow (Vercel)
+
+---
+
+## Implementation Status
+
+| Sprint | Status | Commits |
+|--------|--------|---------|
+| 34A Email Pipeline | 🔵 50% | Endpoints verified, need production test |
+| 34B Voice Hardening | ✅ Complete | `dfd6882` |
+| 34C S2S Auth | ✅ Complete | `dfd6882` |
+| 34D Console Errors | 🔵 75% | Session/templates done, need debugging |
+| 34E Production | ✅ Complete | `dfd6882` |
 
 ---
 
@@ -603,19 +616,46 @@ If critical issues found:
 
 ## Files Modified Summary
 
-### New Files
-- `tests/integration/outreach-send-flow.test.ts`
-- `tests/integration/request-id.test.ts`
-- `src/lib/startup-checks.ts`
+### New Files (Created)
+- `src/lib/startup-checks.ts` ✅ Created
 
-### Modified Files
-- `src/lib/ai/content-generator.ts` - Add sanitizer
-- `src/lib/ai/brand-voice-generator.ts` - Replace YardFlow
-- `src/app/api/accounts/[id]/route.ts` - S2S auth
-- `src/app/api/auth/session/route.ts` - JSON error handling
-- `tests/agents/voice-configs.test.ts` - Add YardFlow tests
-- `tests/integration/s2s-auth.test.ts` - Extend coverage
-- `docs/current/RAILWAY_API_CONTRACT.md` - Auth column
+### Modified Files (Committed)
+- `src/lib/ai/content-generator.ts` ✅ Added sanitizer with space/hyphen/possessive support
+- `src/lib/ai/brand-voice-generator.ts` ✅ Renamed to FreightRoll
+- `src/app/api/accounts/[id]/route.ts` ✅ S2S auth
+- `src/app/api/accounts/[id]/assign/route.ts` ✅ S2S auth
+- `src/app/api/accounts/[id]/calculate-score/route.ts` ✅ S2S auth
+- `tests/agents/voice-configs.test.ts` ✅ Extended (16 tests)
+- `tests/integration/s2s-auth.test.ts` ✅ Extended (5 new endpoint tests)
+- `docs/current/RAILWAY_API_CONTRACT.md` ✅ Auth type table
+
+### Files Planned (Not Yet Created)
+- `tests/integration/outreach-send-flow.test.ts` - Awaiting production testing
+- `tests/integration/request-id.test.ts` - X-Request-Id already in middleware
+
+---
+
+## Implementation Notes
+
+### Sanitizer Enhancement
+The `sanitizeFreightRollContent()` function now handles:
+- Basic: `YardFlow` → `FreightRoll`
+- Case-insensitive: `yardflow`, `YARDFLOW`, `yArDfLoW`
+- With space: `Yard Flow` → `FreightRoll`
+- With hyphen: `Yard-Flow` → `FreightRoll`
+- Possessives: `YardFlow's` → `FreightRoll's`
+
+Applied at the model output parsing stage to catch any AI generation issues.
+
+### S2S Auth Pattern
+All fixed routes now follow this pattern:
+```typescript
+const authResult = await authServiceOrSession(request);
+if (!authResult) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+// Use authResult.userId, authResult.email
+```
 
 ---
 
