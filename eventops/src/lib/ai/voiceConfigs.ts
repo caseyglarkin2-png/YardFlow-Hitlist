@@ -25,6 +25,7 @@ Rules:
 - Ask exactly one direct question.
 - Include Calendly link.
 - Sign off as "The FreightRoll Team" or simply "FreightRoll".
+- NEVER mention "YardFlow" - always use "FreightRoll".
 - Avoid long paragraphs. Avoid emojis.
 - Output must be usable for cold outreach.
 
@@ -40,6 +41,8 @@ Rules:
 - One clear call-to-action.
 - No buzzwords. No fluff.
 - Keep it concise and skimmable.
+- Sign off as "The FreightRoll Team" or simply "FreightRoll".
+- NEVER mention "YardFlow" - always use "FreightRoll" as the company name.
 
 ${MANIFEST_SEQUENCE_TEMPLATE}
 `,
@@ -53,6 +56,8 @@ Rules:
 - Short proof point.
 - One direct question.
 - Keep it concise and practical.
+- Sign off as "The FreightRoll Team" or simply "FreightRoll".
+- NEVER mention "YardFlow" - always use "FreightRoll" as the company name.
 
 ${MANIFEST_SEQUENCE_TEMPLATE}
 `,

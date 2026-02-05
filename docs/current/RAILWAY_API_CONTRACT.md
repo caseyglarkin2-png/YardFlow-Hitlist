@@ -11,6 +11,7 @@ This document specifies the exact request/response formats for API endpoints con
 ## Authentication
 
 All endpoints require either:
+
 1. **S2S Auth** (service-to-service): `Authorization: Bearer <CRON_SECRET>` OR `x-service-key: <SERVICE_TO_SERVICE_SECRET>`
 2. **Session Auth**: NextAuth session cookie (internal dashboard only)
 
@@ -25,6 +26,7 @@ Optional header for S2S: `x-user-id: <userId>` to impersonate user context.
 Health check endpoint. No auth required.
 
 **Response (200)**:
+
 ```json
 {
   "status": "healthy" | "degraded" | "unhealthy",
@@ -55,6 +57,7 @@ Health check endpoint. No auth required.
 Brain chat endpoint for AI assistant.
 
 **Request**:
+
 ```json
 {
   "message": "Show me high-value prospects",
@@ -68,16 +71,16 @@ Brain chat endpoint for AI assistant.
 ```
 
 OR (GTM-YardFlow format):
+
 ```json
 {
-  "messages": [
-    { "role": "user", "content": "Show me high-value prospects" }
-  ],
+  "messages": [{ "role": "user", "content": "Show me high-value prospects" }],
   "conversationId": "optional-uuid"
 }
 ```
 
 **Response (200)**:
+
 ```json
 {
   "message": "Here are your top prospects...",
@@ -103,6 +106,7 @@ OR (GTM-YardFlow format):
 Generate email content with FreightRoll voice.
 
 **Request**:
+
 ```json
 {
   "type": "email",
@@ -117,6 +121,7 @@ Generate email content with FreightRoll voice.
 ```
 
 **Response (200)**:
+
 ```json
 {
   "subject": "Quick question about Acme's yard ops",
@@ -129,6 +134,7 @@ Generate email content with FreightRoll voice.
 ```
 
 **Error (400)** - Invalid tone:
+
 ```json
 {
   "error": "validation_error",
@@ -143,6 +149,7 @@ Generate email content with FreightRoll voice.
 Generate company research dossier.
 
 **Request**:
+
 ```json
 {
   "companyName": "Acme Logistics",
@@ -152,6 +159,7 @@ Generate company research dossier.
 ```
 
 **Response (200)**:
+
 ```json
 {
   "company": "Acme Logistics",
@@ -175,11 +183,13 @@ Generate company research dossier.
 Email performance analytics.
 
 **Query Params**:
+
 - `period`: `7d` | `30d` | `90d` | `all` (default: `30d`)
 - `groupBy`: `day` | `week` | `month` (default: `day`)
 - `sequenceId`: optional filter
 
 **Response (200)**:
+
 ```json
 {
   "sent": 150,
@@ -214,10 +224,12 @@ Email performance analytics.
 Email queue and delivery stats.
 
 **Query Params**:
+
 - `period`: `24h` | `7d` | `30d` (default: `24h`)
 - `groupBy`: `day` | `hour` (default: none)
 
 **Response (200)**:
+
 ```json
 {
   "total": 500,
@@ -238,6 +250,7 @@ Email queue and delivery stats.
 Send email via SendGrid.
 
 **Request**:
+
 ```json
 {
   "to": "prospect@company.com",
@@ -250,6 +263,7 @@ Send email via SendGrid.
 ```
 
 **Response (201)**:
+
 ```json
 {
   "success": true,
@@ -265,6 +279,7 @@ Send email via SendGrid.
 List contacts/prospects with filtering.
 
 **Query Params**:
+
 - `eventId`: Filter by event (optional for S2S)
 - `limit`: Max records (default: 100, max: 500)
 - `skip`: Offset for pagination
@@ -273,6 +288,7 @@ List contacts/prospects with filtering.
 - `persona`: Filter by persona (can repeat: `?persona=isExecOps&persona=isOps`)
 
 **Response (200)**:
+
 ```json
 {
   "people": [
@@ -309,10 +325,12 @@ List contacts/prospects with filtering.
 List target accounts.
 
 **Query Params**:
+
 - `cursor`: Pagination cursor
 - `limit`: Max records (default: 50)
 
 **Response (200)**:
+
 ```json
 {
   "accounts": [
@@ -340,9 +358,11 @@ List target accounts.
 List outreach sequences.
 
 **Query Params**:
+
 - `status`: Filter by status (`active`, `paused`, `draft`)
 
 **Response (200)**:
+
 ```json
 {
   "sequences": [
@@ -368,6 +388,7 @@ List outreach sequences.
 List sequence enrollments.
 
 **Query Params**:
+
 - `prospectId`: Filter by prospect
 - `sequenceId`: Filter by sequence
 - `status`: Filter by status
@@ -375,6 +396,7 @@ List sequence enrollments.
 - `limit`: Max records (default: 25, max: 100)
 
 **Response (200)**:
+
 ```json
 {
   "data": [
@@ -411,6 +433,7 @@ List sequence enrollments.
 All endpoints return consistent error format:
 
 **400 Bad Request**:
+
 ```json
 {
   "error": "validation_error",
@@ -419,6 +442,7 @@ All endpoints return consistent error format:
 ```
 
 **401 Unauthorized**:
+
 ```json
 {
   "error": "unauthorized"
@@ -426,6 +450,7 @@ All endpoints return consistent error format:
 ```
 
 **404 Not Found**:
+
 ```json
 {
   "error": "not_found",
@@ -434,14 +459,17 @@ All endpoints return consistent error format:
 ```
 
 **429 Rate Limited**:
+
 ```json
 {
   "error": "rate_limited"
 }
 ```
+
 Headers: `Retry-After: 30`
 
 **500 Internal Server Error**:
+
 ```json
 {
   "error": "INTERNAL_ERROR",
@@ -454,8 +482,8 @@ Headers: `Retry-After: 30`
 
 ## Changelog
 
-| Date | Change |
-|------|--------|
-| 2026-02-05 | Initial version, Sprint 33 |
+| Date       | Change                                      |
+| ---------- | ------------------------------------------- |
+| 2026-02-05 | Initial version, Sprint 33                  |
 | 2026-02-05 | Removed `luis` tone, now `freightroll` only |
-| 2026-02-05 | Email analytics returns rates as decimals |
+| 2026-02-05 | Email analytics returns rates as decimals   |

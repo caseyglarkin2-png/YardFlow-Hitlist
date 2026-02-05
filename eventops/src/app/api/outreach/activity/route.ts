@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { OutreachStatus } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Get userId from auth result
+    const userId = authResult.type === 'session' 
+      ? authResult.userId 
+      : request.headers.get('x-user-id') || authResult.userId;
 
     const body = await request.json();
     const { outreachId, type, metadata } = body;
@@ -55,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Log the activity
     await prisma.activities.create({
       data: {
-        userId: session.user.id,
+        userId: userId,
         entityType: 'outreach',
         entityId: outreachId,
         action: type as string,

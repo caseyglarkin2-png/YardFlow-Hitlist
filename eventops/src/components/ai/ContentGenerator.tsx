@@ -6,7 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Mail, Linkedin, Phone, Copy, Check } from 'lucide-react';
 
@@ -51,7 +57,9 @@ export function ContentGenerator({
   const [recipientName, setRecipientName] = useState(defaultRecipient);
   const [companyName, setCompanyName] = useState(defaultCompany);
   const [channel, setChannel] = useState<'email' | 'linkedin' | 'phone'>('email');
-  const [tone, setTone] = useState<'professional' | 'casual' | 'urgent' | 'friendly'>('professional');
+  const [tone, setTone] = useState<'professional' | 'casual' | 'urgent' | 'friendly'>(
+    'professional'
+  );
   const [painPoints, setPainPoints] = useState('');
   const [recentNews, setRecentNews] = useState('');
   const [manifestBooth, setManifestBooth] = useState('Booth 247');
@@ -102,12 +110,14 @@ export function ContentGenerator({
   const ChannelIcon = channelIcons[channel];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Input Form */}
       <Card>
         <CardHeader>
           <CardTitle>Content Generator</CardTitle>
-          <CardDescription>AI-powered outreach content with FreightRoll brand voice</CardDescription>
+          <CardDescription>
+            AI-powered outreach content with FreightRoll brand voice
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -251,7 +261,7 @@ export function ContentGenerator({
               {generatedContent.subject && (
                 <div className="space-y-2">
                   <Badge variant="outline">Subject</Badge>
-                  <p className="text-sm font-medium p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm font-medium">
                     {generatedContent.subject}
                   </p>
                 </div>
@@ -259,37 +269,41 @@ export function ContentGenerator({
 
               <div className="space-y-2">
                 <Badge variant="outline">Message</Badge>
-                <div className="text-sm p-4 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap leading-relaxed">
+                <div className="whitespace-pre-wrap rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm leading-relaxed">
                   {generatedContent.body}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
                   Call to Action
                 </Badge>
-                <p className="text-sm font-medium p-3 bg-green-50 rounded-lg border border-green-200">
+                <p className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-medium">
                   {generatedContent.cta}
                 </p>
               </div>
 
-              {generatedContent.followUpSuggestions && generatedContent.followUpSuggestions.length > 0 && (
-                <div className="space-y-2">
-                  <Badge variant="outline">Follow-up Suggestions</Badge>
-                  <ul className="space-y-1 text-sm">
-                    {generatedContent.followUpSuggestions.map((suggestion, index) => (
-                      <li key={index} className="flex items-start gap-2 p-2 bg-purple-50 rounded border border-purple-100">
-                        <span className="text-purple-600">•</span>
-                        <span className="text-gray-700">{suggestion}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {generatedContent.followUpSuggestions &&
+                generatedContent.followUpSuggestions.length > 0 && (
+                  <div className="space-y-2">
+                    <Badge variant="outline">Follow-up Suggestions</Badge>
+                    <ul className="space-y-1 text-sm">
+                      {generatedContent.followUpSuggestions.map((suggestion, index) => (
+                        <li
+                          key={index}
+                          className="flex items-start gap-2 rounded border border-purple-100 bg-purple-50 p-2"
+                        >
+                          <span className="text-purple-600">•</span>
+                          <span className="text-gray-700">{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-400">
-              <ChannelIcon className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <div className="py-12 text-center text-gray-400">
+              <ChannelIcon className="mx-auto mb-3 h-12 w-12 opacity-20" />
               <p className="text-sm">Fill in the form and click "Generate Content"</p>
             </div>
           )}

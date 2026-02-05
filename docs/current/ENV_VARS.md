@@ -33,11 +33,11 @@
 
 Before sending email, these sender addresses must be verified in SendGrid:
 
-| Email                   | Purpose             | Status |
-| ----------------------- | ------------------- | ------ |
-| jake@freightroll.com    | Primary sales       | ⚠️ Verify |
-| casey@freightroll.com   | Account management  | ⚠️ Verify |
-| team@freightroll.com    | General outreach    | ⚠️ Verify |
+| Email                 | Purpose            | Status    |
+| --------------------- | ------------------ | --------- |
+| jake@freightroll.com  | Primary sales      | ⚠️ Verify |
+| casey@freightroll.com | Account management | ⚠️ Verify |
+| team@freightroll.com  | General outreach   | ⚠️ Verify |
 
 ### Verification Steps
 
