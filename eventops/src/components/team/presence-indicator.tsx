@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -48,15 +48,7 @@ export function PresenceIndicator() {
     };
   }, [pathname]);
 
-  useEffect(() => {
-    // Poll for presence updates every 10 seconds
-    const interval = setInterval(fetchPresence, 10000);
-    fetchPresence(); // Initial fetch
-
-    return () => clearInterval(interval);
-  }, [pathname]);
-
-  async function fetchPresence() {
+  const fetchPresence = useCallback(async () => {
     try {
       const res = await fetch("/api/presence");
       const data = await res.json();
@@ -70,7 +62,15 @@ export function PresenceIndicator() {
     } catch (error) {
       console.error("Failed to fetch presence:", error);
     }
-  }
+  }, [pathname]);
+
+  useEffect(() => {
+    // Poll for presence updates every 10 seconds
+    const interval = setInterval(fetchPresence, 10000);
+    fetchPresence(); // Initial fetch
+
+    return () => clearInterval(interval);
+  }, [fetchPresence]);
 
   function getInitials(name: string): string {
     return name

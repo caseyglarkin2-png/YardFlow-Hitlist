@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Meeting {
@@ -45,11 +45,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Meeting>>({});
 
-  useEffect(() => {
-    fetchMeeting();
-  }, [params.id]);
-
-  async function fetchMeeting() {
+  const fetchMeeting = useCallback(async () => {
     try {
       const res = await fetch(`/api/meetings/${params.id}`);
       const data = await res.json();
@@ -60,7 +56,11 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
     } finally {
       setLoading(false);
     }
-  }
+  }, [params.id]);
+
+  useEffect(() => {
+    fetchMeeting();
+  }, [fetchMeeting]);
 
   async function generatePrep() {
     setGeneratingPrep(true);

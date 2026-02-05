@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -34,11 +34,7 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
     steps: [] as SequenceStep[],
   });
 
-  useEffect(() => {
-    fetchSequence();
-  }, [params.id]);
-
-  const fetchSequence = async () => {
+  const fetchSequence = useCallback(async () => {
     try {
       const res = await fetch(`/api/sequences/${params.id}`);
       const data = await res.json();
@@ -54,7 +50,11 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    fetchSequence();
+  }, [fetchSequence]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { DossierView } from '@/components/ai/DossierView';
 import { DossierGeneratorForm } from '@/components/ai/DossierGeneratorForm';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,32 +18,7 @@ function DossierPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>('');
 
-  useEffect(() => {
-    loadCompanies();
-    if (accountId) {
-      loadDossier(accountId);
-    } else {
-      setLoading(false);
-    }
-  }, [accountId]);
-
-  const loadCompanies = async () => {
-    try {
-      const response = await fetch('/api/accounts?limit=100');
-      if (!response.ok) throw new Error('Failed to load companies');
-      const data = await response.json();
-      setCompanies(
-        data.accounts.map((acc: { id: string; company_name: string }) => ({
-          id: acc.id,
-          name: acc.company_name,
-        }))
-      );
-    } catch (err) {
-      console.error('Error loading companies:', err);
-    }
-  };
-
-  const loadDossier = async (accId: string) => {
+  const loadDossier = useCallback(async (accId: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -64,6 +39,32 @@ function DossierPageContent() {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    loadCompanies();
+    if (accountId) {
+      loadDossier(accountId);
+    } else {
+      setLoading(false);
+    }
+  }, [accountId, loadDossier]);
+
+  const loadCompanies = async () => {
+    try {
+      const response = await fetch('/api/accounts?limit=100');
+      if (!response.ok) throw new Error('Failed to load companies');
+      const data = await response.json();
+      setCompanies(
+        data.accounts.map((acc: { id: string; company_name: string }) => ({
+          id: acc.id,
+          name: acc.company_name,
+        }))
+      );
+    } catch (err) {
+      console.error('Error loading companies:', err);
     }
   };
 

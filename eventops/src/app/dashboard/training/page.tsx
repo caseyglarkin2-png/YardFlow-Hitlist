@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Search,
 } from 'lucide-react';
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -50,11 +51,7 @@ export default function TrainingPage() {
   const [showYouTubeDialog, setShowYouTubeDialog] = useState(false);
   const [showHubSpotDialog, setShowHubSpotDialog] = useState(false);
 
-  useEffect(() => {
-    loadContent();
-  }, []);
-
-  async function loadContent() {
+  const loadContent = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/training/content');
@@ -65,7 +62,11 @@ export default function TrainingPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => {
+    loadContent();
+  }, [loadContent]);
 
   const filteredContent = content.filter((item) => {
     if (selectedSource !== 'all' && item.source !== selectedSource) return false;
@@ -266,9 +267,11 @@ export default function TrainingPage() {
               </div>
 
               {item.thumbnailUrl && (
-                <img
+                <Image
                   src={item.thumbnailUrl}
                   alt={item.title}
+                  width={400}
+                  height={128}
                   className="mt-3 h-32 w-full rounded object-cover"
                 />
               )}
@@ -287,11 +290,7 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadFiles();
-  }, []);
-
-  async function loadFiles() {
+  const loadFiles = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/training/drive/list');
@@ -302,7 +301,11 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => {
+    loadFiles();
+  }, [loadFiles]);
 
   async function handleImport() {
     setLoading(true);

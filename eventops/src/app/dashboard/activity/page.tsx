@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Activity {
   id: string;
@@ -37,6 +37,19 @@ export default function ActivityPage() {
   }>({});
   const [loading, setLoading] = useState(true);
 
+  const loadActivities = useCallback(async () => {
+    const params = new URLSearchParams();
+    if (filter.entityType) params.set('entityType', filter.entityType);
+    if (filter.userId) params.set('userId', filter.userId);
+
+    const response = await fetch(`/api/activity?${params}`);
+    if (response.ok) {
+      const data = await response.json();
+      setActivities(data);
+    }
+    setLoading(false);
+  }, [filter]);
+
   useEffect(() => {
     loadActivities();
     loadActiveUsers();
@@ -48,20 +61,7 @@ export default function ActivityPage() {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [filter]);
-
-  const loadActivities = async () => {
-    const params = new URLSearchParams();
-    if (filter.entityType) params.set('entityType', filter.entityType);
-    if (filter.userId) params.set('userId', filter.userId);
-
-    const response = await fetch(`/api/activity?${params}`);
-    if (response.ok) {
-      const data = await response.json();
-      setActivities(data);
-    }
-    setLoading(false);
-  };
+  }, [loadActivities]);
 
   const loadActiveUsers = async () => {
     const response = await fetch('/api/presence');

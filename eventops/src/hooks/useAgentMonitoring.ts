@@ -3,7 +3,7 @@
  * Sprint 33.1 - Agent Monitoring Dashboard
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export interface AgentMonitoringData {
   summary: {
@@ -41,7 +41,7 @@ export function useAgentMonitoring(timeRange: '24h' | '7d' | '30d' = '24h', agen
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       // Don't set global loading on refresh to avoid UI flicker
       if (!data) setLoading(true);
@@ -60,14 +60,15 @@ export function useAgentMonitoring(timeRange: '24h' | '7d' | '30d' = '24h', agen
     } finally {
       if (!data) setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, agentType]);
 
   useEffect(() => {
     fetchData();
     // Refresh every 30 seconds
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
-  }, [timeRange, agentType]);
+  }, [fetchData]);
 
   return { data, loading, error, refresh: fetchData };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -40,11 +40,7 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
     endDate: '',
   });
 
-  useEffect(() => {
-    fetchCampaign();
-  }, [params.id]);
-
-  const fetchCampaign = async () => {
+  const fetchCampaign = useCallback(async () => {
     try {
       const res = await fetch(`/api/campaigns/${params.id}`);
       const data = await res.json();
@@ -59,7 +55,11 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    fetchCampaign();
+  }, [fetchCampaign]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

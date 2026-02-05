@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -16,11 +16,7 @@ export default function PersonDetailPage() {
   const [generatingInsights, setGeneratingInsights] = useState(false);
   const [calculatingRoi, setCalculatingRoi] = useState(false);
 
-  useEffect(() => {
-    fetchPersonData();
-  }, [personId]);
-
-  async function fetchPersonData() {
+  const fetchPersonData = useCallback(async () => {
     try {
       // Fetch person with account details
       const res = await fetch(`/api/people/${personId}`);
@@ -57,7 +53,11 @@ export default function PersonDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [personId]);
+
+  useEffect(() => {
+    fetchPersonData();
+  }, [fetchPersonData]);
 
   async function handleGenerateInsights() {
     if (!personId) return;

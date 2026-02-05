@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface FunnelStage {
   stage: string;
@@ -33,11 +33,7 @@ export default function AdvancedAnalyticsPage() {
   const [groupBy, setGroupBy] = useState('month');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, [groupBy]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [funnelRes, cohortRes, predictionRes] = await Promise.all([
@@ -58,7 +54,11 @@ export default function AdvancedAnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [groupBy]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const getScoreColor = (score: number) => {
     if (score >= 70) return 'text-green-600 bg-green-100';

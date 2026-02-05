@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Notification {
@@ -21,13 +21,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
-    return () => clearInterval(interval);
-  }, [filter]);
-
-  async function fetchNotifications() {
+  const fetchNotifications = useCallback(async () => {
     try {
       const url = filter === 'unread' ? '/api/notifications?unreadOnly=true' : '/api/notifications';
       const res = await fetch(url);
@@ -39,7 +33,13 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   async function markAsRead(id: string) {
     try {

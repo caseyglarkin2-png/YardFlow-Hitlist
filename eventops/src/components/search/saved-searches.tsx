@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Share2 } from 'lucide-react';
@@ -30,7 +30,7 @@ export function SavedSearches({ entityType, onLoad }: SavedSearchesProps) {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchSearches = async () => {
+  const fetchSearches = useCallback(async () => {
     try {
       const res = await fetch(`/api/searches?entityType=${entityType}`);
       if (res.ok) {
@@ -42,11 +42,11 @@ export function SavedSearches({ entityType, onLoad }: SavedSearchesProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [entityType]);
 
   useEffect(() => {
     fetchSearches();
-  }, [entityType]);
+  }, [fetchSearches]);
 
   const handleLoad = (search: SavedSearch) => {
     onLoad(search.filters);

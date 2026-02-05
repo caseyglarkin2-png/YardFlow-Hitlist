@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -44,19 +44,7 @@ export default function BulkResearchPage() {
     missingOnly: false,
   });
 
-  useEffect(() => {
-    loadAccounts();
-  }, [filters]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (processing) {
-      interval = setInterval(checkStatus, 2000);
-    }
-    return () => clearInterval(interval);
-  }, [processing]);
-
-  const loadAccounts = async () => {
+  const loadAccounts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -79,9 +67,9 @@ export default function BulkResearchPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/research/bulk');
       const data = await res.json();
@@ -94,7 +82,19 @@ export default function BulkResearchPage() {
     } catch (error) {
       console.error('Error checking status:', error);
     }
-  };
+  }, [loadAccounts]);
+
+  useEffect(() => {
+    loadAccounts();
+  }, [loadAccounts]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (processing) {
+      interval = setInterval(checkStatus, 2000);
+    }
+    return () => clearInterval(interval);
+  }, [processing, checkStatus]);
 
   const startBulkResearch = async (forceRefresh = false) => {
     if (selected.size === 0) {

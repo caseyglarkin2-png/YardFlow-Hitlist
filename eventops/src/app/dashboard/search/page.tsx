@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdvancedFilters, FilterCondition } from '@/components/search/advanced-filters';
 import { SearchResults } from '@/components/search/search-results';
@@ -19,21 +19,7 @@ export default function AdvancedSearchPage() {
   const [resultCount, setResultCount] = useState(0);
   const [searching, setSearching] = useState(false);
 
-  // Auto-search when filters change (debounced)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (filters.length > 0) {
-        handleSearch();
-      } else {
-        setResults([]);
-        setResultCount(0);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [filters]);
-
-  async function handleSearch() {
+  const handleSearch = useCallback(async () => {
     setSearching(true);
 
     try {
@@ -51,7 +37,21 @@ export default function AdvancedSearchPage() {
     } finally {
       setSearching(false);
     }
-  }
+  }, [entityType, filters]);
+
+  // Auto-search when filters change (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (filters.length > 0) {
+        handleSearch();
+      } else {
+        setResults([]);
+        setResultCount(0);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters, handleSearch]);
 
   async function handleExport() {
     if (results.length === 0) return;

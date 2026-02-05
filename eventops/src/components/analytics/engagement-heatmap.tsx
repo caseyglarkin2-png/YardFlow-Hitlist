@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -26,11 +26,7 @@ export function EngagementHeatmap() {
   const [persona, setPersona] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadHeatmapData();
-  }, [metric, persona]);
-
-  async function loadHeatmapData() {
+  const loadHeatmapData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/analytics/heatmap?metric=${metric}&persona=${persona}`);
@@ -41,7 +37,11 @@ export function EngagementHeatmap() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [metric, persona]);
+
+  useEffect(() => {
+    loadHeatmapData();
+  }, [loadHeatmapData]);
 
   const maxRate = Math.max(...data.map((d) => d.rate), 1);
 
