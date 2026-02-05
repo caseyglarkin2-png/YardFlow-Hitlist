@@ -95,14 +95,17 @@ export async function verifySendGridConnectivity(): Promise<{
     } else if (response.status === 401) {
       logger.error('[startup] SendGrid API key is INVALID');
       return { configured: true, connected: false, error: 'Invalid API key' };
+    } else if (response.status === 403) {
+      logger.error('[startup] SendGrid API key lacks required permissions');
+      return { configured: true, connected: false, error: 'Insufficient permissions (403)' };
     } else {
       const text = await response.text();
       logger.warn('[startup] SendGrid API returned unexpected status', { 
         status: response.status, 
         body: text.slice(0, 200) 
       });
-      // 403 or other status might mean valid key but permission issues
-      return { configured: true, connected: true, error: `Status ${response.status}` };
+      // Other non-OK status codes are treated as connectivity issues
+      return { configured: true, connected: false, error: `Status ${response.status}` };
     }
   } catch (error) {
     logger.error('[startup] SendGrid API connectivity FAILED', {

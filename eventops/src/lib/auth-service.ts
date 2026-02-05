@@ -119,3 +119,57 @@ export async function requireAuth(
 export function isServiceAuth(authResult: AuthResult): boolean {
   return authResult?.type === 'service';
 }
+
+/**
+ * Get a real user ID from auth result, with optional database lookup for S2S calls.
+ * Use when you need a database-valid userId (e.g., for foreign key references).
+ *
+ * For session auth: returns userId directly.
+ * For S2S auth with x-user-id header: returns that userId.
+ * For S2S auth without user context: looks up user by email or returns null.
+ *
+ * @param authResult - Result from authServiceOrSession
+ * @param lookupByEmail - For S2S, attempt to find user by email if userId is a service placeholder
+ * @returns Real user ID or null if not resolvable
+ *
+ * @example
+ * ```typescript
+ * const authResult = await authServiceOrSession(request);
+ * const userId = await getUserIdFromAuth(authResult, prisma);
+ * if (!userId) {
+ *   return NextResponse.json({ error: 'User not found' }, { status: 400 });
+ * }
+ * // Use userId for database operations
+ * ```
+ */
+export async function getUserIdFromAuth(
+  authResult: AuthResult,
+  prismaClient?: { user: { findUnique: (args: { where: { email: string } }) => Promise<{ id: string } | null> } }
+): Promise<string | null> {
+  if (!authResult) return null;
+
+  // Session auth - userId is always valid
+  if (authResult.type === 'session') {
+    return authResult.userId;
+  }
+
+  // S2S auth - check if userId is a service placeholder
+  if (authResult.userId.startsWith('service:')) {
+    // If email provided and prisma available, look up user
+    if (authResult.email && prismaClient) {
+      try {
+        const user = await prismaClient.user.findUnique({
+          where: { email: authResult.email },
+        });
+        return user?.id ?? null;
+      } catch {
+        return null;
+      }
+    }
+    // No way to resolve to real user
+    return null;
+  }
+
+  // S2S with explicit x-user-id header
+  return authResult.userId;
+}

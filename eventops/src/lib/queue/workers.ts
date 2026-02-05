@@ -263,30 +263,72 @@ healthServer.listen(PORT, () => {
   logger.info(`Worker health check server listening on port ${PORT}`);
 });
 
+// Helper: sleep function for retry delays
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // Start workers on module load
 async function startWorkers() {
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY_MS = 5000;
+  
   try {
-    // Run startup health checks before starting workers
+    // Run startup health checks with retry logic
     const { runStartupChecks } = await import('@/lib/startup-checks');
-    const checkResult = await runStartupChecks();
     
-    if (!checkResult.ready) {
-      logger.error('Startup checks failed - cannot start workers', {
-        database: checkResult.database,
-        redis: checkResult.redis,
-        sendgrid: checkResult.sendgrid,
-        ai: checkResult.ai,
-        environment: checkResult.environment,
+    let checkResult;
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        checkResult = await runStartupChecks();
+        
+        if (checkResult.ready) {
+          logger.info('Startup checks passed', {
+            attempt,
+            database: checkResult.database,
+            redis: checkResult.redis,
+            sendgrid: checkResult.sendgrid.connected ? 'connected' : 'not connected',
+            ai: checkResult.ai,
+          });
+          break; // Success - exit retry loop
+        }
+        
+        // Checks ran but some failed
+        logger.warn(`Startup checks failed (attempt ${attempt}/${MAX_RETRIES})`, {
+          database: checkResult.database,
+          redis: checkResult.redis,
+          sendgrid: checkResult.sendgrid,
+          ai: checkResult.ai,
+          environment: checkResult.environment,
+        });
+        
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        logger.warn(`Startup check error (attempt ${attempt}/${MAX_RETRIES})`, { 
+          error: lastError.message 
+        });
+      }
+      
+      // If not the last attempt, wait before retrying
+      if (attempt < MAX_RETRIES) {
+        logger.info(`Retrying startup checks in ${RETRY_DELAY_MS / 1000}s...`);
+        await sleep(RETRY_DELAY_MS);
+      }
+    }
+    
+    // Final check after all retries exhausted
+    if (!checkResult?.ready) {
+      logger.error('Startup checks failed after all retries - cannot start workers', {
+        attempts: MAX_RETRIES,
+        database: checkResult?.database ?? 'unknown',
+        redis: checkResult?.redis ?? 'unknown',
+        sendgrid: checkResult?.sendgrid ?? 'unknown',
+        ai: checkResult?.ai ?? 'unknown',
+        environment: checkResult?.environment ?? 'unknown',
+        lastError: lastError?.message,
       });
       process.exit(1);
     }
-    
-    logger.info('Startup checks passed', {
-      database: checkResult.database,
-      redis: checkResult.redis,
-      sendgrid: checkResult.sendgrid.connected ? 'connected' : 'not connected',
-      ai: checkResult.ai,
-    });
     
     getEnrichmentWorker();
     getSequenceWorker();
