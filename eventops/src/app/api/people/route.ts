@@ -154,6 +154,9 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get('limit') || '100'), 500);
     const skip = parseInt(searchParams.get('skip') || '0');
 
+    // Get total count for pagination
+    const total = await prisma.people.count({ where });
+
     const people = await prisma.people.findMany({
       where,
       include: {
@@ -166,7 +169,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       people,
-      pagination: { limit, skip, hasMore: people.length === limit },
+      pagination: { limit, skip, total, hasMore: people.length === limit },
     });
   } catch (error) {
     console.error('Error fetching people:', error);

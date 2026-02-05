@@ -18,6 +18,12 @@ This sprint plan addresses three major workstreams:
 
 Each sprint produces a demoable increment with full test coverage.
 
+**Review Notes (Post-Subagent Analysis)**:
+- ✅ T33B.2 DONE: Added `total` to `/api/people` pagination response  
+- ✅ Fixed empty interface lint error in `src/types/brain-actions.ts`
+- ⚠️ T33A.1: Use `ADD VALUE` approach for PostgreSQL enum migration, not `RENAME VALUE`
+- ⚠️ T33C.2: Enrollments GET works fine - uses `sequenceId` not `flowId`
+
 ---
 
 ## Sprint 33A: Branding & Voice Cleanup (2-3 hours)
