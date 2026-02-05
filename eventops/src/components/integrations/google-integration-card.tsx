@@ -8,10 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-export function GoogleIntegrationCard({ user, onUpdate }: {
-  user: any;
-  onUpdate: () => void;
-}) {
+export function GoogleIntegrationCard({ user, onUpdate }: { user: any; onUpdate: () => void }) {
   const [syncing, setSyncing] = useState(false);
   const [importing, setImporting] = useState(false);
   const { toast } = useToast();
@@ -21,8 +18,13 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
   };
 
   const handleDisconnect = async () => {
-    if (!confirm('Disconnect Google account? Synced data will be preserved but future syncs disabled.')) return;
-    
+    if (
+      !confirm(
+        'Disconnect Google account? Synced data will be preserved but future syncs disabled.'
+      )
+    )
+      return;
+
     const res = await fetch('/api/google/disconnect', { method: 'POST' });
     if (res.ok) {
       toast({ title: 'Google account disconnected' });
@@ -40,9 +42,9 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ dryRun: user.googleSyncDryRun }),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.dryRun) {
         toast({
           title: `Dry-run complete`,
@@ -54,7 +56,7 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
           description: `Imported ${data.imported}, updated ${data.updated}`,
         });
       }
-      
+
       onUpdate();
     } catch (_error) {
       toast({ title: 'Sync failed', variant: 'destructive' });
@@ -67,12 +69,12 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
     try {
       const res = await fetch('/api/google/gmail/check-replies', { method: 'POST' });
       const data = await res.json();
-      
+
       toast({
         title: 'Email check complete',
         description: `Checked ${data.checked} emails, found ${data.updated} replies`,
       });
-      
+
       onUpdate();
     } catch (_error) {
       toast({ title: 'Check failed', variant: 'destructive' });
@@ -90,9 +92,9 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, dryRun: user.googleSyncDryRun }),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.dryRun) {
         toast({
           title: 'Dry-run complete',
@@ -104,7 +106,7 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
           description: `Imported ${data.imported} contacts`,
         });
       }
-      
+
       onUpdate();
     } catch (error) {
       toast({ title: 'Import failed', variant: 'destructive' });
@@ -138,7 +140,7 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
     if (res.ok) {
       toast({
         title: user.googleSyncDryRun ? 'Live mode enabled' : 'Dry-run mode enabled',
-        description: user.googleSyncDryRun 
+        description: user.googleSyncDryRun
           ? 'Changes will now be saved to database'
           : 'Changes will be previewed only',
       });
@@ -148,21 +150,17 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
 
   return (
     <Card className="p-6">
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="text-lg font-semibold">Google Workspace</h3>
-          <p className="text-sm text-gray-600">
-            Sync Calendar, Gmail, and Contacts
-          </p>
+          <p className="text-sm text-gray-600">Sync Calendar, Gmail, and Contacts</p>
         </div>
         {user?.googleSyncEnabled ? (
           <div className="flex gap-2">
-            <Badge variant={user.googleSyncPaused ? "destructive" : "default"}>
+            <Badge variant={user.googleSyncPaused ? 'destructive' : 'default'}>
               {user.googleSyncPaused ? 'Paused' : 'Connected'}
             </Badge>
-            {user.googleSyncDryRun && (
-              <Badge variant="secondary">Dry-run Mode</Badge>
-            )}
+            {user.googleSyncDryRun && <Badge variant="secondary">Dry-run Mode</Badge>}
           </div>
         ) : (
           <Badge variant="secondary">Not Connected</Badge>
@@ -171,10 +169,11 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
 
       {user?.googleSyncEnabled ? (
         <div className="space-y-4">
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>Last synced: {user.lastGoogleSync 
-              ? new Date(user.lastGoogleSync).toLocaleString() 
-              : 'Never'}</p>
+          <div className="space-y-1 text-sm text-gray-600">
+            <p>
+              Last synced:{' '}
+              {user.lastGoogleSync ? new Date(user.lastGoogleSync).toLocaleString() : 'Never'}
+            </p>
             <p>Syncs: {user.googleSyncAuditLog?.length || 0} total</p>
           </div>
 
@@ -184,10 +183,7 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
                 <Label>Auto-sync enabled</Label>
                 <p className="text-xs text-gray-500">Hourly background sync</p>
               </div>
-              <Switch
-                checked={!user.googleSyncPaused}
-                onCheckedChange={handleTogglePause}
-              />
+              <Switch checked={!user.googleSyncPaused} onCheckedChange={handleTogglePause} />
             </div>
 
             <div className="flex items-center justify-between">
@@ -195,44 +191,24 @@ export function GoogleIntegrationCard({ user, onUpdate }: {
                 <Label>Dry-run mode</Label>
                 <p className="text-xs text-gray-500">Preview changes without saving</p>
               </div>
-              <Switch
-                checked={user.googleSyncDryRun}
-                onCheckedChange={handleToggleDryRun}
-              />
+              <Switch checked={user.googleSyncDryRun} onCheckedChange={handleToggleDryRun} />
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 border-t pt-4">
-            <Button 
-              onClick={handleSyncCalendar} 
-              disabled={syncing}
-              size="sm"
-            >
+            <Button onClick={handleSyncCalendar} disabled={syncing} size="sm">
               {syncing ? 'Syncing...' : 'Sync Calendar'}
             </Button>
-            
-            <Button 
-              onClick={handleCheckReplies}
-              size="sm"
-              variant="outline"
-            >
+
+            <Button onClick={handleCheckReplies} size="sm" variant="outline">
               Check Email Replies
             </Button>
-            
-            <Button 
-              onClick={handleImportContacts}
-              disabled={importing}
-              size="sm"
-              variant="outline"
-            >
+
+            <Button onClick={handleImportContacts} disabled={importing} size="sm" variant="outline">
               {importing ? 'Importing...' : 'Import Contacts'}
             </Button>
-            
-            <Button 
-              onClick={handleDisconnect}
-              size="sm"
-              variant="destructive"
-            >
+
+            <Button onClick={handleDisconnect} size="sm" variant="destructive">
               Disconnect
             </Button>
           </div>

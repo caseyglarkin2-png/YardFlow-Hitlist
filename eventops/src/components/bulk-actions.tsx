@@ -37,8 +37,8 @@ export function BulkActions({ selectedIds, onClear, onAction, type }: BulkAction
   if (selectedIds.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-center gap-4 min-w-[500px]">
+    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 transform">
+      <div className="flex min-w-[500px] items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
         <Badge variant="secondary" className="text-sm">
           {selectedIds.length} selected
         </Badge>

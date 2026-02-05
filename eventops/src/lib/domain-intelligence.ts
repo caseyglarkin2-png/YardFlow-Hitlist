@@ -1,6 +1,6 @@
 /**
  * Advanced Domain Intelligence
- * 
+ *
  * Smarter domain guessing with:
  * - TLD pattern recognition (.com, .io, .co, country codes)
  * - Industry-specific patterns
@@ -22,13 +22,13 @@ export async function guessCompanyDomain(
   industry?: string
 ): Promise<DomainGuess[]> {
   const guesses: DomainGuess[] = [];
-  
+
   // Normalize company name
   const normalized = normalizeCompanyName(companyName);
-  
+
   // Generate TLD variants
   const tlds = getTLDsForCompany(companyName, industry);
-  
+
   for (const tld of tlds) {
     guesses.push({
       domain: `${normalized}.${tld}`,
@@ -36,11 +36,12 @@ export async function guessCompanyDomain(
       verified: false,
     });
   }
-  
+
   // Add common patterns
   const patterns = getCompanyPatterns(normalized, industry);
   for (const pattern of patterns) {
-    for (const tld of tlds.slice(0, 3)) { // Top 3 TLDs only
+    for (const tld of tlds.slice(0, 3)) {
+      // Top 3 TLDs only
       guesses.push({
         domain: `${pattern}.${tld}`,
         confidence: 40,
@@ -48,10 +49,10 @@ export async function guessCompanyDomain(
       });
     }
   }
-  
+
   // Sort by confidence
   guesses.sort((a, b) => b.confidence - a.confidence);
-  
+
   // Verify top candidates
   const topGuesses = guesses.slice(0, 5);
   const verifiedGuesses = await Promise.all(
@@ -60,30 +61,37 @@ export async function guessCompanyDomain(
       verified: await verifyDomainExists(guess.domain),
     }))
   );
-  
+
   // Boost confidence for verified domains
-  return verifiedGuesses.map(g => ({
-    ...g,
-    confidence: g.verified ? Math.min(g.confidence + 30, 95) : g.confidence,
-  })).sort((a, b) => b.confidence - a.confidence);
+  return verifiedGuesses
+    .map((g) => ({
+      ...g,
+      confidence: g.verified ? Math.min(g.confidence + 30, 95) : g.confidence,
+    }))
+    .sort((a, b) => b.confidence - a.confidence);
 }
 
 /**
  * Normalize company name for domain
  */
 function normalizeCompanyName(name: string): string {
-  return name
-    .toLowerCase()
-    // Remove legal entities
-    .replace(/\b(inc|incorporated|llc|ltd|limited|corp|corporation|co|company|gmbh|ag)\b\.?/gi, '')
-    // Remove special chars
-    .replace(/[^a-z0-9\s-]/g, '')
-    // Collapse whitespace
-    .replace(/\s+/g, '-')
-    // Remove leading/trailing hyphens
-    .replace(/^-+|-+$/g, '')
-    // Remove double hyphens
-    .replace(/-{2,}/g, '-');
+  return (
+    name
+      .toLowerCase()
+      // Remove legal entities
+      .replace(
+        /\b(inc|incorporated|llc|ltd|limited|corp|corporation|co|company|gmbh|ag)\b\.?/gi,
+        ''
+      )
+      // Remove special chars
+      .replace(/[^a-z0-9\s-]/g, '')
+      // Collapse whitespace
+      .replace(/\s+/g, '-')
+      // Remove leading/trailing hyphens
+      .replace(/^-+|-+$/g, '')
+      // Remove double hyphens
+      .replace(/-{2,}/g, '-')
+  );
 }
 
 /**
@@ -91,10 +99,10 @@ function normalizeCompanyName(name: string): string {
  */
 function getTLDsForCompany(companyName: string, industry?: string): string[] {
   const tlds: string[] = [];
-  
+
   // Default to .com first
   tlds.push('com');
-  
+
   // Industry-specific TLDs
   if (industry) {
     const industryTLDs: Record<string, string[]> = {
@@ -108,7 +116,7 @@ function getTLDsForCompany(companyName: string, industry?: string): string[] {
       retail: ['shop', 'store'],
       consulting: ['partners', 'group', 'consulting'],
     };
-    
+
     const lowerIndustry = industry.toLowerCase();
     for (const [key, values] of Object.entries(industryTLDs)) {
       if (lowerIndustry.includes(key)) {
@@ -116,13 +124,13 @@ function getTLDsForCompany(companyName: string, industry?: string): string[] {
       }
     }
   }
-  
+
   // Common alternatives
   tlds.push('co', 'net', 'org', 'io');
-  
+
   // Country codes (common ones)
   tlds.push('uk', 'ca', 'au', 'de', 'fr');
-  
+
   // Remove duplicates while preserving order
   return [...new Set(tlds)];
 }
@@ -133,15 +141,15 @@ function getTLDsForCompany(companyName: string, industry?: string): string[] {
 function getTLDConfidence(tld: string, industry?: string): number {
   // Base scores
   const baseScores: Record<string, number> = {
-    'com': 80,
-    'io': 60,
-    'co': 60,
-    'net': 50,
-    'org': 40,
+    com: 80,
+    io: 60,
+    co: 60,
+    net: 50,
+    org: 40,
   };
-  
+
   let score = baseScores[tld] || 30;
-  
+
   // Industry boost
   if (industry) {
     if (industry.toLowerCase().includes('tech') && ['io', 'ai', 'tech'].includes(tld)) {
@@ -151,7 +159,7 @@ function getTLDConfidence(tld: string, industry?: string): number {
       score += 20;
     }
   }
-  
+
   return Math.min(score, 90);
 }
 
@@ -160,27 +168,23 @@ function getTLDConfidence(tld: string, industry?: string): number {
  */
 function getCompanyPatterns(normalized: string, industry?: string): string[] {
   const patterns: string[] = [];
-  
+
   // Remove hyphens for some patterns
   const nohyphens = normalized.replace(/-/g, '');
-  
+
   patterns.push(
     `get${nohyphens}`,
     `use${nohyphens}`,
     `try${nohyphens}`,
     `${nohyphens}app`,
-    `${nohyphens}hq`,
+    `${nohyphens}hq`
   );
-  
+
   // Industry-specific patterns
   if (industry?.toLowerCase().includes('logistics')) {
-    patterns.push(
-      `${nohyphens}express`,
-      `${nohyphens}freight`,
-      `${nohyphens}logistics`
-    );
+    patterns.push(`${nohyphens}express`, `${nohyphens}freight`, `${nohyphens}logistics`);
   }
-  
+
   return patterns;
 }
 
@@ -193,7 +197,7 @@ async function verifyDomainExists(domain: string): Promise<boolean> {
     const response = await fetch(`https://dns.google/resolve?name=${domain}&type=A`, {
       signal: AbortSignal.timeout(3000),
     });
-    
+
     const data = await response.json();
     return data.Answer && data.Answer.length > 0;
   } catch (_error) {
@@ -210,7 +214,7 @@ export function extractDomain(input: string): string | null {
   if (input.includes('@')) {
     return input.split('@')[1]?.toLowerCase() || null;
   }
-  
+
   // URL format
   try {
     const url = new URL(input.startsWith('http') ? input : `https://${input}`);
@@ -224,6 +228,7 @@ export function extractDomain(input: string): string | null {
  * Validate domain format
  */
 export function isValidDomain(domain: string): boolean {
-  const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
+  const domainRegex =
+    /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
   return domainRegex.test(domain);
 }

@@ -1,6 +1,6 @@
 /**
  * Unified AI Provider with automatic fallback
- * 
+ *
  * Provider chain: Gemini → OpenAI → Error
  * Configurable via PREFERRED_AI_PROVIDER env var
  */
@@ -59,7 +59,9 @@ function isRateLimitError(error: unknown): { isRateLimit: boolean; retryAfterSec
 function isModelNotFoundError(error: unknown): boolean {
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
-    return message.includes('404') || message.includes('not found') || message.includes('not supported');
+    return (
+      message.includes('404') || message.includes('not found') || message.includes('not supported')
+    );
   }
   return false;
 }
@@ -93,7 +95,7 @@ async function generateWithOpenAIProvider(
 
 /**
  * Generate content with automatic provider fallback
- * 
+ *
  * @param prompt - The prompt to send to the AI
  * @param options - Generation options
  * @returns Content and metadata about which provider was used
@@ -106,9 +108,8 @@ export async function generateContent(
   const errors: ProviderError[] = [];
 
   // Try preferred provider first
-  const providers: AIProvider[] = preferred === 'gemini' 
-    ? ['gemini', 'openai'] 
-    : ['openai', 'gemini'];
+  const providers: AIProvider[] =
+    preferred === 'gemini' ? ['gemini', 'openai'] : ['openai', 'gemini'];
 
   for (let i = 0; i < providers.length; i++) {
     const provider = providers[i];
@@ -135,7 +136,7 @@ export async function generateContent(
         logger.info('AI provider fallback used', {
           preferredProvider: preferred,
           actualProvider: provider,
-          previousErrors: errors.map(e => ({ provider: e.provider, error: e.error })),
+          previousErrors: errors.map((e) => ({ provider: e.provider, error: e.error })),
         });
       }
 
@@ -181,15 +182,19 @@ export async function generateContent(
   }
 
   // All providers failed
-  const rateLimitedError = errors.find(e => e.isRateLimited);
+  const rateLimitedError = errors.find((e) => e.isRateLimited);
   if (rateLimitedError) {
-    const err = new Error(`All AI providers rate limited. Retry after ${rateLimitedError.retryAfterSeconds}s`);
+    const err = new Error(
+      `All AI providers rate limited. Retry after ${rateLimitedError.retryAfterSeconds}s`
+    );
     (err as any).retryAfterSeconds = rateLimitedError.retryAfterSeconds;
     (err as any).isRateLimited = true;
     throw err;
   }
 
-  throw new Error(`All AI providers failed: ${errors.map(e => `${e.provider}: ${e.error}`).join('; ')}`);
+  throw new Error(
+    `All AI providers failed: ${errors.map((e) => `${e.provider}: ${e.error}`).join('; ')}`
+  );
 }
 
 /**
@@ -216,20 +221,23 @@ export async function checkAIHealth(): Promise<{
       const { isRateLimit, retryAfterSeconds } = isRateLimitError(error);
       geminiStatus = {
         status: 'error',
-        error: isRateLimit 
-          ? `Rate limited, retry in ${retryAfterSeconds}s` 
-          : (error instanceof Error ? error.message : 'Unknown error'),
+        error: isRateLimit
+          ? `Rate limited, retry in ${retryAfterSeconds}s`
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error',
       };
     }
   }
 
   // Check OpenAI
   const openaiResult = await testOpenAIConnection();
-  const openaiStatus = openaiResult.status === 'ok'
-    ? { status: 'ok' as const }
-    : process.env.OPENAI_API_KEY
-      ? { status: 'error' as const, error: openaiResult.error }
-      : { status: 'not_configured' as const };
+  const openaiStatus =
+    openaiResult.status === 'ok'
+      ? { status: 'ok' as const }
+      : process.env.OPENAI_API_KEY
+        ? { status: 'error' as const, error: openaiResult.error }
+        : { status: 'not_configured' as const };
 
   return {
     gemini: geminiStatus,

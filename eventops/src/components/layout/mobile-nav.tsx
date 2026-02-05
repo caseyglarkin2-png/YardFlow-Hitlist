@@ -4,11 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Users, Calendar, Mail, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -36,8 +32,8 @@ export function MobileNav() {
   return (
     <>
       {/* Bottom Navigation - Fixed */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t">
-        <div className="flex justify-around items-center h-16">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
+        <div className="flex h-16 items-center justify-around">
           {mainNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -46,10 +42,8 @@ export function MobileNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center justify-center flex-1 h-full gap-1',
-                  isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-primary'
+                  'flex h-full flex-1 flex-col items-center justify-center gap-1',
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -57,25 +51,25 @@ export function MobileNav() {
               </Link>
             );
           })}
-          
+
           {/* More Menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className="flex flex-col items-center justify-center flex-1 h-full gap-1 text-muted-foreground hover:text-primary">
+              <button className="flex h-full flex-1 flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary">
                 <MoreHorizontal className="h-5 w-5" />
                 <span className="text-xs">More</span>
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[80vh]">
               <div className="py-4">
-                <h3 className="text-lg font-semibold mb-4">All Pages</h3>
+                <h3 className="mb-4 text-lg font-semibold">All Pages</h3>
                 <nav className="grid gap-2">
                   {allNavItems.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
+                        'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors',
                         pathname === item.href
                           ? 'bg-primary text-primary-foreground'
                           : 'hover:bg-accent'
@@ -93,7 +87,7 @@ export function MobileNav() {
       </nav>
 
       {/* Spacer for bottom nav on mobile */}
-      <div className="md:hidden h-16" />
+      <div className="h-16 md:hidden" />
     </>
   );
 }

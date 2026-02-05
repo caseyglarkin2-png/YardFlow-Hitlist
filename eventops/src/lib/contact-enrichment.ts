@@ -1,6 +1,6 @@
 /**
  * Multi-Source Contact Enrichment Service
- * 
+ *
  * Aggregates data from:
  * - Hunter.io (email finding)
  * - Clearbit (company + person data)
@@ -17,27 +17,27 @@ export interface EnrichedContact {
   email: string | null;
   emailConfidence: number;
   emailSource: string;
-  
+
   // Professional info
   title: string | null;
   seniority: string | null;
   department: string | null;
-  
+
   // Social profiles
   linkedInUrl: string | null;
   twitterUrl: string | null;
   githubUrl: string | null;
-  
+
   // Company context
   companyName: string;
   companyDomain: string;
   companySize: string | null;
   companyIndustry: string | null;
-  
+
   // Contact methods
   phoneNumber: string | null;
   mobileNumber: string | null;
-  
+
   // Metadata
   lastEnriched: Date;
   dataQualityScore: number; // 0-100
@@ -70,15 +70,15 @@ export async function enrichContact(
 
   const _startTime = Date.now();
   const sources: string[] = [];
-  
+
   // Parse name
   const nameParts = name.trim().split(/\s+/);
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
-  
+
   // Guess company domain
   const companyDomain = guessDomain(companyName);
-  
+
   // Initialize result
   const result: EnrichedContact = {
     name,
@@ -105,11 +105,11 @@ export async function enrichContact(
   // 1. Try Hunter.io for email
   if (useHunter && process.env.HUNTER_API_KEY) {
     try {
-      const hunterResult = await Promise.race([
+      const hunterResult = (await Promise.race([
         findEmail(firstName, lastName, companyDomain),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
-      ]) as any;
-      
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout)),
+      ])) as any;
+
       if (hunterResult.email) {
         result.email = hunterResult.email;
         result.emailConfidence = hunterResult.confidence;
@@ -194,18 +194,22 @@ async function enrichWithClearbit(email: string): Promise<any> {
 
   const response = await fetch(`https://person.clearbit.com/v2/combined/find?email=${email}`, {
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
     },
   });
 
   if (!response.ok) return null;
-  
+
   const data = await response.json();
   return {
     title: data.person?.employment?.title,
     seniority: data.person?.employment?.seniority,
-    linkedin: data.person?.linkedin?.handle ? `https://linkedin.com/in/${data.person.linkedin.handle}` : null,
-    twitter: data.person?.twitter?.handle ? `https://twitter.com/${data.person.twitter.handle}` : null,
+    linkedin: data.person?.linkedin?.handle
+      ? `https://linkedin.com/in/${data.person.linkedin.handle}`
+      : null,
+    twitter: data.person?.twitter?.handle
+      ? `https://twitter.com/${data.person.twitter.handle}`
+      : null,
     companySize: data.company?.metrics?.employees,
   };
 }
@@ -213,10 +217,13 @@ async function enrichWithClearbit(email: string): Promise<any> {
 /**
  * LinkedIn profile finder using web search
  */
-async function findLinkedInProfile(name: string, companyName: string): Promise<{ url: string; title?: string } | null> {
+async function findLinkedInProfile(
+  name: string,
+  companyName: string
+): Promise<{ url: string; title?: string } | null> {
   // Use Google Custom Search API or SerpAPI
   const searchQuery = `${name} ${companyName} site:linkedin.com/in`;
-  
+
   // If we have SerpAPI key
   if (process.env.SERPAPI_KEY) {
     try {
@@ -225,7 +232,7 @@ async function findLinkedInProfile(name: string, companyName: string): Promise<{
       );
       const data = await response.json();
       const firstResult = data.organic_results?.[0];
-      
+
       if (firstResult && firstResult.link.includes('linkedin.com/in/')) {
         return {
           url: firstResult.link,
@@ -236,7 +243,7 @@ async function findLinkedInProfile(name: string, companyName: string): Promise<{
       console.warn('SerpAPI search failed:', error);
     }
   }
-  
+
   return null;
 }
 
@@ -263,18 +270,20 @@ async function smartGuessContactInfo(
     try {
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      
+
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        messages: [{
-          role: 'user',
-          content: `Given a person named "${firstName} ${lastName}" at company "${companyName}" with domain "${domain}", which email pattern is most likely?
+        messages: [
+          {
+            role: 'user',
+            content: `Given a person named "${firstName} ${lastName}" at company "${companyName}" with domain "${domain}", which email pattern is most likely?
           
 Options:
 ${patterns.map((p, i) => `${i + 1}. ${p}`).join('\n')}
 
-Respond with just the number (1-${patterns.length}) of the most likely pattern.`
-        }],
+Respond with just the number (1-${patterns.length}) of the most likely pattern.`,
+          },
+        ],
         temperature: 0.3,
       });
 
@@ -300,7 +309,10 @@ Respond with just the number (1-${patterns.length}) of the most likely pattern.`
 /**
  * Find social media profiles via web search
  */
-async function findSocialProfiles(name: string, _companyName: string): Promise<{
+async function findSocialProfiles(
+  name: string,
+  _companyName: string
+): Promise<{
   linkedin: string | null;
   twitter: string | null;
   github: string | null;
@@ -315,13 +327,13 @@ async function findSocialProfiles(name: string, _companyName: string): Promise<{
 
   // Would use SerpAPI or similar here
   // For now, construct likely URLs
-  
+
   const linkedInSlug = name.toLowerCase().replace(/\s+/g, '-');
   result.linkedin = `https://linkedin.com/in/${linkedInSlug}`;
-  
+
   const twitterHandle = name.toLowerCase().replace(/\s+/g, '');
   result.twitter = `https://twitter.com/${twitterHandle}`;
-  
+
   return result;
 }
 
@@ -330,25 +342,25 @@ async function findSocialProfiles(name: string, _companyName: string): Promise<{
  */
 function calculateDataQuality(contact: EnrichedContact): number {
   let score = 0;
-  
+
   // Email is most important
   if (contact.email) {
     score += 40;
     score += Math.min(contact.emailConfidence * 0.3, 30); // Up to 30 more for confidence
   }
-  
+
   // Social profiles
   if (contact.linkedInUrl) score += 15;
   if (contact.twitterUrl) score += 5;
-  
+
   // Professional info
   if (contact.title) score += 10;
   if (contact.seniority) score += 5;
   if (contact.department) score += 5;
-  
+
   // Contact methods
   if (contact.phoneNumber) score += 10;
-  
+
   return Math.min(score, 100);
 }
 
@@ -361,20 +373,20 @@ export async function batchEnrichContacts(
 ): Promise<EnrichedContact[]> {
   const { concurrency = 3, ...enrichOptions } = options;
   const results: EnrichedContact[] = [];
-  
+
   // Process in batches
   for (let i = 0; i < contacts.length; i += concurrency) {
     const batch = contacts.slice(i, i + concurrency);
     const batchResults = await Promise.all(
-      batch.map(c => enrichContact(c.name, c.companyName, enrichOptions))
+      batch.map((c) => enrichContact(c.name, c.companyName, enrichOptions))
     );
     results.push(...batchResults);
-    
+
     // Rate limiting between batches
     if (i + concurrency < contacts.length) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
-  
+
   return results;
 }

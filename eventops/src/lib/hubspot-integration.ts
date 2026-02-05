@@ -191,29 +191,26 @@ export async function findHubSpotContactByEmail(
   apiKey: string
 ): Promise<{ id?: number; found: boolean }> {
   try {
-    const response = await fetch(
-      `https://api.hubapi.com/crm/v3/objects/contacts/search`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          filterGroups: [
-            {
-              filters: [
-                {
-                  propertyName: 'email',
-                  operator: 'EQ',
-                  value: email,
-                },
-              ],
-            },
-          ],
-        }),
-      }
-    );
+    const response = await fetch(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        filterGroups: [
+          {
+            filters: [
+              {
+                propertyName: 'email',
+                operator: 'EQ',
+                value: email,
+              },
+            ],
+          },
+        ],
+      }),
+    });
 
     const data = await response.json();
     if (data.results && data.results.length > 0) {

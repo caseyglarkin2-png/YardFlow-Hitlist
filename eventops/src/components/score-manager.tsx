@@ -69,13 +69,9 @@ export function ScoreManager({ accountId, currentScore }: Props) {
   return (
     <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
       <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-base font-semibold leading-6 text-gray-900">
-          ICP Score Management
-        </h3>
+        <h3 className="text-base font-semibold leading-6 text-gray-900">ICP Score Management</h3>
         <div className="mt-2 max-w-xl text-sm text-gray-500">
-          <p>
-            Calculate score automatically based on contacts and data, or set manually.
-          </p>
+          <p>Calculate score automatically based on contacts and data, or set manually.</p>
         </div>
         <div className="mt-5 flex gap-3">
           <button
@@ -94,8 +90,8 @@ export function ScoreManager({ accountId, currentScore }: Props) {
         </div>
 
         {breakdown && (
-          <div className="mt-6 bg-blue-50 p-4 rounded-md">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">
+          <div className="mt-6 rounded-md bg-blue-50 p-4">
+            <h4 className="mb-2 text-sm font-medium text-blue-900">
               Score Breakdown (Total: {breakdown.total})
             </h4>
             <dl className="grid grid-cols-2 gap-4 text-sm">
@@ -122,9 +118,7 @@ export function ScoreManager({ accountId, currentScore }: Props) {
         {showOverrideForm && (
           <form onSubmit={handleOverride} className="mt-6 space-y-4 border-t pt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                New Score (0-100)
-              </label>
+              <label className="block text-sm font-medium text-gray-700">New Score (0-100)</label>
               <input
                 type="number"
                 min="0"
@@ -136,9 +130,7 @@ export function ScoreManager({ accountId, currentScore }: Props) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Reason (Optional)
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Reason (Optional)</label>
               <textarea
                 value={overrideNotes}
                 onChange={(e) => setOverrideNotes(e.target.value)}

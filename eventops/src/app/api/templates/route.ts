@@ -121,7 +121,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, description, channel, tone, subject, template, isActive, isDefault } = parsed.data;
+    const { name, description, channel, tone, subject, template, isActive, isDefault } =
+      parsed.data;
 
     // If setting as default for a tone, unset other defaults
     if (isDefault && tone) {

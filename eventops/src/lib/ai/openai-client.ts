@@ -30,11 +30,7 @@ export async function generateWithOpenAI(
   prompt: string,
   options: OpenAIGenerateOptions = {}
 ): Promise<string> {
-  const {
-    temperature = 0.7,
-    maxTokens = 500,
-    model = 'gpt-4o-mini',
-  } = options;
+  const { temperature = 0.7, maxTokens = 500, model = 'gpt-4o-mini' } = options;
 
   const client = getClient();
 
@@ -43,7 +39,8 @@ export async function generateWithOpenAI(
     messages: [
       {
         role: 'system',
-        content: 'You are a helpful assistant that generates professional email content. Always respond with valid JSON containing "subject" and "content" fields.',
+        content:
+          'You are a helpful assistant that generates professional email content. Always respond with valid JSON containing "subject" and "content" fields.',
       },
       {
         role: 'user',

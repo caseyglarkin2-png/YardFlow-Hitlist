@@ -50,7 +50,7 @@ export function ExportSearchButton({
       onClick={handleExport}
       disabled={disabled || data.length === 0}
     >
-      <Download className="h-4 w-4 mr-2" />
+      <Download className="mr-2 h-4 w-4" />
       Export CSV ({data.length})
     </Button>
   );

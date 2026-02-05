@@ -11,35 +11,40 @@
 ## Current State Assessment
 
 ### ✅ Working
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Railway Web Service | ✅ Live | `yardflow-hitlist-production-2f41.up.railway.app` |
-| Railway Worker | ✅ Live | Heartbeat running |
-| PostgreSQL | ✅ Healthy | All migrations applied |
-| Redis | ✅ Healthy | BullMQ queues operational |
-| S2S Auth | ✅ Working | `x-service-key` header accepted |
-| `/api/templates` | ✅ Working | CRUD with tone support |
-| `/api/health` | ✅ Working | Full diagnostics |
+
+| Component           | Status     | Notes                                             |
+| ------------------- | ---------- | ------------------------------------------------- |
+| Railway Web Service | ✅ Live    | `yardflow-hitlist-production-2f41.up.railway.app` |
+| Railway Worker      | ✅ Live    | Heartbeat running                                 |
+| PostgreSQL          | ✅ Healthy | All migrations applied                            |
+| Redis               | ✅ Healthy | BullMQ queues operational                         |
+| S2S Auth            | ✅ Working | `x-service-key` header accepted                   |
+| `/api/templates`    | ✅ Working | CRUD with tone support                            |
+| `/api/health`       | ✅ Working | Full diagnostics                                  |
 
 ### ❌ Blocked / Needs Work
-| Component | Status | Blocker |
-|-----------|--------|---------|
-| `/api/ai/content/generate` | ❌ 500 | Gemini quota exhausted, model 1.5-flash deprecated |
-| Email sending | ⚠️ Unverified | Need E2E test with SendGrid |
-| Meeting attribution | ⚠️ Partial | Missing outreach→meeting link |
+
+| Component                  | Status        | Blocker                                            |
+| -------------------------- | ------------- | -------------------------------------------------- |
+| `/api/ai/content/generate` | ❌ 500        | Gemini quota exhausted, model 1.5-flash deprecated |
+| Email sending              | ⚠️ Unverified | Need E2E test with SendGrid                        |
+| Meeting attribution        | ⚠️ Partial    | Missing outreach→meeting link                      |
 
 ---
 
 ## Sprint 0: Pre-Flight (CRITICAL BLOCKERS)
+
 **Goal**: Unblock all critical paths before feature work
 
 ### T0.1: AI Provider Resolution ⚠️ BLOCKER
+
 **Priority**: P0  
 **Effort**: 2 hours
 
 **Problem**: Gemini API quota exhausted, `gemini-1.5-flash` model deprecated (now using `gemini-2.0-flash`)
 
 **Tasks**:
+
 1. Create unified AI provider abstraction in `@/lib/ai/provider.ts`
 2. Extract existing OpenAI client from `/api/insights/[personId]/route.ts` to `@/lib/ai/openai-client.ts`
 3. Implement provider fallback: Gemini → OpenAI → error
@@ -47,12 +52,14 @@
 5. Add `OPENAI_API_KEY` to Railway env vars
 
 **Files to Create/Modify**:
+
 - `src/lib/ai/provider.ts` (NEW)
 - `src/lib/ai/openai-client.ts` (NEW)
 - `src/lib/ai/gemini-client.ts` (MODIFY)
 - `src/app/api/ai/content/generate/route.ts` (MODIFY)
 
 **Validation**:
+
 ```bash
 # With Gemini available
 curl -X POST /api/ai/content/generate -d '{"type":"email","tone":"luis"...}'
@@ -63,6 +70,7 @@ curl -X POST /api/ai/content/generate -d '{"type":"email","tone":"luis"...}'
 ```
 
 **Tests**:
+
 - `tests/ai/provider-fallback.test.ts`
   - Gemini available → uses Gemini
   - Gemini 429 → falls back to OpenAI
@@ -71,18 +79,21 @@ curl -X POST /api/ai/content/generate -d '{"type":"email","tone":"luis"...}'
 ---
 
 ### T0.2: SendGrid Domain Verification
+
 **Priority**: P0  
 **Effort**: 1 hour
 
 **Problem**: Email deliverability unverified
 
 **Tasks**:
+
 1. Verify sending domain in SendGrid dashboard
 2. Check SPF, DKIM, DMARC records
 3. Test email delivery to Gmail inbox
 4. Verify email lands in inbox (not spam)
 
 **Validation**:
+
 ```bash
 curl -X POST /api/outreach/send-email \
   -H "x-service-key: $S2S_KEY" \
@@ -91,48 +102,58 @@ curl -X POST /api/outreach/send-email \
 ```
 
 **Tests**:
+
 - Manual: Email received in inbox (not spam folder)
 - `scripts/test-sendgrid-delivery.sh` - sends test email, checks for bounce
 
 ---
 
 ### T0.3: S2S Auth Validation Matrix
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Problem**: Inconsistent auth patterns across endpoints
 
 **Tasks**:
+
 1. Audit all `/api/**/route.ts` files for auth patterns
 2. Ensure all public endpoints use `authServiceOrSession()`
 3. Document which endpoints support S2S vs session-only
 4. Create auth matrix documentation
 
 **Files to Modify**:
+
 - `docs/current/AUTH_MATRIX.md` (NEW)
 
 **Validation**:
+
 - All documented endpoints respond correctly to `x-service-key` header
 
 ---
 
 ## Sprint 1: Infrastructure Stabilization
+
 **Goal**: Production-grade observability and reliability  
 **Demo**: Health dashboard showing all services green with Gemini status
 
 ### T1.1: Health Endpoint - Add AI Provider Check
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Add Gemini API connectivity check (list models call)
 2. Add quota status indicator (rate limit remaining)
 3. Add OpenAI fallback status
 
 **Files to Modify**:
+
 - `src/app/api/health/route.ts`
 
 **Validation**:
+
 ```bash
 curl /api/health | jq '.checks.ai'
 # Returns: {"gemini":{"status":"ok"},"openai":{"status":"ok"}}
@@ -140,25 +161,30 @@ curl /api/health | jq '.checks.ai'
 ```
 
 **Tests**:
+
 - `tests/api/health.test.ts` - AI check returns valid status
 
 ---
 
 ### T1.2: Request ID Propagation
+
 **Priority**: P2  
 **Effort**: 2 hours
 
 **Tasks**:
+
 1. Generate request ID in middleware for all API routes
 2. Include `x-request-id` in all responses
 3. Log request ID in all error logs
 4. Include in error JSON responses
 
 **Files to Create/Modify**:
+
 - `src/middleware.ts` (MODIFY)
 - All API routes (add requestId to error responses)
 
 **Validation**:
+
 ```bash
 curl -v /api/templates
 # Response headers include: x-request-id: abc123
@@ -166,38 +192,46 @@ curl -v /api/templates
 ```
 
 **Tests**:
+
 - `tests/middleware/request-id.test.ts`
 
 ---
 
 ### T1.3: Environment Variable Audit
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Update `docs/current/ENV_VARS.md` with ALL variables
 2. Add `GEMINI_API_KEY`, `OPENAI_API_KEY`, `CALENDLY_LINK` to critical list
 3. Add startup validation in `src/lib/env.ts`
 4. Worker fails fast with clear message if critical vars missing
 
 **Files to Modify**:
+
 - `src/lib/env.ts`
 - `docs/current/ENV_VARS.md`
 
 **Validation**:
+
 - Missing critical var → startup error with specific message
 - `/api/health` shows environment check
 
 **Tests**:
+
 - `tests/lib/env.test.ts` - validates schema
 
 ---
 
 ## Sprint 2: AI Content Generation
+
 **Goal**: Reliable AI email generation with fallback  
 **Demo**: Generate emails with all 3 voices (luis, professional, challenger)
 
 ### T2.1: Multi-Provider AI Client
+
 **Priority**: P0 (Part of T0.1)  
 **Effort**: 3 hours
 
@@ -206,20 +240,24 @@ See T0.1 for details.
 ---
 
 ### T2.2: Rate Limit User Experience
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Detect Gemini 429 response
 2. Return user-friendly error with retry time
 3. Trigger fallback to OpenAI automatically
 4. Log rate limit events for monitoring
 
 **Files to Modify**:
+
 - `src/lib/ai/gemini-client.ts`
 - `src/app/api/ai/content/generate/route.ts`
 
 **Validation**:
+
 ```bash
 # When rate limited:
 curl /api/ai/content/generate
@@ -227,15 +265,18 @@ curl /api/ai/content/generate
 ```
 
 **Tests**:
+
 - `tests/ai/rate-limit.test.ts`
 
 ---
 
 ### T2.3: Voice Output Validation
+
 **Priority**: P1  
 **Effort**: 2 hours
 
 **Tasks**:
+
 1. Validate Luis voice includes Calendly link
 2. Validate subject length ≤ 60 chars
 3. Validate body length ≤ 500 chars for Luis
@@ -243,33 +284,40 @@ curl /api/ai/content/generate
 5. Apply automatic constraints if still invalid
 
 **Files to Modify**:
+
 - `src/lib/ai/content-generator.ts` (already has some of this)
 
 **Validation**:
+
 ```bash
 # Luis tone always includes Calendly link
 # Subject never exceeds 60 chars
 ```
 
 **Tests**:
+
 - `tests/ai/voice-validation.test.ts`
 
 ---
 
 ### T2.4: E2E AI Content Test Script
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Create `scripts/test-ai-content.sh`
 2. Test all 3 voice types against production
 3. Validate response structure
 4. Report pass/fail with details
 
 **Files to Create**:
+
 - `scripts/test-ai-content.sh`
 
 **Validation**:
+
 ```bash
 ./scripts/test-ai-content.sh
 # Output:
@@ -281,16 +329,19 @@ curl /api/ai/content/generate
 ---
 
 ## Sprint 3: Template Management
+
 **Goal**: Complete template CRUD lifecycle  
 **Demo**: Create, update, delete templates with tone assignment
 
 ### T3.1: Template Update Endpoint
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ Already implemented in `src/app/api/templates/[id]/route.ts`
 
 **Validation**:
+
 ```bash
 curl -X PATCH /api/templates/abc123 \
   -d '{"name":"Updated Name"}'
@@ -298,25 +349,30 @@ curl -X PATCH /api/templates/abc123 \
 ```
 
 **Tests**:
+
 - `tests/api/templates-update.test.ts`
 
 ---
 
 ### T3.2: Template Delete Endpoint
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ Already implemented
 
 **Tasks**:
+
 1. Add check for template in active sequence
 2. Return 409 Conflict if in use
 3. Allow force delete with `?force=true`
 
 **Files to Modify**:
+
 - `src/app/api/templates/[id]/route.ts`
 
 **Validation**:
+
 ```bash
 # Template in use:
 curl -X DELETE /api/templates/abc123
@@ -328,17 +384,20 @@ curl -X DELETE /api/templates/abc123?force=true
 ```
 
 **Tests**:
+
 - `tests/api/templates-delete.test.ts`
 
 ---
 
 ### T3.3: Default Template Logic
+
 **Priority**: P2  
 **Effort**: 1 hour
 
 **Status**: ✅ Already implemented (setting isDefault unsets others)
 
 **Validation**:
+
 ```bash
 # Set template A as default for LUIS
 # Set template B as default for LUIS
@@ -346,19 +405,23 @@ curl -X DELETE /api/templates/abc123?force=true
 ```
 
 **Tests**:
+
 - `tests/api/templates-default.test.ts`
 
 ---
 
 ## Sprint 4: Email Pipeline Verification
+
 **Goal**: Verified email sending and tracking  
 **Demo**: Send email, receive it, see open/click tracking
 
 ### T4.1: Send Email E2E Verification
+
 **Priority**: P0  
 **Effort**: 2 hours
 
 **Tasks**:
+
 1. Test `/api/outreach/send-email` endpoint
 2. Verify email arrives in real inbox
 3. Verify SendGrid webhook updates status on open
@@ -367,6 +430,7 @@ curl -X DELETE /api/templates/abc123?force=true
 **Files**: Verification only (already implemented)
 
 **Validation**:
+
 ```bash
 # 1. Send email
 curl -X POST /api/outreach/send-email \
@@ -379,21 +443,25 @@ curl /api/outreach/xxx
 ```
 
 **Tests**:
+
 - `tests/e2e/email-flow.test.ts` (integration test)
 
 ---
 
 ### T4.2: Bulk Email Verification
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Test `/api/outreach/send-bulk` endpoint
 2. Verify batch of 5 emails all sent
 3. Verify queue processing completes
 4. Check rate limiting works
 
 **Validation**:
+
 ```bash
 curl -X POST /api/outreach/send-bulk \
   -d '{"outreachIds":["a","b","c","d","e"]}'
@@ -401,24 +469,29 @@ curl -X POST /api/outreach/send-bulk \
 ```
 
 **Tests**:
+
 - `tests/api/outreach-bulk.test.ts`
 
 ---
 
 ### T4.3: Queue Dashboard Endpoint
+
 **Priority**: P2  
 **Effort**: 2 hours
 
 **Tasks**:
+
 1. Create `/api/queue/status` endpoint
 2. Return counts per queue: pending, active, completed, failed
 3. Support S2S auth
 4. Add to health check
 
 **Files to Create**:
+
 - `src/app/api/queue/status/route.ts`
 
 **Validation**:
+
 ```bash
 curl /api/queue/status -H "x-service-key: $KEY"
 # Returns:
@@ -430,30 +503,36 @@ curl /api/queue/status -H "x-service-key: $KEY"
 ```
 
 **Tests**:
+
 - `tests/api/queue-status.test.ts`
 
 ---
 
 ## Sprint 5: Prospect & Account Management
+
 **Goal**: Full prospect lifecycle for event targeting  
 **Demo**: Import prospects, enrich, score, assign
 
 ### T5.1: Prospect Import with Deduplication
+
 **Priority**: P1  
 **Effort**: 2 hours
 
 **Status**: ⚠️ Partial - import exists, needs dedupe logic
 
 **Tasks**:
+
 1. Add email uniqueness check
 2. Log duplicates (don't fail import)
 3. Add preview mode (dry run)
 4. Return import summary
 
 **Files to Modify**:
+
 - `src/app/api/import/execute/route.ts`
 
 **Validation**:
+
 ```bash
 curl -X POST /api/import/execute \
   -d '{"type":"preview","data":[...]}'
@@ -461,22 +540,26 @@ curl -X POST /api/import/execute \
 ```
 
 **Tests**:
+
 - `tests/api/import-dedupe.test.ts`
 
 ---
 
 ### T5.2: Account Enrichment Verification
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ Exists - verify working
 
 **Tasks**:
+
 1. Test `/api/enrichment/[accountId]` endpoint
 2. Verify `company_dossiers` table populated
 3. Check enrichment queue processes
 
 **Validation**:
+
 ```bash
 curl -X POST /api/enrichment/account123
 # Later:
@@ -485,22 +568,26 @@ curl /api/enrichment/account123
 ```
 
 **Tests**:
+
 - `tests/api/enrichment.test.ts`
 
 ---
 
 ### T5.3: ICP Scoring Verification
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ Field exists on `target_accounts`
 
 **Tasks**:
+
 1. Verify scoring logic runs during import
 2. Verify sortable in list endpoint
 3. Document scoring criteria
 
 **Validation**:
+
 ```bash
 curl /api/accounts?sortBy=icpScore&order=desc
 # Returns accounts sorted by ICP score
@@ -509,17 +596,20 @@ curl /api/accounts?sortBy=icpScore&order=desc
 ---
 
 ### T5.4: Prospect Assignment Verification
+
 **Priority**: P2  
 **Effort**: 1 hour
 
 **Status**: ✅ `assignedTo` field exists
 
 **Tasks**:
+
 1. Verify PATCH endpoint accepts `assignedTo`
 2. Verify filter by assignee works
 3. Test reassignment
 
 **Validation**:
+
 ```bash
 curl -X PATCH /api/people/xxx -d '{"assignedTo":"user123"}'
 curl /api/people?assignedTo=user123
@@ -528,23 +618,27 @@ curl /api/people?assignedTo=user123
 ---
 
 ### T5.5: Activity Timeline API
+
 **Priority**: P1  
 **Effort**: 3 hours
 
 **Status**: ⚠️ Table exists, needs population and endpoint
 
 **Tasks**:
+
 1. Add activity logging to outreach send
 2. Add activity logging to meeting create
 3. Create `/api/activity` endpoint
 4. Support filtering by entityId
 
 **Files to Create/Modify**:
+
 - `src/app/api/activity/route.ts` (NEW)
 - `src/app/api/outreach/send-email/route.ts` (add logging)
 - `src/app/api/meetings/route.ts` (add logging)
 
 **Validation**:
+
 ```bash
 curl /api/activity?personId=xxx
 # Returns:
@@ -556,26 +650,31 @@ curl /api/activity?personId=xxx
 ```
 
 **Tests**:
+
 - `tests/api/activity.test.ts`
 
 ---
 
 ## Sprint 6: Meeting Attribution (Event ROI)
+
 **Goal**: Track meetings booked from outreach  
 **Demo**: See which emails led to meetings
 
 ### T6.1: Meeting Creation Verification
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ Exists - verify Calendly webhook working
 
 **Tasks**:
+
 1. Test Calendly webhook integration
 2. Verify meeting record created with personId
 3. Verify proper field mapping
 
 **Validation**:
+
 ```bash
 # Book via Calendly
 # Check meeting created:
@@ -586,70 +685,84 @@ curl /api/meetings?personId=xxx
 ---
 
 ### T6.2: Meeting-to-Outreach Attribution ⭐ KEY METRIC
+
 **Priority**: P0  
 **Effort**: 3 hours
 
 **Status**: ❌ Missing
 
 **Tasks**:
+
 1. When meeting booked, find last outreach to that person
 2. Add `sourceOutreachId` to Meeting model
 3. Link meeting to source outreach
 4. Add attribution to meeting response
 
 **Files to Modify**:
+
 - `prisma/schema.prisma` (add sourceOutreachId)
 - `src/app/api/webhooks/calendly/route.ts`
 - `src/app/api/meetings/route.ts`
 
 **Validation**:
+
 ```bash
 curl /api/meetings/xxx
 # Returns: {"id":"xxx","personId":"yyy","sourceOutreachId":"zzz",...}
 ```
 
 **Tests**:
+
 - `tests/api/meeting-attribution.test.ts`
 
 ---
 
 ### T6.3: Meeting Outcomes
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Add outcome enum: qualified, not_qualified, follow_up, no_show
 2. Add PATCH endpoint for outcome update
 3. Add dealStage progression
 
 **Files to Modify**:
+
 - `src/app/api/meetings/[id]/route.ts`
 
 **Validation**:
+
 ```bash
 curl -X PATCH /api/meetings/xxx \
   -d '{"outcome":"qualified","dealStage":"proposal"}'
 ```
 
 **Tests**:
+
 - `tests/api/meeting-outcomes.test.ts`
 
 ---
 
 ### T6.4: Attribution Report Endpoint
+
 **Priority**: P1  
 **Effort**: 3 hours
 
 **Tasks**:
+
 1. Create `/api/reports/attribution` endpoint
 2. Return meetings by campaign
 3. Calculate conversion rates
 4. Include pipeline value if available
 
 **Files to Create**:
+
 - `src/app/api/reports/attribution/route.ts`
 
 **Validation**:
+
 ```bash
 curl /api/reports/attribution?eventId=manifest2026
 # Returns:
@@ -662,26 +775,31 @@ curl /api/reports/attribution?eventId=manifest2026
 ```
 
 **Tests**:
+
 - `tests/api/reports-attribution.test.ts`
 
 ---
 
 ## Sprint 7: Sequence Automation
+
 **Goal**: Multi-step email sequences  
 **Demo**: Create sequence, enroll prospects, see automated sends
 
 ### T7.1: Sequence Builder Verification
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ POST /api/sequences exists
 
 **Tasks**:
+
 1. Verify sequence creation with steps
 2. Verify step delay configuration
 3. Document step schema
 
 **Validation**:
+
 ```bash
 curl -X POST /api/sequences \
   -d '{"name":"Intro Sequence","steps":[
@@ -694,21 +812,25 @@ curl -X POST /api/sequences \
 ---
 
 ### T7.2: Enrollment API
+
 **Priority**: P0  
 **Effort**: 3 hours
 
 **Status**: ⚠️ Needs verification/implementation
 
 **Tasks**:
+
 1. Create POST `/api/sequences/:id/enroll`
 2. Accept personId or personIds array
 3. Create sequence_enrollments records
 4. Schedule first step
 
 **Files to Create/Modify**:
+
 - `src/app/api/sequences/[id]/enroll/route.ts` (NEW or MODIFY)
 
 **Validation**:
+
 ```bash
 curl -X POST /api/sequences/seq123/enroll \
   -d '{"personIds":["p1","p2","p3"]}'
@@ -716,20 +838,24 @@ curl -X POST /api/sequences/seq123/enroll \
 ```
 
 **Tests**:
+
 - `tests/api/sequence-enrollment.test.ts`
 
 ---
 
 ### T7.3: Sequence Execution Verification
+
 **Priority**: P1  
 **Effort**: 2 hours
 
 **Tasks**:
+
 1. Verify worker processes sequence-steps queue
 2. Verify delay scheduling works
 3. Test step 2 sends after delay
 
 **Validation**:
+
 - Enroll prospect
 - Step 1 sends immediately
 - Step 2 sends after configured delay
@@ -737,18 +863,22 @@ curl -X POST /api/sequences/seq123/enroll \
 ---
 
 ### T7.4: Sequence Exit (Manual)
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Tasks**:
+
 1. Add PATCH endpoint for enrollment status
 2. Support manual exit (replied, meeting_booked, manual)
 3. Cancel pending scheduled steps
 
 **Files to Modify**:
+
 - `src/app/api/sequences/enrollments/[id]/route.ts`
 
 **Validation**:
+
 ```bash
 curl -X PATCH /api/sequences/enrollments/enroll123 \
   -d '{"status":"exited","exitReason":"meeting_booked"}'
@@ -758,21 +888,25 @@ curl -X PATCH /api/sequences/enrollments/enroll123 \
 ---
 
 ## Sprint 8: Manifest 2026 Event Mode
+
 **Goal**: Event-specific features ready  
 **Demo**: Event readiness dashboard, live metrics
 
 ### T8.1: Event Context Verification
+
 **Priority**: P1  
 **Effort**: 1 hour
 
 **Status**: ✅ `activeEventId` on users works
 
 **Tasks**:
+
 1. Verify all queries filter by eventId
 2. Test switching events changes visible data
 3. Document event context behavior
 
 **Validation**:
+
 ```bash
 # Switch active event
 curl -X PATCH /api/users/me -d '{"activeEventId":"manifest2026"}'
@@ -782,10 +916,12 @@ curl -X PATCH /api/users/me -d '{"activeEventId":"manifest2026"}'
 ---
 
 ### T8.2: Pre-Event Readiness Checklist
+
 **Priority**: P0  
 **Effort**: 3 hours
 
 **Tasks**:
+
 1. Create `/api/manifest/readiness` endpoint
 2. Check all launch criteria:
    - Accounts imported (count > 0)
@@ -797,9 +933,11 @@ curl -X PATCH /api/users/me -d '{"activeEventId":"manifest2026"}'
 3. Return checklist with status per item
 
 **Files to Create**:
+
 - `src/app/api/manifest/readiness/route.ts`
 
 **Validation**:
+
 ```bash
 curl /api/manifest/readiness
 # Returns:
@@ -817,15 +955,18 @@ curl /api/manifest/readiness
 ```
 
 **Tests**:
+
 - `tests/api/manifest-readiness.test.ts`
 
 ---
 
 ### T8.3: Live Dashboard Metrics
+
 **Priority**: P1  
 **Effort**: 3 hours
 
 **Tasks**:
+
 1. Create `/api/manifest/live-stats` endpoint
 2. Return real-time metrics:
    - emails_sent_today
@@ -836,9 +977,11 @@ curl /api/manifest/readiness
 4. Support SSE or polling
 
 **Files to Create**:
+
 - `src/app/api/manifest/live-stats/route.ts`
 
 **Validation**:
+
 ```bash
 curl /api/manifest/live-stats
 # Returns:
@@ -853,28 +996,34 @@ curl /api/manifest/live-stats
 ```
 
 **Tests**:
+
 - `tests/api/manifest-live-stats.test.ts`
 
 ---
 
 ## Sprint 9: Post-Event Polish (After Manifest)
+
 **Goal**: Nice-to-have features and polish
 
 ### T9.1: Sequence Analytics
+
 - Step completion rates
 - Drop-off analysis
 - A/B test results
 
 ### T9.2: Badge Scanning Integration
+
 - API to receive badge scan data
 - Auto-create prospects from scans
 
 ### T9.3: Reply Detection
+
 - Gmail API integration
 - Inbound email webhook
 - Auto-exit sequences on reply
 
 ### T9.4: Database Migration Tooling
+
 - Automated migration scripts
 - Rollback procedures
 
@@ -938,17 +1087,17 @@ Week 4: T8.2 → T8.3 (Event mode, Go-live)
 
 ## Test Coverage Requirements
 
-| Sprint | Required Tests |
-|--------|---------------|
-| 0 | AI provider fallback, SendGrid delivery |
-| 1 | Health endpoint, env validation |
-| 2 | Voice validation, rate limit handling |
-| 3 | Template CRUD operations |
-| 4 | Email send E2E, queue status |
-| 5 | Import dedupe, activity logging |
-| 6 | Meeting attribution, outcomes |
-| 7 | Enrollment, sequence execution |
-| 8 | Readiness checks, live stats |
+| Sprint | Required Tests                          |
+| ------ | --------------------------------------- |
+| 0      | AI provider fallback, SendGrid delivery |
+| 1      | Health endpoint, env validation         |
+| 2      | Voice validation, rate limit handling   |
+| 3      | Template CRUD operations                |
+| 4      | Email send E2E, queue status            |
+| 5      | Import dedupe, activity logging         |
+| 6      | Meeting attribution, outcomes           |
+| 7      | Enrollment, sequence execution          |
+| 8      | Readiness checks, live stats            |
 
 ---
 

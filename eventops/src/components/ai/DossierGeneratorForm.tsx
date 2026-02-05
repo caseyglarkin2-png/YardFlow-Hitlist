@@ -4,7 +4,13 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Wand2 } from 'lucide-react';
 
@@ -86,7 +92,10 @@ export function DossierGeneratorForm({ onGenerate, companies }: DossierGenerator
         </Button>
 
         {dryRun && (
-          <Badge variant="outline" className="w-full justify-center bg-yellow-50 text-yellow-700 border-yellow-200">
+          <Badge
+            variant="outline"
+            className="w-full justify-center border-yellow-200 bg-yellow-50 text-yellow-700"
+          >
             Preview Mode - Results won't be saved
           </Badge>
         )}

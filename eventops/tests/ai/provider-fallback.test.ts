@@ -42,7 +42,9 @@ describe('AI Provider Fallback', () => {
     };
     vi.mocked(getGeminiClient).mockReturnValue(mockGemini as any);
     vi.mocked(isOpenAIAvailable).mockReturnValue(true);
-    vi.mocked(generateWithOpenAI).mockResolvedValue('{"subject":"Test","content":"Hello from OpenAI"}');
+    vi.mocked(generateWithOpenAI).mockResolvedValue(
+      '{"subject":"Test","content":"Hello from OpenAI"}'
+    );
 
     const result = await generateContent('test prompt');
 

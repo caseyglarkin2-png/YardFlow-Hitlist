@@ -4,16 +4,16 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  TrendingUp, 
-  Mail, 
-  Phone, 
-  Linkedin, 
+import {
+  TrendingUp,
+  Mail,
+  Phone,
+  Linkedin,
   Target,
   Flame,
   Clock,
   Building2,
-  User
+  User,
 } from 'lucide-react';
 
 interface TopTarget {
@@ -63,24 +63,24 @@ export default function TopTargetsDashboard() {
 
   function getActionLabel(action: string): string {
     const labels: Record<string, string> = {
-      'INITIAL_OUTREACH': 'Send first email',
-      'FOLLOW_UP': 'Follow up',
-      'BOOK_MEETING': 'Book meeting',
-      'RE_ENGAGE': 'Re-engage',
-      'NURTURE': 'Continue nurturing',
-      'WAIT_FOR_REPLY': 'Wait for reply',
+      INITIAL_OUTREACH: 'Send first email',
+      FOLLOW_UP: 'Follow up',
+      BOOK_MEETING: 'Book meeting',
+      RE_ENGAGE: 'Re-engage',
+      NURTURE: 'Continue nurturing',
+      WAIT_FOR_REPLY: 'Wait for reply',
     };
     return labels[action] || action;
   }
 
   function getActionColor(action: string): string {
     const colors: Record<string, string> = {
-      'INITIAL_OUTREACH': 'bg-green-100 text-green-800',
-      'FOLLOW_UP': 'bg-yellow-100 text-yellow-800',
-      'BOOK_MEETING': 'bg-purple-100 text-purple-800',
-      'RE_ENGAGE': 'bg-orange-100 text-orange-800',
-      'NURTURE': 'bg-blue-100 text-blue-800',
-      'WAIT_FOR_REPLY': 'bg-gray-100 text-gray-800',
+      INITIAL_OUTREACH: 'bg-green-100 text-green-800',
+      FOLLOW_UP: 'bg-yellow-100 text-yellow-800',
+      BOOK_MEETING: 'bg-purple-100 text-purple-800',
+      RE_ENGAGE: 'bg-orange-100 text-orange-800',
+      NURTURE: 'bg-blue-100 text-blue-800',
+      WAIT_FOR_REPLY: 'bg-gray-100 text-gray-800',
     };
     return colors[action] || 'bg-gray-100 text-gray-800';
   }
@@ -92,8 +92,8 @@ export default function TopTargetsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="flex h-96 items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-gray-900"></div>
       </div>
     );
   }
@@ -101,18 +101,16 @@ export default function TopTargetsDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Top Targets</h1>
-          <p className="text-gray-600 mt-1">Your highest priority prospects</p>
+          <p className="mt-1 text-gray-600">Your highest priority prospects</p>
         </div>
-        <Button onClick={loadTargets}>
-          Refresh
-        </Button>
+        <Button onClick={loadTargets}>Refresh</Button>
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Hot Leads</CardTitle>
@@ -121,7 +119,7 @@ export default function TopTargetsDashboard() {
             <div className="flex items-center space-x-2">
               <Flame className="h-4 w-4 text-red-600" />
               <span className="text-2xl font-bold">
-                {targets.filter(t => t.engagementHeat >= 80).length}
+                {targets.filter((t) => t.engagementHeat >= 80).length}
               </span>
             </div>
           </CardContent>
@@ -148,9 +146,7 @@ export default function TopTargetsDashboard() {
           <CardContent>
             <div className="flex items-center space-x-2">
               <Mail className="h-4 w-4 text-green-600" />
-              <span className="text-2xl font-bold">
-                {targets.filter(t => t.email).length}
-              </span>
+              <span className="text-2xl font-bold">{targets.filter((t) => t.email).length}</span>
             </div>
           </CardContent>
         </Card>
@@ -163,7 +159,7 @@ export default function TopTargetsDashboard() {
             <div className="flex items-center space-x-2">
               <Linkedin className="h-4 w-4 text-blue-700" />
               <span className="text-2xl font-bold">
-                {targets.filter(t => t.linkedInUrl).length}
+                {targets.filter((t) => t.linkedInUrl).length}
               </span>
             </div>
           </CardContent>
@@ -171,31 +167,29 @@ export default function TopTargetsDashboard() {
       </div>
 
       {/* Targets Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {targets.map((target) => (
-          <Card 
+          <Card
             key={target.id}
-            className={`hover:shadow-lg transition-shadow cursor-pointer ${
+            className={`cursor-pointer transition-shadow hover:shadow-lg ${
               selectedTarget?.id === target.id ? 'ring-2 ring-blue-500' : ''
             }`}
             onClick={() => setSelectedTarget(target)}
           >
             <CardHeader>
-              <div className="flex justify-between items-start">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="flex items-center space-x-2">
                     <span>{target.name}</span>
-                    {target.engagementHeat >= 80 && (
-                      <Flame className="h-4 w-4 text-red-600" />
-                    )}
+                    {target.engagementHeat >= 80 && <Flame className="h-4 w-4 text-red-600" />}
                   </CardTitle>
                   {target.title && (
-                    <CardDescription className="flex items-center space-x-1 mt-1">
+                    <CardDescription className="mt-1 flex items-center space-x-1">
                       <User className="h-3 w-3" />
                       <span>{target.title}</span>
                     </CardDescription>
                   )}
-                  <CardDescription className="flex items-center space-x-1 mt-1">
+                  <CardDescription className="mt-1 flex items-center space-x-1">
                     <Building2 className="h-3 w-3" />
                     <span>{target.company}</span>
                   </CardDescription>
@@ -215,7 +209,7 @@ export default function TopTargetsDashboard() {
             </CardHeader>
             <CardContent>
               {/* Contact Methods */}
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="mb-3 flex flex-wrap gap-2">
                 {target.email && (
                   <Button
                     size="sm"
@@ -225,7 +219,7 @@ export default function TopTargetsDashboard() {
                       window.location.href = `mailto:${target.email}`;
                     }}
                   >
-                    <Mail className="h-3 w-3 mr-1" />
+                    <Mail className="mr-1 h-3 w-3" />
                     Email
                   </Button>
                 )}
@@ -238,7 +232,7 @@ export default function TopTargetsDashboard() {
                       window.open(target.linkedInUrl!, '_blank');
                     }}
                   >
-                    <Linkedin className="h-3 w-3 mr-1" />
+                    <Linkedin className="mr-1 h-3 w-3" />
                     LinkedIn
                   </Button>
                 )}
@@ -251,41 +245,39 @@ export default function TopTargetsDashboard() {
                       window.location.href = `tel:${target.phoneNumber}`;
                     }}
                   >
-                    <Phone className="h-3 w-3 mr-1" />
+                    <Phone className="mr-1 h-3 w-3" />
                     Call
                   </Button>
                 )}
               </div>
 
               {/* Next Action */}
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <Badge className={getActionColor(target.nextAction)}>
                   {getActionLabel(target.nextAction)}
                 </Badge>
                 {target.lastEngagement && (
-                  <span className="text-xs text-gray-500 flex items-center space-x-1">
+                  <span className="flex items-center space-x-1 text-xs text-gray-500">
                     <Clock className="h-3 w-3" />
-                    <span>
-                      {new Date(target.lastEngagement).toLocaleDateString()}
-                    </span>
+                    <span>{new Date(target.lastEngagement).toLocaleDateString()}</span>
                   </span>
                 )}
               </div>
 
               {/* Data Quality */}
               <div className="mt-2">
-                <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
+                <div className="mb-1 flex items-center justify-between text-xs text-gray-500">
                   <span>Data Quality</span>
                   <span>{target.dataQualityScore}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div className="h-1.5 w-full rounded-full bg-gray-200">
                   <div
                     className={`h-1.5 rounded-full ${
                       target.dataQualityScore >= 80
                         ? 'bg-green-600'
                         : target.dataQualityScore >= 60
-                        ? 'bg-yellow-600'
-                        : 'bg-red-600'
+                          ? 'bg-yellow-600'
+                          : 'bg-red-600'
                     }`}
                     style={{ width: `${target.dataQualityScore}%` }}
                   />
@@ -299,9 +291,9 @@ export default function TopTargetsDashboard() {
       {/* Empty State */}
       {targets.length === 0 && (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center h-64">
-            <Target className="h-12 w-12 text-gray-400 mb-4" />
-            <p className="text-gray-600 mb-2">No targets found</p>
+          <CardContent className="flex h-64 flex-col items-center justify-center">
+            <Target className="mb-4 h-12 w-12 text-gray-400" />
+            <p className="mb-2 text-gray-600">No targets found</p>
             <p className="text-sm text-gray-500">
               Import contacts to start building your target list
             </p>

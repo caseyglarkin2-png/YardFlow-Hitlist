@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Mic, Square, Loader2 } from "lucide-react";
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Mic, Square, Loader2 } from 'lucide-react';
 
 interface VoiceNotesProps {
   onTranscriptionComplete?: (text: string) => void;
@@ -14,7 +14,7 @@ interface VoiceNotesProps {
 export function VoiceNotes({ onTranscriptionComplete, autoAppend = true }: VoiceNotesProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [transcription, setTranscription] = useState("");
+  const [transcription, setTranscription] = useState('');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
@@ -34,9 +34,9 @@ export function VoiceNotes({ onTranscriptionComplete, autoAppend = true }: Voice
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
         await processAudio(audioBlob);
-        
+
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
@@ -67,14 +67,14 @@ export function VoiceNotes({ onTranscriptionComplete, autoAppend = true }: Voice
       });
 
       const data = await res.json();
-      
+
       if (data.text) {
         if (autoAppend) {
-          setTranscription(prev => prev + (prev ? '\n\n' : '') + data.text);
+          setTranscription((prev) => prev + (prev ? '\n\n' : '') + data.text);
         } else {
           setTranscription(data.text);
         }
-        
+
         if (onTranscriptionComplete) {
           onTranscriptionComplete(data.text);
         }
@@ -107,16 +107,12 @@ export function VoiceNotes({ onTranscriptionComplete, autoAppend = true }: Voice
               variant="default"
               className="flex-1"
             >
-              <Mic className="h-4 w-4 mr-2" />
+              <Mic className="mr-2 h-4 w-4" />
               Start Recording
             </Button>
           ) : (
-            <Button
-              onClick={stopRecording}
-              variant="destructive"
-              className="flex-1 animate-pulse"
-            >
-              <Square className="h-4 w-4 mr-2" />
+            <Button onClick={stopRecording} variant="destructive" className="flex-1 animate-pulse">
+              <Square className="mr-2 h-4 w-4" />
               Stop Recording
             </Button>
           )}
@@ -124,7 +120,7 @@ export function VoiceNotes({ onTranscriptionComplete, autoAppend = true }: Voice
 
         {isProcessing && (
           <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Transcribing audio...
           </div>
         )}

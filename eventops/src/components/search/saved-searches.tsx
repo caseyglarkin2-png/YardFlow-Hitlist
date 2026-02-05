@@ -108,22 +108,20 @@ export function SavedSearches({ entityType, onLoad }: SavedSearchesProps) {
         {searches.map((search) => (
           <div
             key={search.id}
-            className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
+            className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent"
           >
             <div className="flex-1 cursor-pointer" onClick={() => handleLoad(search)}>
               <div className="flex items-center gap-2">
                 <span className="font-medium">{search.name}</span>
                 {search.isGlobal && (
                   <Badge variant="secondary" className="text-xs">
-                    <Share2 className="h-3 w-3 mr-1" />
+                    <Share2 className="mr-1 h-3 w-3" />
                     Shared
                   </Badge>
                 )}
               </div>
               {search.description && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {search.description}
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{search.description}</p>
               )}
             </div>
             <Button

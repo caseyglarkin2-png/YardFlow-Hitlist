@@ -1,6 +1,6 @@
 /**
  * Request ID utilities for distributed tracing
- * 
+ *
  * The middleware automatically generates or propagates x-request-id headers.
  * Use these utilities to access the request ID in API routes.
  */

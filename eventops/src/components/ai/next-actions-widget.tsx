@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { AlertCircle, TrendingUp, Clock, Sparkles } from 'lucide-react';
 
 interface NextAction {
   id: string;
@@ -83,22 +83,27 @@ export function NextActionsWidget() {
           <div className="space-y-3">
             {actions.slice(0, 5).map((action) => {
               const Icon = priorityIcons[action.priority];
-              
+
               return (
                 <div
                   key={action.id}
-                  className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-start gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50"
                 >
-                  <div className={`h-8 w-8 rounded-full ${priorityColors[action.priority]} bg-opacity-20 flex items-center justify-center flex-shrink-0`}>
-                    <Icon className={`h-4 w-4 text-${action.priority === 'high' ? 'red' : action.priority === 'medium' ? 'yellow' : 'blue'}-600`} />
+                  <div
+                    className={`h-8 w-8 rounded-full ${priorityColors[action.priority]} flex flex-shrink-0 items-center justify-center bg-opacity-20`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 text-${action.priority === 'high' ? 'red' : action.priority === 'medium' ? 'yellow' : 'blue'}-600`}
+                    />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">{action.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {action.description}
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{action.description}</p>
                   </div>
-                  <Badge variant={action.priority === 'high' ? 'destructive' : 'secondary'} className="ml-2">
+                  <Badge
+                    variant={action.priority === 'high' ? 'destructive' : 'secondary'}
+                    className="ml-2"
+                  >
                     {action.priority}
                   </Badge>
                 </div>

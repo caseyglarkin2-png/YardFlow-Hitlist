@@ -75,35 +75,42 @@ export function QuickActions() {
       <CardContent className="space-y-4">
         {topPeople.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No priority contacts for today. Check your <Link href="/briefing" className="text-primary underline">daily brief</Link>.
+            No priority contacts for today. Check your{' '}
+            <Link href="/briefing" className="text-primary underline">
+              daily brief
+            </Link>
+            .
           </p>
         ) : (
           topPeople.map((person) => (
             <div
               key={person.id}
-              className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              className="flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
             >
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <UserIcon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate">{person.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="truncate text-sm font-medium">{person.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
                       {person.title} at {person.accountName}
                     </p>
                   </div>
-                  <Badge variant={person.icpScore >= 90 ? 'default' : 'secondary'} className="ml-2 flex-shrink-0">
+                  <Badge
+                    variant={person.icpScore >= 90 ? 'default' : 'secondary'}
+                    className="ml-2 flex-shrink-0"
+                  >
                     {person.icpScore}
                   </Badge>
                 </div>
                 {person.nextMeetingIn !== undefined && (
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <CalendarIcon className="h-3 w-3" />
                     Meeting {formatTimeUntil(person.nextMeetingIn)}
                   </p>
                 )}
               </div>
-              <div className="flex gap-1 ml-3 flex-shrink-0">
+              <div className="ml-3 flex flex-shrink-0 gap-1">
                 <Button size="sm" variant="outline" asChild>
                   <Link href={`/calendar?person=${person.id}`}>
                     <CalendarIcon className="h-3 w-3" />
@@ -118,7 +125,7 @@ export function QuickActions() {
             </div>
           ))
         )}
-        <div className="pt-2 border-t">
+        <div className="border-t pt-2">
           <Button variant="link" className="w-full" asChild>
             <Link href="/briefing">View Full Daily Brief →</Link>
           </Button>

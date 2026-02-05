@@ -3,7 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export function DeleteAccountButton({ accountId, accountName }: { accountId: string; accountName: string }) {
+export function DeleteAccountButton({
+  accountId,
+  accountName,
+}: {
+  accountId: string;
+  accountName: string;
+}) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -46,7 +52,8 @@ export function DeleteAccountButton({ accountId, accountName }: { accountId: str
           <h3 className="text-sm font-medium text-red-800">Confirm deletion</h3>
           <div className="mt-2 text-sm text-red-700">
             <p>
-              Are you sure you want to delete <strong>{accountName}</strong>? This will also delete all associated people. This action cannot be undone.
+              Are you sure you want to delete <strong>{accountName}</strong>? This will also delete
+              all associated people. This action cannot be undone.
             </p>
           </div>
           <div className="mt-4 flex gap-2">

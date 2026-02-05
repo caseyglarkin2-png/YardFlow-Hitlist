@@ -1,7 +1,7 @@
 /**
  * API Route: Generate Content (Brand Voice)
  * POST /api/ai/content/generate
- * 
+ *
  * Uses unified AI provider with automatic fallback (Gemini → OpenAI)
  */
 
@@ -177,12 +177,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     const latencyMs = Date.now() - startedAt;
-    
+
     // Check if it's a rate limit error
     const isRateLimited = error && typeof error === 'object' && 'isRateLimited' in error;
-    const retryAfterSeconds = isRateLimited && 'retryAfterSeconds' in error 
-      ? (error as { retryAfterSeconds: number }).retryAfterSeconds 
-      : undefined;
+    const retryAfterSeconds =
+      isRateLimited && 'retryAfterSeconds' in error
+        ? (error as { retryAfterSeconds: number }).retryAfterSeconds
+        : undefined;
 
     logger.error('AI content generate error', {
       requestId,
@@ -194,16 +195,14 @@ export async function POST(request: NextRequest) {
 
     if (isRateLimited) {
       return NextResponse.json(
-        { 
-          error: 'rate_limited', 
+        {
+          error: 'rate_limited',
           message: 'All AI providers are rate limited. Please try again later.',
           retryAfterSeconds,
         },
-        { 
+        {
           status: 429,
-          headers: retryAfterSeconds 
-            ? { 'Retry-After': String(retryAfterSeconds) }
-            : {},
+          headers: retryAfterSeconds ? { 'Retry-After': String(retryAfterSeconds) } : {},
         }
       );
     }

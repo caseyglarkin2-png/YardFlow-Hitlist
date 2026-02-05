@@ -76,51 +76,46 @@ export class AIDossierGenerator {
       const context = this.buildCompanyContext(company);
 
       // Generate dossier using Gemini Pro
-      // NOTE: This prompt generates the FRONTEND-COMPATIBLE format
-      // that matches GTM-YardFlow's DossierPanel expectations
-      const prompt = `You are a B2B sales intelligence analyst researching ${company.name} for the Manifest 2026 trade show.
+      const prompt = `You are a B2B sales intelligence analyst researching ${company.name} for a trade show (Manifest 2026).
 
 COMPANY INFORMATION:
 ${context}
 
-Generate a comprehensive company dossier in JSON format. This will be displayed in a sales dashboard, so be specific and actionable.
+Generate a comprehensive company dossier in JSON format with the following structure:
 
-REQUIRED JSON STRUCTURE:
 {
-  "description": "2-3 paragraph overview of the company, their business model, and market position",
-  "industryCategory": "Single category label (e.g., 'Logistics & Distribution', 'Manufacturing', 'Retail', '3PL', 'Transportation')",
-  "facilityCount": "Estimated number as string (e.g., '12 facilities', '50+ locations', '3-5 yards')",
-  "distributionFootprint": "Geographic scope (e.g., 'National', 'Regional - Southwest', 'Local - Texas', 'International')",
-  "revenueEstimate": "Revenue range (e.g., '$10M-50M', '$100M-500M', '$1B+')",
-  "isYardIntensive": true or false - Does this company likely have significant yard/dock/warehouse operations?,
-  "yardPainPoints": [
-    "Specific pain point related to yard management, dock scheduling, or trailer tracking",
-    "Another operational challenge they likely face",
-    "Third pain point - be specific to their industry"
-  ],
-  "talkingPoints": [
-    "Conversation starter based on recent news, achievements, or industry trends",
-    "Another talking point relevant to Manifest 2026 themes",
-    "Third talking point for sales engagement"
-  ],
-  "competitors": ["Main competitor 1", "Competitor 2", "Competitor 3"],
-  "decisionMakers": [
-    "VP of Operations",
-    "Director of Logistics",
-    "Other likely decision-maker title for yard management solutions"
-  ],
-  "confidenceLevel": "high|medium|low - How confident are you in this research?",
-  "sources": ["Industry knowledge", "Company profile analysis", "Market research"]
+  "companyOverview": "2-3 paragraph overview of the company, their business model, and market position",
+  "industryContext": "Analysis of their industry, market trends, and competitive landscape",
+  "keyPainPoints": ["pain point 1", "pain point 2", "pain point 3"],
+  "techStack": ["likely technology 1", "likely technology 2"],
+  "companySize": "estimate (e.g., 'Enterprise (500-1000 employees)' or 'Mid-market (100-500)')",
+  "facilityIntelligence": {
+    "estimatedYardCount": <number>,
+    "confidenceLevel": "high|medium|low",
+    "reasoning": "explanation of yard count estimate based on company info",
+    "networkBreakdown": {
+      "centralHub": "likely main hub location",
+      "regionalCenters": ["regional center 1", "regional center 2"],
+      "localYards": ["local yard 1", "local yard 2", "etc"]
+    },
+    "operationalScale": "description of their operational footprint"
+  },
+  "strategicQuestions": ["question to ask at booth 1", "question 2", "question 3"],
+  "manifestOpportunities": ["opportunity 1", "opportunity 2", "opportunity 3"],
+  "talkingPoints": ["conversation starter 1 based on recent news/achievements", "talking point 2", "talking point 3"],
+  "competitors": ["main competitor 1", "competitor 2", "competitor 3"],
+  "outreachAngles": ["compelling reason to talk 1", "angle 2 based on pain points", "angle 3 based on event context"],
+  "manifestContext": "Why meeting at Manifest 2026 is particularly relevant for this company - tie to logistics/supply chain themes"
 }
 
-IMPORTANT GUIDELINES:
-- isYardIntensive should be TRUE for: logistics, distribution, manufacturing, 3PL, trucking, warehousing, retail with DCs
-- isYardIntensive should be FALSE for: software-only, professional services, pure e-commerce without fulfillment
-- facilityCount should be a human-readable string, not just a number
-- yardPainPoints must be SPECIFIC to yard/dock operations, not generic business challenges
-- decisionMakers should be titles that would buy yard management software
+Focus on actionable intelligence for trade show conversations. Estimate facility counts based on:
+- Company size and revenue
+- Industry norms for their sector
+- Geographic presence
+- Number of employees
+- Operational indicators
 
-Return ONLY valid JSON. No markdown, no explanation.`;
+Be specific and practical. Return ONLY valid JSON.`;
 
       const dossier = await this.gemini.generateJSON(prompt);
 

@@ -86,10 +86,10 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.next({
       request: { headers: requestHeaders },
     });
-    
+
     // Add request ID to response for client-side correlation
     response.headers.set(REQUEST_ID_HEADER, requestId);
-    
+
     // Add CORS headers
     const cors = corsHeaders(origin);
     cors.forEach((value, key) => response.headers.set(key, value));

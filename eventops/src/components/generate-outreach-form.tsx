@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2 } from "lucide-react";
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2 } from 'lucide-react';
 
 type Template = {
   id: string;
@@ -49,24 +49,22 @@ export function GenerateOutreachForm({
 }) {
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
-  const [templateId, setTemplateId] = useState("");
+  const [templateId, setTemplateId] = useState('');
   const [personaFilter, setPersonaFilter] = useState<string[]>([]);
   const [minIcpScore, setMinIcpScore] = useState<number>(0);
 
   const personas = [
-    { key: "isExecOps", label: "Executive Ops" },
-    { key: "isOps", label: "Operations" },
-    { key: "isProc", label: "Procurement" },
-    { key: "isSales", label: "Sales" },
-    { key: "isTech", label: "Tech" },
-    { key: "isNonOps", label: "Non-Ops" },
+    { key: 'isExecOps', label: 'Executive Ops' },
+    { key: 'isOps', label: 'Operations' },
+    { key: 'isProc', label: 'Procurement' },
+    { key: 'isSales', label: 'Sales' },
+    { key: 'isTech', label: 'Tech' },
+    { key: 'isNonOps', label: 'Non-Ops' },
   ];
 
   const togglePersona = (persona: string) => {
     setPersonaFilter((prev) =>
-      prev.includes(persona)
-        ? prev.filter((p) => p !== persona)
-        : [...prev, persona]
+      prev.includes(persona) ? prev.filter((p) => p !== persona) : [...prev, persona]
     );
   };
 
@@ -88,21 +86,21 @@ export function GenerateOutreachForm({
 
   const handleGenerate = async () => {
     if (!templateId) {
-      alert("Please select a template");
+      alert('Please select a template');
       return;
     }
 
     if (filteredPeople.length === 0) {
-      alert("No people match your filters");
+      alert('No people match your filters');
       return;
     }
 
     setIsGenerating(true);
 
     try {
-      const response = await fetch("/api/outreach/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/outreach/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           templateId,
           personIds: filteredPeople.map((p) => p.id),
@@ -110,15 +108,15 @@ export function GenerateOutreachForm({
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to generate outreach");
+      if (!response.ok) throw new Error('Failed to generate outreach');
 
       const _result = await response.json();
 
-      router.push("/dashboard/outreach");
+      router.push('/dashboard/outreach');
       router.refresh();
     } catch (error) {
-      console.error("Error generating outreach:", error);
-      alert("Failed to generate outreach");
+      console.error('Error generating outreach:', error);
+      alert('Failed to generate outreach');
     } finally {
       setIsGenerating(false);
     }
@@ -126,7 +124,7 @@ export function GenerateOutreachForm({
 
   return (
     <div className="space-y-6">
-      <div className="border rounded-lg p-6 space-y-4">
+      <div className="space-y-4 rounded-lg border p-6">
         <div>
           <Label htmlFor="template">Select Template</Label>
           <Select value={templateId} onValueChange={setTemplateId}>
@@ -145,7 +143,7 @@ export function GenerateOutreachForm({
 
         <div>
           <Label>Filter by Persona</Label>
-          <div className="grid grid-cols-2 gap-3 mt-2">
+          <div className="mt-2 grid grid-cols-2 gap-3">
             {personas.map((persona) => (
               <div key={persona.key} className="flex items-center space-x-2">
                 <Checkbox
@@ -180,15 +178,16 @@ export function GenerateOutreachForm({
         </div>
       </div>
 
-      <div className="border rounded-lg p-6 bg-blue-50">
-        <h3 className="font-semibold mb-2">Preview</h3>
+      <div className="rounded-lg border bg-blue-50 p-6">
+        <h3 className="mb-2 font-semibold">Preview</h3>
         <p className="text-sm text-muted-foreground">
-          This will generate <span className="font-bold text-blue-700">{filteredPeople.length}</span>{" "}
-          outreach messages
+          This will generate{' '}
+          <span className="font-bold text-blue-700">{filteredPeople.length}</span> outreach messages
         </p>
         {personaFilter.length > 0 && (
-          <p className="text-sm text-muted-foreground mt-1">
-            Filtered to: {personaFilter.map((p) => personas.find((per) => per.key === p)?.label).join(", ")}
+          <p className="mt-1 text-sm text-muted-foreground">
+            Filtered to:{' '}
+            {personaFilter.map((p) => personas.find((per) => per.key === p)?.label).join(', ')}
           </p>
         )}
       </div>

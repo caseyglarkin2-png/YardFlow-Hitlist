@@ -32,9 +32,7 @@ export function AssignDropdown({
   onAssigned,
 }: AssignDropdownProps) {
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
-    currentAssignee?.id
-  );
+  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(currentAssignee?.id);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -114,11 +112,7 @@ export function AssignDropdown({
 
   return (
     <div className="flex items-center gap-2">
-      <Select
-        value={selectedUserId}
-        onValueChange={handleAssign}
-        disabled={isLoading}
-      >
+      <Select value={selectedUserId} onValueChange={handleAssign} disabled={isLoading}>
         <SelectTrigger className="w-[200px]">
           <SelectValue placeholder="Assign to...">
             {selectedUserId ? (
@@ -144,12 +138,7 @@ export function AssignDropdown({
         </SelectContent>
       </Select>
       {selectedUserId && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleUnassign}
-          disabled={isLoading}
-        >
+        <Button variant="ghost" size="icon" onClick={handleUnassign} disabled={isLoading}>
           <X className="h-4 w-4" />
         </Button>
       )}

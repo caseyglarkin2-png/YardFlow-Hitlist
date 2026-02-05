@@ -87,7 +87,7 @@ export function detectCompanyPattern(
     const nameParts = name.trim().split(/\s+/);
     const first = nameParts[0]?.toLowerCase() || '';
     const last = nameParts.slice(1).join(' ').toLowerCase() || '';
-    
+
     const localPart = email.split('@')[0]?.toLowerCase() || '';
 
     // Detect pattern
@@ -111,9 +111,9 @@ export function detectCompanyPattern(
       pattern,
       confidence: Math.min(100, (count / knownEmails.length) * 100),
       examples: knownEmails
-        .filter(e => e.email.endsWith(`@${domain}`))
+        .filter((e) => e.email.endsWith(`@${domain}`))
         .slice(0, 3)
-        .map(e => e.email),
+        .map((e) => e.email),
     }));
 
   return {
@@ -133,9 +133,15 @@ export function generateLinkedInProfileUrl(
   _companyName: string
 ): LinkedInProfile {
   // LinkedIn profile URL pattern: linkedin.com/in/first-last
-  const first = firstName.toLowerCase().trim().replace(/[^a-z]/g, '');
-  const last = lastName.toLowerCase().trim().replace(/[^a-z]/g, '');
-  
+  const first = firstName
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z]/g, '');
+  const last = lastName
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z]/g, '');
+
   if (!first || !last) {
     return {
       url: null,
@@ -150,12 +156,12 @@ export function generateLinkedInProfileUrl(
 
   // Confidence based on name complexity (common names have more duplicates)
   let confidence = 70;
-  
+
   // If name is very common (short), reduce confidence
   if (first.length <= 4 && last.length <= 5) {
     confidence = 50; // e.g., "John Smith" has many LinkedIn profiles
   }
-  
+
   // If name is unique, increase confidence
   if (first.length > 7 || last.length > 8) {
     confidence = 85;
@@ -216,8 +222,10 @@ export function scoreEmailCandidate(
   }
 
   // Small companies often use first@ or firstlast@
-  if (companyData?.size === 'Small' && 
-      (candidate.pattern.includes('{first}@') || candidate.pattern.includes('firstlast'))) {
+  if (
+    companyData?.size === 'Small' &&
+    (candidate.pattern.includes('{first}@') || candidate.pattern.includes('firstlast'))
+  ) {
     score += 15;
   }
 
@@ -260,13 +268,15 @@ export function guessContactEmail(
   }
 
   // Score each candidate
-  const scored = candidates.map(c => ({
-    ...c,
-    confidence: scoreEmailCandidate(c, { 
-      size: companySize, 
-      knownPattern: detectedPattern 
-    }),
-  })).sort((a, b) => b.confidence - a.confidence);
+  const scored = candidates
+    .map((c) => ({
+      ...c,
+      confidence: scoreEmailCandidate(c, {
+        size: companySize,
+        knownPattern: detectedPattern,
+      }),
+    }))
+    .sort((a, b) => b.confidence - a.confidence);
 
   // Generate LinkedIn profile
   const linkedin = generateLinkedInProfileUrl(firstName, lastName, companyName);
@@ -276,7 +286,7 @@ export function guessContactEmail(
     email: scored[0]!.email,
     confidence: scored[0]!.confidence,
     pattern: scored[0]!.pattern,
-    alternatives: scored.slice(1, 4).map(s => ({
+    alternatives: scored.slice(1, 4).map((s) => ({
       email: s.email,
       confidence: s.confidence,
     })),

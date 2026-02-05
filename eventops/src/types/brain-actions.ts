@@ -19,8 +19,8 @@ export type BrainActionType =
 // Navigate to a specific page/tab
 export interface NavigateAction {
   type: 'navigate';
-  tab: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts';
-  destination?: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts'; // Alias for backward compat
+  destination: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts';
+  tab?: 'dashboard' | 'prospects' | 'sequences' | 'import' | 'accounts'; // Alias for GTM-YardFlow frontend
 }
 
 // Apply filters to the current view
@@ -101,6 +101,7 @@ export type RailwayAIAction = BrainAction;
 
 /**
  * RailwayAIResponse - Full response type for GTM-YardFlow integration
- * Type alias for frontend compatibility
  */
-export type RailwayAIResponse = BrainResponse;
+export interface RailwayAIResponse extends BrainResponse {
+  // Alias for frontend compatibility
+}

@@ -30,7 +30,7 @@ export function ResearchPanel({ accountId: _accountId, companyDossierId }: Resea
       });
 
       const data = await res.json();
-      
+
       if (res.ok) {
         setResults(data);
         router.refresh();
@@ -48,52 +48,52 @@ export function ResearchPanel({ accountId: _accountId, companyDossierId }: Resea
   return (
     <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
       <div className="px-4 py-5 sm:p-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Advanced Research</h2>
-        <p className="text-sm text-gray-600 mb-4">
+        <h2 className="mb-4 text-lg font-medium text-gray-900">Advanced Research</h2>
+        <p className="mb-4 text-sm text-gray-600">
           Use AI to gather deeper intelligence on this company
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Facility Research */}
-          <div className="border rounded-lg p-4">
-            <h3 className="font-medium mb-2">🏭 Facility Count</h3>
-            <p className="text-sm text-gray-600 mb-3">
+          <div className="rounded-lg border p-4">
+            <h3 className="mb-2 font-medium">🏭 Facility Count</h3>
+            <p className="mb-3 text-sm text-gray-600">
               Research actual facility count using public data sources
             </p>
             <button
               onClick={() => runResearch('facilities')}
               disabled={isResearching === 'facilities'}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 text-sm"
+              className="w-full rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:bg-gray-300"
             >
               {isResearching === 'facilities' ? 'Researching...' : 'Research Facilities'}
             </button>
           </div>
 
           {/* Competitive Analysis */}
-          <div className="border rounded-lg p-4">
-            <h3 className="font-medium mb-2">📊 Competitive Intel</h3>
-            <p className="text-sm text-gray-600 mb-3">
+          <div className="rounded-lg border p-4">
+            <h3 className="mb-2 font-medium">📊 Competitive Intel</h3>
+            <p className="mb-3 text-sm text-gray-600">
               Analyze market position, competitors, and tech sophistication
             </p>
             <button
               onClick={() => runResearch('competitive')}
               disabled={isResearching === 'competitive'}
-              className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-300 text-sm"
+              className="w-full rounded bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700 disabled:bg-gray-300"
             >
               {isResearching === 'competitive' ? 'Analyzing...' : 'Analyze Competitive'}
             </button>
           </div>
 
           {/* Location Mapping */}
-          <div className="border rounded-lg p-4">
-            <h3 className="font-medium mb-2">📍 Location Mapping</h3>
-            <p className="text-sm text-gray-600 mb-3">
+          <div className="rounded-lg border p-4">
+            <h3 className="mb-2 font-medium">📍 Location Mapping</h3>
+            <p className="mb-3 text-sm text-gray-600">
               Map facility locations and geographic spread
             </p>
             <button
               onClick={() => runResearch('locations')}
               disabled={isResearching === 'locations'}
-              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300 text-sm"
+              className="w-full rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:bg-gray-300"
             >
               {isResearching === 'locations' ? 'Mapping...' : 'Map Locations'}
             </button>
@@ -102,16 +102,17 @@ export function ResearchPanel({ accountId: _accountId, companyDossierId }: Resea
 
         {/* Results Display */}
         {results && (
-          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-medium mb-2">✅ Research Complete</h3>
-            <p className="text-sm text-gray-700 mb-2">{results.message}</p>
-            
+          <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <h3 className="mb-2 font-medium">✅ Research Complete</h3>
+            <p className="mb-2 text-sm text-gray-700">{results.message}</p>
+
             {results.research && (
               <div className="mt-3 space-y-2 text-sm">
                 {results.research.estimatedFacilities && (
                   <div>
-                    <span className="font-medium">Facilities:</span> {results.research.estimatedFacilities}
-                    <span className="ml-2 text-xs bg-white px-2 py-1 rounded">
+                    <span className="font-medium">Facilities:</span>{' '}
+                    {results.research.estimatedFacilities}
+                    <span className="ml-2 rounded bg-white px-2 py-1 text-xs">
                       {results.research.confidenceLevel} confidence
                     </span>
                   </div>
@@ -133,12 +134,14 @@ export function ResearchPanel({ accountId: _accountId, companyDossierId }: Resea
                 )}
                 {results.analysis.marketPosition && (
                   <div>
-                    <span className="font-medium">Market Position:</span> {results.analysis.marketPosition}
+                    <span className="font-medium">Market Position:</span>{' '}
+                    {results.analysis.marketPosition}
                   </div>
                 )}
                 {results.analysis.techSophistication && (
                   <div>
-                    <span className="font-medium">Tech Level:</span> {results.analysis.techSophistication}
+                    <span className="font-medium">Tech Level:</span>{' '}
+                    {results.analysis.techSophistication}
                   </div>
                 )}
               </div>
@@ -148,17 +151,21 @@ export function ResearchPanel({ accountId: _accountId, companyDossierId }: Resea
               <div className="mt-3 space-y-2 text-sm">
                 {results.locationData.headquarters && (
                   <div>
-                    <span className="font-medium">HQ:</span> {results.locationData.headquarters.city}, {results.locationData.headquarters.state}
+                    <span className="font-medium">HQ:</span>{' '}
+                    {results.locationData.headquarters.city},{' '}
+                    {results.locationData.headquarters.state}
                   </div>
                 )}
                 {results.locationData.geographicSpread && (
                   <div>
-                    <span className="font-medium">Geographic Spread:</span> {results.locationData.geographicSpread.concentration}
+                    <span className="font-medium">Geographic Spread:</span>{' '}
+                    {results.locationData.geographicSpread.concentration}
                   </div>
                 )}
                 {results.locationData.facilities && (
                   <div>
-                    <span className="font-medium">Facilities Found:</span> {results.locationData.facilities.length}
+                    <span className="font-medium">Facilities Found:</span>{' '}
+                    {results.locationData.facilities.length}
                   </div>
                 )}
               </div>
