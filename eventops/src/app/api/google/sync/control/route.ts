@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 
-export async function POST(request: Request) {
-  const session = await auth();
+export const dynamic = 'force-dynamic';
 
-  if (!session?.user?.id) {
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const user = await prisma.users.update({
-      where: { id: session.user.id },
+      where: { id: authResult.userId },
       data: updates,
       select: {
         googleSyncPaused: true,

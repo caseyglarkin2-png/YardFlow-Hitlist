@@ -1,11 +1,27 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { setGlobalSyncEnabled, getGlobalSyncEnabled } from '@/lib/google/sync-state';
+import { prisma } from '@/lib/db';
 
-export async function POST(request: Request) {
-  const session = await auth();
+export const dynamic = 'force-dynamic';
 
-  if (!session?.user?.email?.endsWith('@freightroll.com')) {
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Admin check: verify email domain
+  let email = authResult.email;
+  if (!email) {
+    const user = await prisma.users.findUnique({
+      where: { id: authResult.userId },
+      select: { email: true },
+    });
+    email = user?.email || undefined;
+  }
+
+  if (!email?.endsWith('@freightroll.com')) {
     return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
   }
 
@@ -25,10 +41,23 @@ export async function POST(request: Request) {
   });
 }
 
-export async function GET() {
-  const session = await auth();
+export async function GET(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-  if (!session?.user?.email?.endsWith('@freightroll.com')) {
+  // Admin check: verify email domain
+  let email = authResult.email;
+  if (!email) {
+    const user = await prisma.users.findUnique({
+      where: { id: authResult.userId },
+      select: { email: true },
+    });
+    email = user?.email || undefined;
+  }
+
+  if (!email?.endsWith('@freightroll.com')) {
     return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
   }
 

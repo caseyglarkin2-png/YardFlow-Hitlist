@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { importGoogleContacts } from '@/lib/google/contacts';
 
-export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'eventId is required' }, { status: 400 });
     }
 
-    const result = await importGoogleContacts(session.user.id, eventId, { dryRun });
+    const result = await importGoogleContacts(authResult.userId, eventId, { dryRun });
 
     return NextResponse.json(result);
   } catch (error) {

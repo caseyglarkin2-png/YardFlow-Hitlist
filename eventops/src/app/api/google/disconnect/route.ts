@@ -1,23 +1,25 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { disconnectGoogle } from '@/lib/google/auth';
 import { prisma } from '@/lib/db';
 
-export async function POST() {
-  const session = await auth();
+export const dynamic = 'force-dynamic';
 
-  if (!session?.user?.id) {
+export async function POST(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    await disconnectGoogle(session.user.id);
+    await disconnectGoogle(authResult.userId);
 
     // Log disconnection
     await prisma.activities.create({
       data: {
         id: crypto.randomUUID(),
-        userId: session.user.id,
+        userId: authResult.userId,
         entityType: 'integration',
         entityId: 'google',
         action: 'google_disconnected',

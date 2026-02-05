@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { syncCalendarEvents } from '@/lib/google/calendar';
 import { googleCircuitBreaker } from '@/lib/google/circuit-breaker';
 
-export async function POST(request: Request) {
-  const session = await auth();
+export const dynamic = 'force-dynamic';
 
-  if (!session?.user?.id) {
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -14,15 +16,15 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const { dryRun, days } = body;
 
-    const result = await googleCircuitBreaker.call(session.user.id, () =>
-      syncCalendarEvents(session.user.id, { dryRun, days })
+    const result = await googleCircuitBreaker.call(authResult.userId, () =>
+      syncCalendarEvents(authResult.userId, { dryRun, days })
     );
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Calendar sync error:', error);
 
-    const cbStatus = googleCircuitBreaker.getStatus(session.user.id);
+    const cbStatus = googleCircuitBreaker.getStatus(authResult.userId);
 
     return NextResponse.json(
       {
