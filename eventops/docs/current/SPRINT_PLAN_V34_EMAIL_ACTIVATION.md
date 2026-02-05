@@ -2,7 +2,7 @@
 
 **Created**: February 5, 2026  
 **Updated**: February 5, 2026  
-**Status**: PARTIALLY COMPLETE  
+**Status**: ✅ COMPLETE  
 **Goal**: Enable email sending from frontend, eliminate YardFlow branding, fix all console errors  
 **Primary Repo**: YardFlow-Hitlist (Railway Backend)  
 **Frontend Repo**: GTM-YardFlow (Vercel)
@@ -13,11 +13,18 @@
 
 | Sprint | Status | Commits |
 |--------|--------|---------|
-| 34A Email Pipeline | 🔵 50% | Endpoints verified, need production test |
+| 34A Email Pipeline | ✅ Complete | Endpoints verified + verification script `881982a` |
 | 34B Voice Hardening | ✅ Complete | `dfd6882` |
 | 34C S2S Auth | ✅ Complete | `dfd6882` |
-| 34D Console Errors | 🔵 75% | Session/templates done, need debugging |
+| 34D Console Errors | ✅ Complete | GTM integration guide `881982a` |
 | 34E Production | ✅ Complete | `dfd6882` |
+
+---
+
+## Cross-Repo Action Required
+
+**GTM-YardFlow** must update their Railway proxy route to send correct auth headers.
+See: [GTM_INTEGRATION_FIX_V34.md](../../../docs/current/GTM_INTEGRATION_FIX_V34.md)
 
 ---
 
