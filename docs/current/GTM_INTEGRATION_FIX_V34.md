@@ -237,6 +237,62 @@ To enable email tracking (opens, clicks, bounces):
 
 ---
 
+## Error Code Reference
+
+### HTTP Status Codes
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| 200 | Success | Response contains requested data |
+| 201 | Created | Resource created successfully |
+| 400 | Bad Request | Check request body/params - validation failed |
+| 401 | Unauthorized | Auth header missing or malformed |
+| 403 | Forbidden | Auth header present but invalid secret |
+| 404 | Not Found | Resource doesn't exist (check ID) |
+| 422 | Unprocessable | Business logic error (see error code) |
+| 429 | Rate Limited | Wait and retry with exponential backoff |
+| 500 | Server Error | Bug - report to Railway backend team |
+| 503 | Service Unavailable | Infrastructure issue - retry later |
+
+### Business Error Codes
+
+Returned in the `code` field of error responses:
+
+| Code | Endpoint | Meaning | Resolution |
+|------|----------|---------|------------|
+| `MISSING_EMAIL` | `/outreach/send-email` | Contact has no email address | Enrich contact first |
+| `ALREADY_SENT` | `/outreach/send-email` | Email already sent to this contact | Use `force: true` to resend |
+| `SERVICE_UNAVAILABLE` | `/outreach/send-email` | SendGrid not configured | Contact backend team |
+| `INVALID_OUTREACH_ID` | `/outreach/send-email` | Outreach record not found | Check outreachId exists |
+| `NO_ACTIVE_EVENT` | Various | User has no active event | Select an event first |
+| `RATE_LIMITED` | AI endpoints | AI provider rate limited | Wait 60s and retry |
+
+### Retry Strategy
+
+For transient errors (429, 503), use exponential backoff:
+
+```typescript
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await fetch(url, options);
+    
+    if (response.ok) return response;
+    
+    if (response.status === 429 || response.status === 503) {
+      const delay = Math.pow(2, i) * 1000; // 1s, 2s, 4s
+      await new Promise(resolve => setTimeout(resolve, delay));
+      continue;
+    }
+    
+    // Non-retryable error
+    throw new Error(`API error: ${response.status}`);
+  }
+  throw new Error('Max retries exceeded');
+}
+```
+
+---
+
 ## Test Commands
 
 After making changes, verify the fix:

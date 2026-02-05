@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,13 +8,19 @@ export const dynamic = 'force-dynamic';
  * POST /api/reports/pdf - Generate PDF report
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Get user from auth result
+  const userId =
+    authResult.type === 'session'
+      ? authResult.userId
+      : req.headers.get('x-user-id') || authResult.userId;
+
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: userId },
   });
 
   if (!user?.activeEventId) {

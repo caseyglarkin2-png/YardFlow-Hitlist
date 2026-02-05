@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
  * GET /api/ab-tests/[id] - Get specific AB test
  */
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -28,8 +28,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
  * PUT /api/ab-tests/[id] - Update AB test (stop, complete, etc.)
  */
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -51,8 +51,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
  * POST /api/ab-tests/[id]/results - Record test results
  */
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

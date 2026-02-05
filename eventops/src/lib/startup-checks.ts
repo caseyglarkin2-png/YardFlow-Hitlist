@@ -51,7 +51,7 @@ export async function verifyRedis(): Promise<boolean> {
 }
 
 /**
- * Check if SendGrid is configured
+ * Check if SendGrid is configured (key presence only)
  */
 export function verifySendGrid(): boolean {
   const hasKey = !!process.env.SENDGRID_API_KEY;
@@ -61,6 +61,59 @@ export function verifySendGrid(): boolean {
     logger.warn('[startup] SendGrid API key NOT configured - email sending disabled');
   }
   return hasKey;
+}
+
+/**
+ * Check if SendGrid API is actually reachable and key is valid
+ * Makes a real API call to verify connectivity
+ */
+export async function verifySendGridConnectivity(): Promise<{
+  configured: boolean;
+  connected: boolean;
+  error?: string;
+}> {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  
+  if (!apiKey) {
+    logger.warn('[startup] SendGrid API key NOT configured - skipping connectivity check');
+    return { configured: false, connected: false };
+  }
+  
+  try {
+    // Check API key validity by requesting account info
+    const response = await fetch('https://api.sendgrid.com/v3/user/credits', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (response.ok) {
+      logger.info('[startup] SendGrid API connectivity verified');
+      return { configured: true, connected: true };
+    } else if (response.status === 401) {
+      logger.error('[startup] SendGrid API key is INVALID');
+      return { configured: true, connected: false, error: 'Invalid API key' };
+    } else {
+      const text = await response.text();
+      logger.warn('[startup] SendGrid API returned unexpected status', { 
+        status: response.status, 
+        body: text.slice(0, 200) 
+      });
+      // 403 or other status might mean valid key but permission issues
+      return { configured: true, connected: true, error: `Status ${response.status}` };
+    }
+  } catch (error) {
+    logger.error('[startup] SendGrid API connectivity FAILED', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { 
+      configured: true, 
+      connected: false, 
+      error: error instanceof Error ? error.message : 'Connection failed' 
+    };
+  }
 }
 
 /**
@@ -109,7 +162,11 @@ export function verifyEnvironment(): { valid: boolean; missing: string[] } {
 export interface StartupResult {
   database: boolean;
   redis: boolean;
-  sendgrid: boolean;
+  sendgrid: {
+    configured: boolean;
+    connected: boolean;
+    error?: string;
+  };
   ai: boolean;
   environment: { valid: boolean; missing: string[] };
   ready: boolean;
@@ -129,19 +186,19 @@ export async function runStartupChecks(): Promise<StartupResult> {
     return {
       database: false,
       redis: false,
-      sendgrid: false,
+      sendgrid: { configured: false, connected: false },
       ai: false,
       environment,
       ready: false,
     };
   }
   
-  const [database, redis] = await Promise.all([
+  const [database, redis, sendgrid] = await Promise.all([
     verifyDatabase(),
     verifyRedis(),
+    verifySendGridConnectivity(),
   ]);
   
-  const sendgrid = verifySendGrid();
   const ai = verifyAIProvider();
   
   const ready = database && redis; // Core services must be up

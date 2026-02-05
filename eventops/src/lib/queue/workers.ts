@@ -264,8 +264,30 @@ healthServer.listen(PORT, () => {
 });
 
 // Start workers on module load
-function startWorkers() {
+async function startWorkers() {
   try {
+    // Run startup health checks before starting workers
+    const { runStartupChecks } = await import('@/lib/startup-checks');
+    const checkResult = await runStartupChecks();
+    
+    if (!checkResult.ready) {
+      logger.error('Startup checks failed - cannot start workers', {
+        database: checkResult.database,
+        redis: checkResult.redis,
+        sendgrid: checkResult.sendgrid,
+        ai: checkResult.ai,
+        environment: checkResult.environment,
+      });
+      process.exit(1);
+    }
+    
+    logger.info('Startup checks passed', {
+      database: checkResult.database,
+      redis: checkResult.redis,
+      sendgrid: checkResult.sendgrid.connected ? 'connected' : 'not connected',
+      ai: checkResult.ai,
+    });
+    
     getEnrichmentWorker();
     getSequenceWorker();
     getAgentWorker();
@@ -303,7 +325,10 @@ function startWorkers() {
   }
 }
 
-startWorkers();
+startWorkers().catch((err) => {
+  logger.error('Worker startup failed', { err });
+  process.exit(1);
+});
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

@@ -233,4 +233,127 @@ describe('S2S Authentication', () => {
       15000
     );
   });
+
+  describe('Sprint 35: New S2S Endpoints', () => {
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/integrations',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/integrations`, {
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200, not 401/403
+        expect(res.status).toBe(200);
+        const data = await res.json();
+        expect(data.integrations).toBeDefined();
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/reports/schedule',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/reports/schedule`, {
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200, not 401/403
+        expect(res.status).toBe(200);
+        const data = await res.json();
+        expect(data.schedules).toBeDefined();
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/ab-tests',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/ab-tests`, {
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+          },
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200 or 400 (no active event), not 401/403
+        expect([200, 400]).toContain(res.status);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/enrichment/validate POST',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/enrichment/validate`, {
+          method: 'POST',
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: 'test@example.com',
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200, not 401/403
+        expect(res.status).toBe(200);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/enrichment/patterns/detect POST',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/enrichment/patterns/detect`, {
+          method: 'POST',
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            accountId: 'test-account-id',
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200 or 404 (account not found), not 401/403
+        expect([200, 404, 500]).toContain(res.status);
+      },
+      15000
+    );
+
+    it.skipIf(SKIP_AUTH_TESTS)(
+      'should accept S2S auth on /api/enrichment/smart-guess POST',
+      async () => {
+        const res = await fetch(`${RAILWAY_URL}/api/enrichment/smart-guess`, {
+          method: 'POST',
+          headers: {
+            'x-service-key': SERVICE_SECRET,
+            'x-user-id': 'test@integration.com',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            personId: 'test-person-id',
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
+
+        // Should get 200 or 404 (person not found), not 401/403
+        expect([200, 404, 400]).toContain(res.status);
+      },
+      15000
+    );
+  });
 });

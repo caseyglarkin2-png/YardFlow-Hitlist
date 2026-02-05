@@ -4,13 +4,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { EmailValidator } from '@/lib/enrichment/email-validator';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -29,8 +29,6 @@ export async function POST(request: NextRequest) {
     } else {
       return NextResponse.json({ error: 'email or emails array is required' }, { status: 400 });
     }
-    // Added a response for the successful execution path to ensure all code paths return a value
-    return NextResponse.json({ success: true, message: 'Emails validated successfully' });
   } catch (error) {
     console.error('Email validation error:', error);
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -7,71 +7,99 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/ab-tests - Get all AB tests
  */
-export async function GET(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export async function GET(req: NextRequest) {
+  try {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get user from auth result
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : req.headers.get('x-user-id') || authResult.userId;
+
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user?.activeEventId) {
+      return NextResponse.json({ error: 'No active event' }, { status: 400 });
+    }
+
+    const tests = await prisma.ab_tests.findMany({
+      where: { eventId: user.activeEventId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json({ tests });
+  } catch (error) {
+    console.error('Error fetching AB tests:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to fetch AB tests' },
+      { status: 500 }
+    );
   }
-
-  const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
-  });
-
-  if (!user?.activeEventId) {
-    return NextResponse.json({ error: 'No active event' }, { status: 400 });
-  }
-
-  const tests = await prisma.ab_tests.findMany({
-    where: { eventId: user.activeEventId },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  return NextResponse.json({ tests });
 }
 
 /**
  * POST /api/ab-tests - Create a new AB test
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  try {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
-  });
+    // Get user from auth result
+    const userId =
+      authResult.type === 'session'
+        ? authResult.userId
+        : req.headers.get('x-user-id') || authResult.userId;
 
-  if (!user?.activeEventId) {
-    return NextResponse.json({ error: 'No active event' }, { status: 400 });
-  }
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+    });
 
-  const { name, description, templateAId, templateBId, sampleSize, winnerThreshold } =
-    await req.json();
+    if (!user?.activeEventId) {
+      return NextResponse.json({ error: 'No active event' }, { status: 400 });
+    }
 
-  if (!name || !templateAId || !templateBId) {
+    const { name, description, templateAId, templateBId, sampleSize, winnerThreshold } =
+      await req.json();
+
+    if (!name || !templateAId || !templateBId) {
+      return NextResponse.json(
+        { error: 'Name, templateAId, and templateBId are required' },
+        { status: 400 }
+      );
+    }
+
+    const test = await prisma.ab_tests.create({
+      data: {
+        name,
+        description,
+        templateAId,
+        templateBId,
+        sampleSize: sampleSize || 100,
+        winnerThreshold: winnerThreshold || 0.05,
+        createdBy: user.id,
+        eventId: user.activeEventId,
+        results: {
+          variantA: { sent: 0, opened: 0, clicked: 0, replied: 0 },
+          variantB: { sent: 0, opened: 0, clicked: 0, replied: 0 },
+        },
+      },
+    });
+
+    return NextResponse.json({ test }, { status: 201 });
+  } catch (error) {
+    console.error('Error creating AB test:', error);
     return NextResponse.json(
-      { error: 'Name, templateAId, and templateBId are required' },
-      { status: 400 }
+      { error: error instanceof Error ? error.message : 'Failed to create AB test' },
+      { status: 500 }
     );
   }
-
-  const test = await prisma.ab_tests.create({
-    data: {
-      name,
-      description,
-      templateAId,
-      templateBId,
-      sampleSize: sampleSize || 100,
-      winnerThreshold: winnerThreshold || 0.05,
-      createdBy: user.id,
-      eventId: user.activeEventId,
-      results: {
-        variantA: { sent: 0, opened: 0, clicked: 0, replied: 0 },
-        variantB: { sent: 0, opened: 0, clicked: 0, replied: 0 },
-      },
-    },
-  });
-
-  return NextResponse.json({ test }, { status: 201 });
 }
