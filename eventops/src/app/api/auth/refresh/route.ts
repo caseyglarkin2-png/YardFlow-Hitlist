@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+// eslint-disable-next-line no-restricted-imports -- Exempt: this IS the auth refresh endpoint
 import { auth } from '@/auth';
 import { logger } from '@/lib/logger';
 import { captureRouteError } from '@/lib/sentry-utils';

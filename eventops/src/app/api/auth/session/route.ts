@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+// eslint-disable-next-line no-restricted-imports -- Exempt: this IS the auth session endpoint
 import { auth } from '@/auth';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthUrl } from '@/lib/google/auth';
+// eslint-disable-next-line no-restricted-imports -- Exempt: OAuth redirect requires session
 import { auth } from '@/auth';
 
 export async function GET() {

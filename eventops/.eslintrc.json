@@ -12,5 +12,28 @@
       }
     ],
     "@typescript-eslint/no-explicit-any": "warn"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/app/api/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/auth"],
+                "message": "Use authServiceOrSession from @/lib/auth-service instead of auth() from @/auth in API routes. See STABILITY_ROADMAP_V2.md."
+              },
+              {
+                "group": ["@/lib/auth"],
+                "importNames": ["auth"],
+                "message": "Use authServiceOrSession from @/lib/auth-service instead of auth() from @/lib/auth in API routes. See STABILITY_ROADMAP_V2.md."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }
