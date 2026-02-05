@@ -1,7 +1,7 @@
 # YardFlow-Hitlist: Stability & Bug Fix Roadmap v2
 
 **Created**: February 5, 2026  
-**Revised**: February 6, 2026 (All Sprints Complete)  
+**Revised**: February 6, 2026 (All Sprints 37-47 Complete)  
 **Goal**: Zero bugs, full GTM integration, Sentry-monitored stability  
 **Philosophy**: Ship Fast, Ship Often - atomic commits with validation
 
@@ -14,10 +14,10 @@
 | Category          | Status       | Details                                                                 |
 | ----------------- | ------------ | ----------------------------------------------------------------------- |
 | **S2S Auth**      | 🟢 Complete  | **ALL** API routes migrated to `authServiceOrSession` (65+ files)       |
-| **Lint Warnings** | 🟢 Near-Zero | 234 → 18 warnings (92% reduction, remaining 17 React hook deps + 1 img) |
+| **Lint Warnings** | 🟢 Zero | 234 → **0** warnings (100% reduction) |
 | **Worker**        | 🟢 Healthy   | Retry logic, graceful shutdown, heartbeat working                       |
-| **Tests**         | 🟢 Passing   | **284 tests** pass, 12 skipped (23 test files)                          |
-| **Sentry**        | 🟢 Active    | `captureRouteError()` utility + 5 high-traffic routes instrumented      |
+| **Tests**         | 🟢 Passing   | **334 tests** pass, 12 skipped (28 test files)                          |
+| **Sentry**        | 🟢 Full      | `captureRouteError()` on **146+ routes** (all except health + 3 webhooks) |
 | **Build**         | 🟢 Clean     | 0 lint errors, build succeeds                                           |
 
 ### Problem (Resolved)
@@ -746,24 +746,21 @@ export async function GET(req: NextRequest) {
 | 42     | ✅ Done | 3-4 hrs   | `39452a1`             | Lint cleanup 234→18 warnings (84 files)          |
 | 43     | ✅ Done | 4-5 hrs   | `a9103ea`             | Auth-service tests + 10 more routes (27+5 tests) |
 | Review | ✅ Done | -         | `19eabae`             | Fixed broken activate route + manifest/generate  |
+| 44     | ✅ Done | 2 hrs     | `47e056d`             | Infrastructure tests: db, queue, webhooks (44 tests) |
+| 45     | ✅ Done | 1.5 hrs   | `4e8c7a1`             | React exhaustive-deps 18→0 warnings (15 files)   |
+| 46     | ✅ Done | 3 hrs     | `683b34c`             | Sentry captureRouteError on 142+ routes          |
+| 47     | ✅ Done | 1 hr      | `5ac689d`             | ESLint no-restricted-imports rule for auth()      |
+| Review2| ✅ Done | -         | `5c84af6`             | 4 missed routes added captureRouteError           |
 
 ### Key Metrics
 
-- **Tests**: 284 total (272 pass, 12 skipped) across 23 test files
-- **Lint**: 0 errors, 18 warnings (17 React exhaustive-deps + 1 img tag)
-- **Auth Coverage**: Zero `auth()` imports outside 3 exempt routes
-- **Files Modified**: 100+ across all sprints
+- **Tests**: 334 total (322 pass, 12 skipped) across 28 test files
+- **Lint**: 0 errors, **0 warnings** (was 234 at start of roadmap)
+- **Sentry Coverage**: 146+ routes instrumented with `captureRouteError`
+- **Auth Coverage**: Zero `auth()` imports outside 3 exempt routes + ESLint rule prevents regressions
+- **Files Modified**: 200+ across all sprints
 
-### Recommended Future Sprints
-
-| Sprint | Priority | Goal                                                            |
-| ------ | -------- | --------------------------------------------------------------- |
-| 44     | Medium   | Tests for db.ts, queue workers, webhook handlers                |
-| 45     | Low      | Fix remaining 17 React hook exhaustive-deps warnings            |
-| 46     | Medium   | Add `captureRouteError` to all routes with bare `console.error` |
-| 47     | Low      | ESLint rule banning direct `auth()` imports in API routes       |
-
-**Total Estimated Time**: ~22-30 hours (COMPLETED)
+**Total Estimated Time**: ~30-40 hours (ALL SPRINTS 37-47 COMPLETED)
 
 ---
 
@@ -816,4 +813,4 @@ grep -rl "authServiceOrSession" src/app/api --include="*.ts" | wc -l
 
 ---
 
-_Document revised Feb 6, 2026. All sprints (37-43) complete. Subagent code review passed (8/10). Review fixes committed. Roadmap execution finished._
+*Document revised Feb 6, 2026. All sprints (37-47) complete. Two subagent code reviews passed. Full stability roadmap executed: 334 tests, 0 lint warnings, 146+ Sentry-instrumented routes, ESLint auth() guard rule.*
