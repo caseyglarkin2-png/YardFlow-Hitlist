@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
  * Track LinkedIn connection status changes
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         status: status === 'CONNECTED' ? 'RESPONDED' : status === 'DECLINED' ? 'BOUNCED' : 'SENT',
         message: 'LinkedIn connection request sent',
         sentAt: new Date(),
-        sentBy: session.user.id,
+        sentBy: authResult.email || authResult.userId,
         notes: `LinkedIn connection ${status.toLowerCase()} on ${new Date().toISOString()}`,
         updatedAt: new Date(),
       },
@@ -60,14 +60,14 @@ export async function POST(req: NextRequest) {
 /**
  * Get LinkedIn activity stats
  */
-export async function GET(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+export async function GET(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (!user?.activeEventId) {

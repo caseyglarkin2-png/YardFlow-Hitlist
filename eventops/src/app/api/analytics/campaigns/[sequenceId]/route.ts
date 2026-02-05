@@ -4,14 +4,16 @@
  * GET /api/analytics/top-sequences - Top performing sequences
  */
 
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { performanceAnalytics } from '@/lib/analytics/performance-analytics';
 import { logger } from '@/lib/logger';
 
-export async function GET(request: Request, { params }: { params: { sequenceId: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest, { params }: { params: { sequenceId: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

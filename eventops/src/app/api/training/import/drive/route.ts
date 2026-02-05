@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { google } from 'googleapis';
 import { getGoogleClient } from '@/lib/google/auth';
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -21,7 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'eventId required' }, { status: 400 });
     }
 
-    const googleClient = await getGoogleClient(session.user.id);
+    const googleClient = await getGoogleClient(authResult.userId);
     const drive = google.drive({ version: 'v3', auth: googleClient });
 
     const imported = [];
@@ -39,7 +41,7 @@ export async function POST(req: NextRequest) {
           data: {
             id: crypto.randomUUID(),
             eventId,
-            userId: session.user.id,
+            userId: authResult.userId,
             source: 'drive',
             type: contentType,
             title: file.data.name || 'Untitled',

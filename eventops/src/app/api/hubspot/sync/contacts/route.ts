@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { syncHubSpotContacts, SyncContactsOptions } from '@/lib/hubspot/sync-contacts';
 import { logger } from '@/lib/logger';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/hubspot/sync/contacts
@@ -16,9 +18,9 @@ import { logger } from '@/lib/logger';
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
+    const authResult = await authServiceOrSession(request);
     
-    if (!session || !session.user) {
+    if (!authResult) {
       logger.warn('Unauthorized HubSpot sync attempt');
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -58,8 +60,8 @@ export async function POST(request: NextRequest) {
     }
 
     logger.info('Starting HubSpot contact sync via API', {
-      userId: session.user.id,
-      userEmail: session.user.email,
+      userId: authResult.userId,
+      userEmail: authResult.email,
       options,
     });
 
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     const result = await syncHubSpotContacts(options);
 
     logger.info('HubSpot contact sync completed via API', {
-      userId: session.user.id,
+      userId: authResult.userId,
       result,
     });
 
@@ -105,12 +107,12 @@ export async function POST(request: NextRequest) {
  * GET /api/hubspot/sync/contacts
  * Get sync status and information
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
+    const authResult = await authServiceOrSession(request);
     
-    if (!session || !session.user) {
+    if (!authResult) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

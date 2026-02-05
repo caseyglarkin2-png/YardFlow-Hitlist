@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { google } from 'googleapis';
 import { getGoogleClient } from '@/lib/google/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
     const fileType = searchParams.get('type') || 'all';
 
-    const googleClient = await getGoogleClient(session.user.id);
+    const googleClient = await getGoogleClient(authResult.userId);
     const drive = google.drive({ version: 'v3', auth: googleClient });
 
     // Build query based on file type

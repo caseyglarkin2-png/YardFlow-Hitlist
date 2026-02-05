@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * API Route: Get Top Targets
@@ -7,10 +9,10 @@ import { auth } from '@/auth';
  *
  * TODO: Refactor to work with current Prisma schema
  */
-export async function GET(_request: NextRequest) {
-  const session = await auth();
+export async function GET(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
 
-  if (!session?.user?.id) {
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

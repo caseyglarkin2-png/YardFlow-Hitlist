@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export const dynamic = 'force-dynamic';
 
 // TODO: Implement webhooks - requires webhooks table in schema
-export async function PUT(_request: NextRequest, _context: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export async function PUT(request: NextRequest, _context: { params: { id: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -17,9 +19,9 @@ export async function PUT(_request: NextRequest, _context: { params: { id: strin
   );
 }
 
-export async function DELETE(_request: NextRequest, _context: { params: { id: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export async function DELETE(request: NextRequest, _context: { params: { id: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

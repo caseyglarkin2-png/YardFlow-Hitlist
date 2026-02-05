@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
  * Track when a meeting request is sent via Manifest app
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       status: 'SENT',
       message: 'Meeting request sent via Manifest app',
       sentAt: new Date(requestedAt || new Date()),
-      sentBy: session.user.id,
+      sentBy: authResult.email || authResult.userId,
       notes: `Manifest meeting request sent at ${requestedAt || new Date().toISOString()}`,
       updatedAt: new Date(),
     },

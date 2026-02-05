@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -14,8 +14,8 @@ const presenceStore = new Map<
  * GET /api/presence - Get online users
  */
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -42,13 +42,13 @@ export async function GET(req: NextRequest) {
  * POST /api/presence - Update user presence (heartbeat)
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (!user) {
@@ -70,14 +70,14 @@ export async function POST(req: NextRequest) {
 /**
  * DELETE /api/presence - Remove user presence (logout/close)
  */
-export async function DELETE(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+export async function DELETE(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (user) {

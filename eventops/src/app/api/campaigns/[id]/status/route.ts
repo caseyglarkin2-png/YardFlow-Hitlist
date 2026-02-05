@@ -1,13 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   // 1. Auth check
-  const session = await auth();
-  if (!session?.user?.id) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 

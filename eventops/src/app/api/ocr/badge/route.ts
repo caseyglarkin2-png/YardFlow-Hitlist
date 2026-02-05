@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
  * This is a placeholder that would integrate with Tesseract.js or cloud OCR service
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

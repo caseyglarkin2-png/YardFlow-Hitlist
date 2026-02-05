@@ -10,15 +10,17 @@
  * 4. Updates sprint tracking
  */
 
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { sendSprintCompletionEmail, type SprintMetrics } from '@/lib/email/sprint-completion';
 import { prisma } from '@/lib/db';
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -56,7 +58,7 @@ export async function POST(request: Request) {
     await prisma.activities.create({
       data: {
         id: crypto.randomUUID(),
-        userId: session.user.id,
+        userId: authResult.userId,
         entityType: 'sprint',
         entityId: metrics.sprintNumber.toString(),
         action: 'sprint_completed',

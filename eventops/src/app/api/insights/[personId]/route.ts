@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 import OpenAI from 'openai';
 
@@ -16,9 +16,11 @@ function getOpenAI(): OpenAI {
   return openaiClient;
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest, { params }: { params: { personId: string } }) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -30,8 +32,8 @@ export async function GET(request: NextRequest, { params }: { params: { personId
 }
 
 export async function POST(request: NextRequest, { params }: { params: { personId: string } }) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -118,7 +120,7 @@ Provide insights in JSON format:
         suggestedApproach: insightsData.suggestedApproach,
         roiOpportunity: insightsData.roiOpportunity,
         confidence: insightsData.confidence,
-        generatedBy: session.user.id,
+        generatedBy: authResult.email || authResult.userId,
       },
       update: {
         roleContext: insightsData.roleContext,
@@ -127,7 +129,7 @@ Provide insights in JSON format:
         roiOpportunity: insightsData.roiOpportunity,
         confidence: insightsData.confidence,
         generatedAt: new Date(),
-        generatedBy: session.user.id,
+        generatedBy: authResult.email || authResult.userId,
       },
     });
 

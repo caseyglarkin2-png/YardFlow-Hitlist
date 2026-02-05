@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { 
   generateManifestRequest, 
   validateManifestRequest,
@@ -7,9 +7,11 @@ import {
 } from '@/lib/manifest/meeting-request-generator';
 import { logger } from '@/lib/logger';
 
-export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
     const validation = validateManifestRequest(message);
     
     logger.info('Generated Manifest meeting request', {
-      userId: session.user.id,
+      userId: authResult.userId,
       contactName: body.contactName,
       companyName: body.companyName,
       messageLength: message.length,
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error('Manifest meeting request generation failed', { 
       error,
-      userId: session.user?.id,
+      userId: authResult.userId,
     });
     
     return NextResponse.json(

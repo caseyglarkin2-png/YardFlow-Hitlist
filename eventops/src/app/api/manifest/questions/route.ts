@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { generateStrategicQuestions } from '@/lib/manifest/strategic-questions';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
-export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
     const result = await generateStrategicQuestions(accountId);
 
     logger.info('Strategic questions generated via API', {
-      userId: session.user.id,
+      userId: authResult.userId,
       accountId,
       questionCount: result.questions.length,
     });
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error('Strategic questions generation failed', {
       error,
-      userId: session.user?.id,
+      userId: authResult.userId,
     });
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -46,9 +48,9 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export async function GET(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -87,7 +89,7 @@ export async function GET(request: Request) {
   } catch (error) {
     logger.error('Failed to fetch strategic questions', {
       error,
-      userId: session.user?.id,
+      userId: authResult.userId,
     });
 
     return NextResponse.json({ error: 'Failed to fetch strategic questions' }, { status: 500 });

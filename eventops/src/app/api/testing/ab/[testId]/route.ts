@@ -4,14 +4,16 @@
  * POST /api/testing/ab - Create new test
  */
 
-import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { abTestingEngine } from '@/lib/testing/ab-testing-engine';
 import { logger } from '@/lib/logger';
 
-export async function GET(request: Request, { params }: { params: { testId: string } }) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest, { params }: { params: { testId: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -26,9 +28,9 @@ export async function GET(request: Request, { params }: { params: { testId: stri
   }
 }
 
-export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
