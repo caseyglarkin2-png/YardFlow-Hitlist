@@ -53,6 +53,27 @@ describe('sanitizeFreightRollContent', () => {
     expect(result.wasModified).toBe(true);
   });
 
+  it('handles "Yard Flow" with space', () => {
+    const input = 'Welcome to Yard Flow platform!';
+    const result = sanitizeFreightRollContent(input);
+    expect(result.content).toBe('Welcome to FreightRoll platform!');
+    expect(result.wasModified).toBe(true);
+  });
+
+  it('handles "Yard-Flow" with hyphen', () => {
+    const input = 'The Yard-Flow solution is great.';
+    const result = sanitizeFreightRollContent(input);
+    expect(result.content).toBe('The FreightRoll solution is great.');
+    expect(result.wasModified).toBe(true);
+  });
+
+  it('handles possessive forms', () => {
+    const input = "YardFlow's technology is innovative. Check Yard Flow's docs.";
+    const result = sanitizeFreightRollContent(input);
+    expect(result.content).toBe("FreightRoll's technology is innovative. Check FreightRoll's docs.");
+    expect(result.wasModified).toBe(true);
+  });
+
   it('returns unmodified content when no YardFlow present', () => {
     const input = 'Hello from FreightRoll!';
     const result = sanitizeFreightRollContent(input);

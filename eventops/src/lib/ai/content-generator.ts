@@ -3,15 +3,20 @@ import { logger } from '@/lib/logger';
 
 /**
  * Sanitize content to ensure FreightRoll branding is always used.
- * Replaces any occurrence of "YardFlow" (case-insensitive) with "FreightRoll".
+ * Replaces any occurrence of "YardFlow" (case-insensitive, with optional space/hyphen)
+ * with "FreightRoll". Handles possessive forms ("YardFlow's" -> "FreightRoll's").
  * Logs when replacement happens for monitoring.
  */
 export function sanitizeFreightRollContent(content: string): {
   content: string;
   wasModified: boolean;
 } {
-  const regex = /yardflow/gi;
-  const wasModified = regex.test(content);
+  // Match YardFlow with optional space/hyphen and optional possessive
+  const sanitized = content.replace(/yard[\s-]?flow('s)?/gi, (match) => {
+    return match.toLowerCase().endsWith("'s") ? "FreightRoll's" : 'FreightRoll';
+  });
+  
+  const wasModified = sanitized !== content;
   
   if (wasModified) {
     logger.warn('[content-generator] YardFlow found in generated content - sanitizing', {
@@ -19,10 +24,7 @@ export function sanitizeFreightRollContent(content: string): {
     });
   }
   
-  return {
-    content: content.replace(/yardflow/gi, 'FreightRoll'),
-    wasModified,
-  };
+  return { content: sanitized, wasModified };
 }
 
 export type ContentContext = {
