@@ -1,6 +1,6 @@
 /**
  * Sprint 43 - Route Auth Pattern Validation
- * 
+ *
  * Scans ALL API routes to verify they use the correct auth pattern.
  * This is a meta-test that catches regressions in auth patterns.
  */
@@ -39,12 +39,12 @@ function findRouteFiles(dir: string): string[] {
  * These either ARE auth endpoints or have valid reasons to use auth() directly.
  */
 const EXEMPT_ROUTES = [
-  '/api/auth/refresh',      // IS the auth endpoint
-  '/api/auth/session',      // IS the auth endpoint
-  '/api/google/connect',    // User-interactive OAuth redirect, needs session
-  '/api/health',            // Public health check
+  '/api/auth/refresh', // IS the auth endpoint
+  '/api/auth/session', // IS the auth endpoint
+  '/api/google/connect', // User-interactive OAuth redirect, needs session
+  '/api/health', // Public health check
   '/api/webhooks/sendgrid', // External webhook, uses signature verification
-  '/api/webhooks/hubspot',  // External webhook, uses signature verification
+  '/api/webhooks/hubspot', // External webhook, uses signature verification
 ];
 
 function getRelativeRoute(filePath: string): string {
@@ -73,15 +73,9 @@ describe('Route Auth Pattern Validation', () => {
       const content = readFileSync(file, 'utf-8');
 
       // Check for old auth() import
-      if (
-        content.includes("from '@/auth'") ||
-        content.includes("from '@/lib/auth'")
-      ) {
+      if (content.includes("from '@/auth'") || content.includes("from '@/lib/auth'")) {
         // Make sure it's not just a type import or re-export
-        if (
-          content.includes('await auth()') ||
-          content.includes('const session = await auth')
-        ) {
+        if (content.includes('await auth()') || content.includes('const session = await auth')) {
           violations.push(`${route}: Still uses auth() instead of authServiceOrSession`);
         }
       }
@@ -102,10 +96,9 @@ describe('Route Auth Pattern Validation', () => {
       const content = readFileSync(file, 'utf-8');
 
       // Routes that handle auth should use authServiceOrSession
-      const hasAuthCheck = content.includes('authServiceOrSession') ||
-        content.includes('requireAuth');
-      const isPublicRoute = !content.includes('Unauthorized') &&
-        !content.includes('401');
+      const hasAuthCheck =
+        content.includes('authServiceOrSession') || content.includes('requireAuth');
+      const isPublicRoute = !content.includes('Unauthorized') && !content.includes('401');
 
       if (!hasAuthCheck && !isPublicRoute) {
         missingAuth.push(`${route}: Has 401 check but doesn't use authServiceOrSession`);
@@ -158,7 +151,9 @@ describe('Route Auth Pattern Validation', () => {
       // Only check routes using authServiceOrSession (they need NextRequest)
       if (content.includes('authServiceOrSession')) {
         // Check for bare Request type (not NextRequest)
-        const handlers = content.match(/export async function (GET|POST|PUT|PATCH|DELETE)\((request|req):\s*Request[^)]/g);
+        const handlers = content.match(
+          /export async function (GET|POST|PUT|PATCH|DELETE)\((request|req):\s*Request[^)]/g
+        );
         if (handlers) {
           wrongType.push(`${route}: Uses Request type instead of NextRequest`);
         }

@@ -11,7 +11,9 @@ import { Download } from 'lucide-react';
 
 export default function AdvancedSearchPage() {
   const _router = useRouter();
-  const [entityType, setEntityType] = useState<'accounts' | 'people' | 'outreach' | 'meetings'>('people');
+  const [entityType, setEntityType] = useState<'accounts' | 'people' | 'outreach' | 'meetings'>(
+    'people'
+  );
   const [filters, setFilters] = useState<FilterCondition[]>([]);
   const [results, setResults] = useState<Record<string, unknown>[]>([]);
   const [resultCount, setResultCount] = useState(0);
@@ -41,7 +43,7 @@ export default function AdvancedSearchPage() {
         body: JSON.stringify({ entityType, filters }),
       });
       const data = await res.json();
-      
+
       setResults(data.results || []);
       setResultCount(data.totalResults || 0);
     } catch (error) {
@@ -77,23 +79,27 @@ export default function AdvancedSearchPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Advanced Search</h1>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={handleExport}
             disabled={results.length === 0}
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Export Results
           </Button>
         </div>
       </div>
 
-      <Tabs value={entityType} onValueChange={(v) => setEntityType(v as 'accounts' | 'people' | 'outreach' | 'meetings')} className="mb-6">
+      <Tabs
+        value={entityType}
+        onValueChange={(v) => setEntityType(v as 'accounts' | 'people' | 'outreach' | 'meetings')}
+        className="mb-6"
+      >
         <TabsList>
           <TabsTrigger value="accounts">Accounts</TabsTrigger>
           <TabsTrigger value="people">People</TabsTrigger>
@@ -102,13 +108,10 @@ export default function AdvancedSearchPage() {
         </TabsList>
       </Tabs>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <SavedSearches
-            entityType={entityType}
-            onLoad={setFilters}
-          />
-          
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-1">
+          <SavedSearches entityType={entityType} onLoad={setFilters} />
+
           <AdvancedFilters
             entityType={entityType}
             onSearch={(_advancedFilters) => {
@@ -119,14 +122,9 @@ export default function AdvancedSearchPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <SearchResults
-            results={results}
-            isLoading={searching}
-            resultCount={resultCount}
-          />
+          <SearchResults results={results} isLoading={searching} resultCount={resultCount} />
         </div>
       </div>
     </div>
   );
 }
-

@@ -153,7 +153,7 @@ export class LinkedInExtractor {
       where: {
         accountId,
         linkedin: null,
-        name: { not: '' }
+        name: { not: '' },
       },
       include: { target_accounts: true },
       take: limit,
@@ -172,13 +172,13 @@ export class LinkedInExtractor {
       }
 
       // Rate limiting: 2 seconds between searches
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     return {
       total: results.length,
-      found: results.filter(r => r.profileUrl !== null).length,
-      notFound: results.filter(r => r.profileUrl === null).length,
+      found: results.filter((r) => r.profileUrl !== null).length,
+      notFound: results.filter((r) => r.profileUrl === null).length,
       results,
     };
   }
@@ -186,11 +186,13 @@ export class LinkedInExtractor {
   /**
    * Batch enrich all companies
    */
-  async enrichAllCompanies(options: {
-    limit?: number;
-    peoplePerCompany?: number;
-    dryRun?: boolean;
-  } = {}): Promise<{ totalCompanies: number; totalPeople: number; totalFound: number }> {
+  async enrichAllCompanies(
+    options: {
+      limit?: number;
+      peoplePerCompany?: number;
+      dryRun?: boolean;
+    } = {}
+  ): Promise<{ totalCompanies: number; totalPeople: number; totalFound: number }> {
     const { limit = 10, peoplePerCompany = 10, dryRun = true } = options;
 
     // Get companies with people needing LinkedIn
@@ -199,7 +201,7 @@ export class LinkedInExtractor {
         people: {
           some: {
             linkedin: null,
-            name: { not: '' }
+            name: { not: '' },
           },
         },
       },
@@ -221,7 +223,7 @@ export class LinkedInExtractor {
       totalFound += result.found;
 
       // Delay between companies
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
 
     return {

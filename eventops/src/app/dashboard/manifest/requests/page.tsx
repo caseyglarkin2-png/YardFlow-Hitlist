@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ManifestRequestsPage() {
   const _router = useRouter();
@@ -21,19 +21,21 @@ export default function ManifestRequestsPage() {
   async function handleGenerate() {
     setGenerating(true);
     setShowResults(false);
-    
+
     try {
       // First, get filtered people
       const personas = Object.entries(personaFilters)
         .filter(([_, value]) => value)
         .map(([key]) => key);
 
-      const res = await fetch(`/api/people?personas=${personas.join(',')}&minIcpScore=${minIcpScore}`);
-      
+      const res = await fetch(
+        `/api/people?personas=${personas.join(',')}&minIcpScore=${minIcpScore}`
+      );
+
       if (!res.ok) {
         throw new Error('Failed to fetch people');
       }
-      
+
       const data = await res.json();
       const personIds = data.people.map((p: { id: string }) => p.id);
 
@@ -82,19 +84,19 @@ export default function ManifestRequestsPage() {
   }
 
   function exportToCsv() {
-    const successfulResults = results.filter(r => r.success);
-    
+    const successfulResults = results.filter((r) => r.success);
+
     const csv = [
       ['Name', 'Company', 'Email', 'Message', 'Character Count'].join(','),
-      ...successfulResults.map(r =>
+      ...successfulResults.map((r) =>
         [
           `"${r.personName}"`,
           `"${r.companyName}"`,
           `"${r.email || ''}"`,
           `"${r.message.replace(/"/g, '""')}"`,
-          r.characterCount
+          r.characterCount,
         ].join(',')
-      )
+      ),
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -107,26 +109,28 @@ export default function ManifestRequestsPage() {
 
   return (
     <div className="p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto max-w-6xl space-y-6">
         <div>
-          <h1 className="text-2xl font-bold mb-2">Manifest Meeting Requests</h1>
+          <h1 className="mb-2 text-2xl font-bold">Manifest Meeting Requests</h1>
           <p className="text-gray-600">
             Generate concise 250-character meeting requests for the Manifest app
           </p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white shadow rounded-lg p-6 space-y-4">
+        <div className="space-y-4 rounded-lg bg-white p-6 shadow">
           <div>
-            <h2 className="text-lg font-semibold mb-3">Filter Contacts</h2>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+            <h2 className="mb-3 text-lg font-semibold">Filter Contacts</h2>
+
+            <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3">
               {Object.entries(personaFilters).map(([key, value]) => (
-                <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                <label key={key} className="flex cursor-pointer items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={value}
-                    onChange={(e) => setPersonaFilters({ ...personaFilters, [key]: e.target.checked })}
+                    onChange={(e) =>
+                      setPersonaFilters({ ...personaFilters, [key]: e.target.checked })
+                    }
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm">
@@ -142,7 +146,7 @@ export default function ManifestRequestsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Minimum ICP Score
               </label>
               <select
@@ -162,13 +166,25 @@ export default function ManifestRequestsPage() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 flex items-center gap-2"
+              className="flex items-center gap-2 rounded-md bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700 disabled:bg-gray-400"
             >
               {generating ? (
                 <>
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   Generating...
                 </>
@@ -180,7 +196,7 @@ export default function ManifestRequestsPage() {
             {showResults && results.length > 0 && (
               <button
                 onClick={exportToCsv}
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="rounded-md bg-green-600 px-6 py-2 text-white hover:bg-green-700"
               >
                 Export to CSV
               </button>
@@ -190,55 +206,59 @@ export default function ManifestRequestsPage() {
 
         {/* Results */}
         {showResults && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              Generated {results.filter(r => r.success).length} / {results.length} Requests
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-semibold">
+              Generated {results.filter((r) => r.success).length} / {results.length} Requests
             </h2>
 
             <div className="space-y-4">
-              {results.filter(r => r.success).map((result, idx) => (
-                <div key={idx} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <div className="font-medium">{result.personName}</div>
-                      <div className="text-sm text-gray-600">{result.companyName}</div>
-                      {result.email && (
-                        <div className="text-xs text-gray-500">{result.email}</div>
-                      )}
+              {results
+                .filter((r) => r.success)
+                .map((result, idx) => (
+                  <div key={idx} className="rounded-lg border p-4">
+                    <div className="mb-2 flex items-start justify-between">
+                      <div>
+                        <div className="font-medium">{result.personName}</div>
+                        <div className="text-sm text-gray-600">{result.companyName}</div>
+                        {result.email && (
+                          <div className="text-xs text-gray-500">{result.email}</div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <span
+                          className={`rounded px-2 py-1 text-xs ${
+                            result.characterCount <= 250
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {result.characterCount} chars
+                        </span>
+                        <button
+                          onClick={() => copyToClipboard(result.message)}
+                          className="rounded bg-blue-100 px-3 py-1 text-xs text-blue-800 hover:bg-blue-200"
+                        >
+                          Copy
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        result.characterCount <= 250 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {result.characterCount} chars
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(result.message)}
-                        className="text-xs px-3 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </div>
 
-                  <div className="bg-gray-50 p-3 rounded text-sm">
-                    {result.message}
+                    <div className="rounded bg-gray-50 p-3 text-sm">{result.message}</div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {results.filter(r => !r.success).length > 0 && (
+              {results.filter((r) => !r.success).length > 0 && (
                 <div className="border-t pt-4">
-                  <h3 className="font-medium text-red-600 mb-2">
-                    {results.filter(r => !r.success).length} Failed
+                  <h3 className="mb-2 font-medium text-red-600">
+                    {results.filter((r) => !r.success).length} Failed
                   </h3>
-                  {results.filter(r => !r.success).map((result, idx) => (
-                    <div key={idx} className="text-sm text-red-600">
-                      {result.personName}: {result.error}
-                    </div>
-                  ))}
+                  {results
+                    .filter((r) => !r.success)
+                    .map((result, idx) => (
+                      <div key={idx} className="text-sm text-red-600">
+                        {result.personName}: {result.error}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>

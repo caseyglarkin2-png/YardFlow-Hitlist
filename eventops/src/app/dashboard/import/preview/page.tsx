@@ -25,7 +25,7 @@ export default function PreviewImportPage() {
       const fileContent = sessionStorage.getItem('importFile');
       const type = sessionStorage.getItem('importType') as 'accounts' | 'people';
       const mappingStr = sessionStorage.getItem('columnMapping');
-      
+
       if (!fileContent || !type || !mappingStr) {
         router.push('/dashboard/import');
         return;
@@ -66,20 +66,27 @@ export default function PreviewImportPage() {
 
             const responseData = await response.json();
             const checkResults = responseData.results || [];
-            
-            const processedRows: ImportRow[] = checkResults.map((result: { data: Record<string, unknown>; isDuplicate?: boolean; message?: string; matchedId?: string }) => ({
-              data: result.data,
-              status: result.isDuplicate ? 'duplicate' : 'new',
-              message: result.message,
-              matchedId: result.matchedId,
-            }));
+
+            const processedRows: ImportRow[] = checkResults.map(
+              (result: {
+                data: Record<string, unknown>;
+                isDuplicate?: boolean;
+                message?: string;
+                matchedId?: string;
+              }) => ({
+                data: result.data,
+                status: result.isDuplicate ? 'duplicate' : 'new',
+                message: result.message,
+                matchedId: result.matchedId,
+              })
+            );
 
             setRows(processedRows);
-            
+
             const newCount = processedRows.filter((r) => r.status === 'new').length;
             const dupCount = processedRows.filter((r) => r.status === 'duplicate').length;
             const errCount = processedRows.filter((r) => r.status === 'error').length;
-            
+
             setStats({ new: newCount, duplicates: dupCount, errors: errCount });
             setIsChecking(false);
           } catch (err) {
@@ -96,9 +103,9 @@ export default function PreviewImportPage() {
 
   async function handleImport() {
     if (!importType) return;
-    
+
     setIsImporting(true);
-    
+
     try {
       const response = await fetch('/api/import/execute', {
         method: 'POST',
@@ -114,7 +121,7 @@ export default function PreviewImportPage() {
       }
 
       const { created: _created } = await response.json();
-      
+
       // Clear session storage
       sessionStorage.removeItem('importFile');
       sessionStorage.removeItem('importType');
@@ -135,7 +142,7 @@ export default function PreviewImportPage() {
 
   if (isChecking) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
           <p className="mt-2 text-sm text-gray-600">Checking for duplicates...</p>
@@ -173,15 +180,15 @@ export default function PreviewImportPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg p-4">
+        <div className="bg-white p-4 shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
           <dt className="text-sm font-medium text-gray-500">New Records</dt>
           <dd className="mt-1 text-3xl font-semibold text-green-600">{stats.new}</dd>
         </div>
-        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg p-4">
+        <div className="bg-white p-4 shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
           <dt className="text-sm font-medium text-gray-500">Duplicates</dt>
           <dd className="mt-1 text-3xl font-semibold text-yellow-600">{stats.duplicates}</dd>
         </div>
-        <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg p-4">
+        <div className="bg-white p-4 shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
           <dt className="text-sm font-medium text-gray-500">Total Rows</dt>
           <dd className="mt-1 text-3xl font-semibold text-gray-900">{rows.length}</dd>
         </div>
@@ -195,21 +202,21 @@ export default function PreviewImportPage() {
         </div>
       )}
 
-      <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg overflow-hidden">
-        <div className="overflow-x-auto max-h-96">
+      <div className="overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
+        <div className="max-h-96 overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-300">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="sticky top-0 bg-gray-50">
               <tr>
-                <th className="py-3 pl-4 pr-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:pl-6">
+                <th className="py-3 pl-4 pr-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:pl-6">
                   Status
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   {importType === 'accounts' ? 'Company' : 'Name'}
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Details
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Message
                 </th>
               </tr>
@@ -232,14 +239,11 @@ export default function PreviewImportPage() {
                     {row.data.name || row.data.accountName}
                   </td>
                   <td className="px-3 py-2 text-sm text-gray-500">
-                    {importType === 'accounts' 
+                    {importType === 'accounts'
                       ? row.data.website || row.data.industry || '-'
-                      : row.data.title || row.data.email || '-'
-                    }
+                      : row.data.title || row.data.email || '-'}
                   </td>
-                  <td className="px-3 py-2 text-sm text-gray-500">
-                    {row.message || '-'}
-                  </td>
+                  <td className="px-3 py-2 text-sm text-gray-500">{row.message || '-'}</td>
                 </tr>
               ))}
             </tbody>
@@ -258,7 +262,7 @@ export default function PreviewImportPage() {
         <button
           onClick={handleImport}
           disabled={stats.new === 0 || isImporting}
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isImporting ? 'Importing...' : `Import ${stats.new} Record${stats.new !== 1 ? 's' : ''}`}
         </button>

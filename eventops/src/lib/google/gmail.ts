@@ -22,10 +22,7 @@ export async function checkEmailReplies(userId: string): Promise<{
       status: 'SENT',
       sentAt: { gte: thirtyDaysAgo },
       gmailThreadId: { not: null },
-      OR: [
-        { lastChecked: null },
-        { lastChecked: { lt: new Date(Date.now() - 3600000) } },
-      ],
+      OR: [{ lastChecked: null }, { lastChecked: { lt: new Date(Date.now() - 3600000) } }],
     },
     include: {
       people: {
@@ -43,7 +40,7 @@ export async function checkEmailReplies(userId: string): Promise<{
   const updated: Array<{ outreachId: string; personName: string; respondedAt: Date }> = [];
 
   await Promise.all(
-    outreachToCheck.map(outreach =>
+    outreachToCheck.map((outreach) =>
       limit(async () => {
         if (!outreach.gmailThreadId) return;
 
@@ -65,8 +62,8 @@ export async function checkEmailReplies(userId: string): Promise<{
 
           for (const message of recentMessages) {
             const headers = message.payload?.headers || [];
-            const fromHeader = headers.find(h => h.name === 'From');
-            const dateHeader = headers.find(h => h.name === 'Date');
+            const fromHeader = headers.find((h) => h.name === 'From');
+            const dateHeader = headers.find((h) => h.name === 'Date');
 
             if (!fromHeader?.value) continue;
 
@@ -77,7 +74,7 @@ export async function checkEmailReplies(userId: string): Promise<{
               outreach.people.email &&
               fromEmail.toLowerCase().includes(outreach.people.email.toLowerCase())
             ) {
-              const respondedAt = dateHeader?.value 
+              const respondedAt = dateHeader?.value
                 ? new Date(dateHeader.value)
                 : new Date(parseInt(message.internalDate || '0'));
 
@@ -115,7 +112,7 @@ export async function checkEmailReplies(userId: string): Promise<{
             }
           }
 
-          if (!updated.find(u => u.outreachId === outreach.id)) {
+          if (!updated.find((u) => u.outreachId === outreach.id)) {
             await prisma.outreach.update({
               where: { id: outreach.id },
               data: { lastChecked: new Date() },
@@ -124,15 +121,23 @@ export async function checkEmailReplies(userId: string): Promise<{
         } catch (error) {
           console.error(`Error checking thread ${outreach.gmailThreadId}:`, error);
 
-          await logGoogleAPICall(userId, 'gmail', 'threads.get', {
-            threadId: outreach.gmailThreadId,
-            error: error instanceof Error ? error.message : String(error),
-          }, false);
+          await logGoogleAPICall(
+            userId,
+            'gmail',
+            'threads.get',
+            {
+              threadId: outreach.gmailThreadId,
+              error: error instanceof Error ? error.message : String(error),
+            },
+            false
+          );
 
-          await prisma.outreach.update({
-            where: { id: outreach.id },
-            data: { lastChecked: new Date() },
-          }).catch(() => {});
+          await prisma.outreach
+            .update({
+              where: { id: outreach.id },
+              data: { lastChecked: new Date() },
+            })
+            .catch(() => {});
         }
       })
     )

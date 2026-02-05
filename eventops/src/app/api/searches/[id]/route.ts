@@ -4,10 +4,7 @@ import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -25,10 +22,7 @@ export async function GET(
     const savedSearch = await prisma.saved_searches.findFirst({
       where: {
         id: params.id,
-        OR: [
-          { userId: user.id },
-          { isGlobal: true },
-        ],
+        OR: [{ userId: user.id }, { isGlobal: true }],
       },
       include: {
         users: {
@@ -44,17 +38,11 @@ export async function GET(
     return NextResponse.json(savedSearch);
   } catch (error) {
     console.error('Error fetching saved search:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch saved search' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch saved search' }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -99,17 +87,11 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating saved search:', error);
-    return NextResponse.json(
-      { error: 'Failed to update saved search' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update saved search' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -145,9 +127,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting saved search:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete saved search' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete saved search' }, { status: 500 });
   }
 }

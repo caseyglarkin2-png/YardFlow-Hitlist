@@ -8,7 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-export function GoogleIntegrationCard({ user, onUpdate }: { user: Record<string, unknown>; onUpdate: () => void }) {
+export function GoogleIntegrationCard({
+  user,
+  onUpdate,
+}: {
+  user: Record<string, unknown>;
+  onUpdate: () => void;
+}) {
   const [syncing, setSyncing] = useState(false);
   const [importing, setImporting] = useState(false);
   const { toast } = useToast();

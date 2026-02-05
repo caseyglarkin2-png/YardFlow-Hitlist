@@ -32,32 +32,33 @@ const MessageSchema = z.object({
   content: z.string(),
 });
 
-const ChatRequestSchema = z.object({
-  // Our original format - single message string
-  message: z.string().min(1).max(2000).optional(),
-  // GTM-YardFlow format - messages array
-  messages: z.array(MessageSchema).optional(),
-  // Conversation continuity
-  conversationId: z.string().optional(),
-  context: z
-    .object({
-      accountId: z.string().optional(),
-      personId: z.string().optional(),
-      pageContext: z.string().optional(), // e.g., 'dashboard', 'prospects', 'sequences'
-      conversationHistory: z
-        .array(
-          z.object({
-            role: z.enum(['user', 'assistant']),
-            content: z.string(),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
-}).refine(
-  (data) => data.message || (data.messages && data.messages.length > 0),
-  { message: 'Either message or messages is required' }
-);
+const ChatRequestSchema = z
+  .object({
+    // Our original format - single message string
+    message: z.string().min(1).max(2000).optional(),
+    // GTM-YardFlow format - messages array
+    messages: z.array(MessageSchema).optional(),
+    // Conversation continuity
+    conversationId: z.string().optional(),
+    context: z
+      .object({
+        accountId: z.string().optional(),
+        personId: z.string().optional(),
+        pageContext: z.string().optional(), // e.g., 'dashboard', 'prospects', 'sequences'
+        conversationHistory: z
+          .array(
+            z.object({
+              role: z.enum(['user', 'assistant']),
+              content: z.string(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+  })
+  .refine((data) => data.message || (data.messages && data.messages.length > 0), {
+    message: 'Either message or messages is required',
+  });
 
 type ChatRequest = z.infer<typeof ChatRequestSchema>;
 
@@ -245,22 +246,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, messages, conversationId: providedConversationId, context } = validationResult.data;
+    const {
+      message,
+      messages,
+      conversationId: providedConversationId,
+      context,
+    } = validationResult.data;
 
     // Extract the actual user message - support both formats
     let userMessage: string;
     let systemPromptFromMessages: string | undefined;
-    
+
     if (messages && messages.length > 0) {
       // GTM-YardFlow format: array of messages
       // Find the last user message
-      const userMessages = messages.filter(m => m.role === 'user');
-      const systemMessages = messages.filter(m => m.role === 'system');
-      
+      const userMessages = messages.filter((m) => m.role === 'user');
+      const systemMessages = messages.filter((m) => m.role === 'system');
+
       if (userMessages.length === 0) {
         return NextResponse.json({ error: 'No user message in messages array' }, { status: 400 });
       }
-      
+
       userMessage = userMessages[userMessages.length - 1].content;
       systemPromptFromMessages = systemMessages.length > 0 ? systemMessages[0].content : undefined;
     } else if (message) {

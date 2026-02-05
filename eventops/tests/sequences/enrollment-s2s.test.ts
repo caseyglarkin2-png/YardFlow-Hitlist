@@ -52,7 +52,9 @@ describe('Sequence Enrollment S2S Auth', () => {
         name: 'Manifest: In the Area',
         status: 'active',
         steps: [{ stepNumber: 0, subject: 'Test', emailBody: 'Body', delayHours: 0 }],
-      } as ReturnType<typeof prisma.outreachSequence.findUnique> extends Promise<infer T> ? T : never);
+      } as ReturnType<typeof prisma.outreachSequence.findUnique> extends Promise<infer T>
+        ? T
+        : never);
 
       vi.mocked(enrollContact).mockResolvedValue({
         success: true,
@@ -82,7 +84,9 @@ describe('Sequence Enrollment S2S Auth', () => {
         status: 'active',
         steps: [],
         // Note: no createdBy field needed in query
-      } as ReturnType<typeof prisma.outreachSequence.findUnique> extends Promise<infer T> ? T : never);
+      } as ReturnType<typeof prisma.outreachSequence.findUnique> extends Promise<infer T>
+        ? T
+        : never);
 
       const result = await prisma.outreachSequence.findUnique({
         where: { id: 'seq-123' },
@@ -146,7 +150,11 @@ describe('Sequence Enrollment S2S Auth', () => {
       };
 
       vi.mocked(prisma.outreachSequence.findUnique).mockResolvedValue(
-        sequenceCreatedByUserA as ReturnType<typeof prisma.outreachSequence.findUnique> extends Promise<infer T> ? T : never
+        sequenceCreatedByUserA as ReturnType<
+          typeof prisma.outreachSequence.findUnique
+        > extends Promise<infer T>
+          ? T
+          : never
       );
 
       // User B (or S2S service) should be able to access it

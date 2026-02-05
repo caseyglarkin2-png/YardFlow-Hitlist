@@ -1,8 +1,8 @@
 /**
  * Sprint Completion API Endpoint
- * 
+ *
  * POST /api/sprints/complete
- * 
+ *
  * Triggers sprint completion workflow:
  * 1. Collects performance metrics
  * 2. Sends email notification to casey@freightroll.com
@@ -40,10 +40,7 @@ export async function POST(request: NextRequest) {
 
     for (const field of requiredFields) {
       if (!metrics[field as keyof SprintMetrics]) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 });
       }
     }
 
@@ -92,7 +89,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * Example usage:
- * 
+ *
  * curl -X POST http://localhost:3000/api/sprints/complete \
  *   -H "Content-Type: application/json" \
  *   -H "Cookie: next-auth.session-token=YOUR_TOKEN" \

@@ -7,7 +7,8 @@ import { logger } from '@/lib/logger';
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
 const FROM_EMAIL = process.env.FROM_EMAIL || 'outreach@yardflow.com';
 const FROM_NAME = process.env.FROM_NAME || 'YardFlow Outreach';
-const COMPANY_ADDRESS = process.env.COMPANY_ADDRESS || '123 Main St, Suite 100, San Francisco, CA 94105';
+const COMPANY_ADDRESS =
+  process.env.COMPANY_ADDRESS || '123 Main St, Suite 100, San Francisco, CA 94105';
 
 if (SENDGRID_API_KEY) {
   sgMail.setApiKey(SENDGRID_API_KEY);
@@ -35,10 +36,7 @@ export interface EmailSendResult {
 /**
  * Substitute template variables in text
  */
-function substituteVariables(
-  template: string,
-  variables: Record<string, unknown>
-): string {
+function substituteVariables(template: string, variables: Record<string, unknown>): string {
   let result = template;
 
   // Add system variables
@@ -63,7 +61,7 @@ function substituteVariables(
 function addTrackingPixel(html: string, trackingId: string): string {
   const trackingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.yardflow.com'}/api/tracking/open?id=${trackingId}`;
   const trackingPixel = `<img src="${trackingUrl}" width="1" height="1" alt="" style="display:none" />`;
-  
+
   // Insert before closing body tag
   return html.replace('</body>', `${trackingPixel}</body>`);
 }
@@ -73,7 +71,7 @@ function addTrackingPixel(html: string, trackingId: string): string {
  */
 function rewriteLinksForTracking(html: string, trackingId: string): string {
   const trackingBase = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.yardflow.com'}/api/tracking/click?id=${trackingId}&url=`;
-  
+
   // Replace href attributes
   return html.replace(/href=["']([^"']+)["']/g, (match, url) => {
     // Don't track unsubscribe links or anchors
@@ -95,10 +93,10 @@ function renderEmailHtml(
 ): string {
   // Substitute variables first
   const substituted = substituteVariables(body, variables);
-  
+
   // Convert markdown to HTML
   let html = marked(substituted) as string;
-  
+
   // Wrap in basic HTML template
   html = `
 <!DOCTYPE html>
@@ -122,16 +120,16 @@ function renderEmailHtml(
 </body>
 </html>
   `;
-  
+
   // Add final variable substitution for footer
   html = substituteVariables(html, variables);
-  
+
   // Add tracking pixel
   html = addTrackingPixel(html, trackingId);
-  
+
   // Rewrite links for click tracking
   html = rewriteLinksForTracking(html, trackingId);
-  
+
   return html;
 }
 
@@ -143,38 +141,46 @@ async function sendWithRetry(
   maxRetries: number = 3
 ): Promise<EmailSendResult> {
   let lastError: unknown;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const [response] = await sgMail.send(msg);
-      
+
       // Extract message ID from headers
       const messageId = response.headers['x-message-id'] || '';
-      
+
       return {
         success: true,
         messageId,
       };
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry on permanent failures
       const errCode = (error as { code?: number })?.code;
       if (errCode === 400 || errCode === 401 || errCode === 403) {
         break;
       }
-      
+
       // Wait with exponential backoff before retry
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
-  
+
   // All retries failed
-  const errorMessage = (lastError as { response?: { body?: { errors?: Array<{ message?: string }> } }; message?: string })?.response?.body?.errors?.[0]?.message || (lastError as Error)?.message || 'Unknown error';
-  
+  const errorMessage =
+    (
+      lastError as {
+        response?: { body?: { errors?: Array<{ message?: string }> } };
+        message?: string;
+      }
+    )?.response?.body?.errors?.[0]?.message ||
+    (lastError as Error)?.message ||
+    'Unknown error';
+
   return {
     success: false,
     error: errorMessage,
@@ -201,7 +207,7 @@ export async function sendEmail(
   try {
     // Generate tracking ID
     const trackingId = `${enrollmentId}_${stepNumber}`;
-    
+
     // Prepare variables
     const variables = {
       firstName: recipient.firstName || '',
@@ -210,13 +216,13 @@ export async function sendEmail(
       company: recipient.company || '',
       email: recipient.email,
     };
-    
+
     // Substitute variables in subject
     const subject = substituteVariables(template.subject, variables);
-    
+
     // Render HTML body
     const html = renderEmailHtml(template.body, variables, trackingId);
-    
+
     // Prepare email
     const msg: sgMail.MailDataRequired = {
       to: recipient.email,
@@ -240,10 +246,10 @@ export async function sendEmail(
         },
       },
     };
-    
+
     // Send email with retry
     const result = await sendWithRetry(msg);
-    
+
     // Log the send
     logger.info('Email sent', {
       enrollmentId,
@@ -252,7 +258,7 @@ export async function sendEmail(
       success: result.success,
       messageId: result.messageId,
     });
-    
+
     return result;
   } catch (error) {
     logger.error('Error sending email', {
@@ -261,7 +267,7 @@ export async function sendEmail(
       recipient: recipient.email,
       error,
     });
-    
+
     return {
       success: false,
       error: error.message,

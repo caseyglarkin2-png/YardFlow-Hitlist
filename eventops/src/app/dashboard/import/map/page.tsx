@@ -42,7 +42,7 @@ export default function MapColumnsPage() {
   useEffect(() => {
     const fileContent = sessionStorage.getItem('importFile');
     const type = sessionStorage.getItem('importType') as 'accounts' | 'people';
-    
+
     if (!fileContent || !type) {
       router.push('/dashboard/import');
       return;
@@ -57,14 +57,14 @@ export default function MapColumnsPage() {
         const headers = results.meta.fields || [];
         setCsvHeaders(headers);
         setData(results.data);
-        
+
         // Auto-map columns based on header names
         const autoMapping: FieldMapping = {};
         const fields = type === 'accounts' ? accountFields : peopleFields;
-        
+
         headers.forEach((header) => {
           const lowerHeader = header.toLowerCase().trim();
-          
+
           // Try exact matches first
           Object.keys(fields).forEach((fieldKey) => {
             const fieldLabel = fields[fieldKey as keyof typeof fields].label.toLowerCase();
@@ -72,26 +72,37 @@ export default function MapColumnsPage() {
               autoMapping[fieldKey] = header;
             }
           });
-          
+
           // Try common variations
-          if (lowerHeader.includes('company') || lowerHeader.includes('account') || lowerHeader.includes('organization')) {
+          if (
+            lowerHeader.includes('company') ||
+            lowerHeader.includes('account') ||
+            lowerHeader.includes('organization')
+          ) {
             if (type === 'people' && !autoMapping.accountName) {
               autoMapping.accountName = header;
             } else if (type === 'accounts' && !autoMapping.name) {
               autoMapping.name = header;
             }
           }
-          if ((lowerHeader.includes('icp') || lowerHeader.includes('score')) && type === 'accounts') {
+          if (
+            (lowerHeader.includes('icp') || lowerHeader.includes('score')) &&
+            type === 'accounts'
+          ) {
             if (!autoMapping.icpScore) autoMapping.icpScore = header;
           }
           if (lowerHeader === 'url' || lowerHeader === 'site') {
             if (!autoMapping.website) autoMapping.website = header;
           }
-          if (lowerHeader.includes('location') || lowerHeader === 'hq' || lowerHeader.includes('headquarter')) {
+          if (
+            lowerHeader.includes('location') ||
+            lowerHeader === 'hq' ||
+            lowerHeader.includes('headquarter')
+          ) {
             if (!autoMapping.headquarters) autoMapping.headquarters = header;
           }
         });
-        
+
         setMapping(autoMapping);
         setAutoMapped(true);
       },
@@ -136,13 +147,11 @@ export default function MapColumnsPage() {
               <div key={fieldKey}>
                 <label className="block text-sm font-medium text-gray-700">
                   {field.label}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
+                  {field.required && <span className="ml-1 text-red-500">*</span>}
                 </label>
                 <select
                   value={mapping[fieldKey] || ''}
-                  onChange={(e) =>
-                    setMapping({ ...mapping, [fieldKey]: e.target.value })
-                  }
+                  onChange={(e) => setMapping({ ...mapping, [fieldKey]: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 >
                   <option value="">-- Select CSV column --</option>
@@ -179,7 +188,7 @@ export default function MapColumnsPage() {
             <button
               onClick={handleContinue}
               disabled={!requiredFieldsMapped}
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Preview Import
             </button>

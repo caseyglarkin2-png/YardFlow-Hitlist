@@ -88,7 +88,7 @@ export default function WorkflowsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg">Loading workflows...</div>
       </div>
     );
@@ -96,27 +96,27 @@ export default function WorkflowsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Workflow Automation</h1>
-          <p className="text-gray-600 mt-1">Automate repetitive tasks</p>
+          <p className="mt-1 text-gray-600">Automate repetitive tasks</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           + New Workflow
         </button>
       </div>
 
       {workflows.length === 0 ? (
-        <div className="bg-white p-12 rounded-lg shadow text-center">
-          <div className="text-6xl mb-4">⚙️</div>
-          <h2 className="text-2xl font-semibold mb-2">No Workflows Yet</h2>
-          <p className="text-gray-600 mb-6">Create automated workflows to streamline your work</p>
+        <div className="rounded-lg bg-white p-12 text-center shadow">
+          <div className="mb-4 text-6xl">⚙️</div>
+          <h2 className="mb-2 text-2xl font-semibold">No Workflows Yet</h2>
+          <p className="mb-6 text-gray-600">Create automated workflows to streamline your work</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
           >
             Create First Workflow
           </button>
@@ -124,37 +124,31 @@ export default function WorkflowsPage() {
       ) : (
         <div className="grid gap-4">
           {workflows.map((workflow) => (
-            <div key={workflow.id} className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-start mb-4">
+            <div key={workflow.id} className="rounded-lg bg-white p-6 shadow">
+              <div className="mb-4 flex items-start justify-between">
                 <div>
                   <h3 className="text-xl font-semibold">{workflow.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="mt-1 text-sm text-gray-600">
                     Created {new Date(workflow.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded text-sm font-medium ${
-                    workflow.enabled
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                  className={`rounded px-3 py-1 text-sm font-medium ${
+                    workflow.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                   }`}
                 >
                   {workflow.enabled ? 'Enabled' : 'Disabled'}
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+              <div className="mb-4 grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-gray-600">Trigger</p>
-                  <p className="font-medium">
-                    {JSON.parse(workflow.trigger).type || 'Unknown'}
-                  </p>
+                  <p className="font-medium">{JSON.parse(workflow.trigger).type || 'Unknown'}</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Actions</p>
-                  <p className="font-medium">
-                    {JSON.parse(workflow.actions).length} action(s)
-                  </p>
+                  <p className="font-medium">{JSON.parse(workflow.actions).length} action(s)</p>
                 </div>
                 <div>
                   <p className="text-gray-600">Conditions</p>
@@ -167,7 +161,7 @@ export default function WorkflowsPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => toggleWorkflow(workflow.id, workflow.enabled)}
-                  className={`px-4 py-2 rounded ${
+                  className={`rounded px-4 py-2 ${
                     workflow.enabled
                       ? 'bg-gray-600 text-white hover:bg-gray-700'
                       : 'bg-green-600 text-white hover:bg-green-700'
@@ -177,13 +171,13 @@ export default function WorkflowsPage() {
                 </button>
                 <button
                   onClick={() => executeWorkflow(workflow.id)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
                   Test Run
                 </button>
                 <button
                   onClick={() => deleteWorkflow(workflow.id)}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                 >
                   Delete
                 </button>
@@ -195,9 +189,9 @@ export default function WorkflowsPage() {
 
       {/* Create Workflow Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full">
-            <h2 className="text-2xl font-bold mb-4">Create Workflow</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-2xl font-bold">Create Workflow</h2>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -218,19 +212,19 @@ export default function WorkflowsPage() {
               }}
             >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Workflow Name</label>
+                <label className="mb-1 block text-sm font-medium">Workflow Name</label>
                 <input
                   type="text"
                   name="name"
                   required
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                   placeholder="e.g., Auto-follow-up on email open"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Trigger Event</label>
-                <select name="trigger" className="w-full px-3 py-2 border rounded">
+                <label className="mb-1 block text-sm font-medium">Trigger Event</label>
+                <select name="trigger" className="w-full rounded border px-3 py-2">
                   <option value="email_opened">Email Opened</option>
                   <option value="email_responded">Email Responded</option>
                   <option value="meeting_scheduled">Meeting Scheduled</option>
@@ -239,8 +233,8 @@ export default function WorkflowsPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Action</label>
-                <select name="actionType" className="w-full px-3 py-2 border rounded">
+                <label className="mb-1 block text-sm font-medium">Action</label>
+                <select name="actionType" className="w-full rounded border px-3 py-2">
                   <option value="send_notification">Send Notification</option>
                   <option value="update_status">Update Status</option>
                   <option value="assign_campaign">Assign to Campaign</option>
@@ -251,13 +245,13 @@ export default function WorkflowsPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border rounded hover:bg-gray-50"
+                  className="rounded border px-4 py-2 hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
                   Create Workflow
                 </button>

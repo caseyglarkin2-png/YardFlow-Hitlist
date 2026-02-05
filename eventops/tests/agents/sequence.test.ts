@@ -231,7 +231,7 @@ describe('SequenceEngineerAgent', () => {
 
       const createCall = vi.mocked(prisma.sequences.create).mock.calls[0][0];
       const steps = JSON.parse(createCall.data.steps as string);
-      
+
       const channels = steps.map((s: { channel: string }) => s.channel);
       expect(channels).toContain('EMAIL');
       expect(channels).toContain('LINKEDIN');

@@ -5,10 +5,7 @@ import { db as prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 // POST /api/people/[id]/assign - Assign person to user
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -27,10 +24,7 @@ export async function POST(
     const { userId } = body;
 
     if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
     // Verify the target user exists
@@ -95,18 +89,12 @@ export async function POST(
     return NextResponse.json(person);
   } catch (error) {
     console.error('Error assigning person:', error);
-    return NextResponse.json(
-      { error: 'Failed to assign person' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to assign person' }, { status: 500 });
   }
 }
 
 // DELETE /api/people/[id]/assign - Unassign person
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
@@ -144,9 +132,6 @@ export async function DELETE(
     return NextResponse.json(person);
   } catch (error) {
     console.error('Error unassigning person:', error);
-    return NextResponse.json(
-      { error: 'Failed to unassign person' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to unassign person' }, { status: 500 });
   }
 }

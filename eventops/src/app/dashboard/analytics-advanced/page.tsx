@@ -69,17 +69,17 @@ export default function AdvancedAnalyticsPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Advanced Analytics</h1>
+        <h1 className="mb-2 text-2xl font-bold">Advanced Analytics</h1>
         <p className="text-gray-600">Conversion funnels, cohort analysis, and predictive scoring</p>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading analytics...</div>
+        <div className="py-12 text-center text-gray-500">Loading analytics...</div>
       ) : (
         <div className="space-y-6">
           {/* Conversion Funnel */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
+          <div className="rounded-lg bg-white shadow">
+            <div className="border-b p-6">
               <h2 className="text-lg font-semibold">Conversion Funnel</h2>
             </div>
             <div className="p-6">
@@ -91,25 +91,25 @@ export default function AdvancedAnalyticsPage() {
                     stage.percentage >= 50
                       ? 'bg-green-500'
                       : stage.percentage >= 25
-                      ? 'bg-yellow-500'
-                      : 'bg-red-500';
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500';
 
                   return (
                     <div key={stage.stage}>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="mb-2 flex items-center justify-between">
                         <span className="font-medium">{stage.stage}</span>
                         <div className="text-sm text-gray-600">
                           {stage.count.toLocaleString()} ({stage.percentage.toFixed(1)}%)
                           {index > 0 && stage.dropoff > 0 && (
-                            <span className="text-red-600 ml-2">
+                            <span className="ml-2 text-red-600">
                               ↓ {stage.dropoff.toLocaleString()}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="relative h-8 bg-gray-200 rounded-lg overflow-hidden">
+                      <div className="relative h-8 overflow-hidden rounded-lg bg-gray-200">
                         <div
-                          className={`${color} h-full flex items-center px-4 text-white font-semibold text-sm transition-all duration-500`}
+                          className={`${color} flex h-full items-center px-4 text-sm font-semibold text-white transition-all duration-500`}
                           style={{ width: `${Math.max(width, 5)}%` }}
                         >
                           {stage.count > 0 && stage.count.toLocaleString()}
@@ -123,13 +123,13 @@ export default function AdvancedAnalyticsPage() {
           </div>
 
           {/* Cohort Analysis */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b flex items-center justify-between">
+          <div className="rounded-lg bg-white shadow">
+            <div className="flex items-center justify-between border-b p-6">
               <h2 className="text-lg font-semibold">Cohort Analysis</h2>
               <select
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-4 py-2"
+                className="rounded-lg border border-gray-300 px-4 py-2"
               >
                 <option value="month">By Month</option>
                 <option value="week">By Week</option>
@@ -141,25 +141,25 @@ export default function AdvancedAnalyticsPage() {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Cohort
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Total
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Sent
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Responded
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Meetings
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Response Rate
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
                       Meeting Rate
                     </th>
                   </tr>
@@ -174,12 +174,12 @@ export default function AdvancedAnalyticsPage() {
                       <td className="px-6 py-4">{cohort.meetings}</td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-2 py-1 rounded text-sm font-medium ${
+                          className={`rounded px-2 py-1 text-sm font-medium ${
                             cohort.responseRate >= 20
                               ? 'bg-green-100 text-green-800'
                               : cohort.responseRate >= 10
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
                           }`}
                         >
                           {cohort.responseRate.toFixed(1)}%
@@ -187,12 +187,12 @@ export default function AdvancedAnalyticsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`px-2 py-1 rounded text-sm font-medium ${
+                          className={`rounded px-2 py-1 text-sm font-medium ${
                             cohort.meetingRate >= 30
                               ? 'bg-green-100 text-green-800'
                               : cohort.meetingRate >= 15
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
                           }`}
                         >
                           {cohort.meetingRate.toFixed(1)}%
@@ -213,24 +213,26 @@ export default function AdvancedAnalyticsPage() {
           </div>
 
           {/* Predictive Scoring */}
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
+          <div className="rounded-lg bg-white shadow">
+            <div className="border-b p-6">
               <h2 className="text-lg font-semibold">Top Conversion Predictions</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="mt-1 text-sm text-gray-600">
                 People most likely to convert based on ICP score, engagement, and history
               </p>
             </div>
-            <div className="divide-y max-h-96 overflow-y-auto">
+            <div className="max-h-96 divide-y overflow-y-auto">
               {predictions.map((prediction, index) => (
-                <div key={prediction.personId} className="p-4 flex items-center gap-4">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                <div key={prediction.personId} className="flex items-center gap-4 p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <div className="font-medium">{prediction.name}</div>
                     <div className="text-sm text-gray-600">{prediction.title}</div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full font-semibold ${getScoreColor(prediction.score)}`}>
+                  <div
+                    className={`rounded-full px-3 py-1 font-semibold ${getScoreColor(prediction.score)}`}
+                  >
                     {prediction.score}
                   </div>
                 </div>

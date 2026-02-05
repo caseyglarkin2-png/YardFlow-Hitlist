@@ -7,7 +7,7 @@ function NewPersonForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accountIdParam = searchParams.get('accountId');
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<Record<string, unknown>[]>([]);
@@ -32,7 +32,7 @@ function NewPersonForm() {
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    
+
     try {
       const response = await fetch('/api/people', {
         method: 'POST',
@@ -72,15 +72,16 @@ function NewPersonForm() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Add Person</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Create a new contact for a target account
-        </p>
+        <p className="mt-1 text-sm text-gray-600">Create a new contact for a target account</p>
       </div>
 
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         <form onSubmit={handleSubmit} className="space-y-6 px-4 py-6 sm:p-8">
           <div>
-            <label htmlFor="accountId" className="block text-sm font-medium leading-6 text-gray-900">
+            <label
+              htmlFor="accountId"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
               Company *
             </label>
             <div className="mt-2">
@@ -180,7 +181,7 @@ function NewPersonForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium leading-6 text-gray-900 mb-3">
+            <label className="mb-3 block text-sm font-medium leading-6 text-gray-900">
               Persona Tags
             </label>
             <div className="space-y-2">
@@ -303,7 +304,7 @@ function NewPersonForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? 'Creating...' : 'Create Person'}
             </button>

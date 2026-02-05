@@ -20,7 +20,10 @@ export class GoogleSearchClient {
   /**
    * Search Google for a query
    */
-  async search(query: string, options: { maxResults?: number; delay?: number } = {}): Promise<SearchResult[]> {
+  async search(
+    query: string,
+    options: { maxResults?: number; delay?: number } = {}
+  ): Promise<SearchResult[]> {
     const { maxResults = 10, delay = 2000 } = options;
 
     try {
@@ -32,11 +35,11 @@ export class GoogleSearchClient {
       const response = await fetch(searchUrl, {
         headers: {
           'User-Agent': userAgent,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.5',
           'Accept-Encoding': 'gzip, deflate, br',
-          'DNT': '1',
-          'Connection': 'keep-alive',
+          DNT: '1',
+          Connection: 'keep-alive',
           'Upgrade-Insecure-Requests': '1',
         },
         signal: AbortSignal.timeout(10000),
@@ -51,18 +54,21 @@ export class GoogleSearchClient {
 
       // Rate limiting delay
       if (delay > 0) {
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
 
       return results.slice(0, maxResults);
     } catch (error) {
       console.error('Google search error:', error);
-      
+
       // If blocked, return empty results rather than failing
-      if (error instanceof Error && (error.message?.includes('429') || error.message?.includes('captcha'))) {
+      if (
+        error instanceof Error &&
+        (error.message?.includes('429') || error.message?.includes('captcha'))
+      ) {
         console.warn('Google rate limit or captcha detected');
       }
-      
+
       return [];
     }
   }
@@ -75,7 +81,7 @@ export class GoogleSearchClient {
 
     // Simple regex-based parsing (works for basic cases)
     // Note: Google HTML structure changes frequently, so this is a basic implementation
-    
+
     // Match result blocks
     const resultRegex = /<div class="[^"]*g[^"]*"[^>]*>(.*?)<\/div>/gis;
     const matches = html.matchAll(resultRegex);
@@ -85,7 +91,7 @@ export class GoogleSearchClient {
 
       // Extract title and URL from <a> tag
       const linkMatch = block.match(/<a href="\/url\?q=([^"&]+)[^>]*>.*?<h3[^>]*>(.*?)<\/h3>/is);
-      
+
       if (linkMatch) {
         const url = decodeURIComponent(linkMatch[1]);
         const title = this.stripHtml(linkMatch[2]);
@@ -125,7 +131,11 @@ export class GoogleSearchClient {
   /**
    * Search for LinkedIn profile
    */
-  async searchLinkedIn(firstName: string, lastName: string, company: string): Promise<string | null> {
+  async searchLinkedIn(
+    firstName: string,
+    lastName: string,
+    company: string
+  ): Promise<string | null> {
     const query = `${firstName} ${lastName} ${company} site:linkedin.com/in`;
     const results = await this.search(query, { maxResults: 3, delay: 2000 });
 
@@ -151,7 +161,7 @@ export class GoogleSearchClient {
     // Return first non-social media result
     for (const result of results) {
       const url = result.url.toLowerCase();
-      
+
       // Skip social media and directories
       if (
         !url.includes('linkedin.com') &&

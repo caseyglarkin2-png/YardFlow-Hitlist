@@ -80,7 +80,7 @@ export class WebsiteScraper {
     // Validate URL to prevent SSRF
     try {
       const parsedUrl = new URL(url);
-      
+
       // Only allow http/https protocols
       if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
         throw new Error('Invalid protocol');
@@ -89,7 +89,7 @@ export class WebsiteScraper {
       // Block internal/private IPs
       const hostname = parsedUrl.hostname.toLowerCase();
       const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '169.254'];
-      if (blockedHosts.some(blocked => hostname.includes(blocked))) {
+      if (blockedHosts.some((blocked) => hostname.includes(blocked))) {
         throw new Error('Cannot fetch internal URLs');
       }
 
@@ -103,8 +103,9 @@ export class WebsiteScraper {
 
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
       signal: AbortSignal.timeout(10000),
     });
@@ -246,8 +247,9 @@ export class WebsiteScraper {
     const products: string[] = [];
 
     // Look for product/service lists
-    const listMatch = html.match(/<ul[^>]*products[^>]*>(.*?)<\/ul>/is) || 
-                      html.match(/<ul[^>]*services[^>]*>(.*?)<\/ul>/is);
+    const listMatch =
+      html.match(/<ul[^>]*products[^>]*>(.*?)<\/ul>/is) ||
+      html.match(/<ul[^>]*services[^>]*>(.*?)<\/ul>/is);
 
     if (listMatch) {
       const items = listMatch[1].match(/<li[^>]*>(.*?)<\/li>/gis);

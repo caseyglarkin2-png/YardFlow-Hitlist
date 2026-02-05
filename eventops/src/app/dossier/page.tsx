@@ -11,7 +11,7 @@ import { useSearchParams } from 'next/navigation';
 function DossierPageContent() {
   const searchParams = useSearchParams();
   const accountId = searchParams.get('accountId') || undefined;
-  
+
   const [dossier, setDossier] = useState<Record<string, unknown> | null>(null);
   const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -135,9 +135,7 @@ function DossierPageContent() {
         </Alert>
       )}
 
-      {!dossier && (
-        <DossierGeneratorForm companies={companies} onGenerate={handleGenerate} />
-      )}
+      {!dossier && <DossierGeneratorForm companies={companies} onGenerate={handleGenerate} />}
 
       {dossier && (
         <DossierView

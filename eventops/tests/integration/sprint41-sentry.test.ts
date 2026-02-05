@@ -1,6 +1,6 @@
 /**
  * Sprint 41 - Sentry Error Capture Tests
- * 
+ *
  * Validates:
  * 1. sentry-utils.ts captureRouteError and captureRouteMessage work correctly
  * 2. Five high-traffic routes call captureRouteError in catch blocks
@@ -108,10 +108,14 @@ describe('captureRouteMessage', () => {
   it('supports custom severity levels', async () => {
     const { captureRouteMessage } = await import('@/lib/sentry-utils');
 
-    captureRouteMessage('Health check info', {
-      route: '/api/health',
-      method: 'GET',
-    }, 'info');
+    captureRouteMessage(
+      'Health check info',
+      {
+        route: '/api/health',
+        method: 'GET',
+      },
+      'info'
+    );
 
     expect(mockSetLevel).toHaveBeenCalledWith('info');
   });

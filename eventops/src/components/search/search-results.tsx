@@ -19,15 +19,11 @@ interface SearchResultsProps {
   resultCount?: number;
 }
 
-export function SearchResults({
-  results,
-  isLoading,
-  resultCount,
-}: SearchResultsProps) {
+export function SearchResults({ results, isLoading, resultCount }: SearchResultsProps) {
   if (isLoading) {
     return (
       <Card className="p-8 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         <p className="mt-4 text-muted-foreground">Searching...</p>
       </Card>
     );
@@ -48,11 +44,11 @@ export function SearchResults({
           Found {resultCount} result{resultCount !== 1 ? 's' : ''}
         </p>
       )}
-      
+
       <div className="space-y-2">
         {results.map((result) => (
           <Link key={result.id} href={result.url}>
-            <Card className="p-4 hover:bg-accent transition-colors cursor-pointer">
+            <Card className="cursor-pointer p-4 transition-colors hover:bg-accent">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -62,12 +58,10 @@ export function SearchResults({
                     </Badge>
                   </div>
                   {result.subtitle && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {result.subtitle}
-                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">{result.subtitle}</p>
                   )}
                   {result.metadata && (
-                    <div className="flex gap-4 mt-2">
+                    <div className="mt-2 flex gap-4">
                       {Object.entries(result.metadata).map(([key, value]) => (
                         <div key={key} className="text-xs">
                           <span className="text-muted-foreground">{key}: </span>

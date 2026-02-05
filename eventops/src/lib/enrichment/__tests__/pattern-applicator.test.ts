@@ -28,7 +28,8 @@ describe('PatternApplicator', () => {
 
   beforeEach(() => {
     applicator = new PatternApplicator();
-    mockDetector = (applicator as unknown as Record<string, unknown>).detector as vi.Mocked<EmailPatternDetector>;
+    mockDetector = (applicator as unknown as Record<string, unknown>)
+      .detector as vi.Mocked<EmailPatternDetector>;
     vi.clearAllMocks();
   });
 

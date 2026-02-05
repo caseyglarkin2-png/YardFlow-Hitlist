@@ -68,21 +68,29 @@ vi.mock('@/lib/logger', () => ({
 // Mock queue modules (dynamic imports)
 vi.mock('@/lib/queue/queues', () => ({
   enrichmentQueue: {
-    getJobCounts: vi.fn().mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
+    getJobCounts: vi
+      .fn()
+      .mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
     getFailed: vi.fn().mockResolvedValue([]),
     getJob: vi.fn().mockResolvedValue(null),
   },
   outreachQueue: {
-    getJobCounts: vi.fn().mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
+    getJobCounts: vi
+      .fn()
+      .mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
     getFailed: vi.fn().mockResolvedValue([]),
     getJob: vi.fn().mockResolvedValue(null),
   },
   emailQueue: {
-    getJobCounts: vi.fn().mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
+    getJobCounts: vi
+      .fn()
+      .mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
     getFailed: vi.fn().mockResolvedValue([]),
   },
   sequenceQueue: {
-    getJobCounts: vi.fn().mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
+    getJobCounts: vi
+      .fn()
+      .mockResolvedValue({ active: 0, waiting: 0, completed: 0, failed: 0, delayed: 0 }),
     getFailed: vi.fn().mockResolvedValue([]),
     getJob: vi.fn().mockResolvedValue(null),
   },

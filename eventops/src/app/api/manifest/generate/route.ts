@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { authServiceOrSession } from "@/lib/auth-service";
-import { prisma } from "@/lib/db";
-import { generateManifestMeetingRequest, generateSimpleManifestRequest } from "@/lib/manifest-generator";
-import { getPersonaLabel } from "@/lib/ai-contact-insights";
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
+import { prisma } from '@/lib/db';
+import {
+  generateManifestMeetingRequest,
+  generateSimpleManifestRequest,
+} from '@/lib/manifest-generator';
+import { getPersonaLabel } from '@/lib/ai-contact-insights';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,17 +13,14 @@ export async function POST(req: NextRequest) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { personIds, useAI = true } = body;
 
     if (!personIds || personIds.length === 0) {
-      return NextResponse.json(
-        { error: "Person IDs required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Person IDs required' }, { status: 400 });
     }
 
     // Get people with all context
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
         if (useAI) {
           // Get company dossier
-          const dossierData = person.target_accounts.company_dossiers?.rawData 
+          const dossierData = person.target_accounts.company_dossiers?.rawData
             ? JSON.parse(person.target_accounts.company_dossiers.rawData)
             : undefined;
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
+    const successCount = results.filter((r) => r.success).length;
 
     return NextResponse.json({
       success: true,
@@ -103,13 +103,15 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    console.error("Error generating Manifest requests:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('Error generating Manifest requests:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { 
-        error: "Failed to generate Manifest requests",
+      {
+        error: 'Failed to generate Manifest requests',
         details: errorMessage,
-        hint: errorMessage.includes('API key') ? 'Check OPENAI_API_KEY environment variable' : undefined
+        hint: errorMessage.includes('API key')
+          ? 'Check OPENAI_API_KEY environment variable'
+          : undefined,
       },
       { status: 500 }
     );

@@ -110,7 +110,7 @@ export class WikipediaExtractor {
       }
 
       const pages = data.query?.pages;
-      
+
       if (!pages || typeof pages !== 'object') {
         return null;
       }
@@ -126,7 +126,7 @@ export class WikipediaExtractor {
         extract?: string;
         revisions?: Array<Record<string, string>>;
       };
-      
+
       if (!page || page.missing || !page.title) {
         return null;
       }
@@ -188,21 +188,23 @@ export class WikipediaExtractor {
    * Clean Wikipedia markup
    */
   private cleanWikitext(text: string): string {
-    return text
-      // Remove refs
-      .replace(/<ref[^>]*>.*?<\/ref>/gis, '')
-      .replace(/<ref[^>]*\/>/gi, '')
-      // Remove wikilinks markup but keep text
-      .replace(/\[\[(?:[^|\]]+\|)?([^\]]+)\]\]/g, '$1')
-      // Remove templates
-      .replace(/\{\{[^}]+\}\}/g, '')
-      // Remove bold/italic
-      .replace(/'''?/g, '')
-      // Remove HTML
-      .replace(/<[^>]+>/g, '')
-      // Clean up
-      .replace(/\s+/g, ' ')
-      .trim();
+    return (
+      text
+        // Remove refs
+        .replace(/<ref[^>]*>.*?<\/ref>/gis, '')
+        .replace(/<ref[^>]*\/>/gi, '')
+        // Remove wikilinks markup but keep text
+        .replace(/\[\[(?:[^|\]]+\|)?([^\]]+)\]\]/g, '$1')
+        // Remove templates
+        .replace(/\{\{[^}]+\}\}/g, '')
+        // Remove bold/italic
+        .replace(/'''?/g, '')
+        // Remove HTML
+        .replace(/<[^>]+>/g, '')
+        // Clean up
+        .replace(/\s+/g, ' ')
+        .trim()
+    );
   }
 
   /**
@@ -213,8 +215,8 @@ export class WikipediaExtractor {
 
     const items = text
       .split(/[,\n]/)
-      .map(item => this.cleanWikitext(item))
-      .filter(item => item.length > 0 && item.length < 100);
+      .map((item) => this.cleanWikitext(item))
+      .filter((item) => item.length > 0 && item.length < 100);
 
     return items.length > 0 ? items.slice(0, 10) : undefined;
   }

@@ -78,7 +78,7 @@ export async function enrollContact(
     });
 
     if (!complianceResult.compliant) {
-      const errorMessages = complianceResult.errors.map(e => e.message).join(', ');
+      const errorMessages = complianceResult.errors.map((e) => e.message).join(', ');
       return { success: false, error: `Compliance check failed: ${errorMessages}` };
     }
 
@@ -103,10 +103,13 @@ export async function enrollContact(
     });
 
     // Schedule first step immediately
-    await addSequenceJob({
-      enrollmentId: enrollment.id,
-      stepNumber: 0,
-    }, 0); // No delay for first step
+    await addSequenceJob(
+      {
+        enrollmentId: enrollment.id,
+        stepNumber: 0,
+      },
+      0
+    ); // No delay for first step
 
     logger.info('Contact enrolled in sequence', {
       sequenceId,
@@ -124,7 +127,9 @@ export async function enrollContact(
 /**
  * Process a sequence step (send email)
  */
-export async function processStep(enrollmentId: string): Promise<{ success: boolean; error?: string }> {
+export async function processStep(
+  enrollmentId: string
+): Promise<{ success: boolean; error?: string }> {
   try {
     // Get enrollment with related data
     const enrollment = await prisma.sequenceEnrollment.findUnique({
@@ -140,7 +145,7 @@ export async function processStep(enrollmentId: string): Promise<{ success: bool
       where: { id: enrollment.sequenceId },
     });
 
-    const person = enrollment.personId 
+    const person = enrollment.personId
       ? await prisma.people.findUnique({
           where: { id: enrollment.personId },
           include: { target_accounts: true },
@@ -178,13 +183,13 @@ export async function processStep(enrollmentId: string): Promise<{ success: bool
     if (!complianceResult.compliant) {
       // Pause enrollment due to compliance failure
       await pauseEnrollment(enrollmentId, 'compliance_failed');
-      
-      const errorMessages = complianceResult.errors.map(e => e.message).join(', ');
+
+      const errorMessages = complianceResult.errors.map((e) => e.message).join(', ');
       logger.warn('Enrollment paused due to compliance failure', {
         enrollmentId,
         errors: errorMessages,
       });
-      
+
       return { success: false, error: `Compliance check failed: ${errorMessages}` };
     }
 
@@ -281,10 +286,13 @@ export async function advanceEnrollment(enrollmentId: string): Promise<void> {
     const nextStep = steps[nextStepNumber];
     const delayMs = nextStep.delayHours * 60 * 60 * 1000; // Convert hours to milliseconds
 
-    await addSequenceJob({
-      enrollmentId,
-      stepNumber: nextStepNumber,
-    }, delayMs);
+    await addSequenceJob(
+      {
+        enrollmentId,
+        stepNumber: nextStepNumber,
+      },
+      delayMs
+    );
 
     logger.info('Enrollment advanced to next step', {
       enrollmentId,
@@ -402,10 +410,13 @@ export async function resumeEnrollment(enrollmentId: string): Promise<void> {
     });
 
     // Resume from current step
-    await addSequenceJob({
-      enrollmentId,
-      stepNumber: enrollment.currentStep,
-    }, 0);
+    await addSequenceJob(
+      {
+        enrollmentId,
+        stepNumber: enrollment.currentStep,
+      },
+      0
+    );
 
     logger.info('Enrollment resumed', { enrollmentId });
   } catch (error) {

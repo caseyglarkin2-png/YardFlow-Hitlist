@@ -31,15 +31,16 @@ export async function POST(req: NextRequest) {
     // Mock transcription for development
     const mockTranscriptions = [
       "They're interested in our waste optimization module and want to see a demo next week.",
-      "Discussed their current logistics challenges with cross-docking efficiency. They have 15 facilities nationwide.",
-      "Need proposal by end of month. Budget approved for Q2. Decision maker is the VP of Operations.",
+      'Discussed their current logistics challenges with cross-docking efficiency. They have 15 facilities nationwide.',
+      'Need proposal by end of month. Budget approved for Q2. Decision maker is the VP of Operations.',
       "Follow up with detailed ROI analysis. They're comparing us with two other vendors.",
     ];
 
-    const randomTranscription = mockTranscriptions[Math.floor(Math.random() * mockTranscriptions.length)];
+    const randomTranscription =
+      mockTranscriptions[Math.floor(Math.random() * mockTranscriptions.length)];
 
     // Simulated processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     return NextResponse.json({
       text: randomTranscription,
@@ -68,7 +69,6 @@ export async function POST(req: NextRequest) {
       language: transcription.language,
     });
     */
-
   } catch (error) {
     console.error('Transcription error:', error);
     return NextResponse.json(

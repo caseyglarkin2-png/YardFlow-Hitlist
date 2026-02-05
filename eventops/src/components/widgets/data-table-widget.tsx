@@ -1,7 +1,14 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Column {
   key: string;
@@ -25,7 +32,7 @@ export function DataTableWidget({ title, columns, data, maxRows = 10 }: DataTabl
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-auto max-h-[400px]">
+        <div className="max-h-[400px] overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -37,7 +44,10 @@ export function DataTableWidget({ title, columns, data, maxRows = 10 }: DataTabl
             <TableBody>
               {displayData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="text-center text-muted-foreground py-8">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="py-8 text-center text-muted-foreground"
+                  >
                     No data available
                   </TableCell>
                 </TableRow>

@@ -18,15 +18,15 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
           fetch(`/api/people/${params.id}`),
           fetch('/api/accounts'),
         ]);
-        
+
         if (!personRes.ok) throw new Error('Failed to fetch person');
         if (!accountsRes.ok) throw new Error('Failed to fetch accounts');
-        
+
         const [personData, accountsData] = await Promise.all([
           personRes.json(),
           accountsRes.json(),
         ]);
-        
+
         setPerson(personData);
         setAccounts(accountsData);
       } catch (err) {
@@ -44,7 +44,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    
+
     try {
       const response = await fetch(`/api/people/${params.id}`, {
         method: 'PATCH',
@@ -82,7 +82,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
 
   if (isFetching) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-sm text-gray-600">Loading...</div>
       </div>
     );
@@ -102,7 +102,10 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         <form onSubmit={handleSubmit} className="space-y-6 px-4 py-6 sm:p-8">
           <div>
-            <label htmlFor="accountId" className="block text-sm font-medium leading-6 text-gray-900">
+            <label
+              htmlFor="accountId"
+              className="block text-sm font-medium leading-6 text-gray-900"
+            >
               Company *
             </label>
             <div className="mt-2">
@@ -201,7 +204,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium leading-6 text-gray-900 mb-3">
+            <label className="mb-3 block text-sm font-medium leading-6 text-gray-900">
               Persona Tags
             </label>
             <div className="space-y-2">
@@ -324,7 +327,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? 'Saving...' : 'Save Changes'}
             </button>

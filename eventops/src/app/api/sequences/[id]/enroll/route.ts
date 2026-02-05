@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
+
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
@@ -92,7 +92,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       skipped: results.skipped,
     });
   } catch (error) {
-    captureRouteError(error, { route: '/api/sequences/[id]/enroll', method: 'POST', extras: { sequenceId: id } });
+    captureRouteError(error, {
+      route: '/api/sequences/[id]/enroll',
+      method: 'POST',
+      extras: { sequenceId: id },
+    });
     logger.error('Error enrolling contacts', { sequenceId: id, error });
     return NextResponse.json({ error: 'Failed to enroll contacts' }, { status: 500 });
   }

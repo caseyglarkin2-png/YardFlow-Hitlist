@@ -11,14 +11,14 @@
 
 ### ✅ ROADMAP COMPLETE — Final State
 
-| Category | Status | Details |
-|----------|--------|---------|
-| **S2S Auth** | 🟢 Complete | **ALL** API routes migrated to `authServiceOrSession` (65+ files) |
+| Category          | Status       | Details                                                                 |
+| ----------------- | ------------ | ----------------------------------------------------------------------- |
+| **S2S Auth**      | 🟢 Complete  | **ALL** API routes migrated to `authServiceOrSession` (65+ files)       |
 | **Lint Warnings** | 🟢 Near-Zero | 234 → 18 warnings (92% reduction, remaining 17 React hook deps + 1 img) |
-| **Worker** | 🟢 Healthy | Retry logic, graceful shutdown, heartbeat working |
-| **Tests** | 🟢 Passing | **284 tests** pass, 12 skipped (23 test files) |
-| **Sentry** | 🟢 Active | `captureRouteError()` utility + 5 high-traffic routes instrumented |
-| **Build** | 🟢 Clean | 0 lint errors, build succeeds |
+| **Worker**        | 🟢 Healthy   | Retry logic, graceful shutdown, heartbeat working                       |
+| **Tests**         | 🟢 Passing   | **284 tests** pass, 12 skipped (23 test files)                          |
+| **Sentry**        | 🟢 Active    | `captureRouteError()` utility + 5 high-traffic routes instrumented      |
+| **Build**         | 🟢 Clean     | 0 lint errors, build succeeds                                           |
 
 ### Problem (Resolved)
 
@@ -46,6 +46,7 @@ Using auth() (unmigrated):    0  ✅
 ## Sprint Structure
 
 Each sprint produces:
+
 1. Demoable, tested functionality
 2. Atomic commits with validation
 3. Railway deployment verification
@@ -76,6 +77,7 @@ const authResult = await authServiceOrSession(req);
 ```
 
 **Validation**:
+
 - [ ] `npm run lint` passes
 - [ ] Create test `tests/integration/people-assign-s2s.test.ts`
 - [ ] Manual: Assign person via GTM-YardFlow
@@ -85,13 +87,15 @@ const authResult = await authServiceOrSession(req);
 
 ### Ticket 38.2: Fix Export Routes (~30 min)
 
-**Files**: 
+**Files**:
+
 - `src/app/api/export/full/route.ts` - Full migration needed
 - `src/app/api/export/route.ts` - **POST only** (GET already uses authServiceOrSession)
 
 **Impact**: Export buttons fail in GTM
 
 **Validation**:
+
 - [ ] `npm run lint` passes
 - [ ] Create test `tests/integration/export-s2s.test.ts`
 - [ ] Manual: Export accounts via GTM-YardFlow
@@ -102,6 +106,7 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 38.3: Fix Outreach Routes (~1 hour)
 
 **Files** (5 files needing migration):
+
 - `src/app/api/outreach/[id]/route.ts`
 - `src/app/api/outreach/[id]/mark-sent/route.ts`
 - `src/app/api/outreach/export/route.ts`
@@ -113,6 +118,7 @@ const authResult = await authServiceOrSession(req);
 **Impact**: All outreach management fails in GTM
 
 **Validation**:
+
 - [ ] `npm run lint` passes
 - [ ] Create test `tests/integration/outreach-s2s.test.ts`
 - [ ] Manual: Create/edit outreach in GTM
@@ -123,12 +129,14 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 38.4: Fix Meeting Routes (~30 min)
 
 **Files**:
+
 - `src/app/api/meetings/route.ts`
 - `src/app/api/meetings/[id]/route.ts`
 
 **Impact**: Meeting scheduling broken in GTM
 
 **Validation**:
+
 - [ ] `npm run lint` passes
 - [ ] Create test `tests/integration/meetings-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for meeting routes`
@@ -155,6 +163,7 @@ const authResult = await authServiceOrSession(req);
 **File**: `src/app/api/contact/[id]/insights/route.ts`
 
 **Validation**:
+
 - [ ] Test: `tests/integration/contact-insights-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for contact insights route`
 
@@ -163,12 +172,14 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 39.2: Fix Notification Routes (~45 min)
 
 **Files**:
+
 - `src/app/api/notifications/route.ts`
 - `src/app/api/notifications/[id]/route.ts`
 - `src/app/api/notifications/mark-read/route.ts`
 - `src/app/api/notifications/mark-all-read/route.ts`
 
 **Validation**:
+
 - [ ] Test: `tests/integration/notifications-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for notification routes`
 
@@ -177,12 +188,14 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 39.3: Fix Queue/Analytics Routes (~45 min)
 
 **Files**:
+
 - `src/app/api/queue/stats/route.ts`
 - `src/app/api/queue/enrich/route.ts`
 - `src/app/api/queue/status/[jobId]/route.ts`
 - `src/app/api/engagement/score/route.ts`
 
 **Validation**:
+
 - [ ] Test: `tests/integration/queue-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for queue and analytics routes`
 
@@ -191,10 +204,12 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 39.4: Fix Activity/Search Routes (~30 min)
 
 **Files**:
+
 - `src/app/api/activity/stream/route.ts`
 - `src/app/api/search/advanced/route.ts`
 
 **Validation**:
+
 - [ ] Test: `tests/integration/activity-search-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for activity and search routes`
 
@@ -216,11 +231,13 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 40.1: HubSpot/Admin Routes (~30 min)
 
 **Files**:
+
 - `src/app/api/hubspot/sync/contacts/route.ts`
 - `src/app/api/admin/google-sync/control/route.ts`
 - `src/app/api/admin/seed/route.ts`
 
 **Validation**:
+
 - [ ] Test: `tests/integration/admin-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for admin routes`
 
@@ -229,6 +246,7 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 40.2: Training Routes (~45 min)
 
 **Files**:
+
 - `src/app/api/training/content/route.ts`
 - `src/app/api/training/content/[id]/route.ts`
 - `src/app/api/training/drive/list/route.ts`
@@ -236,6 +254,7 @@ const authResult = await authServiceOrSession(req);
 - `src/app/api/training/import/hubspot/route.ts`
 
 **Validation**:
+
 - [ ] Test: `tests/integration/training-s2s.test.ts`
 - [ ] Commit: `fix: S2S auth for training routes`
 
@@ -244,6 +263,7 @@ const authResult = await authServiceOrSession(req);
 ### Ticket 40.3: Remaining Feature Routes (~2 hours)
 
 **Files**:
+
 - `src/app/api/webhooks/route.ts`
 - `src/app/api/webhooks/[id]/route.ts`
 - `src/app/api/insights/[personId]/route.ts`
@@ -265,6 +285,7 @@ const authResult = await authServiceOrSession(req);
 - `src/app/api/reports/pdf/route.ts`
 
 **Validation**:
+
 - [ ] Tests for each group
 - [ ] Commit: `fix: S2S auth for remaining feature routes`
 
@@ -287,6 +308,7 @@ const authResult = await authServiceOrSession(req);
 ### ⚠️ IMPORTANT: OAuth Token Requirement
 
 Google integration routes require OAuth tokens stored in the user session. Migrating these routes to S2S auth ONLY will break them because:
+
 1. S2S calls don't have session tokens
 2. OAuth refresh tokens must come from session
 
@@ -295,10 +317,12 @@ Google integration routes require OAuth tokens stored in the user session. Migra
 ### Ticket 40.5.1: Audit Google Routes (~30 min)
 
 For each route, determine if it:
+
 - Needs OAuth tokens (KEEP session auth)
 - Only does DB operations (CAN migrate to S2S)
 
 **Files to audit**:
+
 - `src/app/api/google/connect/route.ts` - OAuth required
 - `src/app/api/google/disconnect/route.ts` - Session required
 - `src/app/api/google/calendar/sync/route.ts` - OAuth required
@@ -311,6 +335,7 @@ For each route, determine if it:
 ### Ticket 40.5.2: Implement Hybrid Auth for Google Routes
 
 For routes that need OAuth:
+
 ```typescript
 import { authServiceOrSession } from '@/lib/auth-service';
 import { auth } from '@/auth';
@@ -318,25 +343,26 @@ import { auth } from '@/auth';
 export async function POST(req: NextRequest) {
   // Try S2S first
   const authResult = await authServiceOrSession(req);
-  
+
   // If S2S auth, this is a status/config request - no OAuth needed
   if (authResult?.serviceAuth) {
     // Handle S2S case (limited operations)
     return handleServiceRequest(authResult);
   }
-  
+
   // For user operations, get full session with OAuth tokens
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   // Proceed with OAuth-dependent operation
   return handleUserRequest(session);
 }
 ```
 
 **Validation**:
+
 - [ ] OAuth flow still works (connect/disconnect)
 - [ ] Calendar sync works
 - [ ] Gmail check-replies works
@@ -373,12 +399,9 @@ interface RouteErrorContext {
   extra?: Record<string, unknown>;
 }
 
-export function captureRouteError(
-  error: unknown,
-  context: RouteErrorContext
-): Error {
+export function captureRouteError(error: unknown, context: RouteErrorContext): Error {
   const err = error instanceof Error ? error : new Error(String(error));
-  
+
   Sentry.captureException(err, {
     tags: {
       route: context.route,
@@ -387,7 +410,7 @@ export function captureRouteError(
     user: context.userId ? { id: context.userId } : undefined,
     extra: context.extra,
   });
-  
+
   return err;
 }
 
@@ -409,6 +432,7 @@ export function captureRouteMessage(
 ```
 
 **Validation**:
+
 - [ ] Unit test `tests/lib/sentry-utils.test.ts`
 - [ ] Verify Sentry receives test error
 - [ ] Commit: `feat: Add Sentry error capture utilities`
@@ -418,6 +442,7 @@ export function captureRouteMessage(
 ### Ticket 41.2: Add Sentry to High-Traffic Routes (~1.5 hours)
 
 Add `captureRouteError` to catch blocks in:
+
 - `src/app/api/ai/chat/route.ts`
 - `src/app/api/sequences/[id]/enroll/route.ts`
 - `src/app/api/accounts/[id]/route.ts`
@@ -425,6 +450,7 @@ Add `captureRouteError` to catch blocks in:
 - `src/app/api/outreach/route.ts`
 
 Pattern:
+
 ```typescript
 catch (error) {
   captureRouteError(error, {
@@ -438,6 +464,7 @@ catch (error) {
 ```
 
 **Validation**:
+
 - [ ] Test errors appear in Sentry dashboard
 - [ ] Commit: `feat: Add Sentry error capture to high-traffic routes`
 
@@ -446,11 +473,13 @@ catch (error) {
 ### Ticket 41.3: Add Sentry Alerts (~30 min)
 
 Configure in Sentry dashboard:
+
 - Alert on 5+ errors/minute (same error)
 - Alert on new error types
 - Weekly digest email
 
 **Validation**:
+
 - [ ] Trigger test alert
 - [ ] Verify notification received
 
@@ -480,16 +509,18 @@ Pattern: Prefix with `_` or remove
 // Before
 catch (error) { // 'error' is defined but never used
 
-// After  
+// After
 catch (_error) {
 ```
 
 **Files** (top offenders):
+
 - `src/app/dashboard/ab-test/page.tsx` (4 warnings)
 - `src/app/dashboard/import/preview/page.tsx` (3 warnings)
 - `src/lib/ai/gemini-client.ts` (2 warnings)
 
 **Validation**:
+
 - [ ] `npm run lint | grep "is defined but never used" | wc -l` returns 0
 - [ ] Commit: `refactor: Fix unused variable lint warnings`
 
@@ -508,16 +539,21 @@ const data: any = await response.json();
 // After
 const data: Record<string, unknown> = await response.json();
 // OR with specific type
-interface ResponseData { id: string; name: string; }
-const data = await response.json() as ResponseData;
+interface ResponseData {
+  id: string;
+  name: string;
+}
+const data = (await response.json()) as ResponseData;
 ```
 
 **Files** (top offenders):
+
 - `src/lib/enrichment/company-enrichment-orchestrator.ts` (7 warnings)
 - `src/lib/outreach/email-sender.ts` (6 warnings)
 - `src/app/dashboard/manifest/requests/page.tsx` (4 warnings)
 
 **Validation**:
+
 - [ ] `npm run lint | grep "Unexpected any" | wc -l` returns 0
 - [ ] Commit: `refactor: Replace any types with proper typing`
 
@@ -539,6 +575,7 @@ useEffect(() => { loadData(); }, [loadData]);
 ```
 
 **Files**:
+
 - `src/app/dashboard/activity/page.tsx`
 - `src/app/dashboard/analytics-advanced/page.tsx`
 - `src/app/dashboard/campaigns/[id]/page.tsx`
@@ -546,6 +583,7 @@ useEffect(() => { loadData(); }, [loadData]);
 - `src/app/dashboard/notifications/page.tsx`
 
 **Validation**:
+
 - [ ] `npm run lint | grep "exhaustive-deps" | wc -l` returns 0
 - [ ] Commit: `refactor: Fix React hook dependency warnings`
 
@@ -558,6 +596,7 @@ useEffect(() => { loadData(); }, [loadData]);
 Remove all unused imports
 
 **Validation**:
+
 - [ ] `npm run lint | grep "is defined but never used" | wc -l` returns 0
 - [ ] Commit: `refactor: Remove unused imports`
 
@@ -580,11 +619,13 @@ Remove all unused imports
 ### Ticket 43.1: Core Route Tests (~2 hours)
 
 Create test files:
+
 - `tests/integration/accounts-crud.test.ts`
 - `tests/integration/people-crud.test.ts`
 - `tests/integration/ai-chat.test.ts`
 
 **Validation**:
+
 - [ ] Each test file has 5+ test cases
 - [ ] All tests pass
 - [ ] Commit: `test: Add core route integration tests`
@@ -598,6 +639,7 @@ Create test files:
 - E2E AI chat conversation flow
 
 **Validation**:
+
 - [ ] Each flow test covers happy path + error cases
 - [ ] Commit: `test: Add E2E flow tests`
 
@@ -693,17 +735,17 @@ export async function GET(req: NextRequest) {
 
 ## Progress Tracking
 
-| Sprint | Status | Est. Time | Commit | Notes |
-|--------|--------|-----------|--------|-------|
-| 37 | ✅ Done | - | `00bd872` / `346e5f3` | Sentry + Sequence S2S fix |
-| 38 | ✅ Done | 2-3 hrs | `ac93133` | Critical S2S routes (10 files, 14 tests) |
-| 39 | ✅ Done | 3-4 hrs | `d2d3724` | Secondary S2S routes (10 files, 20 tests) |
-| 40 | ✅ Done | 4-5 hrs | `c9ea035` | Remaining S2S routes (35 files) |
-| 40.5 | ✅ Done | 2-3 hrs | `f91342a` | Google OAuth routes (6 files, 19 tests) |
-| 41 | ✅ Done | 2-3 hrs | `c8e6f8e` | Sentry error capture (5 routes, 10 tests) |
-| 42 | ✅ Done | 3-4 hrs | `39452a1` | Lint cleanup 234→18 warnings (84 files) |
-| 43 | ✅ Done | 4-5 hrs | `a9103ea` | Auth-service tests + 10 more routes (27+5 tests) |
-| Review | ✅ Done | - | `19eabae` | Fixed broken activate route + manifest/generate |
+| Sprint | Status  | Est. Time | Commit                | Notes                                            |
+| ------ | ------- | --------- | --------------------- | ------------------------------------------------ |
+| 37     | ✅ Done | -         | `00bd872` / `346e5f3` | Sentry + Sequence S2S fix                        |
+| 38     | ✅ Done | 2-3 hrs   | `ac93133`             | Critical S2S routes (10 files, 14 tests)         |
+| 39     | ✅ Done | 3-4 hrs   | `d2d3724`             | Secondary S2S routes (10 files, 20 tests)        |
+| 40     | ✅ Done | 4-5 hrs   | `c9ea035`             | Remaining S2S routes (35 files)                  |
+| 40.5   | ✅ Done | 2-3 hrs   | `f91342a`             | Google OAuth routes (6 files, 19 tests)          |
+| 41     | ✅ Done | 2-3 hrs   | `c8e6f8e`             | Sentry error capture (5 routes, 10 tests)        |
+| 42     | ✅ Done | 3-4 hrs   | `39452a1`             | Lint cleanup 234→18 warnings (84 files)          |
+| 43     | ✅ Done | 4-5 hrs   | `a9103ea`             | Auth-service tests + 10 more routes (27+5 tests) |
+| Review | ✅ Done | -         | `19eabae`             | Fixed broken activate route + manifest/generate  |
 
 ### Key Metrics
 
@@ -714,12 +756,12 @@ export async function GET(req: NextRequest) {
 
 ### Recommended Future Sprints
 
-| Sprint | Priority | Goal |
-|--------|----------|------|
-| 44 | Medium | Tests for db.ts, queue workers, webhook handlers |
-| 45 | Low | Fix remaining 17 React hook exhaustive-deps warnings |
-| 46 | Medium | Add `captureRouteError` to all routes with bare `console.error` |
-| 47 | Low | ESLint rule banning direct `auth()` imports in API routes |
+| Sprint | Priority | Goal                                                            |
+| ------ | -------- | --------------------------------------------------------------- |
+| 44     | Medium   | Tests for db.ts, queue workers, webhook handlers                |
+| 45     | Low      | Fix remaining 17 React hook exhaustive-deps warnings            |
+| 46     | Medium   | Add `captureRouteError` to all routes with bare `console.error` |
+| 47     | Low      | ESLint rule banning direct `auth()` imports in API routes       |
 
 **Total Estimated Time**: ~22-30 hours (COMPLETED)
 
@@ -727,18 +769,19 @@ export async function GET(req: NextRequest) {
 
 ## Risk Matrix
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Google OAuth routes break | High | Critical | Sprint 40.5 isolated, hybrid auth pattern |
-| Lint fixes cause runtime bugs | Low | Medium | Run full test suite after each batch |
-| S2S migration breaks existing users | Low | High | authServiceOrSession supports BOTH patterns |
-| Sentry overload (too many events) | Low | Low | 10% sample rate configured |
+| Risk                                | Probability | Impact   | Mitigation                                  |
+| ----------------------------------- | ----------- | -------- | ------------------------------------------- |
+| Google OAuth routes break           | High        | Critical | Sprint 40.5 isolated, hybrid auth pattern   |
+| Lint fixes cause runtime bugs       | Low         | Medium   | Run full test suite after each batch        |
+| S2S migration breaks existing users | Low         | High     | authServiceOrSession supports BOTH patterns |
+| Sentry overload (too many events)   | Low         | Low      | 10% sample rate configured                  |
 
 ---
 
 ## Definition of Done
 
 A sprint is complete when:
+
 1. All code changes committed and pushed
 2. `npm run lint` passes
 3. `npm test` passes (all tests)
@@ -773,4 +816,4 @@ grep -rl "authServiceOrSession" src/app/api --include="*.ts" | wc -l
 
 ---
 
-*Document revised Feb 6, 2026. All sprints (37-43) complete. Subagent code review passed (8/10). Review fixes committed. Roadmap execution finished.*
+_Document revised Feb 6, 2026. All sprints (37-43) complete. Subagent code review passed (8/10). Review fixes committed. Roadmap execution finished._

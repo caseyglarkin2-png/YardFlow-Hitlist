@@ -1,31 +1,31 @@
-"use client";
+'use client';
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Camera, X } from "lucide-react";
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Camera, X } from 'lucide-react';
 
 export default function BadgeScanPage() {
   const router = useRouter();
   const [scanning, setScanning] = useState(false);
   const [extractedData, setExtractedData] = useState<Record<string, unknown> | null>(null);
   const [manualEdit, setManualEdit] = useState({
-    name: "",
-    title: "",
-    company: "",
-    email: "",
-    phone: "",
+    name: '',
+    title: '',
+    company: '',
+    email: '',
+    phone: '',
   });
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   async function startCamera() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -40,7 +40,7 @@ export default function BadgeScanPage() {
   function stopCamera() {
     if (videoRef.current?.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
+      tracks.forEach((track) => track.stop());
     }
     setScanning(false);
   }
@@ -50,39 +50,39 @@ export default function BadgeScanPage() {
 
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     ctx.drawImage(video, 0, 0);
-    
+
     // Convert to blob
     canvas.toBlob(async (blob) => {
       if (!blob) return;
-      
+
       // Send to OCR API
       const formData = new FormData();
       formData.append('image', blob);
-      
+
       try {
         const res = await fetch('/api/ocr/badge', {
           method: 'POST',
           body: formData,
         });
-        
+
         const data = await res.json();
         setExtractedData(data);
         setManualEdit({
-          name: data.name || "",
-          title: data.title || "",
-          company: data.company || "",
-          email: data.email || "",
-          phone: data.phone || "",
+          name: data.name || '',
+          title: data.title || '',
+          company: data.company || '',
+          email: data.email || '',
+          phone: data.phone || '',
         });
-        
+
         stopCamera();
       } catch (error) {
         console.error('OCR failed:', error);
@@ -132,7 +132,7 @@ export default function BadgeScanPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto max-w-4xl px-4 py-8">
       <Card>
         <CardHeader>
           <CardTitle>Badge Scanner</CardTitle>
@@ -142,31 +142,27 @@ export default function BadgeScanPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           {!scanning && !extractedData && (
-            <div className="text-center space-y-4">
-              <div className="bg-muted rounded-lg p-12">
-                <Camera className="h-24 w-24 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">
-                  Use your camera to scan an event badge
-                </p>
+            <div className="space-y-4 text-center">
+              <div className="rounded-lg bg-muted p-12">
+                <Camera className="mx-auto mb-4 h-24 w-24 text-muted-foreground" />
+                <p className="mb-4 text-muted-foreground">Use your camera to scan an event badge</p>
                 <Button onClick={startCamera} size="lg">
-                  <Camera className="h-4 w-4 mr-2" />
+                  <Camera className="mr-2 h-4 w-4" />
                   Start Camera
                 </Button>
               </div>
-              
+
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or
-                  </span>
+                  <span className="bg-background px-2 text-muted-foreground">Or</span>
                 </div>
               </div>
 
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => router.push('/dashboard/people/new')}
                 className="w-full"
               >
@@ -178,26 +174,21 @@ export default function BadgeScanPage() {
           {scanning && (
             <div className="space-y-4">
               <div className="relative">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full rounded-lg"
-                />
+                <video ref={videoRef} autoPlay playsInline className="w-full rounded-lg" />
                 <canvas ref={canvasRef} className="hidden" />
-                
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="border-4 border-primary rounded-lg w-3/4 h-1/2 opacity-50"></div>
+
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="h-1/2 w-3/4 rounded-lg border-4 border-primary opacity-50"></div>
                 </div>
               </div>
 
               <div className="flex gap-2">
                 <Button onClick={captureAndProcess} className="flex-1">
-                  <Camera className="h-4 w-4 mr-2" />
+                  <Camera className="mr-2 h-4 w-4" />
                   Capture & Process
                 </Button>
                 <Button variant="outline" onClick={stopCamera}>
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>
               </div>
@@ -206,7 +197,7 @@ export default function BadgeScanPage() {
 
           {extractedData && (
             <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4">
                 <p className="text-sm font-medium text-green-800">
                   Badge scanned successfully! Review and edit the information below.
                 </p>
@@ -262,18 +253,18 @@ export default function BadgeScanPage() {
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  onClick={saveContact} 
+                <Button
+                  onClick={saveContact}
                   className="flex-1"
                   disabled={!manualEdit.name || !manualEdit.company}
                 >
                   Save Contact
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setExtractedData(null);
-                    setManualEdit({ name: "", title: "", company: "", email: "", phone: "" });
+                    setManualEdit({ name: '', title: '', company: '', email: '', phone: '' });
                   }}
                 >
                   Scan Another

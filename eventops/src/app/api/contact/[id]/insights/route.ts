@@ -1,18 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { authServiceOrSession } from "@/lib/auth-service";
-import { prisma } from "@/lib/db";
-import { generateContactInsights, getPersonaLabel } from "@/lib/ai-contact-insights";
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
+import { prisma } from '@/lib/db';
+import { generateContactInsights, getPersonaLabel } from '@/lib/ai-contact-insights';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const personId = params.id;
@@ -31,14 +28,14 @@ export async function POST(
     });
 
     if (!person) {
-      return NextResponse.json({ error: "Person not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Person not found' }, { status: 404 });
     }
 
     // Check if insights exist and are recent (less than 30 days old)
     if (person.contact_insights) {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       if (person.contact_insights.generatedAt > thirtyDaysAgo) {
         return NextResponse.json({
           cached: true,
@@ -51,20 +48,22 @@ export async function POST(
     const dossier = person.target_accounts.company_dossiers;
     if (!dossier) {
       return NextResponse.json(
-        { error: "Company dossier not found. Please generate company research first." },
+        { error: 'Company dossier not found. Please generate company research first.' },
         { status: 400 }
       );
     }
 
     // Parse dossier data
-    const dossierData = dossier.rawData ? JSON.parse(dossier.rawData) : {
-      companyOverview: dossier.companyOverview,
-      keyPainPoints: dossier.keyPainPoints,
-      industryContext: dossier.industryContext,
-      facilityCount: dossier.facilityCount,
-      operationalScale: dossier.operationalScale,
-      companySize: dossier.companySize,
-    };
+    const dossierData = dossier.rawData
+      ? JSON.parse(dossier.rawData)
+      : {
+          companyOverview: dossier.companyOverview,
+          keyPainPoints: dossier.keyPainPoints,
+          industryContext: dossier.industryContext,
+          facilityCount: dossier.facilityCount,
+          operationalScale: dossier.operationalScale,
+          companySize: dossier.companySize,
+        };
 
     // Generate contact insights
     const persona = getPersonaLabel(person);
@@ -104,27 +103,26 @@ export async function POST(
       insights,
     });
   } catch (error) {
-    console.error("Error generating contact insights:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error('Error generating contact insights:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { 
-        error: "Failed to generate contact insights",
+      {
+        error: 'Failed to generate contact insights',
         details: errorMessage,
-        hint: errorMessage.includes('API key') ? 'Check OPENAI_API_KEY environment variable' : undefined
+        hint: errorMessage.includes('API key')
+          ? 'Check OPENAI_API_KEY environment variable'
+          : undefined,
       },
       { status: 500 }
     );
   }
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const insights = await prisma.contact_insights.findUnique({
@@ -133,17 +131,14 @@ export async function GET(
 
     if (!insights) {
       return NextResponse.json(
-        { error: "No insights found. Generate insights first." },
+        { error: 'No insights found. Generate insights first.' },
         { status: 404 }
       );
     }
 
     return NextResponse.json({ insights });
   } catch (error) {
-    console.error("Error fetching contact insights:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch contact insights" },
-      { status: 500 }
-    );
+    console.error('Error fetching contact insights:', error);
+    return NextResponse.json({ error: 'Failed to fetch contact insights' }, { status: 500 });
   }
 }

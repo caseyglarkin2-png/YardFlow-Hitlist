@@ -1,8 +1,8 @@
 /**
  * Sprint 43 - Auth Service Comprehensive Tests
- * 
+ *
  * Tests the core auth-service module used by every API route.
- * Covers: S2S auth, cron auth, session auth, requireAuth, 
+ * Covers: S2S auth, cron auth, session auth, requireAuth,
  * isServiceAuth, getUserIdFromAuth, and edge cases.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -185,9 +185,7 @@ describe('authServiceOrSession', () => {
       });
       const { authServiceOrSession } = await import('@/lib/auth-service');
 
-      const result = await authServiceOrSession(
-        makeRequest('http://localhost:3000/api/test')
-      );
+      const result = await authServiceOrSession(makeRequest('http://localhost:3000/api/test'));
 
       expect(result).toEqual({
         type: 'session',
@@ -200,9 +198,7 @@ describe('authServiceOrSession', () => {
       mockAuth.mockResolvedValue({ user: null });
       const { authServiceOrSession } = await import('@/lib/auth-service');
 
-      const result = await authServiceOrSession(
-        makeRequest('http://localhost:3000/api/test')
-      );
+      const result = await authServiceOrSession(makeRequest('http://localhost:3000/api/test'));
 
       expect(result).toBeNull();
     });
@@ -211,9 +207,7 @@ describe('authServiceOrSession', () => {
       mockAuth.mockResolvedValue({ user: { email: 'no-id@test.com' } });
       const { authServiceOrSession } = await import('@/lib/auth-service');
 
-      const result = await authServiceOrSession(
-        makeRequest('http://localhost:3000/api/test')
-      );
+      const result = await authServiceOrSession(makeRequest('http://localhost:3000/api/test'));
 
       expect(result).toBeNull();
     });
@@ -222,9 +216,7 @@ describe('authServiceOrSession', () => {
       mockAuth.mockRejectedValue(new Error('Database connection error'));
       const { authServiceOrSession } = await import('@/lib/auth-service');
 
-      const result = await authServiceOrSession(
-        makeRequest('http://localhost:3000/api/test')
-      );
+      const result = await authServiceOrSession(makeRequest('http://localhost:3000/api/test'));
 
       expect(result).toBeNull();
     });
@@ -235,9 +227,7 @@ describe('authServiceOrSession', () => {
       });
       const { authServiceOrSession } = await import('@/lib/auth-service');
 
-      const result = await authServiceOrSession(
-        makeRequest('http://localhost:3000/api/test')
-      );
+      const result = await authServiceOrSession(makeRequest('http://localhost:3000/api/test'));
 
       expect(result).toEqual({
         type: 'session',
@@ -321,9 +311,7 @@ describe('requireAuth', () => {
     mockAuth.mockResolvedValue(null);
     const { requireAuth } = await import('@/lib/auth-service');
 
-    const result = await requireAuth(
-      makeRequest('http://localhost:3000/api/test')
-    );
+    const result = await requireAuth(makeRequest('http://localhost:3000/api/test'));
 
     expect(result.error).toBe(true);
     if (result.error) {

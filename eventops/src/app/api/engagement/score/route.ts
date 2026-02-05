@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       person.outreach.forEach((o) => {
         if (o.status === 'OPENED') score += 5;
         if (o.status === 'RESPONDED') score += 20;
-        
+
         // Track most recent engagement
         const dates = [o.openedAt, o.respondedAt].filter(Boolean) as Date[];
         dates.forEach((d) => {
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       person.meetings.forEach((m) => {
         if (m.status === 'SCHEDULED') score += 30;
         if (m.status === 'COMPLETED') score += 50;
-        
+
         if (!lastEngagedAt || new Date(m.scheduledAt) > lastEngagedAt) {
           lastEngagedAt = new Date(m.scheduledAt);
         }

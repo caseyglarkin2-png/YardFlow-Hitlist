@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { action, personIds } = body;
 
     if (!action || !personIds || !Array.isArray(personIds)) {
-      return NextResponse.json(
-        { error: 'Missing action or personIds' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing action or personIds' }, { status: 400 });
     }
 
     let result;
@@ -43,19 +40,25 @@ export async function POST(request: NextRequest) {
 
       case 'add-to-sequence':
         // TODO: Implement sequences - requires personId and eventId fields in sequences table
-        return NextResponse.json({
-          success: false,
-          error: 'Sequence feature not yet implemented',
-          action: 'add-to-sequence',
-        }, { status: 501 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Sequence feature not yet implemented',
+            action: 'add-to-sequence',
+          },
+          { status: 501 }
+        );
 
       case 'update-status':
         // TODO: Add status field to people schema
-        return NextResponse.json({
-          success: false,
-          error: 'Status field not yet implemented in people model',
-          action: 'update-status',
-        }, { status: 501 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Status field not yet implemented in people model',
+            action: 'update-status',
+          },
+          { status: 501 }
+        );
 
       case 'assign-owner':
         const { ownerId } = body;
@@ -104,9 +107,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Bulk action error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

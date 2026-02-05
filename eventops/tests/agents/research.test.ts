@@ -57,9 +57,9 @@ vi.mock('@/lib/ai/gemini-client', () => ({
 
 vi.mock('@/lib/yardflow-content-hub', () => ({
   contentHubClient: {
-    getCaseStudies: vi.fn().mockResolvedValue([
-      { title: 'Case Study 1', challenge: 'Improved efficiency' },
-    ]),
+    getCaseStudies: vi
+      .fn()
+      .mockResolvedValue([{ title: 'Case Study 1', challenge: 'Improved efficiency' }]),
   },
 }));
 
@@ -142,7 +142,7 @@ describe('ResearchAgent', () => {
         'companySize',
       ];
 
-      requiredFields.forEach(field => {
+      requiredFields.forEach((field) => {
         expect(dossier[field]).toBeDefined();
       });
     });

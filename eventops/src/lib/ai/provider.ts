@@ -187,7 +187,8 @@ export async function generateContent(
     const err = new Error(
       `All AI providers rate limited. Retry after ${rateLimitedError.retryAfterSeconds}s`
     );
-    (err as unknown as Record<string, unknown>).retryAfterSeconds = rateLimitedError.retryAfterSeconds;
+    (err as unknown as Record<string, unknown>).retryAfterSeconds =
+      rateLimitedError.retryAfterSeconds;
     (err as unknown as Record<string, unknown>).isRateLimited = true;
     throw err;
   }

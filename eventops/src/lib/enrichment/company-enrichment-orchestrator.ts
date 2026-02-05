@@ -79,7 +79,7 @@ export class CompanyEnrichmentOrchestrator {
       if (website) {
         try {
           const webData = await this.websiteScraper.scrapeCompanyWebsite(company.name, website);
-          
+
           if (webData.description) {
             data.description = webData.description;
           }
@@ -107,14 +107,17 @@ export class CompanyEnrichmentOrchestrator {
 
           sources.push('website_scraping');
         } catch (error) {
-          console.warn(`Website scraping failed for ${company.name}:`, error instanceof Error ? error.message : error);
+          console.warn(
+            `Website scraping failed for ${company.name}:`,
+            error instanceof Error ? error.message : error
+          );
         }
       }
 
       // 3. Get Wikipedia data
       try {
         const wikiData = await this.wikiExtractor.extractCompanyData(company.name);
-        
+
         if (wikiData) {
           // Fill in missing data from Wikipedia
           if (!data.industry && wikiData.industry) {
@@ -142,14 +145,20 @@ export class CompanyEnrichmentOrchestrator {
           sources.push('wikipedia');
         }
       } catch (error) {
-        console.warn(`Wikipedia extraction failed for ${company.name}:`, error instanceof Error ? error.message : error);
+        console.warn(
+          `Wikipedia extraction failed for ${company.name}:`,
+          error instanceof Error ? error.message : error
+        );
       }
 
       // Count data points collected
-      const dataPoints = Object.keys(data).filter(key => {
+      const dataPoints = Object.keys(data).filter((key) => {
         const value = data[key as keyof typeof data];
-        return value !== undefined && value !== null && 
-               (typeof value !== 'object' || Object.keys(value).length > 0);
+        return (
+          value !== undefined &&
+          value !== null &&
+          (typeof value !== 'object' || Object.keys(value).length > 0)
+        );
       }).length;
 
       return {
@@ -180,7 +189,7 @@ export class CompanyEnrichmentOrchestrator {
   async saveEnrichmentData(accountId: string, data: EnrichmentResult['data']): Promise<void> {
     // Update target_accounts table
     const updateData: Record<string, unknown> = {};
-    
+
     if (data.website) updateData.website = data.website;
     if (data.industry) updateData.industry = data.industry;
     if (data.headquarters) updateData.headquarters = data.headquarters;
@@ -194,7 +203,7 @@ export class CompanyEnrichmentOrchestrator {
 
     // Update or create company_dossiers with enriched data
     const dossierData: Record<string, unknown> = {};
-    
+
     if (data.description || data.wikipediaSummary) {
       dossierData.companyOverview = data.description || data.wikipediaSummary;
     }
@@ -215,12 +224,12 @@ export class CompanyEnrichmentOrchestrator {
     // Add structured data to rawData field
     try {
       dossierData.rawData = JSON.stringify({
-      employeeCount: data.employeeCount,
-      foundedYear: data.foundedYear,
-      keyProducts: data.keyProducts,
-      socialLinks: data.socialLinks,
-      sources: ['web_scraping', 'wikipedia'],
-      scrapedAt: new Date().toISOString(),
+        employeeCount: data.employeeCount,
+        foundedYear: data.foundedYear,
+        keyProducts: data.keyProducts,
+        socialLinks: data.socialLinks,
+        sources: ['web_scraping', 'wikipedia'],
+        scrapedAt: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Failed to stringify raw data:', error);
@@ -284,7 +293,7 @@ export class CompanyEnrichmentOrchestrator {
       }
 
       // Rate limiting
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
     return results;
@@ -304,21 +313,17 @@ export class CompanyEnrichmentOrchestrator {
     // Get companies missing enrichment data
     const companies = await prisma.target_accounts.findMany({
       where: {
-        OR: [
-          { industry: null },
-          { headquarters: null },
-          { website: null },
-        ],
+        OR: [{ industry: null }, { headquarters: null }, { website: null }],
       },
       take: limit,
     });
 
-    const accountIds = companies.map(c => c.id);
+    const accountIds = companies.map((c) => c.id);
     const results = await this.enrichBatch(accountIds, { dryRun, delay: 2000 });
 
     return {
       total: results.length,
-      successful: results.filter(r => r.success).length,
+      successful: results.filter((r) => r.success).length,
       totalDataPoints: results.reduce((sum, r) => sum + r.dataPoints, 0),
       results,
     };

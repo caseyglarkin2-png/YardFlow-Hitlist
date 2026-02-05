@@ -35,7 +35,8 @@ Return ONLY valid JSON, no markdown formatting.`;
       messages: [
         {
           role: 'system',
-          content: 'You are a B2B research analyst specializing in logistics and supply chain companies. Provide accurate, concise business intelligence.',
+          content:
+            'You are a B2B research analyst specializing in logistics and supply chain companies. Provide accurate, concise business intelligence.',
         },
         {
           role: 'user',
@@ -64,10 +65,14 @@ export async function generatePersonalizedOutreach(
   companyDossier: Record<string, unknown>,
   channel: 'EMAIL' | 'LINKEDIN' | 'PHONE',
   contactInsights?: { roleContext: string; likelyPainPoints: string; roiOpportunity: string },
-  roiData?: { annualSavings: number; paybackPeriod: number; assumptions?: { totalFacilities?: string } }
+  roiData?: {
+    annualSavings: number;
+    paybackPeriod: number;
+    assumptions?: { totalFacilities?: string };
+  }
 ) {
   const eventName = 'Manifest 2026';
-  
+
   let contextSection = `Company Context:
 ${JSON.stringify(companyDossier, null, 2)}`;
 
@@ -84,9 +89,9 @@ Contact-Specific Insights:
     const savings = new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(roiData.annualSavings);
-    
+
     contextSection += `
 
 ROI Calculation:
@@ -94,7 +99,7 @@ ROI Calculation:
 - Payback Period: ${roiData.paybackPeriod} months
 - Based on: ${roiData.assumptions?.totalFacilities || 'N/A'} facilities`;
   }
-  
+
   const prompt = `Write a highly personalized ${channel.toLowerCase()} outreach message for:
 
 Person: ${personName}
@@ -108,7 +113,7 @@ ${contextSection}
 Requirements:
 - Natural, conversational tone (not salesy)
 - Reference specific company context or pain points
-${roiData ? '- Subtly reference the ROI opportunity (don\'t quote exact numbers, but hint at the scale of value)' : ''}
+${roiData ? "- Subtly reference the ROI opportunity (don't quote exact numbers, but hint at the scale of value)" : ''}
 ${contactInsights ? '- Address their specific role context and pain points' : ''}
 - Mention ${eventName} naturally
 - Keep it concise (3-4 short paragraphs for email, 2-3 for LinkedIn)
@@ -128,7 +133,8 @@ Return ONLY valid JSON, no markdown formatting.`;
       messages: [
         {
           role: 'system',
-          content: 'You are an expert at writing authentic, personalized B2B outreach that builds genuine connections. You write like a human, not a marketing bot.',
+          content:
+            'You are an expert at writing authentic, personalized B2B outreach that builds genuine connections. You write like a human, not a marketing bot.',
         },
         {
           role: 'user',

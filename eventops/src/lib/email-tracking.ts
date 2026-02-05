@@ -1,6 +1,6 @@
 /**
  * Email Activity Tracker Utility
- * 
+ *
  * Provides functions to track email opens, clicks, and replies
  */
 
@@ -26,12 +26,12 @@ export function generateTrackedLink(outreachId: string, url: string): string {
  */
 export function injectTrackingPixel(htmlBody: string, outreachId: string): string {
   const trackingPixel = `<img src="${generateTrackingPixel(outreachId)}" width="1" height="1" alt="" style="display:none" />`;
-  
+
   // Try to inject before closing </body> tag
   if (htmlBody.includes('</body>')) {
     return htmlBody.replace('</body>', `${trackingPixel}</body>`);
   }
-  
+
   // Otherwise append to end
   return `${htmlBody}${trackingPixel}`;
 }
@@ -41,16 +41,13 @@ export function injectTrackingPixel(htmlBody: string, outreachId: string): strin
  */
 export function wrapLinksWithTracking(htmlBody: string, outreachId: string): string {
   // Replace href="..." with tracked links
-  return htmlBody.replace(
-    /href="([^"]+)"/g,
-    (match, url) => {
-      // Skip tracking pixel and mailto links
-      if (url.includes('/api/outreach/track') || url.startsWith('mailto:')) {
-        return match;
-      }
-      return `href="${generateTrackedLink(outreachId, url)}"`;
+  return htmlBody.replace(/href="([^"]+)"/g, (match, url) => {
+    // Skip tracking pixel and mailto links
+    if (url.includes('/api/outreach/track') || url.startsWith('mailto:')) {
+      return match;
     }
-  );
+    return `href="${generateTrackedLink(outreachId, url)}"`;
+  });
 }
 
 /**

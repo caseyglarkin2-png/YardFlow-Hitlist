@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
-import { 
-  generateManifestRequest, 
+import {
+  generateManifestRequest,
   validateManifestRequest,
-  type ManifestRequestInput 
+  type ManifestRequestInput,
 } from '@/lib/manifest/meeting-request-generator';
 import { logger } from '@/lib/logger';
 
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json() as ManifestRequestInput;
+    const body = (await request.json()) as ManifestRequestInput;
 
     // Validate required fields
     if (!body.contactName || !body.companyName || !body.title) {
@@ -28,10 +28,10 @@ export async function POST(request: NextRequest) {
 
     // Generate the meeting request
     const message = await generateManifestRequest(body);
-    
+
     // Validate the generated message
     const validation = validateManifestRequest(message);
-    
+
     logger.info('Generated Manifest meeting request', {
       userId: authResult.userId,
       contactName: body.contactName,
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       messageLength: message.length,
       valid: validation.valid,
     });
-    
+
     return NextResponse.json({
       message,
       length: message.length,
@@ -50,14 +50,11 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Manifest meeting request generation failed', { 
+    logger.error('Manifest meeting request generation failed', {
       error,
       userId: authResult.userId,
     });
-    
-    return NextResponse.json(
-      { error: 'Failed to generate meeting request' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: 'Failed to generate meeting request' }, { status: 500 });
   }
 }

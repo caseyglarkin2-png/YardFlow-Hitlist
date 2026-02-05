@@ -23,11 +23,7 @@ interface ResponsiveTableProps {
   onRowClick?: (row: Record<string, unknown>) => void;
 }
 
-export function ResponsiveTable({
-  columns,
-  data,
-  onRowClick,
-}: ResponsiveTableProps) {
+export function ResponsiveTable({ columns, data, onRowClick }: ResponsiveTableProps) {
   return (
     <>
       {/* Desktop Table */}
@@ -49,9 +45,7 @@ export function ResponsiveTable({
               >
                 {columns.map((column) => (
                   <TableCell key={column.key}>
-                    {column.render
-                      ? column.render(row[column.key], row)
-                      : row[column.key]}
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
                   </TableCell>
                 ))}
               </TableRow>
@@ -61,7 +55,7 @@ export function ResponsiveTable({
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-3">
+      <div className="space-y-3 md:hidden">
         {data.map((row, index) => (
           <Card
             key={row.id || index}
@@ -69,14 +63,10 @@ export function ResponsiveTable({
             onClick={() => onRowClick?.(row)}
           >
             {columns.map((column) => (
-              <div key={column.key} className="flex justify-between py-2 border-b last:border-0">
-                <span className="font-semibold text-sm text-muted-foreground">
-                  {column.label}
-                </span>
+              <div key={column.key} className="flex justify-between border-b py-2 last:border-0">
+                <span className="text-sm font-semibold text-muted-foreground">{column.label}</span>
                 <span className="text-sm">
-                  {column.render
-                    ? column.render(row[column.key], row)
-                    : row[column.key]}
+                  {column.render ? column.render(row[column.key], row) : row[column.key]}
                 </span>
               </div>
             ))}

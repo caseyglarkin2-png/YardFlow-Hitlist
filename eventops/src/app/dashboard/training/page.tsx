@@ -114,11 +114,11 @@ export default function TrainingPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="mx-auto max-w-7xl p-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Training Content</h1>
-          <p className="text-gray-600 mt-1">
+          <p className="mt-1 text-gray-600">
             Import training materials from Drive, YouTube, and HubSpot
           </p>
         </div>
@@ -187,10 +187,10 @@ export default function TrainingPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 mb-6">
+      <div className="mb-6 flex gap-4">
         <div className="flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
             <Input
               placeholder="Search content..."
               value={searchQuery}
@@ -203,7 +203,7 @@ export default function TrainingPage() {
         <select
           value={selectedSource}
           onChange={(e) => setSelectedSource(e.target.value)}
-          className="px-4 py-2 border rounded-md"
+          className="rounded-md border px-4 py-2"
         >
           <option value="all">All Sources</option>
           <option value="drive">Google Drive</option>
@@ -214,23 +214,21 @@ export default function TrainingPage() {
 
       {/* Content Grid */}
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading...</div>
+        <div className="py-12 text-center text-gray-500">Loading...</div>
       ) : filteredContent.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="py-12 text-center text-gray-500">
           No training content yet. Import from Drive, YouTube, or HubSpot to get started.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredContent.map((item) => (
-            <Card key={item.id} className="p-4 hover:shadow-lg transition-shadow">
+            <Card key={item.id} className="p-4 transition-shadow hover:shadow-lg">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-gray-100 rounded">
-                  {getContentIcon(item.type)}
-                </div>
+                <div className="rounded bg-gray-100 p-2">{getContentIcon(item.type)}</div>
 
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold truncate" title={item.title}>
+                    <h3 className="truncate font-semibold" title={item.title}>
                       {item.title}
                     </h3>
                     <button
@@ -242,18 +240,15 @@ export default function TrainingPage() {
                   </div>
 
                   {item.description && (
-                    <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                      {item.description}
-                    </p>
+                    <p className="mt-1 line-clamp-2 text-sm text-gray-600">{item.description}</p>
                   )}
 
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge className={getSourceBadgeColor(item.source)}>
-                      {item.source}
-                    </Badge>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Badge className={getSourceBadgeColor(item.source)}>{item.source}</Badge>
                     {item.duration && (
                       <span className="text-xs text-gray-500">
-                        {Math.floor(item.duration / 60)}:{(item.duration % 60).toString().padStart(2, '0')}
+                        {Math.floor(item.duration / 60)}:
+                        {(item.duration % 60).toString().padStart(2, '0')}
                       </span>
                     )}
                   </div>
@@ -262,7 +257,7 @@ export default function TrainingPage() {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mt-2"
+                    className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
                   >
                     View Content
                     <ExternalLink className="h-3 w-3" />
@@ -274,7 +269,7 @@ export default function TrainingPage() {
                 <img
                   src={item.thumbnailUrl}
                   alt={item.title}
-                  className="w-full h-32 object-cover rounded mt-3"
+                  className="mt-3 h-32 w-full rounded object-cover"
                 />
               )}
             </Card>
@@ -333,14 +328,14 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="max-h-96 overflow-y-auto space-y-2">
+      <div className="max-h-96 space-y-2 overflow-y-auto">
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading files...</div>
+          <div className="py-8 text-center text-gray-500">Loading files...</div>
         ) : files.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No files found</div>
+          <div className="py-8 text-center text-gray-500">No files found</div>
         ) : (
           files.map((file) => (
-            <div key={file.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
+            <div key={file.id} className="flex items-center gap-2 rounded p-2 hover:bg-gray-50">
               <Checkbox
                 checked={selected.includes(file.id)}
                 onCheckedChange={(checked) => {
@@ -450,7 +445,7 @@ function HubSpotImportDialog({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-2">Number of calls to import</label>
+        <label className="mb-2 block text-sm font-medium">Number of calls to import</label>
         <Input
           type="number"
           value={limit}

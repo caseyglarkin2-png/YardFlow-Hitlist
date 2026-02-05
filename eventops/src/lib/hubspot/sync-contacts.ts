@@ -53,7 +53,7 @@ export async function syncHubSpotContacts(
       for (const contact of response.results) {
         try {
           const wasUpdated = await processContact(contact, options.accountId);
-          
+
           if (wasUpdated) {
             result.updated++;
           } else {
@@ -71,9 +71,8 @@ export async function syncHubSpotContacts(
             return result;
           }
         } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
           result.errors.push({
             contactId: contact.id,
             email: contact.properties.email,
@@ -105,9 +104,8 @@ export async function syncHubSpotContacts(
 
     return result;
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
     logger.error('HubSpot contact sync failed', {
       error: errorMessage,
       partialResult: result,
@@ -128,26 +126,20 @@ async function fetchContactsPage(
     const response = await hubspotClient.crm.contacts.basicApi.getPage(
       limit,
       after,
-      [
-        'firstname',
-        'lastname',
-        'email',
-        'phone',
-        'jobtitle',
-        'linkedin',
-        'company',
-      ],
+      ['firstname', 'lastname', 'email', 'phone', 'jobtitle', 'linkedin', 'company'],
       undefined,
       undefined,
       false
     );
 
     return {
-      results: response.results.map((r: { createdAt: Date | string; updatedAt: Date | string; [key: string]: unknown }) => ({
-        ...r,
-        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
-        updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
-      })) as HubSpotContact[],
+      results: response.results.map(
+        (r: { createdAt: Date | string; updatedAt: Date | string; [key: string]: unknown }) => ({
+          ...r,
+          createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
+          updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,
+        })
+      ) as HubSpotContact[],
       paging: response.paging
         ? {
             next: response.paging.next
@@ -179,20 +171,15 @@ async function processContact(
   const props = contact.properties;
 
   // Build full name from firstname and lastname
-  const name = [props.firstname, props.lastname]
-    .filter(Boolean)
-    .join(' ')
-    .trim() || 'Unknown';
+  const name = [props.firstname, props.lastname].filter(Boolean).join(' ').trim() || 'Unknown';
 
   // Determine accountId - use company name as fallback or provided default
   const accountId =
-    defaultAccountId ||
-    generateAccountIdFromCompany(props.company) ||
-    `hubspot-${contact.id}`;
+    defaultAccountId || generateAccountIdFromCompany(props.company) || `hubspot-${contact.id}`;
 
   // Check if person already exists by email or HubSpot ID
   let existingPerson = null;
-  
+
   if (props.email) {
     existingPerson = await prisma.people.findFirst({
       where: { email: props.email },
@@ -283,14 +270,14 @@ async function processContact(
  */
 function buildNotes(contact: HubSpotContact, existingNotes?: string | null): string {
   const hubspotMetadata = `hubspot_id:${contact.id}|synced:${new Date().toISOString()}`;
-  
+
   if (existingNotes) {
     // Update existing notes, preserving non-HubSpot content
     const noteLines = existingNotes.split('\n');
     const filteredLines = noteLines.filter(
       (line) => !line.includes('hubspot_id:') && !line.includes('synced:')
     );
-    
+
     return [...filteredLines, hubspotMetadata].filter(Boolean).join('\n');
   }
 
@@ -302,7 +289,7 @@ function buildNotes(contact: HubSpotContact, existingNotes?: string | null): str
  */
 function generateAccountIdFromCompany(company?: string): string | null {
   if (!company) return null;
-  
+
   // Convert to lowercase, remove special chars, replace spaces with hyphens
   return `account-${company
     .toLowerCase()

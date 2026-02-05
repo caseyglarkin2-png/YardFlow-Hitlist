@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 interface HeatmapData {
   hour: number;
@@ -17,13 +17,13 @@ interface HeatmapData {
   rate: number;
 }
 
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 export function EngagementHeatmap() {
   const [data, setData] = useState<HeatmapData[]>([]);
-  const [metric, setMetric] = useState<"opens" | "clicks" | "replies">("opens");
-  const [persona, setPersona] = useState<string>("all");
+  const [metric, setMetric] = useState<'opens' | 'clicks' | 'replies'>('opens');
+  const [persona, setPersona] = useState<string>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,13 +33,11 @@ export function EngagementHeatmap() {
   async function loadHeatmapData() {
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/analytics/heatmap?metric=${metric}&persona=${persona}`
-      );
+      const res = await fetch(`/api/analytics/heatmap?metric=${metric}&persona=${persona}`);
       const result = await res.json();
       setData(result.data || []);
     } catch (error) {
-      console.error("Failed to load heatmap:", error);
+      console.error('Failed to load heatmap:', error);
     } finally {
       setLoading(false);
     }
@@ -48,13 +46,13 @@ export function EngagementHeatmap() {
   const maxRate = Math.max(...data.map((d) => d.rate), 1);
 
   function getColor(rate: number): string {
-    if (rate === 0) return "bg-gray-100";
+    if (rate === 0) return 'bg-gray-100';
     const intensity = rate / maxRate;
-    
-    if (intensity > 0.75) return "bg-green-600";
-    if (intensity > 0.5) return "bg-green-500";
-    if (intensity > 0.25) return "bg-green-400";
-    return "bg-green-300";
+
+    if (intensity > 0.75) return 'bg-green-600';
+    if (intensity > 0.5) return 'bg-green-500';
+    if (intensity > 0.25) return 'bg-green-400';
+    return 'bg-green-300';
   }
 
   function getCellData(day: number, hour: number): HeatmapData | undefined {
@@ -67,12 +65,13 @@ export function EngagementHeatmap() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Engagement Heatmap</CardTitle>
-            <CardDescription>
-              When your audience is most engaged (by day and hour)
-            </CardDescription>
+            <CardDescription>When your audience is most engaged (by day and hour)</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Select value={metric} onValueChange={(v) => setMetric(v as 'opens' | 'clicks' | 'replies')}>
+            <Select
+              value={metric}
+              onValueChange={(v) => setMetric(v as 'opens' | 'clicks' | 'replies')}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -103,7 +102,7 @@ export function EngagementHeatmap() {
       <CardContent>
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -134,12 +133,10 @@ export function EngagementHeatmap() {
                           title={`${day} ${hour}:00 - ${count} ${metric}, ${Math.round(rate)}% rate`}
                         >
                           <div
-                            className={`h-8 w-8 rounded ${getColor(rate)} flex items-center justify-center text-xs font-medium hover:ring-2 hover:ring-primary cursor-pointer transition-all`}
+                            className={`h-8 w-8 rounded ${getColor(rate)} flex cursor-pointer items-center justify-center text-xs font-medium transition-all hover:ring-2 hover:ring-primary`}
                           >
                             {count > 0 && (
-                              <span className="text-white text-[10px]">
-                                {Math.round(rate)}%
-                              </span>
+                              <span className="text-[10px] text-white">{Math.round(rate)}%</span>
                             )}
                           </div>
                         </td>
@@ -150,14 +147,14 @@ export function EngagementHeatmap() {
               </tbody>
             </table>
 
-            <div className="flex items-center gap-4 mt-6">
+            <div className="mt-6 flex items-center gap-4">
               <span className="text-sm font-medium">Low</span>
               <div className="flex gap-1">
-                <div className="h-4 w-8 bg-gray-100 rounded"></div>
-                <div className="h-4 w-8 bg-green-300 rounded"></div>
-                <div className="h-4 w-8 bg-green-400 rounded"></div>
-                <div className="h-4 w-8 bg-green-500 rounded"></div>
-                <div className="h-4 w-8 bg-green-600 rounded"></div>
+                <div className="h-4 w-8 rounded bg-gray-100"></div>
+                <div className="h-4 w-8 rounded bg-green-300"></div>
+                <div className="h-4 w-8 rounded bg-green-400"></div>
+                <div className="h-4 w-8 rounded bg-green-500"></div>
+                <div className="h-4 w-8 rounded bg-green-600"></div>
               </div>
               <span className="text-sm font-medium">High</span>
             </div>

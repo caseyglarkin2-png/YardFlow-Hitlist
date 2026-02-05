@@ -7,10 +7,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Mark notification as read
  */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const authResult = await authServiceOrSession(req);
   if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,10 +27,7 @@ export async function PATCH(
 /**
  * Delete notification
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const authResult = await authServiceOrSession(req);
   if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

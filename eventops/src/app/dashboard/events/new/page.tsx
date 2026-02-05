@@ -14,7 +14,7 @@ export default function NewEventPage() {
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    
+
     try {
       const response = await fetch('/api/events', {
         method: 'POST',
@@ -53,10 +53,7 @@ export default function NewEventPage() {
       <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
         <form onSubmit={handleSubmit} className="space-y-6 px-4 py-6 sm:p-8">
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
+            <label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
               Event Name
             </label>
             <div className="mt-2">
@@ -72,10 +69,7 @@ export default function NewEventPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="location"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
+            <label htmlFor="location" className="block text-sm font-medium leading-6 text-gray-900">
               Location
             </label>
             <div className="mt-2">
@@ -129,10 +123,7 @@ export default function NewEventPage() {
           </div>
 
           <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
+            <label htmlFor="status" className="block text-sm font-medium leading-6 text-gray-900">
               Status
             </label>
             <div className="mt-2">
@@ -166,7 +157,7 @@ export default function NewEventPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? 'Creating...' : 'Create Event'}
             </button>

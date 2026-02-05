@@ -63,7 +63,7 @@ export default function CampaignsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const res = await fetch('/api/campaigns', {
         method: 'POST',
@@ -117,31 +117,29 @@ export default function CampaignsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="mx-auto max-w-7xl p-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
-          <p className="text-gray-600 mt-1">
-            Organize and track multi-touch outreach campaigns
-          </p>
+          <p className="mt-1 text-gray-600">Organize and track multi-touch outreach campaigns</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Create Campaign
         </button>
       </div>
 
       {campaigns.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns yet</h3>
-          <p className="text-gray-600 mb-4">
+        <div className="rounded-lg bg-white p-12 text-center shadow">
+          <h3 className="mb-2 text-lg font-medium text-gray-900">No campaigns yet</h3>
+          <p className="mb-4 text-gray-600">
             Get started by creating your first campaign to organize outreach efforts
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             Create First Campaign
           </button>
@@ -152,29 +150,34 @@ export default function CampaignsPage() {
             <Link
               key={campaign.id}
               href={`/dashboard/campaigns/${campaign.id}`}
-              className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+              className="rounded-lg bg-white p-6 shadow transition-shadow hover:shadow-md"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="mb-2 flex items-center gap-3">
                     <h3 className="text-lg font-semibold text-gray-900">{campaign.name}</h3>
-                    <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(campaign.status)}`}>
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs ${getStatusBadge(campaign.status)}`}
+                    >
                       {campaign.status}
                     </span>
                   </div>
                   {campaign.description && (
-                    <p className="text-gray-600 mb-3">{campaign.description}</p>
+                    <p className="mb-3 text-gray-600">{campaign.description}</p>
                   )}
                   <div className="flex gap-6 text-sm text-gray-500">
                     <div>
-                      <span className="font-medium text-gray-700">{campaign._count.outreach}</span> outreach messages
+                      <span className="font-medium text-gray-700">{campaign._count.outreach}</span>{' '}
+                      outreach messages
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">{campaign._count.sequences}</span> sequences
+                      <span className="font-medium text-gray-700">{campaign._count.sequences}</span>{' '}
+                      sequences
                     </div>
                     {campaign.minIcpScore && (
                       <div>
-                        Min ICP: <span className="font-medium text-gray-700">{campaign.minIcpScore}</span>
+                        Min ICP:{' '}
+                        <span className="font-medium text-gray-700">{campaign.minIcpScore}</span>
                       </div>
                     )}
                   </div>
@@ -195,13 +198,13 @@ export default function CampaignsPage() {
 
       {/* Create Campaign Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Create New Campaign</h2>
-            
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">Create New Campaign</h2>
+
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Campaign Name *
                 </label>
                 <input
@@ -209,19 +212,17 @@ export default function CampaignsPage() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
                   placeholder="e.g., Top Tier Outreach - Q1 2026"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
                   rows={3}
                   placeholder="Campaign goals and strategy..."
                 />
@@ -229,31 +230,27 @@ export default function CampaignsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Start Date</label>
                   <input
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
-                  </label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">End Date</label>
                   <input
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   Target Personas
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -271,7 +268,9 @@ export default function CampaignsPage() {
                           } else {
                             setFormData({
                               ...formData,
-                              targetPersonas: formData.targetPersonas.filter(p => p !== persona.value),
+                              targetPersonas: formData.targetPersonas.filter(
+                                (p) => p !== persona.value
+                              ),
                             });
                           }
                         }}
@@ -284,7 +283,7 @@ export default function CampaignsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Minimum ICP Score
                 </label>
                 <input
@@ -293,13 +292,13 @@ export default function CampaignsPage() {
                   max="100"
                   value={formData.minIcpScore}
                   onChange={(e) => setFormData({ ...formData, minIcpScore: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
                   placeholder="e.g., 75"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   Campaign Goals
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -308,11 +307,13 @@ export default function CampaignsPage() {
                       type="number"
                       placeholder="Meetings"
                       value={formData.goals.meetings}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        goals: { ...formData.goals, meetings: e.target.value },
-                      })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          goals: { ...formData.goals, meetings: e.target.value },
+                        })
+                      }
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     />
                     <span className="text-xs text-gray-500">Meetings</span>
                   </div>
@@ -321,11 +322,13 @@ export default function CampaignsPage() {
                       type="number"
                       placeholder="Emails"
                       value={formData.goals.emails}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        goals: { ...formData.goals, emails: e.target.value },
-                      })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          goals: { ...formData.goals, emails: e.target.value },
+                        })
+                      }
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     />
                     <span className="text-xs text-gray-500">Emails Sent</span>
                   </div>
@@ -334,28 +337,30 @@ export default function CampaignsPage() {
                       type="number"
                       placeholder="Responses"
                       value={formData.goals.responses}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        goals: { ...formData.goals, responses: e.target.value },
-                      })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          goals: { ...formData.goals, responses: e.target.value },
+                        })
+                      }
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                     />
                     <span className="text-xs text-gray-500">Responses</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-4">
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
                   Create Campaign
                 </button>

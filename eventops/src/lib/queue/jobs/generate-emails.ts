@@ -41,7 +41,7 @@ export async function processGenerateEmails(
     };
   } catch (error) {
     logger.error('Generate emails job failed', { accountId, error });
-    
+
     return {
       success: false,
       accountId,

@@ -1,11 +1,11 @@
 /**
  * Sentry Error Capture Utilities
- * 
+ *
  * Provides contextual error capture for API routes with:
  * - Route/method tagging for dashboard filtering
  * - User context correlation
  * - Structured extras for debugging
- * 
+ *
  * Usage in route catch blocks:
  *   captureRouteError(error, { route: '/api/accounts/[id]', method: 'GET', userId });
  */
@@ -25,7 +25,7 @@ export interface RouteErrorContext {
 /**
  * Capture an error with full route context in Sentry.
  * Use in catch blocks of API route handlers.
- * 
+ *
  * @param error - The caught error (unknown type from catch blocks)
  * @param context - Route context for tagging and filtering
  * @returns The Sentry event ID for reference
@@ -52,9 +52,10 @@ export function captureRouteError(error: unknown, context: RouteErrorContext): s
     }
 
     // Normalize the error
-    const normalizedError = error instanceof Error
-      ? error
-      : new Error(typeof error === 'string' ? error : JSON.stringify(error));
+    const normalizedError =
+      error instanceof Error
+        ? error
+        : new Error(typeof error === 'string' ? error : JSON.stringify(error));
 
     return Sentry.captureException(normalizedError);
   });
@@ -63,7 +64,7 @@ export function captureRouteError(error: unknown, context: RouteErrorContext): s
 /**
  * Capture a warning/info message with route context.
  * Use for non-error conditions worth tracking (e.g., rate limits, auth failures).
- * 
+ *
  * @param message - Descriptive message
  * @param context - Route context for tagging
  * @param level - Severity level (default: 'warning')

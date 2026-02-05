@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Download, Trash2, BarChart3, PieChart, TrendingUp, Users } from "lucide-react";
+} from '@/components/ui/select';
+import { Download, Trash2, BarChart3, PieChart, TrendingUp, Users } from 'lucide-react';
 
 interface Widget {
   id: string;
@@ -22,55 +22,55 @@ interface Widget {
 
 const AVAILABLE_WIDGETS: Widget[] = [
   {
-    id: "accounts-by-icp",
-    type: "chart",
-    title: "Accounts by ICP Score",
-    description: "Bar chart showing account distribution",
+    id: 'accounts-by-icp',
+    type: 'chart',
+    title: 'Accounts by ICP Score',
+    description: 'Bar chart showing account distribution',
     icon: BarChart3,
   },
   {
-    id: "response-rate",
-    type: "metric",
-    title: "Response Rate",
-    description: "Overall email response rate",
+    id: 'response-rate',
+    type: 'metric',
+    title: 'Response Rate',
+    description: 'Overall email response rate',
     icon: TrendingUp,
   },
   {
-    id: "top-campaigns",
-    type: "table",
-    title: "Top Campaigns",
-    description: "Best performing campaigns",
+    id: 'top-campaigns',
+    type: 'table',
+    title: 'Top Campaigns',
+    description: 'Best performing campaigns',
     icon: Users,
   },
   {
-    id: "persona-breakdown",
-    type: "chart",
-    title: "Persona Breakdown",
-    description: "Pie chart of contact personas",
+    id: 'persona-breakdown',
+    type: 'chart',
+    title: 'Persona Breakdown',
+    description: 'Pie chart of contact personas',
     icon: PieChart,
   },
   {
-    id: "meeting-funnel",
-    type: "chart",
-    title: "Meeting Funnel",
-    description: "Conversion funnel visualization",
+    id: 'meeting-funnel',
+    type: 'chart',
+    title: 'Meeting Funnel',
+    description: 'Conversion funnel visualization',
     icon: BarChart3,
   },
 ];
 
 export default function ReportBuilderPage() {
   const [selectedWidgets, setSelectedWidgets] = useState<Widget[]>([]);
-  const [reportName, _setReportName] = useState("Custom Report");
-  const [dateRange, setDateRange] = useState("last-30-days");
+  const [reportName, _setReportName] = useState('Custom Report');
+  const [dateRange, setDateRange] = useState('last-30-days');
 
   function addWidget(widget: Widget) {
-    if (!selectedWidgets.find(w => w.id === widget.id)) {
+    if (!selectedWidgets.find((w) => w.id === widget.id)) {
       setSelectedWidgets([...selectedWidgets, widget]);
     }
   }
 
   function removeWidget(widgetId: string) {
-    setSelectedWidgets(selectedWidgets.filter(w => w.id !== widgetId));
+    setSelectedWidgets(selectedWidgets.filter((w) => w.id !== widgetId));
   }
 
   async function generatePDF() {
@@ -80,7 +80,7 @@ export default function ReportBuilderPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reportType: 'custom',
-          widgets: selectedWidgets.map(w => w.id),
+          widgets: selectedWidgets.map((w) => w.id),
           dateRange,
         }),
       });
@@ -104,7 +104,7 @@ export default function ReportBuilderPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: reportName,
-          widgets: selectedWidgets.map(w => w.id),
+          widgets: selectedWidgets.map((w) => w.id),
           dateRange,
         }),
       });
@@ -118,8 +118,8 @@ export default function ReportBuilderPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Custom Report Builder</h1>
           <p className="text-muted-foreground">
@@ -142,13 +142,13 @@ export default function ReportBuilderPage() {
             Save Template
           </Button>
           <Button onClick={generatePDF}>
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Export PDF
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Available Widgets */}
         <Card className="lg:col-span-1">
           <CardHeader>
@@ -158,19 +158,19 @@ export default function ReportBuilderPage() {
           <CardContent className="space-y-2">
             {AVAILABLE_WIDGETS.map((widget) => {
               const Icon = widget.icon;
-              const isAdded = selectedWidgets.some(w => w.id === widget.id);
-              
+              const isAdded = selectedWidgets.some((w) => w.id === widget.id);
+
               return (
                 <Button
                   key={widget.id}
-                  variant={isAdded ? "secondary" : "outline"}
-                  className="w-full justify-start h-auto p-3"
+                  variant={isAdded ? 'secondary' : 'outline'}
+                  className="h-auto w-full justify-start p-3"
                   onClick={() => addWidget(widget)}
                   disabled={isAdded}
                 >
-                  <Icon className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <Icon className="mr-2 h-4 w-4 flex-shrink-0" />
                   <div className="text-left">
-                    <div className="font-medium text-sm">{widget.title}</div>
+                    <div className="text-sm font-medium">{widget.title}</div>
                     <div className="text-xs text-muted-foreground">{widget.description}</div>
                   </div>
                 </Button>
@@ -190,11 +190,7 @@ export default function ReportBuilderPage() {
                 </CardDescription>
               </div>
               {selectedWidgets.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedWidgets([])}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedWidgets([])}>
                   Clear All
                 </Button>
               )}
@@ -202,15 +198,15 @@ export default function ReportBuilderPage() {
           </CardHeader>
           <CardContent>
             {selectedWidgets.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-20" />
+              <div className="py-12 text-center text-muted-foreground">
+                <BarChart3 className="mx-auto mb-4 h-16 w-16 opacity-20" />
                 <p>Add widgets from the sidebar to build your report</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {selectedWidgets.map((widget, _index) => {
                   const Icon = widget.icon;
-                  
+
                   return (
                     <Card key={widget.id} className="relative">
                       <CardHeader>
@@ -229,7 +225,7 @@ export default function ReportBuilderPage() {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="bg-muted rounded h-32 flex items-center justify-center text-sm text-muted-foreground">
+                        <div className="flex h-32 items-center justify-center rounded bg-muted text-sm text-muted-foreground">
                           {widget.description}
                         </div>
                       </CardContent>
@@ -240,11 +236,11 @@ export default function ReportBuilderPage() {
             )}
 
             {selectedWidgets.length > 0 && (
-              <div className="mt-6 p-4 bg-muted rounded-lg">
-                <p className="text-sm font-medium mb-2">Report Preview Info:</p>
-                <div className="text-sm text-muted-foreground space-y-1">
+              <div className="mt-6 rounded-lg bg-muted p-4">
+                <p className="mb-2 text-sm font-medium">Report Preview Info:</p>
+                <div className="space-y-1 text-sm text-muted-foreground">
                   <p>• Date Range: {dateRange.replace(/-/g, ' ')}</p>
-                  <p>• Widgets: {selectedWidgets.map(w => w.title).join(', ')}</p>
+                  <p>• Widgets: {selectedWidgets.map((w) => w.title).join(', ')}</p>
                   <p>• Export format: PDF or HTML</p>
                 </div>
               </div>

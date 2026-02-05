@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json(
-        { error: 'No active event selected' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No active event selected' }, { status: 400 });
     }
 
     const { type, rows } = await request.json();
@@ -84,7 +81,8 @@ export async function POST(request: NextRequest) {
             phone: data.phone || null,
             linkedin: data.linkedin || null,
             notes: data.notes || null,
-            isExecOps: data.isExecOps === 'TRUE' || data.isExecOps === true || data.isExecOps === '1',
+            isExecOps:
+              data.isExecOps === 'TRUE' || data.isExecOps === true || data.isExecOps === '1',
             isOps: data.isOps === 'TRUE' || data.isOps === true || data.isOps === '1',
             isProc: data.isProc === 'TRUE' || data.isProc === true || data.isProc === '1',
             isSales: data.isSales === 'TRUE' || data.isSales === true || data.isSales === '1',
@@ -100,9 +98,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ created });
   } catch (error) {
     console.error('Error executing import:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

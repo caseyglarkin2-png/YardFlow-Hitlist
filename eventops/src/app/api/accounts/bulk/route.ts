@@ -23,10 +23,7 @@ export async function POST(request: NextRequest) {
     const { action, accountIds } = body;
 
     if (!action || !accountIds || !Array.isArray(accountIds)) {
-      return NextResponse.json(
-        { error: 'Missing action or accountIds' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing action or accountIds' }, { status: 400 });
     }
 
     let result;
@@ -128,9 +125,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Bulk action error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

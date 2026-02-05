@@ -2,7 +2,11 @@
  * Content Purposing Agent Tests
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ContentPurposingAgent, ContentRequest, PurposedContent } from '@/lib/agents/content-purposing-agent';
+import {
+  ContentPurposingAgent,
+  ContentRequest,
+  PurposedContent,
+} from '@/lib/agents/content-purposing-agent';
 
 vi.mock('@/lib/db', () => ({
   prisma: {
@@ -112,7 +116,7 @@ describe('ContentPurposingAgent', () => {
 
       expect(results.length).toBe(3);
       // Each result should have personalization
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.personalized).toBeTruthy();
       });
     });

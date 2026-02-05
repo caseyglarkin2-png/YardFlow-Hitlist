@@ -75,72 +75,82 @@ export async function GET(req: NextRequest) {
       });
     } else {
       // Convert to CSV
-      const accountsCsv = jsonToCSV(accounts.map(a => ({
-        id: a.id,
-        name: a.name,
-        industry: a.industry,
-        headquarters: a.headquarters,
-        icpScore: a.icpScore,
-        website: a.website,
-        notes: a.notes,
-        assignedTo: a.assignedTo,
-        peopleCount: a.people.length,
-      })));
+      const accountsCsv = jsonToCSV(
+        accounts.map((a) => ({
+          id: a.id,
+          name: a.name,
+          industry: a.industry,
+          headquarters: a.headquarters,
+          icpScore: a.icpScore,
+          website: a.website,
+          notes: a.notes,
+          assignedTo: a.assignedTo,
+          peopleCount: a.people.length,
+        }))
+      );
 
-      const peopleCsv = jsonToCSV(people.map(p => ({
-        id: p.id,
-        name: p.name,
-        email: p.email,
-        title: p.title,
-        phone: p.phone,
-        accountName: p.target_accounts.name,
-        linkedin: p.linkedin,
-        isExecOps: p.isExecOps,
-        isOps: p.isOps,
-        isProc: p.isProc,
-        isSales: p.isSales,
-        isTech: p.isTech,
-        isNonOps: p.isNonOps,
-        notes: p.notes,
-        assignedTo: p.assignedTo,
-      })));
+      const peopleCsv = jsonToCSV(
+        people.map((p) => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          title: p.title,
+          phone: p.phone,
+          accountName: p.target_accounts.name,
+          linkedin: p.linkedin,
+          isExecOps: p.isExecOps,
+          isOps: p.isOps,
+          isProc: p.isProc,
+          isSales: p.isSales,
+          isTech: p.isTech,
+          isNonOps: p.isNonOps,
+          notes: p.notes,
+          assignedTo: p.assignedTo,
+        }))
+      );
 
-      const outreachCsv = jsonToCSV(outreach.map(o => ({
-        id: o.id,
-        personName: o.people.name,
-        accountName: o.people.target_accounts.name,
-        channel: o.channel,
-        status: o.status,
-        subject: o.subject,
-        sentAt: o.sentAt,
-        openedAt: o.openedAt,
-        respondedAt: o.respondedAt,
-      })));
+      const outreachCsv = jsonToCSV(
+        outreach.map((o) => ({
+          id: o.id,
+          personName: o.people.name,
+          accountName: o.people.target_accounts.name,
+          channel: o.channel,
+          status: o.status,
+          subject: o.subject,
+          sentAt: o.sentAt,
+          openedAt: o.openedAt,
+          respondedAt: o.respondedAt,
+        }))
+      );
 
-      const meetingsCsv = jsonToCSV(meetings.map(m => ({
-        id: m.id,
-        personName: m.people.name,
-        accountName: m.people.target_accounts.name,
-        scheduledAt: m.scheduledAt,
-        status: m.status,
-        outcome: m.outcome,
-        dealStage: m.dealStage,
-        location: m.location,
-      })));
+      const meetingsCsv = jsonToCSV(
+        meetings.map((m) => ({
+          id: m.id,
+          personName: m.people.name,
+          accountName: m.people.target_accounts.name,
+          scheduledAt: m.scheduledAt,
+          status: m.status,
+          outcome: m.outcome,
+          dealStage: m.dealStage,
+          location: m.location,
+        }))
+      );
 
-      const activitiesCsv = jsonToCSV(activities.map(a => ({
-        id: a.id,
-        userName: a.users.name,
-        entityType: a.entityType,
-        entityId: a.entityId,
-        action: a.action,
-        description: a.description,
-        createdAt: a.createdAt,
-      })));
+      const activitiesCsv = jsonToCSV(
+        activities.map((a) => ({
+          id: a.id,
+          userName: a.users.name,
+          entityType: a.entityType,
+          entityId: a.entityId,
+          action: a.action,
+          description: a.description,
+          createdAt: a.createdAt,
+        }))
+      );
 
       // In production, use JSZip to create actual ZIP file
       // For now, return concatenated CSVs
-      
+
       const fullExport = `
 === ACCOUNTS ===
 ${accountsCsv}
@@ -179,9 +189,9 @@ function jsonToCSV(data: any[]): string {
   if (data.length === 0) return '';
 
   const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(item =>
+  const rows = data.map((item) =>
     Object.values(item)
-      .map(v => {
+      .map((v) => {
         if (v === null || v === undefined) return '';
         const str = String(v);
         return str.includes(',') || str.includes('"') ? `"${str.replace(/"/g, '""')}"` : str;

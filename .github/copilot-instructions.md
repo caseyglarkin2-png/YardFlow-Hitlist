@@ -199,14 +199,14 @@ export async function POST(req: NextRequest) {
 
 The worker service requires these to start (checked by `startup-checks.ts`):
 
-| Variable | Required | Notes |
-|----------|----------|-------|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `REDIS_URL` | ✅ | Redis connection for BullMQ |
-| `AUTH_SECRET` | ✅ | NextAuth secret (min 32 chars) |
-| `SENDGRID_API_KEY` | ⚠️ | Optional but emails fail without it |
-| `GEMINI_API_KEY` | ⚠️ | Primary AI provider |
-| `OPENAI_API_KEY` | ⚠️ | Fallback AI provider |
+| Variable           | Required | Notes                               |
+| ------------------ | -------- | ----------------------------------- |
+| `DATABASE_URL`     | ✅       | PostgreSQL connection string        |
+| `REDIS_URL`        | ✅       | Redis connection for BullMQ         |
+| `AUTH_SECRET`      | ✅       | NextAuth secret (min 32 chars)      |
+| `SENDGRID_API_KEY` | ⚠️       | Optional but emails fail without it |
+| `GEMINI_API_KEY`   | ⚠️       | Primary AI provider                 |
+| `OPENAI_API_KEY`   | ⚠️       | Fallback AI provider                |
 
 ---
 
@@ -245,4 +245,3 @@ The Vercel frontend proxies all AI calls through Railway:
 ```
 
 **Critical**: GTM-YardFlow has NO AI API keys. All AI routes through Railway.
-

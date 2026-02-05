@@ -8,10 +8,7 @@ export const dynamic = 'force-dynamic';
  * GET /api/campaigns/[id]
  * Get campaign details with metrics
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
@@ -44,10 +41,10 @@ export async function GET(
 
     const metrics = {
       total: outreachStats.reduce((sum, stat) => sum + stat._count, 0),
-      draft: outreachStats.find(s => s.status === 'DRAFT')?._count || 0,
-      sent: outreachStats.find(s => s.status === 'SENT')?._count || 0,
-      opened: outreachStats.find(s => s.status === 'OPENED')?._count || 0,
-      responded: outreachStats.find(s => s.status === 'RESPONDED')?._count || 0,
+      draft: outreachStats.find((s) => s.status === 'DRAFT')?._count || 0,
+      sent: outreachStats.find((s) => s.status === 'SENT')?._count || 0,
+      opened: outreachStats.find((s) => s.status === 'OPENED')?._count || 0,
+      responded: outreachStats.find((s) => s.status === 'RESPONDED')?._count || 0,
       responseRate: 0,
     };
 
@@ -69,10 +66,7 @@ export async function GET(
  * PATCH /api/campaigns/[id]
  * Update campaign
  */
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
@@ -105,10 +99,7 @@ export async function PATCH(
  * DELETE /api/campaigns/[id]
  * Delete campaign
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {

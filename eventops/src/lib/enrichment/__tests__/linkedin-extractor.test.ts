@@ -31,7 +31,8 @@ describe('LinkedInExtractor', () => {
 
   beforeEach(() => {
     extractor = new LinkedInExtractor();
-    mockSearchClient = (extractor as unknown as Record<string, unknown>).searchClient as vi.Mocked<GoogleSearchClient>;
+    mockSearchClient = (extractor as unknown as Record<string, unknown>)
+      .searchClient as vi.Mocked<GoogleSearchClient>;
     vi.clearAllMocks();
   });
 

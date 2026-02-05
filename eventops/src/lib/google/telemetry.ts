@@ -21,9 +21,7 @@ export async function logGoogleAPICall(
       select: { googleSyncAuditLog: true },
     });
 
-    const auditLog = Array.isArray(user?.googleSyncAuditLog) 
-      ? user.googleSyncAuditLog 
-      : [];
+    const auditLog = Array.isArray(user?.googleSyncAuditLog) ? user.googleSyncAuditLog : [];
 
     // Keep last 100 entries
     const updatedLog = [...auditLog, logEntry].slice(-100);

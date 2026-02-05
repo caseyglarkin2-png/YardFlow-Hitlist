@@ -123,37 +123,38 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="mx-auto max-w-5xl p-6">
       <div className="mb-6">
-        <Link href="/dashboard/sequences" className="text-blue-600 hover:text-blue-700 mb-2 inline-block">
+        <Link
+          href="/dashboard/sequences"
+          className="mb-2 inline-block text-blue-600 hover:text-blue-700"
+        >
           ← Back to Sequences
         </Link>
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="mb-2 flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">{sequence.name}</h1>
-              <span className={`px-3 py-1 text-sm rounded-full ${
-                sequence.isActive 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-gray-100 text-gray-800'
-              }`}>
+              <span
+                className={`rounded-full px-3 py-1 text-sm ${
+                  sequence.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                }`}
+              >
                 {sequence.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>
-            {sequence.description && (
-              <p className="text-gray-600">{sequence.description}</p>
-            )}
+            {sequence.description && <p className="text-gray-600">{sequence.description}</p>}
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
             >
               {isEditing ? 'Cancel' : 'Edit'}
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
             >
               Delete
             </button>
@@ -163,24 +164,24 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
 
       {/* Edit Form */}
       {isEditing && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Edit Sequence</h2>
+        <div className="mb-6 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-lg font-semibold">Edit Sequence</h2>
           <form onSubmit={handleUpdate} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
               <input
                 type="text"
                 value={editData.name}
                 onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
               <textarea
                 value={editData.description}
                 onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full rounded-md border border-gray-300 px-3 py-2"
                 rows={2}
               />
             </div>
@@ -198,38 +199,38 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-3">
+              <div className="mb-3 flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700">Steps</label>
                 <button
                   type="button"
                   onClick={addStep}
-                  className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                  className="rounded bg-blue-100 px-3 py-1 text-sm text-blue-700 hover:bg-blue-200"
                 >
                   + Add Step
                 </button>
               </div>
-              
+
               <div className="space-y-3">
                 {editData.steps.map((step, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="font-medium text-sm text-gray-700">Step {index + 1}</span>
+                  <div key={index} className="rounded-lg border border-gray-200 p-4">
+                    <div className="mb-3 flex items-start justify-between">
+                      <span className="text-sm font-medium text-gray-700">Step {index + 1}</span>
                       <button
                         type="button"
                         onClick={() => removeStep(index)}
-                        className="text-red-600 text-sm hover:text-red-700"
+                        className="text-sm text-red-600 hover:text-red-700"
                       >
                         Remove
                       </button>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Channel</label>
+                        <label className="mb-1 block text-xs text-gray-600">Channel</label>
                         <select
                           value={step.channel}
                           onChange={(e) => updateStep(index, 'channel', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                         >
                           <option value="LINKEDIN">LinkedIn</option>
                           <option value="EMAIL">Email</option>
@@ -238,13 +239,13 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Delay (days)</label>
+                        <label className="mb-1 block text-xs text-gray-600">Delay (days)</label>
                         <input
                           type="number"
                           min="0"
                           value={step.delayDays}
                           onChange={(e) => updateStep(index, 'delayDays', parseInt(e.target.value))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                         />
                       </div>
                     </div>
@@ -255,7 +256,7 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
 
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               Save Changes
             </button>
@@ -264,24 +265,26 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
       )}
 
       {/* Sequence Timeline */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 className="text-lg font-semibold mb-4">Sequence Timeline</h3>
+      <div className="mb-6 rounded-lg bg-white p-6 shadow">
+        <h3 className="mb-4 text-lg font-semibold">Sequence Timeline</h3>
         <div className="space-y-4">
           {sequence.steps.map((step, index) => (
             <div key={index} className="flex items-start">
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-lg">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg">
                 {channelIcons[step.channel] || '📋'}
               </div>
               <div className="ml-4 flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium">Step {index + 1}: {step.channel}</span>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="font-medium">
+                    Step {index + 1}: {step.channel}
+                  </span>
                   <span className="text-sm text-gray-500">
                     {step.delayDays === 0 ? 'Immediate' : `Day ${step.delayDays}`}
                   </span>
                 </div>
                 <div className="text-sm text-gray-600">
-                  {step.delayDays === 0 
-                    ? 'Sent immediately when sequence starts' 
+                  {step.delayDays === 0
+                    ? 'Sent immediately when sequence starts'
                     : `Sent ${step.delayDays} days after previous step`}
                 </div>
               </div>
@@ -291,17 +294,17 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-600 mb-1">Total Steps</div>
+      <div className="mb-6 grid grid-cols-3 gap-4">
+        <div className="rounded-lg bg-white p-4 shadow">
+          <div className="mb-1 text-sm text-gray-600">Total Steps</div>
           <div className="text-2xl font-bold text-gray-900">{sequence.steps.length}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-600 mb-1">Outreach Messages</div>
+        <div className="rounded-lg bg-white p-4 shadow">
+          <div className="mb-1 text-sm text-gray-600">Outreach Messages</div>
           <div className="text-2xl font-bold text-blue-600">{sequence._count.outreach}</div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-600 mb-1">Total Duration</div>
+        <div className="rounded-lg bg-white p-4 shadow">
+          <div className="mb-1 text-sm text-gray-600">Total Duration</div>
           <div className="text-2xl font-bold text-purple-600">
             {sequence.steps.reduce((sum, s) => sum + s.delayDays, 0)} days
           </div>
@@ -310,8 +313,8 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
 
       {/* Campaign Link */}
       {sequence.campaign && (
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h3 className="font-medium mb-2">Part of Campaign</h3>
+        <div className="rounded-lg bg-blue-50 p-4">
+          <h3 className="mb-2 font-medium">Part of Campaign</h3>
           <Link
             href={`/dashboard/campaigns/${sequence.campaign.id}`}
             className="text-blue-600 hover:text-blue-700"

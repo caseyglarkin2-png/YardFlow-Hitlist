@@ -44,7 +44,7 @@ export async function processLinkedInEnrichment(
     for (const person of people) {
       try {
         const result = await extractor.discoverProfile(person.id);
-        
+
         if (result.profileUrl) {
           enriched++;
         } else {
@@ -52,11 +52,13 @@ export async function processLinkedInEnrichment(
         }
 
         // Rate limit: 1 request per second
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         errors++;
         if (errorMessages.length < 10) {
-          errorMessages.push(`${person.name}: ${error instanceof Error ? error.message : String(error)}`);
+          errorMessages.push(
+            `${person.name}: ${error instanceof Error ? error.message : String(error)}`
+          );
         }
       }
     }
@@ -80,7 +82,7 @@ export async function processLinkedInEnrichment(
     };
   } catch (error) {
     logger.error('LinkedIn enrichment job failed', { accountId, error });
-    
+
     return {
       success: false,
       accountId,

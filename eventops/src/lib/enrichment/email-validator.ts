@@ -16,7 +16,7 @@ export class EmailValidator {
       return {
         valid: false,
         reason: 'Invalid email format',
-        confidence: 0
+        confidence: 0,
       };
     }
 
@@ -31,13 +31,13 @@ export class EmailValidator {
         valid: true,
         reason: 'Valid format and domain accepts email',
         confidence: 90,
-        mxRecords: mxResult.records
+        mxRecords: mxResult.records,
       };
     } else {
       return {
         valid: false,
         reason: 'Domain does not accept email (no MX records)',
-        confidence: 20
+        confidence: 20,
       };
     }
   }
@@ -56,10 +56,9 @@ export class EmailValidator {
   private async checkMXRecords(domain: string): Promise<{ hasMX: boolean; records: string[] }> {
     try {
       // Use Google DNS API (free, no auth required)
-      const response = await fetch(
-        `https://dns.google/resolve?name=${domain}&type=MX`,
-        { signal: AbortSignal.timeout(3000) }
-      );
+      const response = await fetch(`https://dns.google/resolve?name=${domain}&type=MX`, {
+        signal: AbortSignal.timeout(3000),
+      });
 
       const data = await response.json();
 
@@ -91,7 +90,7 @@ export class EmailValidator {
       results.set(email, result);
 
       // Rate limit: 100ms between checks
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     return results;
@@ -100,13 +99,9 @@ export class EmailValidator {
   /**
    * Track pattern accuracy based on delivery/bounce data
    */
-  async trackPatternAccuracy(
-    companyId: string,
-    email: string,
-    delivered: boolean
-  ): Promise<void> {
+  async trackPatternAccuracy(companyId: string, email: string, delivered: boolean): Promise<void> {
     const contact = await prisma.people.findFirst({
-      where: { email, accountId: companyId }
+      where: { email, accountId: companyId },
     });
 
     if (!contact) {
@@ -115,7 +110,7 @@ export class EmailValidator {
 
     // Get the pattern that was used
     const patterns = await prisma.email_patterns.findMany({
-      where: { accountId: companyId }
+      where: { accountId: companyId },
     });
 
     for (const pattern of patterns) {
@@ -125,29 +120,29 @@ export class EmailValidator {
           where: { id: pattern.id },
           data: {
             verifiedCount: { increment: 1 },
-            lastVerifiedAt: new Date()
-          }
+            lastVerifiedAt: new Date(),
+          },
         });
 
         await prisma.people.update({
           where: { id: contact.id },
           data: {
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         });
       } else {
         await prisma.email_patterns.update({
           where: { id: pattern.id },
           data: {
-            bouncedCount: { increment: 1 }
-          }
+            bouncedCount: { increment: 1 },
+          },
         });
 
         await prisma.people.update({
           where: { id: contact.id },
           data: {
-            updatedAt: new Date()
-          }
+            updatedAt: new Date(),
+          },
         });
       }
     }

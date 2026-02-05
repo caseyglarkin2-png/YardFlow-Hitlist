@@ -44,7 +44,7 @@ export default function CustomDashboardsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <div className="text-muted-foreground">Loading dashboard...</div>
       </div>
     );
@@ -52,7 +52,7 @@ export default function CustomDashboardsPage() {
 
   if (!stats) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <Card className="w-96">
           <CardHeader>
             <CardTitle>Dashboard Unavailable</CardTitle>
@@ -67,11 +67,11 @@ export default function CustomDashboardsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-          <p className="text-muted-foreground mt-1">Track your event operations performance</p>
+          <p className="mt-1 text-muted-foreground">Track your event operations performance</p>
         </div>
         <Button onClick={loadStats} variant="outline">
           Refresh
@@ -122,7 +122,7 @@ export default function CustomDashboardsPage() {
         <ChartWidget
           title="Campaign Performance"
           type="bar"
-          data={stats.recentCampaigns.map(c => ({
+          data={stats.recentCampaigns.map((c) => ({
             name: c.name,
             value: c.replied,
           }))}
@@ -143,11 +143,7 @@ export default function CustomDashboardsPage() {
           data={stats.recentCampaigns}
           maxRows={5}
         />
-        <ActivityFeed
-          title="Recent Activity"
-          activities={stats.recentActivity}
-          maxItems={5}
-        />
+        <ActivityFeed title="Recent Activity" activities={stats.recentActivity} maxItems={5} />
       </div>
     </div>
   );

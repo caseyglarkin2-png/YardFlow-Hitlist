@@ -137,7 +137,10 @@ Provide insights in JSON format:
   } catch (error) {
     console.error('Error generating insights:', error);
     return NextResponse.json(
-      { error: 'Failed to generate insights', details: error instanceof Error ? error.message : 'Unknown error' },
+      {
+        error: 'Failed to generate insights',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

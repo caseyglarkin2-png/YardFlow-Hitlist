@@ -40,7 +40,7 @@ export default function ImportPage() {
 
   function handleContinue() {
     if (!file || !importType) return;
-    
+
     // Store file in sessionStorage for next step (limited size, but works for demo)
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -80,12 +80,8 @@ export default function ImportPage() {
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
               />
             </svg>
-            <span className="mt-2 block text-sm font-semibold text-gray-900">
-              Import Accounts
-            </span>
-            <span className="mt-1 block text-sm text-gray-500">
-              Upload a CSV of companies
-            </span>
+            <span className="mt-2 block text-sm font-semibold text-gray-900">Import Accounts</span>
+            <span className="mt-1 block text-sm text-gray-500">Upload a CSV of companies</span>
           </button>
 
           <button
@@ -105,17 +101,13 @@ export default function ImportPage() {
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            <span className="mt-2 block text-sm font-semibold text-gray-900">
-              Import People
-            </span>
-            <span className="mt-1 block text-sm text-gray-500">
-              Upload a CSV of contacts
-            </span>
+            <span className="mt-2 block text-sm font-semibold text-gray-900">Import People</span>
+            <span className="mt-1 block text-sm text-gray-500">Upload a CSV of contacts</span>
           </button>
         </div>
       ) : (
         <div className="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-lg">
-          <div className="px-4 py-6 sm:p-8 space-y-6">
+          <div className="space-y-6 px-4 py-6 sm:p-8">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium text-gray-900">
                 Import {importType === 'accounts' ? 'Accounts' : 'People'}
@@ -135,15 +127,13 @@ export default function ImportPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Upload CSV File
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Upload CSV File</label>
               <div className="mt-2">
                 <input
                   type="file"
                   accept=".csv"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none"
+                  className="block w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50 text-sm text-gray-900 focus:outline-none"
                 />
               </div>
               <p className="mt-1 text-sm text-gray-500">
@@ -159,7 +149,7 @@ export default function ImportPage() {
 
             {preview.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">
+                <h3 className="mb-2 text-sm font-medium text-gray-900">
                   Preview ({preview.length} rows shown)
                 </h3>
                 <div className="overflow-x-auto">
@@ -169,7 +159,7 @@ export default function ImportPage() {
                         {headers.slice(0, 5).map((header, idx) => (
                           <th
                             key={idx}
-                            className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
                           >
                             {header}
                           </th>
@@ -181,13 +171,13 @@ export default function ImportPage() {
                         )}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-200 bg-white">
                       {preview.map((row: Record<string, unknown>, idx) => (
                         <tr key={idx}>
                           {headers.slice(0, 5).map((header, cellIdx) => (
                             <td
                               key={cellIdx}
-                              className="px-3 py-2 whitespace-nowrap text-sm text-gray-900"
+                              className="whitespace-nowrap px-3 py-2 text-sm text-gray-900"
                             >
                               {row[header] || '-'}
                             </td>
@@ -216,7 +206,7 @@ export default function ImportPage() {
               <button
                 onClick={handleContinue}
                 disabled={!file || preview.length === 0}
-                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Continue to Mapping
               </button>

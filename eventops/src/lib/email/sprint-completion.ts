@@ -1,15 +1,13 @@
 /**
  * Sprint Completion Email Service
- * 
+ *
  * Automatically sends performance summary emails to casey@freightroll.com
  * when sprints are completed in YardFlow projects.
  */
 
 import { Resend } from 'resend';
 
-const resend = process.env.RESEND_API_KEY 
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 export interface SprintMetrics {
   sprintNumber: number;
@@ -17,7 +15,7 @@ export interface SprintMetrics {
   startDate: string;
   endDate: string;
   demo: string;
-  
+
   // Performance metrics
   buildTime: number; // milliseconds
   buildTimeChange: number; // percentage
@@ -27,7 +25,7 @@ export interface SprintMetrics {
   bundleSizeChange: number;
   testCoverage: number; // percentage
   testCoverageChange: number;
-  
+
   // Completion data
   tasksCompleted: number;
   tasksTotal: number;
@@ -36,17 +34,17 @@ export interface SprintMetrics {
     name: string;
     validation: string;
   }>;
-  
+
   // Deployment
   productionUrl: string;
   commitHash: string;
   deploymentStatus: 'live' | 'failed' | 'pending';
-  
+
   // Notes
   blockers?: string[];
   technicalDebt?: string[];
   recommendations?: string[];
-  
+
   // Next sprint
   nextSprint: {
     number: number;
@@ -260,12 +258,16 @@ function generateEmailHtml(metrics: SprintMetrics): string {
   <div class="section">
     <h2>✅ Completed Tasks (${metrics.tasksCompleted}/${metrics.tasksTotal})</h2>
     <ul class="task-list">
-      ${metrics.taskDetails.map(task => `
+      ${metrics.taskDetails
+        .map(
+          (task) => `
         <li class="task-item">
           <div class="task-name">${task.id}: ${task.name}</div>
           <div class="task-validation">✓ ${task.validation}</div>
         </li>
-      `).join('')}
+      `
+        )
+        .join('')}
     </ul>
   </div>
 
@@ -278,32 +280,44 @@ function generateEmailHtml(metrics: SprintMetrics): string {
     </div>
   </div>
 
-  ${metrics.blockers && metrics.blockers.length > 0 ? `
+  ${
+    metrics.blockers && metrics.blockers.length > 0
+      ? `
     <div class="section">
       <h2>⚠️ Blockers Encountered</h2>
       <ul>
-        ${metrics.blockers.map(b => `<li>${b}</li>`).join('')}
+        ${metrics.blockers.map((b) => `<li>${b}</li>`).join('')}
       </ul>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
-  ${metrics.technicalDebt && metrics.technicalDebt.length > 0 ? `
+  ${
+    metrics.technicalDebt && metrics.technicalDebt.length > 0
+      ? `
     <div class="section">
       <h2>🔧 Technical Debt Identified</h2>
       <ul>
-        ${metrics.technicalDebt.map(d => `<li>${d}</li>`).join('')}
+        ${metrics.technicalDebt.map((d) => `<li>${d}</li>`).join('')}
       </ul>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
-  ${metrics.recommendations && metrics.recommendations.length > 0 ? `
+  ${
+    metrics.recommendations && metrics.recommendations.length > 0
+      ? `
     <div class="section">
       <h2>💡 Recommendations</h2>
       <ul>
-        ${metrics.recommendations.map(r => `<li>${r}</li>`).join('')}
+        ${metrics.recommendations.map((r) => `<li>${r}</li>`).join('')}
       </ul>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div class="next-sprint">
     <h2 style="margin-top: 0; color: white;">🎯 Next Sprint</h2>
@@ -339,27 +353,39 @@ Demo: ${metrics.demo}
 - Test Coverage: ${metrics.testCoverage.toFixed(1)}% (${formatMetricChange(metrics.testCoverageChange)} from last sprint)
 
 ✅ COMPLETED TASKS (${metrics.tasksCompleted}/${metrics.tasksTotal}):
-${metrics.taskDetails.map(task => `- ${task.id}: ${task.name} - ${task.validation}`).join('\n')}
+${metrics.taskDetails.map((task) => `- ${task.id}: ${task.name} - ${task.validation}`).join('\n')}
 
 🚀 DEPLOYED:
 - Production URL: ${metrics.productionUrl}
 - Commit: ${metrics.commitHash}
 - Status: ${metrics.deploymentStatus.toUpperCase()}
 
-${metrics.blockers && metrics.blockers.length > 0 ? `
+${
+  metrics.blockers && metrics.blockers.length > 0
+    ? `
 ⚠️ BLOCKERS:
-${metrics.blockers.map(b => `- ${b}`).join('\n')}
-` : ''}
+${metrics.blockers.map((b) => `- ${b}`).join('\n')}
+`
+    : ''
+}
 
-${metrics.technicalDebt && metrics.technicalDebt.length > 0 ? `
+${
+  metrics.technicalDebt && metrics.technicalDebt.length > 0
+    ? `
 🔧 TECHNICAL DEBT:
-${metrics.technicalDebt.map(d => `- ${d}`).join('\n')}
-` : ''}
+${metrics.technicalDebt.map((d) => `- ${d}`).join('\n')}
+`
+    : ''
+}
 
-${metrics.recommendations && metrics.recommendations.length > 0 ? `
+${
+  metrics.recommendations && metrics.recommendations.length > 0
+    ? `
 💡 RECOMMENDATIONS:
-${metrics.recommendations.map(r => `- ${r}`).join('\n')}
-` : ''}
+${metrics.recommendations.map((r) => `- ${r}`).join('\n')}
+`
+    : ''
+}
 
 🎯 NEXT SPRINT:
 Sprint ${metrics.nextSprint.number}: ${metrics.nextSprint.name}
@@ -409,7 +435,7 @@ export async function sendSprintCompletionEmail(
 
 /**
  * Example usage:
- * 
+ *
  * const metrics: SprintMetrics = {
  *   sprintNumber: 18,
  *   sprintName: 'Google Workspace Integration',
@@ -441,6 +467,6 @@ export async function sendSprintCompletionEmail(
  *     goal: 'High-performance bulk operations for managing thousands of records efficiently',
  *   },
  * };
- * 
+ *
  * await sendSprintCompletionEmail(metrics);
  */

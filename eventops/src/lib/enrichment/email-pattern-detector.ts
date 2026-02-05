@@ -13,13 +13,13 @@ export class EmailPatternDetector {
   async detectPatternsForCompany(accountId: string): Promise<PatternDetectionResult> {
     // 1. Get all contacts with emails for this company
     const contacts = await prisma.people.findMany({
-      where: { 
+      where: {
         accountId,
         email: { not: '' },
-        name: { not: '' }
+        name: { not: '' },
       },
       include: { target_accounts: true },
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
     });
 
     if (contacts.length === 0) {
@@ -28,7 +28,7 @@ export class EmailPatternDetector {
         totalEmails: 0,
         detectedPatterns: [],
         primaryPattern: null,
-        recommendation: 'No emails found. Need at least 1 email to detect pattern.'
+        recommendation: 'No emails found. Need at least 1 email to detect pattern.',
       };
     }
 
@@ -38,20 +38,16 @@ export class EmailPatternDetector {
     // 3. Analyze each email to determine its pattern
     const patternCounts = new Map<EmailPatternType, number>();
     const patternExamples = new Map<EmailPatternType, string[]>();
-    
+
     for (const contact of contacts) {
       const nameParts = contact.name.split(' ');
       const firstName = nameParts[0];
       const lastName = nameParts.slice(1).join(' ') || nameParts[0];
-      
-      const pattern = this.inferPattern(
-        contact.email!,
-        firstName,
-        lastName
-      );
-      
+
+      const pattern = this.inferPattern(contact.email!, firstName, lastName);
+
       patternCounts.set(pattern, (patternCounts.get(pattern) || 0) + 1);
-      
+
       const examples = patternExamples.get(pattern) || [];
       if (examples.length < 3) {
         examples.push(contact.email!);
@@ -60,18 +56,21 @@ export class EmailPatternDetector {
     }
 
     // 4. Calculate confidence scores for each pattern
-    const detectedPatterns: Omit<EmailPattern, 'id' | 'verifiedCount' | 'bouncedCount' | 'lastDetectedAt'>[] = [];
-    
+    const detectedPatterns: Omit<
+      EmailPattern,
+      'id' | 'verifiedCount' | 'bouncedCount' | 'lastDetectedAt'
+    >[] = [];
+
     for (const [patternType, count] of patternCounts) {
       const confidence = (count / contacts.length) * 100;
-      
+
       detectedPatterns.push({
         companyId: accountId,
         companyDomain: domain,
         patternType,
         confidence,
         sampleSize: count,
-        examples: patternExamples.get(patternType) || []
+        examples: patternExamples.get(patternType) || [],
       });
     }
 
@@ -96,7 +95,7 @@ export class EmailPatternDetector {
       totalEmails: contacts.length,
       detectedPatterns: detectedPatterns as unknown as PatternDetectionResult['detectedPatterns'],
       primaryPattern: primaryPattern as unknown as PatternDetectionResult['primaryPattern'],
-      recommendation
+      recommendation,
     };
   }
 
@@ -119,7 +118,7 @@ export class EmailPatternDetector {
     if (localPart === `${l[0]}.${f}`) return 'l.first';
     if (localPart === `${l[0]}${f}`) return 'lfirst';
     if (localPart === `${f}_${l}`) return 'first_last';
-    
+
     return 'custom';
   }
 
@@ -155,16 +154,16 @@ export class EmailPatternDetector {
 
     const patterns: Record<EmailPatternType, string> = {
       'first.last': `${f}.${l}@${domain}`,
-      'firstlast': `${f}${l}@${domain}`,
-      'first': `${f}@${domain}`,
+      firstlast: `${f}${l}@${domain}`,
+      first: `${f}@${domain}`,
       'f.last': `${f[0]}.${l}@${domain}`,
-      'flast': `${f[0]}${l}@${domain}`,
+      flast: `${f[0]}${l}@${domain}`,
       'first.l': `${f}.${l[0]}@${domain}`,
-      'firstl': `${f}${l[0]}@${domain}`,
+      firstl: `${f}${l[0]}@${domain}`,
       'l.first': `${l[0]}.${f}@${domain}`,
-      'lfirst': `${l[0]}${f}@${domain}`,
-      'first_last': `${f}_${l}@${domain}`,
-      'custom': `${f}.${l}@${domain}` // Default fallback
+      lfirst: `${l[0]}${f}@${domain}`,
+      first_last: `${f}_${l}@${domain}`,
+      custom: `${f}.${l}@${domain}`, // Default fallback
     };
 
     return patterns[patternType];
@@ -182,8 +181,8 @@ export class EmailPatternDetector {
         where: {
           accountId_patternType: {
             accountId: pattern.companyId,
-            patternType: pattern.patternType
-          }
+            patternType: pattern.patternType,
+          },
         },
         create: {
           accountId: pattern.companyId,
@@ -191,14 +190,14 @@ export class EmailPatternDetector {
           patternType: pattern.patternType,
           confidence: pattern.confidence,
           sampleSize: pattern.sampleSize,
-          examples: pattern.examples
+          examples: pattern.examples,
         },
         update: {
           confidence: pattern.confidence,
           sampleSize: pattern.sampleSize,
           examples: pattern.examples,
-          lastDetectedAt: new Date()
-        }
+          lastDetectedAt: new Date(),
+        },
       });
     }
   }

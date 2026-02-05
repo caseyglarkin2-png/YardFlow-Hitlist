@@ -86,7 +86,7 @@ export async function syncCalendarEvents(
     const limit = pLimit(user.googleRateLimit || 10);
 
     await Promise.all(
-      allEvents.map(event =>
+      allEvents.map((event) =>
         limit(async () => {
           const summary = event.summary || '(No title)';
           const startTime = event.start?.dateTime || event.start?.date;

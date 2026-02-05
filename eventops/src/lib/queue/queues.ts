@@ -229,7 +229,11 @@ export async function addEnrichmentJob(
   }
 }
 
-export async function addOutreachJob(name: string, data: OutreachSequenceJobData, options?: Record<string, unknown>) {
+export async function addOutreachJob(
+  name: string,
+  data: OutreachSequenceJobData,
+  options?: Record<string, unknown>
+) {
   try {
     const job = await outreachQueue.add(name, data, options);
     logger.info('Outreach job added', { jobId: job.id, name, data });

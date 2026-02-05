@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Download, Calendar, BarChart3 } from "lucide-react";
-import Link from "next/link";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Download, Calendar, BarChart3 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ReportsPage() {
   async function exportAllData(format: 'csv' | 'json') {
@@ -22,7 +22,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Reports & Analytics</h1>
         <p className="text-muted-foreground">
@@ -30,37 +30,31 @@ export default function ReportsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Custom Report Builder */}
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="transition-shadow hover:shadow-lg">
           <CardHeader>
             <div className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-blue-500" />
               <CardTitle>Custom Report Builder</CardTitle>
             </div>
-            <CardDescription>
-              Drag and drop widgets to create custom reports
-            </CardDescription>
+            <CardDescription>Drag and drop widgets to create custom reports</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/dashboard/reports/builder">
-              <Button className="w-full">
-                Build Custom Report
-              </Button>
+              <Button className="w-full">Build Custom Report</Button>
             </Link>
           </CardContent>
         </Card>
 
         {/* Scheduled Reports */}
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="transition-shadow hover:shadow-lg">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-green-500" />
               <CardTitle>Scheduled Reports</CardTitle>
             </div>
-            <CardDescription>
-              Set up automatic email delivery
-            </CardDescription>
+            <CardDescription>Set up automatic email delivery</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/dashboard/reports/scheduled">
@@ -72,31 +66,21 @@ export default function ReportsPage() {
         </Card>
 
         {/* Data Export */}
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="transition-shadow hover:shadow-lg">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Download className="h-5 w-5 text-purple-500" />
               <CardTitle>Data Warehouse Export</CardTitle>
             </div>
-            <CardDescription>
-              Download all your data for backup or migration
-            </CardDescription>
+            <CardDescription>Download all your data for backup or migration</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={() => exportAllData('csv')}
-            >
-              <Download className="h-4 w-4 mr-2" />
+            <Button className="w-full" variant="outline" onClick={() => exportAllData('csv')}>
+              <Download className="mr-2 h-4 w-4" />
               Export as CSV
             </Button>
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={() => exportAllData('json')}
-            >
-              <Download className="h-4 w-4 mr-2" />
+            <Button className="w-full" variant="outline" onClick={() => exportAllData('json')}>
+              <Download className="mr-2 h-4 w-4" />
               Export as JSON
             </Button>
           </CardContent>
@@ -141,7 +125,7 @@ export default function ReportsPage() {
             <CardTitle className="text-lg">Need Help?</CardTitle>
             <CardDescription>Learn more about reporting</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground space-y-2">
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>• Create custom layouts with the builder</p>
             <p>• Schedule daily, weekly, or monthly delivery</p>
             <p>• Export to CSV or JSON format</p>

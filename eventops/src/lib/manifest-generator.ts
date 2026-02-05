@@ -53,7 +53,8 @@ Return ONLY valid JSON, no markdown formatting.`;
       messages: [
         {
           role: 'system',
-          content: 'You are an expert at writing ultra-concise, compelling meeting requests for event networking apps. Every message MUST be under 250 characters.',
+          content:
+            'You are an expert at writing ultra-concise, compelling meeting requests for event networking apps. Every message MUST be under 250 characters.',
         },
         {
           role: 'user',
@@ -68,7 +69,7 @@ Return ONLY valid JSON, no markdown formatting.`;
     if (!content) throw new Error('No response from OpenAI');
 
     const result = JSON.parse(content);
-    
+
     // Enforce character limit
     if (result.message.length > MANIFEST_CHAR_LIMIT) {
       // Truncate intelligently at last complete sentence within limit
@@ -76,15 +77,16 @@ Return ONLY valid JSON, no markdown formatting.`;
       const lastPeriod = truncated.lastIndexOf('.');
       const lastQuestion = truncated.lastIndexOf('?');
       const lastExclamation = truncated.lastIndexOf('!');
-      
+
       const lastSentenceEnd = Math.max(lastPeriod, lastQuestion, lastExclamation);
-      if (lastSentenceEnd > 100) { // Only truncate at sentence if it's not too short
+      if (lastSentenceEnd > 100) {
+        // Only truncate at sentence if it's not too short
         truncated = truncated.substring(0, lastSentenceEnd + 1);
       } else {
         // Otherwise just add ellipsis
         truncated = truncated.substring(0, MANIFEST_CHAR_LIMIT - 3) + '...';
       }
-      
+
       result.message = truncated;
     }
 
@@ -107,9 +109,9 @@ export function generateSimpleManifestRequest(
   persona: string
 ): ManifestRequestData {
   const firstName = personName.split(' ')[0];
-  
+
   let message = '';
-  
+
   if (persona.includes('Procurement')) {
     message = `Hi ${firstName}! Would love to chat about supply chain optimization at Manifest. We've helped similar companies like ${companyName} save 15-20% on logistics. Coffee at our booth?`;
   } else if (persona.includes('Operations')) {

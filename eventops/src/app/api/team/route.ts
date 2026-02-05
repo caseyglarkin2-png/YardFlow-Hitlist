@@ -45,10 +45,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(users);
   } catch (error) {
     console.error('Error fetching team:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch team members' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 });
   }
 }
 
@@ -71,10 +68,7 @@ export async function POST(request: NextRequest) {
     const { email, name, role } = await request.json();
 
     if (!email || !role) {
-      return NextResponse.json(
-        { error: 'Email and role required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email and role required' }, { status: 400 });
     }
 
     // Check if user already exists
@@ -83,10 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'User already exists' }, { status: 409 });
     }
 
     // Create user (in real app, send invite email)
@@ -103,9 +94,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(user);
   } catch (error) {
     console.error('Error inviting team member:', error);
-    return NextResponse.json(
-      { error: 'Failed to invite team member' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to invite team member' }, { status: 500 });
   }
 }

@@ -32,16 +32,17 @@ export async function processEmailPattern(
       domain: result.domain,
       totalEmails: result.totalEmails,
       patternsDetected: result.detectedPatterns.length,
-      primaryPattern: result.detectedPatterns.length > 0
-        ? {
-            type: result.detectedPatterns[0].patternType,
-            confidence: result.detectedPatterns[0].confidence,
-          }
-        : null,
+      primaryPattern:
+        result.detectedPatterns.length > 0
+          ? {
+              type: result.detectedPatterns[0].patternType,
+              confidence: result.detectedPatterns[0].confidence,
+            }
+          : null,
     };
   } catch (error) {
     logger.error('Email pattern job failed', { accountId, error });
-    
+
     return {
       success: false,
       accountId,

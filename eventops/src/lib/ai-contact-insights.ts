@@ -52,7 +52,8 @@ Return ONLY valid JSON, no markdown formatting.`;
       messages: [
         {
           role: 'system',
-          content: 'You are an expert B2B sales strategist who creates highly personalized contact insights for supply chain and logistics professionals. Your insights are specific, actionable, and grounded in the contact\'s role and company context.',
+          content:
+            "You are an expert B2B sales strategist who creates highly personalized contact insights for supply chain and logistics professionals. Your insights are specific, actionable, and grounded in the contact's role and company context.",
         },
         {
           role: 'user',
@@ -74,11 +75,11 @@ Return ONLY valid JSON, no markdown formatting.`;
 }
 
 export function getPersonaLabel(person: Record<string, unknown>): string {
-  if (person.isExecOps) return "Executive Operations Leader";
-  if (person.isOps) return "Operations Professional";
-  if (person.isProc) return "Procurement Specialist";
-  if (person.isSales) return "Sales Leader";
-  if (person.isTech) return "Technology Leader";
-  if (person.isNonOps) return "Business Leader";
-  return "Professional";
+  if (person.isExecOps) return 'Executive Operations Leader';
+  if (person.isOps) return 'Operations Professional';
+  if (person.isProc) return 'Procurement Specialist';
+  if (person.isSales) return 'Sales Leader';
+  if (person.isTech) return 'Technology Leader';
+  if (person.isNonOps) return 'Business Leader';
+  return 'Professional';
 }

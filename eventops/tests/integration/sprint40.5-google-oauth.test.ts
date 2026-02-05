@@ -1,6 +1,6 @@
 /**
  * Sprint 40.5 - Google OAuth S2S Auth Migration Tests
- * 
+ *
  * Validates that 6 Google OAuth routes now support both
  * S2S (service-to-service) and session-based auth via authServiceOrSession.
  * google/connect intentionally kept with auth() (user-interactive redirect).
@@ -52,7 +52,11 @@ vi.mock('@/lib/google/sync-state', () => ({
   getGlobalSyncEnabled: vi.fn().mockReturnValue(true),
 }));
 
-function mockRequest(method: string, body?: Record<string, unknown>, headers?: Record<string, string>) {
+function mockRequest(
+  method: string,
+  body?: Record<string, unknown>,
+  headers?: Record<string, string>
+) {
   const url = 'http://localhost:3000/api/test';
   const opts: RequestInit & { headers: Record<string, string> } = {
     method,
@@ -64,8 +68,16 @@ function mockRequest(method: string, body?: Record<string, unknown>, headers?: R
   return new Request(url, opts);
 }
 
-const S2S_AUTH = { type: 'service' as const, userId: 'user-s2s-123', email: 'agent@freightroll.com' };
-const SESSION_AUTH = { type: 'session' as const, userId: 'user-sess-456', email: 'user@freightroll.com' };
+const S2S_AUTH = {
+  type: 'service' as const,
+  userId: 'user-s2s-123',
+  email: 'agent@freightroll.com',
+};
+const SESSION_AUTH = {
+  type: 'session' as const,
+  userId: 'user-sess-456',
+  email: 'user@freightroll.com',
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -212,7 +224,11 @@ describe('Admin Google Sync Control - /api/admin/google-sync/control', () => {
   });
 
   it('rejects non-admin S2S users', async () => {
-    mockAuthServiceOrSession.mockResolvedValue({ type: 'service', userId: 'user-x', email: 'user@gmail.com' });
+    mockAuthServiceOrSession.mockResolvedValue({
+      type: 'service',
+      userId: 'user-x',
+      email: 'user@gmail.com',
+    });
     const { POST } = await import('@/app/api/admin/google-sync/control/route');
     const res = await POST(mockRequest('POST', { action: 'enable' }) as never);
     expect(res.status).toBe(403);

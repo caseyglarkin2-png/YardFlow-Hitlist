@@ -56,12 +56,10 @@ export function NotificationBell() {
         body: JSON.stringify({ notificationIds }),
       });
 
-      setNotifications(prev =>
-        prev.map(n =>
-          notificationIds.includes(n.id) ? { ...n, read: true } : n
-        )
+      setNotifications((prev) =>
+        prev.map((n) => (notificationIds.includes(n.id) ? { ...n, read: true } : n))
       );
-      setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
+      setUnreadCount((prev) => Math.max(0, prev - notificationIds.length));
     } catch (error) {
       console.error('Failed to mark as read:', error);
     }
@@ -75,7 +73,7 @@ export function NotificationBell() {
         body: JSON.stringify({ markAll: true }),
       });
 
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Failed to mark all as read:', error);
@@ -103,7 +101,7 @@ export function NotificationBell() {
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+              className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
@@ -116,7 +114,7 @@ export function NotificationBell() {
             <SheetTitle>Notifications</SheetTitle>
             {unreadCount > 0 && (
               <Button variant="ghost" size="sm" onClick={markAllRead}>
-                <Check className="h-4 w-4 mr-1" />
+                <Check className="mr-1 h-4 w-4" />
                 Mark all read
               </Button>
             )}
@@ -124,37 +122,29 @@ export function NotificationBell() {
           <SheetDescription>
             {unreadCount > 0
               ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
-              : 'You\'re all caught up!'}
+              : "You're all caught up!"}
           </SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-3">
           {notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No notifications yet
-            </p>
+            <p className="py-8 text-center text-sm text-muted-foreground">No notifications yet</p>
           ) : (
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-3 rounded-lg border transition-colors ${
-                  notification.read
-                    ? 'bg-background'
-                    : 'bg-accent/50 border-primary/20'
+                className={`rounded-lg border p-3 transition-colors ${
+                  notification.read ? 'bg-background' : 'border-primary/20 bg-accent/50'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl flex-shrink-0">
+                  <span className="flex-shrink-0 text-2xl">
                     {getNotificationIcon(notification.type)}
                   </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{notification.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{notification.message}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {new Date(notification.createdAt).toLocaleString()}
                     </p>
                   </div>

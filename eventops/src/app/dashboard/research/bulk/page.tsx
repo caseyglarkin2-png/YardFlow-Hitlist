@@ -64,10 +64,10 @@ export default function BulkResearchPage() {
         daysOld: filters.daysOld.toString(),
         missingOnly: filters.missingOnly.toString(),
       });
-      
+
       const res = await fetch(`/api/research/candidates?${params}`);
       const data = await res.json();
-      
+
       if (res.ok) {
         setAccounts(data.accounts);
       } else {
@@ -86,7 +86,7 @@ export default function BulkResearchPage() {
       const res = await fetch('/api/research/bulk');
       const data = await res.json();
       setStatus(data);
-      
+
       if (data.queueLength === 0 && !data.processing) {
         setProcessing(false);
         loadAccounts(); // Refresh to show updated dossier status
@@ -102,13 +102,17 @@ export default function BulkResearchPage() {
       return;
     }
 
-    if (!confirm(`Generate dossiers for ${selected.size} accounts?${forceRefresh ? ' (Force refresh)' : ''}`)) {
+    if (
+      !confirm(
+        `Generate dossiers for ${selected.size} accounts?${forceRefresh ? ' (Force refresh)' : ''}`
+      )
+    ) {
       return;
     }
 
     setProcessing(true);
     const accountIds = Array.from(selected);
-    
+
     try {
       const res = await fetch('/api/research/bulk', {
         method: 'POST',
@@ -117,7 +121,7 @@ export default function BulkResearchPage() {
       });
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         alert(data.error || 'Failed to start bulk research');
         setProcessing(false);
@@ -131,16 +135,14 @@ export default function BulkResearchPage() {
 
   const selectTop100 = () => {
     const top100 = accounts
-      .filter(a => a.needsResearch)
+      .filter((a) => a.needsResearch)
       .slice(0, 100)
-      .map(a => a.id);
+      .map((a) => a.id);
     setSelected(new Set(top100));
   };
 
   const selectMissing = () => {
-    const missing = accounts
-      .filter(a => !a.hasDossier)
-      .map(a => a.id);
+    const missing = accounts.filter((a) => !a.hasDossier).map((a) => a.id);
     setSelected(new Set(missing));
   };
 
@@ -148,7 +150,7 @@ export default function BulkResearchPage() {
     if (selected.size === accounts.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(accounts.map(a => a.id)));
+      setSelected(new Set(accounts.map((a) => a.id)));
     }
   };
 
@@ -159,47 +161,45 @@ export default function BulkResearchPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Bulk Research Generation</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="mt-1 text-sm text-gray-600">
             Generate AI dossiers for multiple accounts at once
           </p>
         </div>
         <Link
           href="/dashboard/accounts"
-          className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+          className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
         >
           ← Back to Accounts
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded shadow space-y-4">
+      <div className="space-y-4 rounded bg-white p-4 shadow">
         <h2 className="font-medium">Filters</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Min ICP Score
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Min ICP Score</label>
             <input
               type="number"
               value={filters.minIcpScore}
-              onChange={(e) => setFilters({ ...filters, minIcpScore: parseInt(e.target.value) || 0 })}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              onChange={(e) =>
+                setFilters({ ...filters, minIcpScore: parseInt(e.target.value) || 0 })
+              }
+              className="w-full rounded border border-gray-300 px-3 py-2"
               min="0"
               max="100"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Days Old
-            </label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Days Old</label>
             <input
               type="number"
               value={filters.daysOld}
               onChange={(e) => setFilters({ ...filters, daysOld: parseInt(e.target.value) || 7 })}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full rounded border border-gray-300 px-3 py-2"
               min="1"
             />
           </div>
@@ -222,21 +222,21 @@ export default function BulkResearchPage() {
         <button
           onClick={selectTop100}
           disabled={processing}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-300"
         >
           Select Top 100
         </button>
         <button
           onClick={selectMissing}
           disabled={processing}
-          className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-300"
+          className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:bg-gray-300"
         >
           Select Missing
         </button>
         <button
           onClick={toggleAll}
           disabled={processing}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 disabled:bg-gray-300"
+          className="rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700 disabled:bg-gray-300"
         >
           {selected.size === accounts.length ? 'Deselect All' : 'Select All'}
         </button>
@@ -244,14 +244,14 @@ export default function BulkResearchPage() {
         <button
           onClick={() => startBulkResearch(false)}
           disabled={selected.size === 0 || processing}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300"
+          className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:bg-gray-300"
         >
           {processing ? 'Processing...' : `Generate (${selected.size})`}
         </button>
         <button
           onClick={() => startBulkResearch(true)}
           disabled={selected.size === 0 || processing}
-          className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:bg-gray-300"
+          className="rounded bg-orange-600 px-4 py-2 text-white hover:bg-orange-700 disabled:bg-gray-300"
         >
           Force Refresh ({selected.size})
         </button>
@@ -259,64 +259,67 @@ export default function BulkResearchPage() {
 
       {/* Progress */}
       {processing && status && (
-        <div className="bg-blue-50 p-6 rounded shadow">
-          <div className="flex justify-between items-start mb-4">
-            <h2 className="font-bold text-lg">Research in Progress</h2>
-            <button
-              onClick={clearResults}
-              className="text-sm text-gray-600 hover:text-gray-800"
-            >
+        <div className="rounded bg-blue-50 p-6 shadow">
+          <div className="mb-4 flex items-start justify-between">
+            <h2 className="text-lg font-bold">Research in Progress</h2>
+            <button onClick={clearResults} className="text-sm text-gray-600 hover:text-gray-800">
               Clear Results
             </button>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div className="bg-white p-3 rounded">
+
+          <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="rounded bg-white p-3">
               <div className="text-2xl font-bold text-blue-600">{status.queueLength}</div>
               <div className="text-sm text-gray-600">In Queue</div>
             </div>
-            <div className="bg-white p-3 rounded">
+            <div className="rounded bg-white p-3">
               <div className="text-2xl font-bold text-green-600">{status.completedCount}</div>
               <div className="text-sm text-gray-600">Completed</div>
             </div>
-            <div className="bg-white p-3 rounded">
+            <div className="rounded bg-white p-3">
               <div className="text-2xl font-bold text-red-600">{status.errorCount}</div>
               <div className="text-sm text-gray-600">Errors</div>
             </div>
-            <div className="bg-white p-3 rounded">
+            <div className="rounded bg-white p-3">
               <div className="text-2xl font-bold text-yellow-600">{status.skippedCount}</div>
               <div className="text-sm text-gray-600">Skipped</div>
             </div>
           </div>
 
           {status.currentItem && (
-            <div className="bg-white p-3 rounded mb-4">
+            <div className="mb-4 rounded bg-white p-3">
               <div className="text-sm text-gray-600">Currently processing:</div>
               <div className="font-medium">{status.currentItem.accountName}</div>
             </div>
           )}
 
           {status.results.length > 0 && (
-            <div className="bg-white rounded p-4 max-h-64 overflow-y-auto">
-              <div className="text-sm font-medium mb-2">Recent Results:</div>
+            <div className="max-h-64 overflow-y-auto rounded bg-white p-4">
+              <div className="mb-2 text-sm font-medium">Recent Results:</div>
               <div className="space-y-1">
-                {status.results.slice(-20).reverse().map((r, idx) => (
-                  <div
-                    key={idx}
-                    className={`text-sm ${
-                      r.status === 'completed' ? 'text-green-600' :
-                      r.status === 'error' ? 'text-red-600' :
-                      r.status === 'skipped' ? 'text-yellow-600' :
-                      'text-gray-600'
-                    }`}
-                  >
-                    {r.status === 'completed' && '✓ '}
-                    {r.status === 'error' && '✗ '}
-                    {r.status === 'skipped' && '⊘ '}
-                    {r.accountName} - {r.status}
-                    {r.error && ` (${r.error})`}
-                  </div>
-                ))}
+                {status.results
+                  .slice(-20)
+                  .reverse()
+                  .map((r, idx) => (
+                    <div
+                      key={idx}
+                      className={`text-sm ${
+                        r.status === 'completed'
+                          ? 'text-green-600'
+                          : r.status === 'error'
+                            ? 'text-red-600'
+                            : r.status === 'skipped'
+                              ? 'text-yellow-600'
+                              : 'text-gray-600'
+                      }`}
+                    >
+                      {r.status === 'completed' && '✓ '}
+                      {r.status === 'error' && '✗ '}
+                      {r.status === 'skipped' && '⊘ '}
+                      {r.accountName} - {r.status}
+                      {r.error && ` (${r.error})`}
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -324,13 +327,11 @@ export default function BulkResearchPage() {
       )}
 
       {/* Accounts Table */}
-      <div className="bg-white rounded shadow overflow-x-auto">
+      <div className="overflow-x-auto rounded bg-white shadow">
         {loading ? (
           <div className="p-12 text-center text-gray-500">Loading accounts...</div>
         ) : accounts.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            No accounts found matching filters
-          </div>
+          <div className="p-12 text-center text-gray-500">No accounts found matching filters</div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -343,22 +344,22 @@ export default function BulkResearchPage() {
                     disabled={processing}
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Company
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Industry
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   ICP Score
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Dossier Status
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {accounts.map(account => (
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {accounts.map((account) => (
                 <tr key={account.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <input
@@ -382,22 +383,24 @@ export default function BulkResearchPage() {
                       <div className="text-xs text-gray-500">{account.website}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {account.industry || '-'}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{account.industry || '-'}</td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      (account.icpScore || 0) >= 80 ? 'bg-green-100 text-green-800' :
-                      (account.icpScore || 0) >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        (account.icpScore || 0) >= 80
+                          ? 'bg-green-100 text-green-800'
+                          : (account.icpScore || 0) >= 60
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {account.icpScore || 0}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     {account.hasDossier ? (
                       <div>
-                        <span className="text-green-600 text-sm">✓ Has dossier</span>
+                        <span className="text-sm text-green-600">✓ Has dossier</span>
                         {account.daysSinceUpdate !== null && (
                           <div className="text-xs text-gray-500">
                             {account.daysSinceUpdate} days old
@@ -406,7 +409,7 @@ export default function BulkResearchPage() {
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-500 text-sm">No dossier</span>
+                      <span className="text-sm text-gray-500">No dossier</span>
                     )}
                   </td>
                 </tr>

@@ -98,34 +98,40 @@ export default function ActivityPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-500';
-      case 'away': return 'bg-yellow-500';
-      case 'busy': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'active':
+        return 'bg-green-500';
+      case 'away':
+        return 'bg-yellow-500';
+      case 'busy':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Team Activity</h1>
+        <h1 className="mb-2 text-2xl font-bold">Team Activity</h1>
         <p className="text-gray-600">Real-time activity feed and user presence</p>
       </div>
 
       {/* Active Users */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Active Now ({activeUsers.length})</h2>
+      <div className="mb-6 rounded-lg bg-white p-6 shadow">
+        <h2 className="mb-4 text-lg font-semibold">Active Now ({activeUsers.length})</h2>
         <div className="flex flex-wrap gap-3">
           {activeUsers.map((presence) => (
             <div
               key={presence.userId}
-              className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg"
+              className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2"
             >
               <div className="relative">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
                   {presence.user.name?.charAt(0) || presence.user.email?.charAt(0) || 'U'}
                 </div>
-                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${getStatusColor(presence.status)} rounded-full border-2 border-white`} />
+                <div
+                  className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 ${getStatusColor(presence.status)} rounded-full border-2 border-white`}
+                />
               </div>
               <div>
                 <div className="text-sm font-medium">
@@ -137,24 +143,20 @@ export default function ActivityPage() {
               </div>
             </div>
           ))}
-          {activeUsers.length === 0 && (
-            <p className="text-gray-500 text-sm">No active users</p>
-          )}
+          {activeUsers.length === 0 && <p className="text-sm text-gray-500">No active users</p>}
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Filters</h2>
+      <div className="mb-6 rounded-lg bg-white p-6 shadow">
+        <h2 className="mb-4 text-lg font-semibold">Filters</h2>
         <div className="flex gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Entity Type
-            </label>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Entity Type</label>
             <select
               value={filter.entityType || ''}
               onChange={(e) => setFilter({ ...filter, entityType: e.target.value || undefined })}
-              className="border border-gray-300 rounded-lg px-4 py-2"
+              className="rounded-lg border border-gray-300 px-4 py-2"
             >
               <option value="">All Types</option>
               <option value="account">Accounts</option>
@@ -165,13 +167,11 @@ export default function ActivityPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              User
-            </label>
+            <label className="mb-2 block text-sm font-medium text-gray-700">User</label>
             <select
               value={filter.userId || ''}
               onChange={(e) => setFilter({ ...filter, userId: e.target.value || undefined })}
-              className="border border-gray-300 rounded-lg px-4 py-2"
+              className="rounded-lg border border-gray-300 px-4 py-2"
             >
               <option value="">All Users</option>
               {activeUsers.map((presence) => (
@@ -185,11 +185,11 @@ export default function ActivityPage() {
       </div>
 
       {/* Activity Feed */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b">
+      <div className="rounded-lg bg-white shadow">
+        <div className="border-b p-6">
           <h2 className="text-lg font-semibold">Activity Feed</h2>
         </div>
-        <div className="divide-y max-h-[600px] overflow-y-auto">
+        <div className="max-h-[600px] divide-y overflow-y-auto">
           {loading ? (
             <div className="p-8 text-center text-gray-500">Loading activities...</div>
           ) : activities.length === 0 ? (
@@ -200,24 +200,22 @@ export default function ActivityPage() {
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">{getActionIcon(activity.action)}</div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <span className="font-medium">
                         {activity.user.name || activity.user.email}
                       </span>
                       <span className={`text-sm ${getActionColor(activity.action)}`}>
                         {activity.action}
                       </span>
-                      <span className="text-sm text-gray-600">
-                        {activity.entityType}
-                      </span>
+                      <span className="text-sm text-gray-600">{activity.entityType}</span>
                       {activity.entityId && (
-                        <span className="text-xs text-gray-500 font-mono">
+                        <span className="font-mono text-xs text-gray-500">
                           #{activity.entityId.slice(0, 8)}
                         </span>
                       )}
                     </div>
                     {activity.metadata && Object.keys(activity.metadata).length > 0 && (
-                      <div className="text-sm text-gray-600 mb-1">
+                      <div className="mb-1 text-sm text-gray-600">
                         {Object.entries(activity.metadata).map(([key, value]) => (
                           <span key={key} className="mr-3">
                             <span className="font-medium">{key}:</span> {String(value)}
@@ -225,9 +223,7 @@ export default function ActivityPage() {
                         ))}
                       </div>
                     )}
-                    <div className="text-xs text-gray-500">
-                      {formatTimeAgo(activity.createdAt)}
-                    </div>
+                    <div className="text-xs text-gray-500">{formatTimeAgo(activity.createdAt)}</div>
                   </div>
                 </div>
               </div>

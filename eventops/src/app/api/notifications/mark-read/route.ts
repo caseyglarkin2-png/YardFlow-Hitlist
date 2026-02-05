@@ -29,10 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!notificationIds || !Array.isArray(notificationIds)) {
-      return NextResponse.json(
-        { error: 'Missing notificationIds' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing notificationIds' }, { status: 400 });
     }
 
     await prisma.notifications.updateMany({
@@ -51,9 +48,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error marking notifications as read:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

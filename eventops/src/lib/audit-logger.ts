@@ -20,11 +20,11 @@ export async function createAuditLog(data: AuditLogData) {
         entityType: data.entityType,
         entityId: data.entityId || '',
         description: `${data.action} ${data.entityType}`,
-        metadata: { 
+        metadata: {
           changes: data.changes,
           ipAddress: data.ipAddress,
           userAgent: data.userAgent,
-          ...data.metadata 
+          ...data.metadata,
         } as Record<string, unknown>,
       },
     });

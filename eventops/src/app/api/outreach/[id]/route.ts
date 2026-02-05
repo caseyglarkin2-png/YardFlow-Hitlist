@@ -1,17 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { authServiceOrSession } from "@/lib/auth-service";
-import { prisma } from "@/lib/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { authServiceOrSession } from '@/lib/auth-service';
+import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
@@ -29,22 +26,16 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error("Error updating outreach:", error);
-    return NextResponse.json(
-      { error: "Failed to update outreach" },
-      { status: 500 }
-    );
+    console.error('Error updating outreach:', error);
+    return NextResponse.json({ error: 'Failed to update outreach' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const authResult = await authServiceOrSession(req);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await prisma.outreach.delete({
@@ -53,10 +44,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting outreach:", error);
-    return NextResponse.json(
-      { error: "Failed to delete outreach" },
-      { status: 500 }
-    );
+    console.error('Error deleting outreach:', error);
+    return NextResponse.json({ error: 'Failed to delete outreach' }, { status: 500 });
   }
 }

@@ -71,7 +71,7 @@ export class HubSpotRateLimiter {
       if (this.requestTimestamps.length >= this.config.maxRequests) {
         const oldestTimestamp = this.requestTimestamps[0];
         const waitTime = this.config.windowMs - (now - oldestTimestamp);
-        
+
         logger.debug('Rate limit reached, waiting', {
           waitTime,
           queueLength: this.queue.length,
@@ -88,7 +88,7 @@ export class HubSpotRateLimiter {
       try {
         // Record timestamp before making request
         this.requestTimestamps.push(Date.now());
-        
+
         // Execute the request
         const result = await request.fn();
         request.resolve(result);
@@ -103,18 +103,14 @@ export class HubSpotRateLimiter {
   /**
    * Handle errors with exponential backoff retry logic
    */
-  private async handleError<T>(
-    error: unknown,
-    request: QueuedRequest<T>
-  ): Promise<void> {
+  private async handleError<T>(error: unknown, request: QueuedRequest<T>): Promise<void> {
     const isRateLimitError = this.isRateLimitError(error);
     const shouldRetry = request.retries < this.config.maxRetries;
 
     if (isRateLimitError && shouldRetry) {
       // Exponential backoff
-      const backoffTime =
-        this.config.baseBackoffMs * Math.pow(2, request.retries);
-      
+      const backoffTime = this.config.baseBackoffMs * Math.pow(2, request.retries);
+
       logger.warn('Rate limit 429 error, retrying with backoff', {
         retries: request.retries + 1,
         maxRetries: this.config.maxRetries,
@@ -122,24 +118,21 @@ export class HubSpotRateLimiter {
       });
 
       await this.sleep(backoffTime);
-      
+
       // Re-queue the request
       request.retries++;
       this.queue.unshift(request);
     } else {
       // Max retries exceeded or non-recoverable error
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
       logger.error('Request failed after retries', {
         error: errorMessage,
         retries: request.retries,
       });
 
       request.reject(
-        new Error(
-          `HubSpot API request failed: ${errorMessage} (after ${request.retries} retries)`
-        )
+        new Error(`HubSpot API request failed: ${errorMessage} (after ${request.retries} retries)`)
       );
     }
   }

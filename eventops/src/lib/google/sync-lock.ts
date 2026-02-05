@@ -44,11 +44,13 @@ export async function releaseSyncLock(
 ): Promise<void> {
   const lockId = `${userId}-${lockType}`;
 
-  await prisma.google_sync_locks.delete({
-    where: { id: lockId },
-  }).catch(() => {
-    // Lock might have expired already - ignore
-  });
+  await prisma.google_sync_locks
+    .delete({
+      where: { id: lockId },
+    })
+    .catch(() => {
+      // Lock might have expired already - ignore
+    });
 }
 
 export async function withSyncLock<T>(
