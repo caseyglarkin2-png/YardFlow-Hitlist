@@ -15,12 +15,26 @@ export async function POST(
 
     // For session auth, lookup user by email. For S2S, use userId directly.
     let currentUserId = authResult.userId;
+    let currentUserName: string | null = null;
+    let currentUserEmail: string | null = authResult.email || null;
+    
     if (authResult.type === 'session' && authResult.email) {
       const currentUser = await prisma.users.findUnique({
         where: { email: authResult.email },
       });
       if (currentUser) {
         currentUserId = currentUser.id;
+        currentUserName = currentUser.name;
+        currentUserEmail = currentUser.email;
+      }
+    } else if (authResult.type === 'service') {
+      // For S2S, try to look up user by ID if provided
+      const currentUser = await prisma.users.findUnique({
+        where: { id: currentUserId },
+      });
+      if (currentUser) {
+        currentUserName = currentUser.name;
+        currentUserEmail = currentUser.email;
       }
     }
 
@@ -78,11 +92,11 @@ export async function POST(
           userId: userId,
           type: 'ASSIGNMENT',
           title: 'Account assigned to you',
-          message: `${currentUser.name || currentUser.email} assigned "${account.name}" to you`,
+          message: `${currentUserName || currentUserEmail || 'Someone'} assigned "${account.name}" to you`,
           metadata: {
             accountId: params.id,
             accountName: account.name,
-            assignedBy: currentUser.id,
+            assignedBy: currentUserId,
           },
         },
       });
