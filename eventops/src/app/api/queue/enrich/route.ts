@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -30,7 +32,7 @@ export async function POST(req: NextRequest) {
       case 'email-pattern':
         job = await addEnrichmentJob('email-pattern', {
           accountId,
-          userId: session.user.id,
+          userId: authResult.userId,
         });
         break;
 
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
         job = await addEnrichmentJob('linkedin-enrichment', {
           accountId,
           limit: limit || 50,
-          userId: session.user.id,
+          userId: authResult.userId,
         });
         break;
 
@@ -46,7 +48,7 @@ export async function POST(req: NextRequest) {
         job = await addEnrichmentJob('generate-emails', {
           accountId,
           force: force || false,
-          userId: session.user.id,
+          userId: authResult.userId,
         });
         break;
     }

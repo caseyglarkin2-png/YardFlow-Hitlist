@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -7,14 +7,14 @@ export const dynamic = 'force-dynamic';
 /**
  * Calculate engagement scores for all accounts
  */
-export async function POST(_req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+export async function POST(req: NextRequest) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (!user?.activeEventId) {
@@ -89,13 +89,13 @@ export async function POST(_req: NextRequest) {
  * Get engagement scores
  */
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (!user?.activeEventId) {

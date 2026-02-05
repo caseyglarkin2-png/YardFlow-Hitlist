@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
  * Create notification
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   const notification = await prisma.notifications.create({
     data: {
-      userId: userId || session.user.id,
+      userId: userId || authResult.userId,
       type: type || 'INFO',
       title,
       message,
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
  * Get notifications for user
  */
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
   const notifications = await prisma.notifications.findMany({
     where: {
-      userId: session.user.id,
+      userId: authResult.userId,
       ...(unreadOnly && { read: false }),
     },
     orderBy: { createdAt: 'desc' },
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     notifications,
     unreadCount: await prisma.notifications.count({
-      where: { userId: session.user.id, read: false },
+      where: { userId: authResult.userId, read: false },
     }),
   });
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { authServiceOrSession } from "@/lib/auth-service";
 import { prisma } from "@/lib/db";
 import { generateContactInsights, getPersonaLabel } from "@/lib/ai-contact-insights";
 
@@ -10,8 +10,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -86,7 +86,7 @@ export async function POST(
         suggestedApproach: insightsData.suggestedApproach,
         roiOpportunity: insightsData.roiOpportunity,
         confidence: insightsData.confidence,
-        generatedBy: session.user.email,
+        generatedBy: authResult.email || authResult.userId,
       },
       update: {
         roleContext: insightsData.roleContext,
@@ -95,7 +95,7 @@ export async function POST(
         roiOpportunity: insightsData.roiOpportunity,
         confidence: insightsData.confidence,
         generatedAt: new Date(),
-        generatedBy: session.user.email,
+        generatedBy: authResult.email || authResult.userId,
       },
     });
 
@@ -122,8 +122,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

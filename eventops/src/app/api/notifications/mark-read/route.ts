@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
+    const authResult = await authServiceOrSession(request);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (markAll) {
       await prisma.notifications.updateMany({
         where: {
-          userId: session.user.id,
+          userId: authResult.userId,
           read: false,
         },
         data: {
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
     await prisma.notifications.updateMany({
       where: {
         id: { in: notificationIds },
-        userId: session.user.id,
+        userId: authResult.userId,
       },
       data: {
         read: true,
