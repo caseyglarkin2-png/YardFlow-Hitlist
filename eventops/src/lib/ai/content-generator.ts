@@ -20,9 +20,6 @@ export type FreightRollValidationIssue =
   | 'too_many_questions'
   | 'too_long';
 
-/** @deprecated Use FreightRollValidationIssue */
-export type LuisValidationIssue = FreightRollValidationIssue;
-
 const METRIC_TOKEN_REGEX =
   /(\$\d+[kKmMbB]?|\d+(?:\.\d+)?%|\d+\s+(?:facilities|yards|sites|locations|dc|dcs|warehouses))/;
 
@@ -137,9 +134,6 @@ export function enforceFreightRollConstraints(
   return { content: adjusted, issues };
 }
 
-/** @deprecated Use enforceFreightRollConstraints */
-export const enforceLuisConstraints = enforceFreightRollConstraints;
-
 export function buildFreightRollRepairPrompt(
   context: ContentContext,
   calendlyLink: string
@@ -156,9 +150,3 @@ export function buildFreightRollRepairPrompt(
     `Calendly link: ${calendlyLink}`,
   ]);
 }
-
-/** @deprecated Use buildFreightRollRepairPrompt */
-export const buildLuisRepairPrompt = buildFreightRollRepairPrompt;
-
-/** @deprecated Use validateFreightRollOutput */
-export const validateLuisOutput = validateFreightRollOutput;

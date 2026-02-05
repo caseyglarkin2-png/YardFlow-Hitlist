@@ -23,8 +23,7 @@ import { VOICE_CONFIGS } from '@/lib/ai/voiceConfigs';
 
 export const dynamic = 'force-dynamic';
 
-// Support both 'freightroll' and 'luis' (deprecated alias)
-const ToneSchema = z.enum(['freightroll', 'luis', 'professional', 'challenger']);
+const ToneSchema = z.enum(['freightroll', 'professional', 'challenger']);
 
 const RequestSchema = z.object({
   type: z.literal('email'),
@@ -109,10 +108,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'validation_error', details }, { status: 400 });
     }
 
-    const { context, tone: rawTone, goal } = parsed.data;
-
-    // Map 'luis' to 'freightroll' for backward compatibility
-    const tone = rawTone === 'luis' ? 'freightroll' : rawTone;
+    const { context, tone, goal } = parsed.data;
 
     if (!VOICE_CONFIGS[tone as keyof typeof VOICE_CONFIGS]) {
       return NextResponse.json({ error: 'invalid_tone' }, { status: 400 });

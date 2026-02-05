@@ -35,7 +35,7 @@ ${input.roiEstimate ? `ROI Opportunity: ${input.roiEstimate}` : ''}
 
 Requirements:
 - MAXIMUM 250 characters (strict limit, critical!)
-- Mention "YardFlow Yard Network System" or "YardFlow"
+- Mention "FreightRoll" or "FreightRoll Yard Network"
 - Reference their specific pain point if available
 - Include "Booth #1847" or "#1847"
 - Professional, concise, value-focused tone
@@ -84,16 +84,16 @@ function generateFallbackMessage(input: ManifestRequestInput): string {
 
   const painPointMention = input.keyPainPoint ? ` re: ${input.keyPainPoint}` : '';
 
-  let message = `${input.contactName}, I'd love to discuss how YardFlow's Yard Network System can help ${input.companyName}${facilityMention}${painPointMention}. Visit booth #1847 at Manifest!`;
+  let message = `${input.contactName}, I'd love to discuss how FreightRoll's Yard Network can help ${input.companyName}${facilityMention}${painPointMention}. Visit booth #1847 at Manifest!`;
 
   // Ensure under 250 characters
   if (message.length > 250) {
-    message = `${input.contactName}, let's discuss YardFlow for ${input.companyName}${facilityMention}. Booth #1847 at Manifest!`;
+    message = `${input.contactName}, let's discuss FreightRoll for ${input.companyName}${facilityMention}. Booth #1847 at Manifest!`;
   }
 
   // Final safety check
   if (message.length > 250) {
-    message = `${input.contactName}, YardFlow demo at Manifest booth #1847? ${input.companyName} could benefit.`;
+    message = `${input.contactName}, FreightRoll demo at Manifest booth #1847? ${input.companyName} could benefit.`;
   }
 
   logger.info('Generated fallback Manifest message', { length: message.length });
@@ -129,8 +129,8 @@ export function validateManifestRequest(message: string): {
     warnings.push('Message should include booth number (#1847)');
   }
 
-  if (!message.toLowerCase().includes('yardflow')) {
-    warnings.push('Message should mention YardFlow');
+  if (!message.toLowerCase().includes('freightroll')) {
+    warnings.push('Message should mention FreightRoll');
   }
 
   if (message.length < 50) {

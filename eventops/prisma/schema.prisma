@@ -117,7 +117,7 @@ enum MeetingStatus {
 }
 
 enum TemplateTone {
-  LUIS
+  FREIGHTROLL
   PROFESSIONAL
   CHALLENGER
 }

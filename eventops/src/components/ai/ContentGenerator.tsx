@@ -107,7 +107,7 @@ export function ContentGenerator({
       <Card>
         <CardHeader>
           <CardTitle>Content Generator</CardTitle>
-          <CardDescription>AI-powered outreach content with YardFlow brand voice</CardDescription>
+          <CardDescription>AI-powered outreach content with FreightRoll brand voice</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
