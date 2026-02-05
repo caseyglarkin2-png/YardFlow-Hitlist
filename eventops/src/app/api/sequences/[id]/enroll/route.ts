@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { enrollContact } from '@/lib/outreach/sequence-engine';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const { id } = await params;
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { personIds, accountIds } = body;
 
-    const sequence = await prisma.outreachSequence.findFirst({
-      where: {
-        id: params.id,
-        createdBy: session.user.id,
-      },
+    // Find sequence without createdBy filter - team members should access all sequences
+    const sequence = await prisma.outreachSequence.findUnique({
+      where: { id },
     });
 
     if (!sequence) {
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     };
 
     for (const personId of allPersonIds) {
-      const result = await enrollContact(params.id, personId);
+      const result = await enrollContact(id, personId);
 
       if (result.success) {
         results.enrolled.push(personId);
@@ -74,7 +75,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     logger.info('Bulk enrollment completed', {
-      sequenceId: params.id,
+      sequenceId: id,
+      userId: authResult.userId,
       enrolledCount: results.enrolled.length,
       skippedCount: results.skipped.length,
     });
@@ -87,7 +89,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       skipped: results.skipped,
     });
   } catch (error) {
-    logger.error('Error enrolling contacts', { sequenceId: params.id, error });
+    const { id } = await params;
+    logger.error('Error enrolling contacts', { sequenceId: id, error });
     return NextResponse.json({ error: 'Failed to enroll contacts' }, { status: 500 });
   }
 }

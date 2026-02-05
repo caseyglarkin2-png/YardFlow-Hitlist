@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const { id } = await params;
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sequence = await prisma.outreachSequence.findFirst({
-      where: {
-        id: params.id,
-        createdBy: session.user.id,
-      },
+    // Find sequence without createdBy filter - team members should access all sequences
+    const sequence = await prisma.outreachSequence.findUnique({
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const enrollmentStats = await prisma.sequenceEnrollment.groupBy({
       by: ['status'],
-      where: { sequenceId: params.id },
+      where: { sequenceId: id },
       _count: true,
     });
 
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const emailStats = await prisma.emailActivity.findMany({
       where: {
         enrollment: {
-          sequenceId: params.id,
+          sequenceId: id,
         },
       },
       select: {
@@ -134,7 +135,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({ analytics });
   } catch (error) {
-    logger.error('Error fetching sequence analytics', { sequenceId: params.id, error });
+    logger.error('Error fetching sequence analytics', { error });
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }
 }

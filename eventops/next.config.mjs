@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -59,4 +61,20 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Sentry webpack plugin options
+  org: 'dude-whats-the-bid-llc',
+  project: 'yardflow-hitlist',
+
+  // Suppress source map upload logs
+  silent: !process.env.CI,
+
+  // Upload source maps for better stack traces
+  widenClientFileUpload: true,
+
+  // Disable Sentry telemetry
+  disableLogger: true,
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  automaticVercelMonitors: true,
+});

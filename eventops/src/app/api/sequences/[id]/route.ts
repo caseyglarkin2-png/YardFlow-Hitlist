@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const sequence = await prisma.outreachSequence.findFirst({
-      where: {
-        id,
-        createdBy: session.user.id,
-      },
+    // Find sequence without createdBy filter - team members should access all sequences
+    const sequence = await prisma.outreachSequence.findUnique({
+      where: { id },
       include: {
         enrollments: {
           take: 10,
@@ -48,19 +48,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const { name, description, steps, status } = body;
 
-    const existingSequence = await prisma.outreachSequence.findFirst({
-      where: {
-        id,
-        createdBy: session.user.id,
-      },
+    // Find sequence without createdBy filter
+    const existingSequence = await prisma.outreachSequence.findUnique({
+      where: { id },
     });
 
     if (!existingSequence) {
@@ -144,20 +142,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // First check if sequence exists and belongs to user
-    const sequence = await prisma.outreachSequence.findFirst({
-      where: {
-        id,
-        createdBy: session.user.id,
-      },
+    // Find sequence without createdBy filter
+    const sequence = await prisma.outreachSequence.findUnique({
+      where: { id },
     });
 
     if (!sequence) {
