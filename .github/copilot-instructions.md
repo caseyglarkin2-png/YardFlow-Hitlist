@@ -7,24 +7,26 @@
 - **Goal**: Target high-value accounts at events (Manifest 2026).
 - **Core Philosophy**: **Ship Fast, Ship Often**. Deploy production updates incrementally via "Golden Deployments".
 - **Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
-- **Stack**: Next.js 14.2 (App Router), PostgreSQL (Prisma), Redis (BullMQ), NextAuth v5.
+- **Stack**: Next.js 14.2 (App Router), PostgreSQL (Prisma 7 + PrismaPg adapter), Redis (BullMQ), NextAuth v5.
 
 ## 🏗️ Architecture: "One Monorepo, Two Services"
 
-All code lives in `/eventops`, but runs as two distict services on Railway.
+All code lives in `/eventops`, but runs as two distinct services on Railway.
 
 ### 1. Web App (`YardFlow-Hitlist`)
 
 - **Role**: Serves UI and API routes (Headless).
-- **Entry**: `eventops/start-production.sh` (Using Next.js Standalone mode).
+- **Entry**: `eventops/start-production.sh` (Next.js Standalone mode).
+- **Dockerfile**: `eventops/Dockerfile`
 - **Criticality**: Must never block. 502s are unacceptable.
 
 ### 2. Worker Service (`YardFlow-Worker`)
 
 - **Role**: Process async jobs, AI agents, and scrapers.
-- **Entry**: `eventops/start-worker.sh`.
-- **Scaling**: Independent from web traffic.
-- **Liveness**: Must run a "Heartbeat" job every 60s to `worker:last_heartbeat`.
+- **Entry**: `eventops/start-worker.sh` or `Dockerfile.worker`.
+- **Health Endpoint**: Worker runs its own HTTP server on port 8080 (`/health`).
+- **Liveness**: Heartbeat job writes to Redis key `worker:last_heartbeat` every 60s.
+- **Startup**: Runs `startup-checks.ts` with 3 retries before starting workers.
 
 ## 🛠️ Developer Workflow
 
@@ -57,12 +59,24 @@ The project enforces strict ESLint rules that function as build breakers.
 
 ### 2. Database & Redis (Lazy Initialization)
 
-**CRITICAL**: Always use lazy initialization for external services. Top-level instantiation breaks Nixpacks builds.
+**CRITICAL**: Always use lazy initialization for external services. Top-level instantiation blocks builds and crashes workers before health servers start.
 
 ```typescript
-// ✅ Correct: src/lib/db.ts - lazy initialization pattern
-// Import usage: import { prisma } from '@/lib/db';
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+// ✅ Correct: src/lib/db.ts - Proxy-based lazy initialization
+// Connection only created on first property access, not at import
+function getPrismaClient(): PrismaClient {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
+  return globalForPrisma.prisma;
+}
+
+export const db = new Proxy({} as PrismaClient, {
+  get(_, prop) {
+    return getPrismaClient()[prop as keyof PrismaClient];
+  },
+});
+export const prisma = db; // Alias
 
 // ✅ Correct: src/lib/queue/client.ts - lazy getter
 let redisConnection: Redis | null = null;
@@ -73,6 +87,8 @@ export function getRedisConnection(): Redis {
   return redisConnection;
 }
 ```
+
+**Why Proxy?** Worker imports agents → agents import db → without Proxy, DB connects immediately, blocks health server startup → Railway healthcheck fails → crash loop.
 
 ### 3. API Route Standards
 
@@ -177,6 +193,19 @@ if (!session?.user?.id) {
 5. **Prisma Model Access**: Use lowercase for Prisma client access (`prisma.meeting` not `prisma.Meeting`), even if model is defined as `model Meeting`. The `@@map("meetings")` directive maps to table name.
 6. **Prisma Enums**: Import enums from `@prisma/client` (e.g., `import { OutreachStatus } from '@prisma/client'`), don't use string literals.
 
+### Required Environment Variables (Worker)
+
+The worker service requires these to start (checked by `startup-checks.ts`):
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string |
+| `REDIS_URL` | ✅ | Redis connection for BullMQ |
+| `AUTH_SECRET` | ✅ | NextAuth secret (min 32 chars) |
+| `SENDGRID_API_KEY` | ⚠️ | Optional but emails fail without it |
+| `GEMINI_API_KEY` | ⚠️ | Primary AI provider |
+| `OPENAI_API_KEY` | ⚠️ | Fallback AI provider |
+
 ---
 
 ## 🤖 AI Endpoints (Brain System)
@@ -215,21 +244,3 @@ The Vercel frontend proxies all AI calls through Railway:
 
 **Critical**: GTM-YardFlow has NO AI API keys. All AI routes through Railway.
 
----
-
-## Critical Patterns
-
-### Database Access
-
-- Use lazy initialization for Prisma client
-- Always use: `import { prisma } from '@/lib/db'`
-
-### Authentication
-
-- Check auth in API routes: `const session = await auth()`
-- Protect routes with session checks
-
-### Deployment
-
-- Railway deployment with auto-deploy from main
-- All code lives in `/eventops` directory
