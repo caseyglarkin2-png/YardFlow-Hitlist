@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { people } from '@prisma/client';
 import { generateCompanyResearch, generatePersonalizedOutreach } from '@/lib/ai-research';
@@ -18,8 +18,8 @@ function getPersonaLabel(person: people): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
               locations: researchData.locations || null,
               operationalScale: researchData.operationalScale || null,
               rawData: JSON.stringify(researchData),
-              researchedBy: session.user.email,
+              researchedBy: authResult.email || authResult.userId,
             },
           });
         }
@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
             status: 'DRAFT',
             subject: outreachData.subject || null,
             message: outreachData.message,
-            sentBy: session.user.email,
+            sentBy: authResult.email || authResult.userId,
             updatedAt: new Date(),
           },
         });

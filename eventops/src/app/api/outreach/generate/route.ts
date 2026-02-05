@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { people } from '@prisma/client';
+
+export const dynamic = 'force-dynamic';
 
 function fillTemplate(
   template: string,
@@ -33,8 +35,8 @@ function getPersonaLabel(person: people): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) {
+    const authResult = await authServiceOrSession(req);
+    if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -98,7 +100,7 @@ export async function POST(req: NextRequest) {
         subject,
         message,
         templateId: template.id,
-        sentBy: session.user.email,
+        sentBy: authResult.email || authResult.userId,
         updatedAt: new Date(),
       };
     });

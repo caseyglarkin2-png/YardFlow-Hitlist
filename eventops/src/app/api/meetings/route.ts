@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { authServiceOrSession } from '@/lib/auth-service';
 import { db as prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -8,13 +8,13 @@ export const dynamic = 'force-dynamic';
  * Get all meetings for the active event
  */
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (!user?.activeEventId) {
@@ -65,8 +65,8 @@ export async function GET(req: NextRequest) {
  * Create a new meeting
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       location,
       meetingType,
       notes,
-      createdBy: session.user.id,
+      createdBy: authResult.userId,
       updatedAt: new Date(),
     },
     include: {

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
 import { db as prisma } from '@/lib/db';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { OutreachStatus } from '@prisma/client';
@@ -27,15 +26,15 @@ export async function GET(req: NextRequest) {
  * POST /api/export - Export data with body params
  */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
+  const authResult = await authServiceOrSession(req);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { type, format, filters } = await req.json();
 
   const user = await prisma.users.findUnique({
-    where: { email: session.user.email! },
+    where: { id: authResult.userId },
   });
 
   if (!user?.activeEventId) {
