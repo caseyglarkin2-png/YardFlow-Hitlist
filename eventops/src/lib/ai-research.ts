@@ -61,10 +61,10 @@ export async function generatePersonalizedOutreach(
   personTitle: string | null,
   companyName: string,
   persona: string,
-  companyDossier: any,
+  companyDossier: Record<string, unknown>,
   channel: 'EMAIL' | 'LINKEDIN' | 'PHONE',
-  contactInsights?: any,
-  roiData?: any
+  contactInsights?: { roleContext: string; likelyPainPoints: string; roiOpportunity: string },
+  roiData?: { annualSavings: number; paybackPeriod: number; assumptions?: { totalFacilities?: string } }
 ) {
   const eventName = 'Manifest 2026';
   

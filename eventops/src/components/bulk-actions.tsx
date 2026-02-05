@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 interface BulkActionsProps {
   selectedIds: string[];
   onClear: () => void;
-  onAction: (action: string, params?: Record<string, any>) => Promise<void>;
+  onAction: (action: string, params?: Record<string, unknown>) => Promise<void>;
   type: 'accounts' | 'people';
 }
 

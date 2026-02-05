@@ -10,7 +10,7 @@ export default function ImportPage() {
   const router = useRouter();
   const [importType, setImportType] = useState<ImportType>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<any[]>([]);
+  const [preview, setPreview] = useState<Record<string, unknown>[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -182,7 +182,7 @@ export default function ImportPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {preview.map((row: any, idx) => (
+                      {preview.map((row: Record<string, unknown>, idx) => (
                         <tr key={idx}>
                           {headers.slice(0, 5).map((header, cellIdx) => (
                             <td

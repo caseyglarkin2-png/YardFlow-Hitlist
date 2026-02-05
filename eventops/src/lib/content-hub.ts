@@ -62,7 +62,7 @@ export const contentHub = {
   /**
    * Fetch messaging templates for a persona
    */
-  async fetchMessaging(persona: string): Promise<any | null> {
+  async fetchMessaging(persona: string): Promise<Record<string, unknown> | null> {
     try {
       const res = await fetch(`${CONTENT_HUB_URL}/api/messaging/${persona}`, {
         headers: CONTENT_HUB_API_KEY ? { 'x-api-key': CONTENT_HUB_API_KEY } : {},
@@ -87,7 +87,7 @@ export const contentHub = {
   /**
    * Fetch case study by ID
    */
-  async fetchCaseStudy(id: string): Promise<any | null> {
+  async fetchCaseStudy(id: string): Promise<Record<string, unknown> | null> {
     try {
       const res = await fetch(`${CONTENT_HUB_URL}/api/case-studies/${id}`, {
         headers: CONTENT_HUB_API_KEY ? { 'x-api-key': CONTENT_HUB_API_KEY } : {},
@@ -109,7 +109,7 @@ export const contentHub = {
   /**
    * Fetch ROI calculator data
    */
-  async fetchRoiData(calculatorType: string): Promise<any | null> {
+  async fetchRoiData(calculatorType: string): Promise<Record<string, unknown> | null> {
     try {
       const res = await fetch(`${CONTENT_HUB_URL}/api/roi/${calculatorType}`, {
         headers: CONTENT_HUB_API_KEY ? { 'x-api-key': CONTENT_HUB_API_KEY } : {},

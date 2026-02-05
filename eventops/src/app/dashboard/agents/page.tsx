@@ -20,7 +20,7 @@ export default function AgentsDashboardPage() {
   const { toast } = useToast();
   const [triggering, setTriggering] = useState(false);
 
-  const triggerAgent = async (action: string, params: any) => {
+  const triggerAgent = async (action: string, params: Record<string, unknown>) => {
     try {
       setTriggering(true);
       const response = await fetch('/api/agents/trigger', {
@@ -38,7 +38,7 @@ export default function AgentsDashboardPage() {
 
       // Refresh data without reloading page
       setTimeout(() => refresh(), 1000);
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Error',
         description: 'Failed to start agent task',

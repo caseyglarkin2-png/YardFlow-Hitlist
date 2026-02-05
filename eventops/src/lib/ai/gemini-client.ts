@@ -110,7 +110,7 @@ export class GeminiProClient {
 
       const text = data.candidates[0].content.parts[0].text;
       return text.trim();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Gemini Pro error:', error);
       throw error;
     }
@@ -154,7 +154,7 @@ export class GeminiProClient {
 
       const data: GeminiResponse = await response.json();
       return data.candidates[0].content.parts[0].text.trim();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Gemini chat error:', error);
       throw error;
     }
@@ -163,7 +163,7 @@ export class GeminiProClient {
   /**
    * Generate structured JSON output
    */
-  async generateJSON<T = any>(prompt: string, schema?: string): Promise<T> {
+  async generateJSON<T = unknown>(prompt: string, schema?: string): Promise<T> {
     const systemPrompt = schema
       ? `${prompt}\n\nRespond ONLY with valid JSON matching this schema:\n${schema}`
       : `${prompt}\n\nRespond ONLY with valid JSON.`;

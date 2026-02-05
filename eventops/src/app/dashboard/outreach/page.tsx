@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Download } from "lucide-react";
+import { Plus } from "lucide-react";
 import { OutreachFilters } from "@/components/outreach-filters";
 import { OutreachList } from "@/components/outreach-list";
 import { ExportOutreachButton } from "@/components/export-outreach-button";
@@ -36,7 +36,7 @@ export default async function OutreachPage({
     );
   }
 
-  const whereClause: any = {
+  const whereClause: Record<string, unknown> = {
     people: {
       target_accounts: {
         eventId: user.activeEventId,

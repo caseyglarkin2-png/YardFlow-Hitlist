@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Calendar as CalendarIcon, Clock, MapPin, User, Building2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Building2, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface Meeting {

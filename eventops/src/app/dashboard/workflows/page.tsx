@@ -68,7 +68,7 @@ export default function WorkflowsPage() {
     }
   }
 
-  async function createWorkflow(formData: any) {
+  async function createWorkflow(formData: Record<string, unknown>) {
     try {
       const res = await fetch('/api/workflows', {
         method: 'POST',

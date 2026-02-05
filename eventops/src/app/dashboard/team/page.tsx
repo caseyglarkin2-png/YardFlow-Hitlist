@@ -16,7 +16,7 @@ interface TeamMember {
 }
 
 export default function TeamPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);

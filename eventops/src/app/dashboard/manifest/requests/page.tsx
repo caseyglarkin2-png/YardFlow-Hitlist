@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function ManifestRequestsPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [personaFilters, setPersonaFilters] = useState({
     isExecOps: false,
     isOps: false,
@@ -15,7 +15,7 @@ export default function ManifestRequestsPage() {
   });
   const [minIcpScore, setMinIcpScore] = useState(90);
   const [generating, setGenerating] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Record<string, unknown>[]>([]);
   const [showResults, setShowResults] = useState(false);
 
   async function handleGenerate() {
@@ -35,7 +35,7 @@ export default function ManifestRequestsPage() {
       }
       
       const data = await res.json();
-      const personIds = data.people.map((p: any) => p.id);
+      const personIds = data.people.map((p: { id: string }) => p.id);
 
       if (personIds.length === 0) {
         alert('No people match your filters');
@@ -68,9 +68,9 @@ export default function ManifestRequestsPage() {
       const generateData = await generateRes.json();
       setResults(generateData.results);
       setShowResults(true);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error:', error);
-      alert(`Error: ${error.message}`);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setGenerating(false);
     }

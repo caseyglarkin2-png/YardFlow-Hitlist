@@ -36,7 +36,7 @@ export default function MapColumnsPage() {
   const [importType, setImportType] = useState<'accounts' | 'people' | null>(null);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [mapping, setMapping] = useState<FieldMapping>({});
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [autoMapped, setAutoMapped] = useState(false);
 
   useEffect(() => {

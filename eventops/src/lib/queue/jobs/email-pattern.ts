@@ -39,7 +39,7 @@ export async function processEmailPattern(
           }
         : null,
     };
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Email pattern job failed', { accountId, error });
     
     return {
@@ -49,7 +49,7 @@ export async function processEmailPattern(
       totalEmails: 0,
       patternsDetected: 0,
       primaryPattern: null,
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

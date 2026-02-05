@@ -94,8 +94,8 @@ export class EmailPatternDetector {
     return {
       domain,
       totalEmails: contacts.length,
-      detectedPatterns: detectedPatterns as any,
-      primaryPattern: primaryPattern as any,
+      detectedPatterns: detectedPatterns as unknown as PatternDetectionResult['detectedPatterns'],
+      primaryPattern: primaryPattern as unknown as PatternDetectionResult['primaryPattern'],
       recommendation
     };
   }

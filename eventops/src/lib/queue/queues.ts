@@ -40,7 +40,7 @@ export interface AgentJobData {
     | 'run-graphics'
     | 'run-socials'
     | 'run-contracting';
-  params: any;
+  params: Record<string, unknown>;
   userId?: string;
   parentTaskId?: string;
 }
@@ -217,7 +217,7 @@ export const sequenceQueue = {
 export async function addEnrichmentJob(
   name: string,
   data: EmailPatternJobData | LinkedInEnrichmentJobData | GenerateEmailsJobData,
-  options?: any
+  options?: Record<string, unknown>
 ) {
   try {
     const job = await enrichmentQueue.add(name, data, options);
@@ -229,7 +229,7 @@ export async function addEnrichmentJob(
   }
 }
 
-export async function addOutreachJob(name: string, data: OutreachSequenceJobData, options?: any) {
+export async function addOutreachJob(name: string, data: OutreachSequenceJobData, options?: Record<string, unknown>) {
   try {
     const job = await outreachQueue.add(name, data, options);
     logger.info('Outreach job added', { jobId: job.id, name, data });

@@ -28,9 +28,9 @@ export async function acquireSyncLock(
     });
 
     return true;
-  } catch (error: any) {
+  } catch (error) {
     // Lock already exists or creation failed
-    if (error.code === 'P2002') {
+    if (error instanceof Error && (error as Error & { code?: string }).code === 'P2002') {
       // Unique constraint violation - lock exists
       return false;
     }

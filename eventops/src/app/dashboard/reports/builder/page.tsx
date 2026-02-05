@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -12,14 +10,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Download, Plus, Trash2, BarChart3, PieChart, TrendingUp, Users } from "lucide-react";
+import { Download, Trash2, BarChart3, PieChart, TrendingUp, Users } from "lucide-react";
 
 interface Widget {
   id: string;
   type: string;
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const AVAILABLE_WIDGETS: Widget[] = [
@@ -62,7 +60,7 @@ const AVAILABLE_WIDGETS: Widget[] = [
 
 export default function ReportBuilderPage() {
   const [selectedWidgets, setSelectedWidgets] = useState<Widget[]>([]);
-  const [reportName, setReportName] = useState("Custom Report");
+  const [reportName, _setReportName] = useState("Custom Report");
   const [dateRange, setDateRange] = useState("last-30-days");
 
   function addWidget(widget: Widget) {
@@ -210,7 +208,7 @@ export default function ReportBuilderPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {selectedWidgets.map((widget, index) => {
+                {selectedWidgets.map((widget, _index) => {
                   const Icon = widget.icon;
                   
                   return (

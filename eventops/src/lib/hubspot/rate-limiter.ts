@@ -19,7 +19,7 @@ interface RateLimiterConfig {
  * Handles HubSpot's 100 requests per 10 seconds limit
  */
 export class HubSpotRateLimiter {
-  private queue: QueuedRequest<any>[] = [];
+  private queue: QueuedRequest<unknown>[] = [];
   private requestTimestamps: number[] = [];
   private processing = false;
   private config: RateLimiterConfig;
@@ -158,7 +158,7 @@ export class HubSpotRateLimiter {
       }
       // Axios-style error
       if ('response' in error) {
-        const response = (error as any).response;
+        const response = (error as { response?: { status?: number } }).response;
         if (response?.status === 429) {
           return true;
         }

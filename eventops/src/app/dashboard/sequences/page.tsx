@@ -10,16 +10,16 @@ interface Sequence {
   description: string | null;
   isActive: boolean;
   campaignId: string | null;
-  steps: any;
+  steps: Record<string, unknown>[] | unknown;
   createdAt: string;
   campaign?: { name: string };
   _count: { outreach: number };
 }
 
 export default function SequencesPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [sequences, setSequences] = useState<Sequence[]>([]);
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -66,7 +66,7 @@ export default function SequencesPage() {
     });
   };
 
-  const updateStep = (index: number, field: string, value: any) => {
+  const updateStep = (index: number, field: string, value: string | number | null) => {
     const newSteps = [...formData.steps];
     newSteps[index] = { ...newSteps[index], [field]: value };
     setFormData({ ...formData, steps: newSteps });
@@ -84,7 +84,7 @@ export default function SequencesPage() {
           campaignId: formData.campaignId || null,
           steps: formData.steps.map(s => ({
             ...s,
-            delayDays: parseInt(s.delayDays as any),
+            delayDays: parseInt(String(s.delayDays)),
           })),
         }),
       });

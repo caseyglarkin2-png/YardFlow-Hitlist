@@ -2,20 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -25,7 +11,7 @@ interface SavedSearch {
   name: string;
   description?: string;
   entityType: string;
-  filters: any;
+  filters: Record<string, unknown>;
   isGlobal: boolean;
   createdAt: string;
   users?: {
@@ -36,7 +22,7 @@ interface SavedSearch {
 
 interface SavedSearchesProps {
   entityType: 'people' | 'accounts' | 'outreach' | 'meetings';
-  onLoad: (filters: any) => void;
+  onLoad: (filters: Record<string, unknown>) => void;
 }
 
 export function SavedSearches({ entityType, onLoad }: SavedSearchesProps) {

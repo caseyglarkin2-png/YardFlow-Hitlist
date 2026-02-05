@@ -6,7 +6,7 @@ import { exportToCSV } from '@/lib/search-builder';
 import { useToast } from '@/hooks/use-toast';
 
 interface ExportSearchButtonProps {
-  data: any[];
+  data: Record<string, unknown>[];
   filename?: string;
   disabled?: boolean;
 }

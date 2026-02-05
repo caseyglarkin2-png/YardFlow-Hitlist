@@ -23,7 +23,7 @@ export async function generateManifestMeetingRequest(
   personTitle: string | null,
   companyName: string,
   persona: string,
-  companyDossier?: any,
+  companyDossier?: Record<string, unknown>,
   roiOpportunity?: string
 ): Promise<ManifestRequestData> {
   const prompt = `Write a concise meeting request for the Manifest 2026 app (250 character MAXIMUM):

@@ -197,7 +197,7 @@ Generate JSON with:
         context: {
           ...request.context,
           isFollowUp: true,
-        } as any,
+        } as ContentGenerationRequest['context'] & { isFollowUp: boolean },
       }),
       this.generateLinkedInMessage(request),
     ]);

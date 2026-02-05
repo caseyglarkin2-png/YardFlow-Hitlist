@@ -12,10 +12,10 @@ describe('AIDossierGenerator', () => {
   beforeEach(() => {
     mockGeminiClient = {
       generateJSON: vi.fn(),
-    } as any;
+    } as unknown as vi.Mocked<GeminiProClient>;
 
     generator = new AIDossierGenerator();
-    (generator as any).geminiClient = mockGeminiClient;
+    (generator as unknown as Record<string, unknown>).geminiClient = mockGeminiClient;
   });
 
   describe('generateDossier', () => {
@@ -63,7 +63,7 @@ describe('AIDossierGenerator', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: mockCompanyData }),
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const result = await generator.generateDossier('account-123');
 
@@ -111,7 +111,7 @@ describe('AIDossierGenerator', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: mockCompanyData }),
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const result = await generator.generateDossier('account-456');
 
@@ -125,7 +125,7 @@ describe('AIDossierGenerator', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: { company_name: 'Test' } }),
-      }) as any;
+      }) as unknown as typeof fetch;
 
       await expect(generator.generateDossier('account-789')).rejects.toThrow('Gemini API error');
     });
@@ -155,7 +155,7 @@ describe('AIDossierGenerator', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: { company_name: 'Test' } }),
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const accountIds = ['account-1', 'account-2', 'account-3'];
       const results = await generator.generateBatch(accountIds, { dryRun: true, delay: 100 });
@@ -192,7 +192,7 @@ describe('AIDossierGenerator', () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({ account: { company_name: 'Test' } }),
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const accountIds = ['account-1', 'account-2', 'account-3'];
       const results = await generator.generateBatch(accountIds, { dryRun: true, delay: 50 });

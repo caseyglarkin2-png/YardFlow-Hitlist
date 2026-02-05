@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar, Building2, BarChart3 } from "lucide-react";
+import { Download, Calendar, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
 export default function ReportsPage() {

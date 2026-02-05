@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
 
 type ImportRow = {
-  data: any;
+  data: Record<string, unknown>;
   status: 'new' | 'duplicate' | 'error';
   message?: string;
   matchedId?: string;
@@ -39,8 +39,8 @@ export default function PreviewImportPage() {
         skipEmptyLines: true,
         complete: async (results) => {
           try {
-            const mappedData = results.data.map((row: any) => {
-              const mapped: any = {};
+            const mappedData = results.data.map((row: Record<string, unknown>) => {
+              const mapped: Record<string, unknown> = {};
               Object.keys(mapping).forEach((fieldKey) => {
                 const csvColumn = mapping[fieldKey];
                 if (csvColumn && row[csvColumn]) {
@@ -67,7 +67,7 @@ export default function PreviewImportPage() {
             const responseData = await response.json();
             const checkResults = responseData.results || [];
             
-            const processedRows: ImportRow[] = checkResults.map((result: any) => ({
+            const processedRows: ImportRow[] = checkResults.map((result: { data: Record<string, unknown>; isDuplicate?: boolean; message?: string; matchedId?: string }) => ({
               data: result.data,
               status: result.isDuplicate ? 'duplicate' : 'new',
               message: result.message,
@@ -113,7 +113,7 @@ export default function PreviewImportPage() {
         throw new Error('Import failed');
       }
 
-      const { created } = await response.json();
+      const { created: _created } = await response.json();
       
       // Clear session storage
       sessionStorage.removeItem('importFile');
@@ -127,7 +127,7 @@ export default function PreviewImportPage() {
         router.push('/dashboard/people');
       }
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       alert('Failed to import data. Please try again.');
       setIsImporting(false);
     }

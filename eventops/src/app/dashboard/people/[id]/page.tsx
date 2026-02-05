@@ -6,12 +6,12 @@ import Link from "next/link";
 
 export default function PersonDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const _router = useRouter();
   const personId = params.id as string;
 
-  const [person, setPerson] = useState<any>(null);
-  const [insights, setInsights] = useState<any>(null);
-  const [roiData, setRoiData] = useState<any>(null);
+  const [person, setPerson] = useState<Record<string, unknown> | null>(null);
+  const [insights, setInsights] = useState<Record<string, unknown> | null>(null);
+  const [roiData, setRoiData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingInsights, setGeneratingInsights] = useState(false);
   const [calculatingRoi, setCalculatingRoi] = useState(false);
@@ -35,7 +35,7 @@ export default function PersonDetailPage() {
           const insightsData = await insightsRes.json();
           setInsights(insightsData.insights);
         }
-      } catch (e) {
+      } catch (_e) {
         // No insights yet
       }
 
@@ -47,7 +47,7 @@ export default function PersonDetailPage() {
             const roiResult = await roiRes.json();
             setRoiData(roiResult.roiCalculation);
           }
-        } catch (e) {
+        } catch (_e) {
           // No ROI yet
         }
       }
@@ -76,9 +76,9 @@ export default function PersonDetailPage() {
       const data = await res.json();
       setInsights(data.insights);
       alert("Contact insights generated successfully!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error generating insights:", error);
-      alert(`Failed to generate insights: ${error.message}`);
+      alert(`Failed to generate insights: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setGeneratingInsights(false);
     }
@@ -106,9 +106,9 @@ export default function PersonDetailPage() {
       const data = await res.json();
       setRoiData(data.roiCalculation);
       alert("ROI calculated successfully!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error calculating ROI:", error);
-      alert(`Failed to calculate ROI: ${error.message}`);
+      alert(`Failed to calculate ROI: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setCalculatingRoi(false);
     }

@@ -9,7 +9,7 @@ interface SearchResult {
   type: 'person' | 'account' | 'outreach' | 'meeting';
   title: string;
   subtitle?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   url: string;
 }
 

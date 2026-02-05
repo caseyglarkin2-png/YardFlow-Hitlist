@@ -41,7 +41,7 @@ export default async function AccountsPage({
   }
 
   // Build where clause with filters
-  const where: any = { eventId: user.activeEventId };
+  const where: Record<string, unknown> = { eventId: user.activeEventId };
 
   if (searchParams.search) {
     where.name = { contains: searchParams.search, mode: 'insensitive' };
@@ -52,7 +52,7 @@ export default async function AccountsPage({
   }
 
   // Build orderBy clause
-  let orderBy: any = { name: 'asc' };
+  let orderBy: Record<string, unknown> = { name: 'asc' };
   if (searchParams.sort === 'icp-desc') {
     orderBy = { icpScore: 'desc' };
   } else if (searchParams.sort === 'icp-asc') {

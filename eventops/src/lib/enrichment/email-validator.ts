@@ -64,7 +64,7 @@ export class EmailValidator {
       const data = await response.json();
 
       if (data.Answer && data.Answer.length > 0) {
-        const records = data.Answer.map((a: any) => {
+        const records = data.Answer.map((a: { data: string }) => {
           // MX records format: "priority exchange"
           const parts = a.data.split(' ');
           return parts[1] || a.data;

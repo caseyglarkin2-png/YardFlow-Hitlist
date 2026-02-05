@@ -8,7 +8,7 @@ import { ScoreHistory } from '@/components/score-history';
 import { ResearchPanel } from '@/components/research-panel';
 
 export default async function AccountDetailPage({ params }: { params: { id: string } }) {
-  const session = await auth();
+  const _session = await auth();
   
   const account = await prisma.target_accounts.findUnique({
     where: { id: params.id },
@@ -129,7 +129,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
           
           {account.people.length > 0 ? (
             <ul className="divide-y divide-gray-200">
-              {account.people.map((person: any) => (
+              {account.people.map((person: { id: string; name: string; title?: string; email?: string; isExecOps?: boolean; isOpsManager?: boolean; isSales?: boolean }) => (
                 <li key={person.id} className="py-4">
                   <div className="flex items-center justify-between">
                     <div>

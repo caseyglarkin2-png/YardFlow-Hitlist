@@ -22,7 +22,7 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);

@@ -12,10 +12,10 @@ describe('BrandVoiceContentGenerator', () => {
   beforeEach(() => {
     mockGeminiClient = {
       generateContent: vi.fn(),
-    } as any;
+    } as unknown as vi.Mocked<GeminiProClient>;
 
     generator = new BrandVoiceContentGenerator();
-    (generator as any).geminiClient = mockGeminiClient;
+    (generator as unknown as Record<string, unknown>).geminiClient = mockGeminiClient;
   });
 
   describe('generateEmail', () => {

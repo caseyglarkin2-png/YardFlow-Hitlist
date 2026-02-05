@@ -77,7 +77,7 @@ export class LinkedInExtractor {
         confidence,
         foundVia: 'google_search',
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error(`LinkedIn discovery error for ${personId}:`, error);
       return {
         personId,
@@ -85,7 +85,7 @@ export class LinkedInExtractor {
         profileUrl: null,
         confidence: 0,
         foundVia: 'error',
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

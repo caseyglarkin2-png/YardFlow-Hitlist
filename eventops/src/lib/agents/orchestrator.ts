@@ -333,7 +333,7 @@ export class AgentOrchestrator {
           break;
 
         case 'sequence-engineer':
-          output = await this.sequenceEngineer.designSequence(task.input as any, task.parentTaskId);
+          output = await this.sequenceEngineer.designSequence(task.input as Parameters<typeof this.sequenceEngineer.designSequence>[0], task.parentTaskId);
           break;
 
         case 'content-purposing':

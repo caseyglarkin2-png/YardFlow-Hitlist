@@ -143,7 +143,7 @@ export function ContentGenerator({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="channel">Channel</Label>
-              <Select value={channel} onValueChange={(v) => setChannel(v as any)}>
+              <Select value={channel} onValueChange={(v) => setChannel(v as 'email' | 'linkedin' | 'phone')}>
                 <SelectTrigger id="channel">
                   <SelectValue />
                 </SelectTrigger>
@@ -157,7 +157,7 @@ export function ContentGenerator({
 
             <div className="space-y-2">
               <Label htmlFor="tone">Tone</Label>
-              <Select value={tone} onValueChange={(v) => setTone(v as any)}>
+              <Select value={tone} onValueChange={(v) => setTone(v as 'professional' | 'casual' | 'urgent' | 'friendly')}>
                 <SelectTrigger id="tone">
                   <SelectValue />
                 </SelectTrigger>

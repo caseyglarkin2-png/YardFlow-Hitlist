@@ -13,7 +13,7 @@ interface EnrichmentResult {
 }
 
 export default function EmailEnrichmentPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [selectedPersonas, setSelectedPersonas] = useState<string[]>([]);
   const [minIcpScore, setMinIcpScore] = useState<number>(0);
   const [onlyMissingEmail, setOnlyMissingEmail] = useState<boolean>(true);

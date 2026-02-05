@@ -106,8 +106,8 @@ export class CompanyEnrichmentOrchestrator {
           }
 
           sources.push('website_scraping');
-        } catch (error: any) {
-          console.warn(`Website scraping failed for ${company.name}:`, error.message);
+        } catch (error) {
+          console.warn(`Website scraping failed for ${company.name}:`, error instanceof Error ? error.message : error);
         }
       }
 
@@ -141,8 +141,8 @@ export class CompanyEnrichmentOrchestrator {
 
           sources.push('wikipedia');
         }
-      } catch (error: any) {
-        console.warn(`Wikipedia extraction failed for ${company.name}:`, error.message);
+      } catch (error) {
+        console.warn(`Wikipedia extraction failed for ${company.name}:`, error instanceof Error ? error.message : error);
       }
 
       // Count data points collected
@@ -160,7 +160,7 @@ export class CompanyEnrichmentOrchestrator {
         sources,
         data,
       };
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Company enrichment error for ${accountId}:`, error);
       return {
         accountId,
@@ -169,7 +169,7 @@ export class CompanyEnrichmentOrchestrator {
         dataPoints: 0,
         sources: [],
         data: {},
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -179,7 +179,7 @@ export class CompanyEnrichmentOrchestrator {
    */
   async saveEnrichmentData(accountId: string, data: EnrichmentResult['data']): Promise<void> {
     // Update target_accounts table
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     
     if (data.website) updateData.website = data.website;
     if (data.industry) updateData.industry = data.industry;
@@ -193,7 +193,7 @@ export class CompanyEnrichmentOrchestrator {
     }
 
     // Update or create company_dossiers with enriched data
-    const dossierData: any = {};
+    const dossierData: Record<string, unknown> = {};
     
     if (data.description || data.wikipediaSummary) {
       dossierData.companyOverview = data.description || data.wikipediaSummary;
@@ -264,13 +264,13 @@ export class CompanyEnrichmentOrchestrator {
         if (!dryRun && result.success) {
           try {
             await this.saveEnrichmentData(accountId, result.data);
-          } catch (saveError: any) {
+          } catch (saveError) {
             console.error(`Failed to save enrichment for ${accountId}:`, saveError);
-            result.error = `Enriched but save failed: ${saveError.message}`;
+            result.error = `Enriched but save failed: ${saveError instanceof Error ? saveError.message : 'Unknown error'}`;
             result.success = false;
           }
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error(`Critical error enriching ${accountId}:`, error);
         results.push({
           accountId,
@@ -279,7 +279,7 @@ export class CompanyEnrichmentOrchestrator {
           dataPoints: 0,
           sources: [],
           data: {},
-          error: `Critical error: ${error.message}`,
+          error: `Critical error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         });
       }
 

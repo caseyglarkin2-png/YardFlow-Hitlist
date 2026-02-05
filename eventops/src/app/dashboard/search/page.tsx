@@ -6,14 +6,14 @@ import { AdvancedFilters, FilterCondition } from '@/components/search/advanced-f
 import { SearchResults } from '@/components/search/search-results';
 import { SavedSearches } from '@/components/search/saved-searches';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Save, Search } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Download } from 'lucide-react';
 
 export default function AdvancedSearchPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [entityType, setEntityType] = useState<'accounts' | 'people' | 'outreach' | 'meetings'>('people');
   const [filters, setFilters] = useState<FilterCondition[]>([]);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Record<string, unknown>[]>([]);
   const [resultCount, setResultCount] = useState(0);
   const [searching, setSearching] = useState(false);
 
@@ -63,7 +63,7 @@ export default function AdvancedSearchPage() {
     a.click();
   }
 
-  function convertToCSV(data: any[]): string {
+  function convertToCSV(data: Record<string, unknown>[]): string {
     if (data.length === 0) return '';
 
     const headers = Object.keys(data[0]).join(',');
@@ -93,7 +93,7 @@ export default function AdvancedSearchPage() {
         </div>
       </div>
 
-      <Tabs value={entityType} onValueChange={(v) => setEntityType(v as any)} className="mb-6">
+      <Tabs value={entityType} onValueChange={(v) => setEntityType(v as 'accounts' | 'people' | 'outreach' | 'meetings')} className="mb-6">
         <TabsList>
           <TabsTrigger value="accounts">Accounts</TabsTrigger>
           <TabsTrigger value="people">People</TabsTrigger>
@@ -111,7 +111,7 @@ export default function AdvancedSearchPage() {
           
           <AdvancedFilters
             entityType={entityType}
-            onSearch={(advancedFilters) => {
+            onSearch={(_advancedFilters) => {
               // Convert AdvancedFilters to FilterCondition[] if needed
               handleSearch();
             }}

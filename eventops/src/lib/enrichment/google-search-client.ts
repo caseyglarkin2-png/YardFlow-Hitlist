@@ -55,11 +55,11 @@ export class GoogleSearchClient {
       }
 
       return results.slice(0, maxResults);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Google search error:', error);
       
       // If blocked, return empty results rather than failing
-      if (error.message?.includes('429') || error.message?.includes('captcha')) {
+      if (error instanceof Error && (error.message?.includes('429') || error.message?.includes('captcha'))) {
         console.warn('Google rate limit or captcha detected');
       }
       

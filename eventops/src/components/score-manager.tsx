@@ -15,7 +15,7 @@ export function ScoreManager({ accountId, currentScore }: Props) {
   const [showOverrideForm, setShowOverrideForm] = useState(false);
   const [overrideScore, setOverrideScore] = useState(currentScore?.toString() || '');
   const [overrideNotes, setOverrideNotes] = useState('');
-  const [breakdown, setBreakdown] = useState<any>(null);
+  const [breakdown, setBreakdown] = useState<Record<string, unknown> | null>(null);
 
   async function handleCalculate() {
     setIsCalculating(true);

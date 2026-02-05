@@ -108,7 +108,7 @@ export async function enrichContact(
       const hunterResult = (await Promise.race([
         findEmail(firstName, lastName, companyDomain),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout)),
-      ])) as any;
+      ])) as { email?: string; confidence?: number };
 
       if (hunterResult.email) {
         result.email = hunterResult.email;
@@ -188,7 +188,7 @@ export async function enrichContact(
 /**
  * Clearbit Person API enrichment
  */
-async function enrichWithClearbit(email: string): Promise<any> {
+async function enrichWithClearbit(email: string): Promise<Record<string, unknown> | null> {
   const apiKey = process.env.CLEARBIT_API_KEY;
   if (!apiKey) return null;
 

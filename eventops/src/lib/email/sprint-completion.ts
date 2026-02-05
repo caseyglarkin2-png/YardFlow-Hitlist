@@ -401,9 +401,9 @@ export async function sendSprintCompletionEmail(
 
     console.log('Sprint completion email sent:', data?.id);
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error sending sprint completion email:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 

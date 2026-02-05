@@ -59,7 +59,7 @@ export function wrapLinksWithTracking(htmlBody: string, outreachId: string): str
 export async function trackEmailActivity(
   outreachId: string,
   type: 'OPENED' | 'CLICKED' | 'RESPONDED',
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   try {
     await fetch('/api/outreach/activity', {

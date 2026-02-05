@@ -28,11 +28,11 @@ interface ABTest {
 }
 
 export default function ABTestingPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [tests, setTests] = useState<ABTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedTest, setSelectedTest] = useState<string | null>(null);
+  const [_selectedTest, setSelectedTest] = useState<string | null>(null);
 
   useEffect(() => {
     // In real implementation, fetch list of tests
@@ -40,7 +40,7 @@ export default function ABTestingPage() {
     setLoading(false);
   }, []);
 
-  async function createTest(formData: any) {
+  async function createTest(formData: Record<string, unknown>) {
     try {
       const res = await fetch('/api/ab-test', {
         method: 'POST',
@@ -63,7 +63,7 @@ export default function ABTestingPage() {
     }
   }
 
-  async function fetchTestResults(testId: string) {
+  async function _fetchTestResults(testId: string) {
     try {
       const res = await fetch(`/api/ab-test?testId=${testId}`);
       const data = await res.json();

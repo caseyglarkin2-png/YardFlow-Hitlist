@@ -143,7 +143,7 @@ async function fetchContactsPage(
     );
 
     return {
-      results: response.results.map((r: any) => ({
+      results: response.results.map((r: { createdAt: Date | string; updatedAt: Date | string; [key: string]: unknown }) => ({
         ...r,
         createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : r.createdAt,
         updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : r.updatedAt,

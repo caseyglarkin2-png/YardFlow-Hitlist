@@ -150,8 +150,8 @@ export async function syncContactToHubSpot(
 
     const data = await response.json();
     return { id: data.id, success: true };
-  } catch (error: any) {
-    return { id: 0, success: false, error: error.message };
+  } catch (error) {
+    return { id: 0, success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -178,8 +178,8 @@ export async function createHubSpotActivity(
     }
 
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 

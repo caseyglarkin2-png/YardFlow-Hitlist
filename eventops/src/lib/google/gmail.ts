@@ -121,12 +121,12 @@ export async function checkEmailReplies(userId: string): Promise<{
               data: { lastChecked: new Date() },
             });
           }
-        } catch (error: any) {
+        } catch (error) {
           console.error(`Error checking thread ${outreach.gmailThreadId}:`, error);
 
           await logGoogleAPICall(userId, 'gmail', 'threads.get', {
             threadId: outreach.gmailThreadId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           }, false);
 
           await prisma.outreach.update({

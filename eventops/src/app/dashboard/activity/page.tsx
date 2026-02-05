@@ -7,7 +7,7 @@ interface Activity {
   action: string;
   entityType: string;
   entityId: string | null;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
   user: {
     id: string;

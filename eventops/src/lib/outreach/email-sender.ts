@@ -23,7 +23,7 @@ export interface EmailRecipient {
   firstName?: string;
   lastName?: string;
   company?: string;
-  [key: string]: any;
+  [key: string]: string | undefined;
 }
 
 export interface EmailSendResult {
@@ -37,7 +37,7 @@ export interface EmailSendResult {
  */
 function substituteVariables(
   template: string,
-  variables: Record<string, any>
+  variables: Record<string, unknown>
 ): string {
   let result = template;
 
@@ -90,7 +90,7 @@ function rewriteLinksForTracking(html: string, trackingId: string): string {
  */
 function renderEmailHtml(
   body: string,
-  variables: Record<string, any>,
+  variables: Record<string, unknown>,
   trackingId: string
 ): string {
   // Substitute variables first
@@ -142,7 +142,7 @@ async function sendWithRetry(
   msg: sgMail.MailDataRequired,
   maxRetries: number = 3
 ): Promise<EmailSendResult> {
-  let lastError: any;
+  let lastError: unknown;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -155,11 +155,12 @@ async function sendWithRetry(
         success: true,
         messageId,
       };
-    } catch (error: any) {
+    } catch (error) {
       lastError = error;
       
       // Don't retry on permanent failures
-      if (error.code === 400 || error.code === 401 || error.code === 403) {
+      const errCode = (error as { code?: number })?.code;
+      if (errCode === 400 || errCode === 401 || errCode === 403) {
         break;
       }
       
@@ -172,7 +173,7 @@ async function sendWithRetry(
   }
   
   // All retries failed
-  const errorMessage = lastError?.response?.body?.errors?.[0]?.message || lastError?.message || 'Unknown error';
+  const errorMessage = (lastError as { response?: { body?: { errors?: Array<{ message?: string }> } }; message?: string })?.response?.body?.errors?.[0]?.message || (lastError as Error)?.message || 'Unknown error';
   
   return {
     success: false,
@@ -253,7 +254,7 @@ export async function sendEmail(
     });
     
     return result;
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error sending email', {
       enrollmentId,
       stepNumber,

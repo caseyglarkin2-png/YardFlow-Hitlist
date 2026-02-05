@@ -3,8 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-type EventStatus = 'PLANNING' | 'ACTIVE' | 'COMPLETED';
-
 export default function NewEventPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Upload,
   Link as LinkIcon,
   FileText,
   Play,
@@ -61,7 +60,7 @@ export default function TrainingPage() {
       const res = await fetch('/api/training/content');
       const data = await res.json();
       setContent(data.content || []);
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Failed to load content' });
     } finally {
       setLoading(false);
@@ -109,7 +108,7 @@ export default function TrainingPage() {
       await fetch(`/api/training/content/${id}`, { method: 'DELETE' });
       toast({ title: 'Content deleted' });
       loadContent();
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Failed to delete' });
     }
   }
@@ -288,7 +287,7 @@ export default function TrainingPage() {
 
 // Sub-components for import dialogs
 function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
-  const [files, setFiles] = useState<any[]>([]);
+  const [files, setFiles] = useState<Record<string, unknown>[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -303,7 +302,7 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
       const res = await fetch('/api/training/drive/list');
       const data = await res.json();
       setFiles(data.files || []);
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Failed to load files' });
     } finally {
       setLoading(false);
@@ -325,7 +324,7 @@ function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
       const data = await res.json();
       toast({ title: `Imported ${data.count} files` });
       onSuccess();
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Import failed' });
     } finally {
       setLoading(false);
@@ -395,7 +394,7 @@ function YouTubeImportDialog({ onSuccess }: { onSuccess: () => void }) {
 
       toast({ title: 'YouTube video imported' });
       onSuccess();
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Failed to import video' });
     } finally {
       setLoading(false);
@@ -441,7 +440,7 @@ function HubSpotImportDialog({ onSuccess }: { onSuccess: () => void }) {
       const data = await res.json();
       toast({ title: `Imported ${data.count} call recordings` });
       onSuccess();
-    } catch (error) {
+    } catch (_error) {
       toast({ title: 'Import failed' });
     } finally {
       setLoading(false);

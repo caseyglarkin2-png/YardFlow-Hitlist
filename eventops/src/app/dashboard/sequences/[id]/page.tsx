@@ -101,7 +101,7 @@ export default function SequenceDetailsPage({ params }: { params: { id: string }
     });
   };
 
-  const updateStep = (index: number, field: string, value: any) => {
+  const updateStep = (index: number, field: string, value: string | number | null) => {
     const newSteps = [...editData.steps];
     newSteps[index] = { ...newSteps[index], [field]: value };
     setEditData({ ...editData, steps: newSteps });

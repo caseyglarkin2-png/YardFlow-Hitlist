@@ -25,7 +25,7 @@ export async function createAuditLog(data: AuditLogData) {
           ipAddress: data.ipAddress,
           userAgent: data.userAgent,
           ...data.metadata 
-        } as any,
+        } as Record<string, unknown>,
       },
     });
 

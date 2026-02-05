@@ -120,7 +120,12 @@ export class WikipediaExtractor {
         return null;
       }
 
-      const page = pageValues[0] as any;
+      const page = pageValues[0] as {
+        missing?: boolean;
+        title?: string;
+        extract?: string;
+        revisions?: Array<Record<string, string>>;
+      };
       
       if (!page || page.missing || !page.title) {
         return null;
@@ -128,7 +133,7 @@ export class WikipediaExtractor {
 
       // Get infobox data if available
       const wikitext = page.revisions?.[0]?.['*'] || '';
-      const infobox = this.parseInfobox(wikitext);
+      const infobox = this.parseInfobox(wikitext as string);
 
       return {
         title: page.title,
@@ -248,7 +253,7 @@ export class WikipediaExtractor {
 
       const data = await response.json();
       const pages = data.query?.pages;
-      const page = Object.values(pages || {})[0] as any;
+      const page = Object.values(pages || {})[0] as { extract?: string } | undefined;
 
       return page?.extract || null;
     } catch (error) {

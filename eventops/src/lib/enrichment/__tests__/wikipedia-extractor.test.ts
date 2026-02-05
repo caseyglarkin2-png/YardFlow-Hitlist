@@ -28,7 +28,7 @@ describe('WikipediaExtractor', () => {
     });
 
     it('should handle null input', async () => {
-      const result = await extractor.searchCompany(null as any);
+      const result = await extractor.searchCompany(null as unknown as string);
       expect(result).toBeNull();
     });
   });

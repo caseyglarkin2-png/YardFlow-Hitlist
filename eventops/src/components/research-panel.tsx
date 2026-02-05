@@ -11,7 +11,7 @@ interface ResearchPanelProps {
 export function ResearchPanel({ accountId: _accountId, companyDossierId }: ResearchPanelProps) {
   const router = useRouter();
   const [isResearching, setIsResearching] = useState<string | null>(null);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<Record<string, unknown> | null>(null);
 
   const runResearch = async (type: 'facilities' | 'competitive' | 'locations') => {
     if (!companyDossierId) {

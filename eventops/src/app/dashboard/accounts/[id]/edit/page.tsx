@@ -8,7 +8,7 @@ export default function EditAccountPage({ params }: { params: { id: string } }) 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [account, setAccount] = useState<any>(null);
+  const [account, setAccount] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     async function fetchAccount() {

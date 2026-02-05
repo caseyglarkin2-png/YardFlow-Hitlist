@@ -12,7 +12,7 @@ function DossierPageContent() {
   const searchParams = useSearchParams();
   const accountId = searchParams.get('accountId') || undefined;
   
-  const [dossier, setDossier] = useState<any>(null);
+  const [dossier, setDossier] = useState<Record<string, unknown> | null>(null);
   const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ function DossierPageContent() {
       if (!response.ok) throw new Error('Failed to load companies');
       const data = await response.json();
       setCompanies(
-        data.accounts.map((acc: any) => ({
+        data.accounts.map((acc: { id: string; company_name: string }) => ({
           id: acc.id,
           name: acc.company_name,
         }))
@@ -60,8 +60,8 @@ function DossierPageContent() {
 
       const company = companies.find((c) => c.id === accId);
       if (company) setSelectedCompanyName(company.name);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -91,8 +91,8 @@ function DossierPageContent() {
       if (!dryRun) {
         await loadDossier(accId);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }

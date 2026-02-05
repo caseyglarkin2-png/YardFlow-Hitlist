@@ -115,9 +115,9 @@ export async function enrollContact(
     });
 
     return { success: true, enrollmentId: enrollment.id };
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error enrolling contact', { sequenceId, personId, error });
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -233,9 +233,9 @@ export async function processStep(enrollmentId: string): Promise<{ success: bool
     await advanceEnrollment(enrollmentId);
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Error processing sequence step', { enrollmentId, error });
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 

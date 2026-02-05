@@ -20,7 +20,7 @@ interface Notification {
   message: string;
   read: boolean;
   createdAt: string;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
 }
 
 export function NotificationBell() {

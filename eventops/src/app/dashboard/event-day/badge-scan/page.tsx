@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Upload, X } from "lucide-react";
+import { Camera, X } from "lucide-react";
 
 export default function BadgeScanPage() {
   const router = useRouter();
   const [scanning, setScanning] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<Record<string, unknown> | null>(null);
   const [manualEdit, setManualEdit] = useState({
     name: "",
     title: "",

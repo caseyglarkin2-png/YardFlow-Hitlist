@@ -23,7 +23,7 @@ export async function generateContactInsights(
   personName: string,
   personTitle: string | null,
   persona: string,
-  companyDossier: any
+  companyDossier: Record<string, unknown>
 ): Promise<ContactInsightData> {
   const prompt = `Analyze this contact and generate persona-specific insights:
 
@@ -73,7 +73,7 @@ Return ONLY valid JSON, no markdown formatting.`;
   }
 }
 
-export function getPersonaLabel(person: any): string {
+export function getPersonaLabel(person: Record<string, unknown>): string {
   if (person.isExecOps) return "Executive Operations Leader";
   if (person.isOps) return "Operations Professional";
   if (person.isProc) return "Procurement Specialist";

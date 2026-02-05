@@ -6,13 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 interface Column {
   key: string;
   label: string;
-  render?: (value: any, row: any) => React.ReactNode;
+  render?: (value: unknown, row: Record<string, unknown>) => React.ReactNode;
 }
 
 interface DataTableWidgetProps {
   title: string;
   columns: Column[];
-  data: any[];
+  data: Record<string, unknown>[];
   maxRows?: number;
 }
 

@@ -16,7 +16,7 @@ export function buildPrismaWhere(filters: AdvancedFilters): PrismaFilter {
   }
 }
 
-function conditionToPrisma(condition: FilterCondition): any {
+function conditionToPrisma(condition: FilterCondition): PrismaFilter {
   const { field, operator, value } = condition;
 
   switch (operator) {
@@ -43,7 +43,7 @@ function conditionToPrisma(condition: FilterCondition): any {
   }
 }
 
-export function exportToCSV(data: any[], filename: string) {
+export function exportToCSV(data: Record<string, unknown>[], filename: string) {
   if (data.length === 0) return;
 
   // Get headers from first object
@@ -78,7 +78,7 @@ export function exportToCSV(data: any[], filename: string) {
   document.body.removeChild(link);
 }
 
-export function formatSearchResults(results: any[], entityType: string) {
+export function formatSearchResults(results: Record<string, unknown>[], entityType: string) {
   return results.map((result) => ({
     ...result,
     entityType,

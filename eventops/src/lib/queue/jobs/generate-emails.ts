@@ -39,7 +39,7 @@ export async function processGenerateEmails(
       skipped: result.skipped,
       pattern: result.pattern ?? null,
     };
-  } catch (error: any) {
+  } catch (error) {
     logger.error('Generate emails job failed', { accountId, error });
     
     return {
@@ -48,7 +48,7 @@ export async function processGenerateEmails(
       emailsGenerated: 0,
       skipped: 0,
       pattern: null,
-      error: error.message,
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

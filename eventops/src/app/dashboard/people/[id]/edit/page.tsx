@@ -8,8 +8,8 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [person, setPerson] = useState<any>(null);
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [person, setPerson] = useState<Record<string, unknown> | null>(null);
+  const [accounts, setAccounts] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
     async function fetchData() {

@@ -2,14 +2,13 @@
 
 import React, { useState } from 'react';
 import { ContentGenerator } from '@/components/ai/ContentGenerator';
-import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export default function ContentGeneratorPage() {
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = async (request: any) => {
+  const handleGenerate = async (request: Record<string, unknown>) => {
     setError(null);
     try {
       const response = await fetch('/api/ai/content/generate', {
@@ -25,8 +24,8 @@ export default function ContentGeneratorPage() {
 
       const data = await response.json();
       return data.content;
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
       throw err;
     }
   };

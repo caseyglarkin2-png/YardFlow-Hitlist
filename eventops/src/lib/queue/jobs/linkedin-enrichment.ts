@@ -53,10 +53,10 @@ export async function processLinkedInEnrichment(
 
         // Rate limit: 1 request per second
         await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error: any) {
+      } catch (error) {
         errors++;
         if (errorMessages.length < 10) {
-          errorMessages.push(`${person.name}: ${error.message}`);
+          errorMessages.push(`${person.name}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     }
@@ -78,7 +78,7 @@ export async function processLinkedInEnrichment(
       errors,
       errorMessages,
     };
-  } catch (error: any) {
+  } catch (error) {
     logger.error('LinkedIn enrichment job failed', { accountId, error });
     
     return {
@@ -88,7 +88,7 @@ export async function processLinkedInEnrichment(
       enriched: 0,
       notFound: 0,
       errors: 1,
-      errorMessages: [error.message],
+      errorMessages: [error instanceof Error ? error.message : String(error)],
     };
   }
 }

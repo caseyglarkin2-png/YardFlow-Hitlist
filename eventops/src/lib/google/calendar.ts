@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { google, calendar_v3 } from 'googleapis';
 import { getGoogleClient } from './auth';
 import { prisma } from '@/lib/db';
 import { withSyncLock } from './sync-lock';
@@ -55,7 +55,7 @@ export async function syncCalendarEvents(
     const timeMin = new Date();
     timeMin.setDate(timeMin.getDate() - daysToSync);
 
-    const allEvents: any[] = [];
+    const allEvents: calendar_v3.Schema$Event[] = [];
     let pageToken: string | undefined;
 
     // Paginated fetch
@@ -93,7 +93,7 @@ export async function syncCalendarEvents(
           const endTime = event.end?.dateTime || event.end?.date;
           const description = event.description || null;
           const location = event.location || null;
-          const attendees = event.attendees?.map((a: any) => a.email) || [];
+          const attendees = event.attendees?.map((a) => a.email) || [];
 
           if (!startTime) {
             skipped.push({

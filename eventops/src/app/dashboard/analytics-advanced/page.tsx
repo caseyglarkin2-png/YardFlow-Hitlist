@@ -85,7 +85,7 @@ export default function AdvancedAnalyticsPage() {
             <div className="p-6">
               <div className="space-y-4">
                 {funnel.map((stage, index) => {
-                  const maxWidth = 100;
+                  const _maxWidth = 100;
                   const width = stage.percentage;
                   const color =
                     stage.percentage >= 50

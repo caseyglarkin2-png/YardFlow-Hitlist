@@ -4,7 +4,7 @@ export async function logGoogleAPICall(
   userId: string,
   service: 'calendar' | 'gmail' | 'contacts',
   operation: string,
-  metadata: Record<string, any> = {},
+  metadata: Record<string, unknown> = {},
   success: boolean = true
 ) {
   const logEntry = {

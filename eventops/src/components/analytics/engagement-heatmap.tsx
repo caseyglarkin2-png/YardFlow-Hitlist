@@ -72,7 +72,7 @@ export function EngagementHeatmap() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Select value={metric} onValueChange={(v: any) => setMetric(v)}>
+            <Select value={metric} onValueChange={(v) => setMetric(v as 'opens' | 'clicks' | 'replies')}>
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>

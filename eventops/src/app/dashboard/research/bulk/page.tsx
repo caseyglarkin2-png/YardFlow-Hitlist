@@ -32,7 +32,7 @@ interface BulkStatus {
 }
 
 export default function BulkResearchPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);

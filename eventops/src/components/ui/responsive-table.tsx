@@ -14,13 +14,13 @@ import { Card } from '@/components/ui/card';
 interface Column {
   key: string;
   label: string;
-  render?: (value: any, row: any) => ReactNode;
+  render?: (value: unknown, row: Record<string, unknown>) => ReactNode;
 }
 
 interface ResponsiveTableProps {
   columns: Column[];
-  data: any[];
-  onRowClick?: (row: any) => void;
+  data: Record<string, unknown>[];
+  onRowClick?: (row: Record<string, unknown>) => void;
 }
 
 export function ResponsiveTable({

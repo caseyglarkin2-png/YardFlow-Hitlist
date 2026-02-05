@@ -62,7 +62,7 @@ export class WebsiteScraper {
       };
 
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error(`Website scraping error for ${companyName}:`, error);
       throw error;
     }
@@ -97,8 +97,8 @@ export class WebsiteScraper {
       if (hostname.match(/^(10|172\.(1[6-9]|2[0-9]|3[01])|192\.168)\./)) {
         throw new Error('Cannot fetch private IP addresses');
       }
-    } catch (error: any) {
-      throw new Error(`Invalid URL: ${error.message}`);
+    } catch (error) {
+      throw new Error(`Invalid URL: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     const response = await fetch(url, {

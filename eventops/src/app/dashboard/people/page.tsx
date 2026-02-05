@@ -41,7 +41,7 @@ export default async function PeoplePage({
   }
 
   // Build where clause with filters
-  const where: any = {
+  const where: Record<string, unknown> = {
     target_accounts: {
       eventId: user.activeEventId,
     },
