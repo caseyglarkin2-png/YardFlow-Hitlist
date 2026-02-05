@@ -18,14 +18,15 @@ Manifest Sequence Template:
 "
 `;
 
-exports[`VOICE_CONFIGS > matches snapshots for prompts > luis 1`] = `
-"Voice: Luis (short, punchy, metrics-first)
+exports[`VOICE_CONFIGS > matches snapshots for prompts > freightroll 1`] = `
+"Voice: FreightRoll (short, punchy, metrics-first)
 
 Rules:
 - Short opener. No fluff.
-- Use Primo proof: include at least one hard metric token (examples: "$1M", "4%", "25 facilities").
+- Use concrete proof: include at least one hard metric token (examples: "$1M", "4%", "25 facilities").
 - Ask exactly one direct question.
 - Include Calendly link.
+- Sign off as "The FreightRoll Team" or simply "FreightRoll".
 - Avoid long paragraphs. Avoid emojis.
 - Output must be usable for cold outreach.
 

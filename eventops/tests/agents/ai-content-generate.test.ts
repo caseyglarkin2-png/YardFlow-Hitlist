@@ -55,7 +55,7 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        tone: 'luis',
+        tone: 'freightroll',
         context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );
@@ -93,7 +93,7 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        tone: 'luis',
+        tone: 'freightroll',
         context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );
@@ -104,7 +104,7 @@ describe('POST /api/ai/content/generate', () => {
     expect(typeof json.content).toBe('string');
   });
 
-  it('repairs luis content to satisfy constraints', async () => {
+  it('repairs freightroll content to satisfy constraints', async () => {
     mockAuth.mockResolvedValue({ type: 'service', userId: 'service:test' });
     generateContentMock
       .mockResolvedValueOnce(
@@ -115,7 +115,7 @@ describe('POST /api/ai/content/generate', () => {
     const res = await POST(
       createRequest({
         type: 'email',
-        tone: 'luis',
+        tone: 'freightroll',
         context: { prospectName: 'Casey', companyName: 'FreightRoll' },
       })
     );

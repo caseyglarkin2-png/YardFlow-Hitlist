@@ -13,7 +13,8 @@ import { TemplateTone, OutreachChannel } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
-const ToneSchema = z.enum(['LUIS', 'PROFESSIONAL', 'CHALLENGER']);
+// Accept both FREIGHTROLL (preferred) and LUIS (legacy) - stored as LUIS in DB
+const ToneSchema = z.enum(['FREIGHTROLL', 'LUIS', 'PROFESSIONAL', 'CHALLENGER']);
 const ChannelSchema = z.enum(['EMAIL', 'LINKEDIN', 'PHONE']);
 
 const UpdateTemplateSchema = z.object({

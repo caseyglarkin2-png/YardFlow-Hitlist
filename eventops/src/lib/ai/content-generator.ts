@@ -13,12 +13,15 @@ export type GeneratedContent = {
   content: string;
 };
 
-export type LuisValidationIssue =
+export type FreightRollValidationIssue =
   | 'missing_calendly_link'
   | 'missing_metric'
   | 'missing_question'
   | 'too_many_questions'
   | 'too_long';
+
+/** @deprecated Use FreightRollValidationIssue */
+export type LuisValidationIssue = FreightRollValidationIssue;
 
 const METRIC_TOKEN_REGEX =
   /(\$\d+[kKmMbB]?|\d+(?:\.\d+)?%|\d+\s+(?:facilities|yards|sites|locations|dc|dcs|warehouses))/;
@@ -62,8 +65,11 @@ export function parseModelJson(text: string): GeneratedContent {
   return { subject, content };
 }
 
-export function validateLuisOutput(content: string, calendlyLink: string): LuisValidationIssue[] {
-  const issues: LuisValidationIssue[] = [];
+export function validateFreightRollOutput(
+  content: string,
+  calendlyLink: string
+): FreightRollValidationIssue[] {
+  const issues: FreightRollValidationIssue[] = [];
 
   if (!content.includes(calendlyLink)) {
     issues.push('missing_calendly_link');
@@ -116,10 +122,10 @@ function ensureCalendly(content: string, calendlyLink: string): string {
   return `${content.replace(/\s+$/, '')} ${calendlyLink}`;
 }
 
-export function enforceLuisConstraints(
+export function enforceFreightRollConstraints(
   content: string,
   calendlyLink: string
-): { content: string; issues: LuisValidationIssue[] } {
+): { content: string; issues: FreightRollValidationIssue[] } {
   let adjusted = content.trim();
 
   adjusted = ensureMetric(adjusted);
@@ -127,19 +133,32 @@ export function enforceLuisConstraints(
   adjusted = ensureSingleQuestion(adjusted);
   adjusted = clampContent(adjusted, 250);
 
-  const issues = validateLuisOutput(adjusted, calendlyLink);
+  const issues = validateFreightRollOutput(adjusted, calendlyLink);
   return { content: adjusted, issues };
 }
 
-export function buildLuisRepairPrompt(context: ContentContext, calendlyLink: string): string {
+/** @deprecated Use enforceFreightRollConstraints */
+export const enforceLuisConstraints = enforceFreightRollConstraints;
+
+export function buildFreightRollRepairPrompt(
+  context: ContentContext,
+  calendlyLink: string
+): string {
   const base = buildPrompt(context).prompt;
   return compactLines([
     base,
-    'STRICT CONSTRAINTS FOR LUIS:',
+    'STRICT CONSTRAINTS FOR FREIGHTROLL TONE:',
     '- Content <= 250 characters.',
     '- Include Calendly link exactly as provided.',
     '- Include at least one metric token like "$1M", "4%", or "25 facilities".',
     '- Exactly one question mark in the content.',
+    '- Sign off as FreightRoll or The FreightRoll Team.',
     `Calendly link: ${calendlyLink}`,
   ]);
 }
+
+/** @deprecated Use buildFreightRollRepairPrompt */
+export const buildLuisRepairPrompt = buildFreightRollRepairPrompt;
+
+/** @deprecated Use validateFreightRollOutput */
+export const validateLuisOutput = validateFreightRollOutput;

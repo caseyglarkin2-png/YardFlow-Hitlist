@@ -1,4 +1,4 @@
-export type VoiceTone = 'luis' | 'professional' | 'challenger';
+export type VoiceTone = 'freightroll' | 'professional' | 'challenger';
 
 export type VoiceConfig = {
   tone: VoiceTone;
@@ -15,15 +15,16 @@ const MANIFEST_SEQUENCE_TEMPLATE = `Manifest Sequence Template:
 - Length: Tight, skimmable, no fluff.`;
 
 export const VOICE_CONFIGS: Record<VoiceTone, VoiceConfig> = {
-  luis: {
-    tone: 'luis',
-    prompt: `Voice: Luis (short, punchy, metrics-first)
+  freightroll: {
+    tone: 'freightroll',
+    prompt: `Voice: FreightRoll (short, punchy, metrics-first)
 
 Rules:
 - Short opener. No fluff.
-- Use Primo proof: include at least one hard metric token (examples: "$1M", "4%", "25 facilities").
+- Use concrete proof: include at least one hard metric token (examples: "$1M", "4%", "25 facilities").
 - Ask exactly one direct question.
 - Include Calendly link.
+- Sign off as "The FreightRoll Team" or simply "FreightRoll".
 - Avoid long paragraphs. Avoid emojis.
 - Output must be usable for cold outreach.
 

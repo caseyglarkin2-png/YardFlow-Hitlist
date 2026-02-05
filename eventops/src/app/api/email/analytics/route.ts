@@ -75,23 +75,26 @@ export async function GET(request: NextRequest) {
       }),
     ]);
 
-    // Calculate rates
-    const openRate = sentCount > 0 ? (openedCount / sentCount) * 100 : 0;
-    const clickRate = sentCount > 0 ? (clickedCount / sentCount) * 100 : 0;
-    const replyRate = sentCount > 0 ? (repliedCount / sentCount) * 100 : 0;
-    const bounceRate = sentCount > 0 ? (bouncedCount / sentCount) * 100 : 0;
+    // Calculate rates (as decimals for frontend: 0.31 = 31%)
+    const openRate = sentCount > 0 ? openedCount / sentCount : 0;
+    const clickRate = sentCount > 0 ? clickedCount / sentCount : 0;
+    const replyRate = sentCount > 0 ? repliedCount / sentCount : 0;
+    const bounceRate = sentCount > 0 ? bouncedCount / sentCount : 0;
 
+    // Frontend-compatible format (per RAILWAY_API_CONTRACT.md)
     const summary = {
       sent: sentCount,
       delivered: deliveredCount,
-      opened: openedCount,
-      clicked: clickedCount,
+      opens: openedCount, // Frontend expects 'opens' not 'opened'
+      clicks: clickedCount, // Frontend expects 'clicks' not 'clicked'
+      bounces: bouncedCount, // Frontend expects 'bounces' not 'bounced'
+      complaints: 0, // We don't track complaints yet
+      openRate: Math.round(openRate * 100) / 100, // As decimal (0.31)
+      clickRate: Math.round(clickRate * 100) / 100, // As decimal (0.08)
+      bounceRate: Math.round(bounceRate * 100) / 100, // As decimal (0.02)
+      // Additional fields for internal use
       replied: repliedCount,
-      bounced: bouncedCount,
-      openRate: Math.round(openRate * 10) / 10,
-      clickRate: Math.round(clickRate * 10) / 10,
-      replyRate: Math.round(replyRate * 10) / 10,
-      bounceRate: Math.round(bounceRate * 10) / 10,
+      replyRate: Math.round(replyRate * 100) / 100,
     };
 
     // Get daily breakdown if groupBy is 'day'
@@ -126,15 +129,16 @@ export async function GET(request: NextRequest) {
       byPeriod = dailyStats.map((d) => ({
         period: d.date,
         sent: Number(d.sent),
-        opened: Number(d.opened),
-        clicked: Number(d.clicked),
+        opens: Number(d.opened),
+        clicks: Number(d.clicked),
         replied: Number(d.replied),
       }));
     }
 
+    // Return flat response per RAILWAY_API_CONTRACT.md
     return NextResponse.json({
-      summary,
-      byPeriod,
+      ...summary,
+      ...(byPeriod ? { byPeriod } : {}),
     });
   } catch (err) {
     logger.error('Failed to get email analytics', { error: String(err) });

@@ -8,8 +8,17 @@ export const dynamic = 'force-dynamic';
 /**
  * Generate daily breakdown for a date range
  */
-function generateDailyData(startDate: Date, endDate: Date): Array<{ date: string; sent: number; opened: number; clicked: number; bounced: number }> {
-  const days: Array<{ date: string; sent: number; opened: number; clicked: number; bounced: number }> = [];
+function generateDailyData(
+  startDate: Date,
+  endDate: Date
+): Array<{ date: string; sent: number; opened: number; clicked: number; bounced: number }> {
+  const days: Array<{
+    date: string;
+    sent: number;
+    opened: number;
+    clicked: number;
+    bounced: number;
+  }> = [];
   const current = new Date(startDate);
   while (current <= endDate) {
     days.push({
@@ -121,10 +130,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Generate daily breakdown if requested
-    let dailyData: Array<{ date: string; sent: number; opened: number; clicked: number; bounced: number }> | undefined;
+    let dailyData:
+      | Array<{ date: string; sent: number; opened: number; clicked: number; bounced: number }>
+      | undefined;
     if (groupBy === 'day') {
       dailyData = generateDailyData(startDate, new Date());
-      
+
       // Get all outreach records and populate daily data
       const outreaches = await prisma.outreach.findMany({
         where: {
@@ -139,7 +150,7 @@ export async function GET(request: NextRequest) {
       for (const outreach of outreaches) {
         if (outreach.sentAt) {
           const dateKey = outreach.sentAt.toISOString().split('T')[0];
-          const dayEntry = dailyData.find(d => d.date === dateKey);
+          const dayEntry = dailyData.find((d) => d.date === dateKey);
           if (dayEntry) {
             dayEntry.sent++;
             if (outreach.status === 'OPENED' || outreach.status === 'RESPONDED') {

@@ -13,17 +13,18 @@ import { logger } from '@/lib/logger';
 import { generateContent } from '@/lib/ai/provider';
 import {
   buildPrompt,
-  buildLuisRepairPrompt,
-  enforceLuisConstraints,
+  buildFreightRollRepairPrompt,
+  enforceFreightRollConstraints,
   parseModelJson,
-  validateLuisOutput,
+  validateFreightRollOutput,
   type ContentContext,
 } from '@/lib/ai/content-generator';
 import { VOICE_CONFIGS } from '@/lib/ai/voiceConfigs';
 
 export const dynamic = 'force-dynamic';
 
-const ToneSchema = z.enum(['luis', 'professional', 'challenger']);
+// Support both 'freightroll' and 'luis' (deprecated alias)
+const ToneSchema = z.enum(['freightroll', 'luis', 'professional', 'challenger']);
 
 const RequestSchema = z.object({
   type: z.literal('email'),
@@ -108,14 +109,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'validation_error', details }, { status: 400 });
     }
 
-    const { context, tone, goal } = parsed.data;
+    const { context, tone: rawTone, goal } = parsed.data;
 
-    if (!VOICE_CONFIGS[tone]) {
+    // Map 'luis' to 'freightroll' for backward compatibility
+    const tone = rawTone === 'luis' ? 'freightroll' : rawTone;
+
+    if (!VOICE_CONFIGS[tone as keyof typeof VOICE_CONFIGS]) {
       return NextResponse.json({ error: 'invalid_tone' }, { status: 400 });
     }
 
     const calendlyLink = process.env.CALENDLY_LINK || process.env.CALENDLY_URL || '';
-    if (tone === 'luis' && !calendlyLink) {
+    if (tone === 'freightroll' && !calendlyLink) {
       logger.error('AI content generate missing Calendly link', { requestId, tone });
       return NextResponse.json({ error: 'missing_calendly_link' }, { status: 500 });
     }
@@ -125,7 +129,7 @@ export async function POST(request: NextRequest) {
       companyName: context.companyName,
       title: context.title,
       goal: goal,
-      tone,
+      tone: tone as 'freightroll' | 'professional' | 'challenger',
     };
 
     const { prompt, promptVersion } = buildPrompt(contentContext);
@@ -141,17 +145,17 @@ export async function POST(request: NextRequest) {
     const fallbackUsed = result.fallbackUsed;
 
     let validationIssues: string[] = [];
-    if (tone === 'luis' && calendlyLink) {
-      const issues = validateLuisOutput(generated.content, calendlyLink);
+    if (tone === 'freightroll' && calendlyLink) {
+      const issues = validateFreightRollOutput(generated.content, calendlyLink);
       if (issues.length > 0) {
-        const repairPrompt = buildLuisRepairPrompt(contentContext, calendlyLink);
+        const repairPrompt = buildFreightRollRepairPrompt(contentContext, calendlyLink);
         const repairResult = await generateContent(repairPrompt, {
           temperature: 0.2,
           maxTokens: 200,
         });
         generated = parseModelJson(repairResult.content);
 
-        const enforced = enforceLuisConstraints(generated.content, calendlyLink);
+        const enforced = enforceFreightRollConstraints(generated.content, calendlyLink);
         generated = { ...generated, content: enforced.content };
         validationIssues = enforced.issues;
       }
