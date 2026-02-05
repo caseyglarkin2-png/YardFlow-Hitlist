@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const { error, response } = await requireAuth(request);
@@ -17,6 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(person);
   } catch (err) {
+    captureRouteError(err, { route: '/api/prospects/[id]', method: 'GET' });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -49,6 +51,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(updated);
   } catch (err) {
+    captureRouteError(err, { route: '/api/prospects/[id]', method: 'PUT' });
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }

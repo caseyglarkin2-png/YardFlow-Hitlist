@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 import { db as prisma } from '@/lib/db';
 import {
   personToHubSpotContact,
@@ -93,6 +94,7 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (error) {
+      captureRouteError(error, { route: '/api/crm/hubspot/sync', method: 'POST', userId: authResult?.userId });
       results.failed++;
       results.errors.push(
         `Error syncing ${personId}: ${error instanceof Error ? error.message : 'Unknown error'}`

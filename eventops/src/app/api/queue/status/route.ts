@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { captureRouteError } from '@/lib/sentry-utils';
 import { getRedisConnection } from '@/lib/queue/client';
 import { emailQueue, enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib/queue/queues';
 
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
+    captureRouteError(error, { route: '/api/queue/status', method: 'GET', userId: authResult?.userId });
     return NextResponse.json(
       {
         status: 'error',
