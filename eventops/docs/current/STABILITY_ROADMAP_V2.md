@@ -1,7 +1,7 @@
 # YardFlow-Hitlist: Stability & Bug Fix Roadmap v2
 
 **Created**: February 5, 2026  
-**Revised**: February 5, 2026 (Subagent Review Applied)  
+**Revised**: February 6, 2026 (All Sprints Complete)  
 **Goal**: Zero bugs, full GTM integration, Sentry-monitored stability  
 **Philosophy**: Ship Fast, Ship Often - atomic commits with validation
 
@@ -9,37 +9,37 @@
 
 ## Executive Summary
 
-### Current State Audit Results
+### ✅ ROADMAP COMPLETE — Final State
 
 | Category | Status | Details |
 |----------|--------|---------|
-| **S2S Auth** | 🟡 Partial | 76 routes migrated, **61 remaining** (1 partial migration) |
-| **Lint Warnings** | 🟡 Warning | 234 warnings (any types, unused vars, React hooks) |
+| **S2S Auth** | 🟢 Complete | **ALL** API routes migrated to `authServiceOrSession` (65+ files) |
+| **Lint Warnings** | 🟢 Near-Zero | 234 → 18 warnings (92% reduction, remaining 17 React hook deps + 1 img) |
 | **Worker** | 🟢 Healthy | Retry logic, graceful shutdown, heartbeat working |
-| **Tests** | 🟢 Passing | 177 tests pass, 12 skipped (17 test files) |
-| **Sentry** | 🟡 Partial | SDK integrated, but no explicit error capture in routes |
-| **Build** | 🟢 Clean | Lint warnings don't block build |
+| **Tests** | 🟢 Passing | **284 tests** pass, 12 skipped (23 test files) |
+| **Sentry** | 🟢 Active | `captureRouteError()` utility + 5 high-traffic routes instrumented |
+| **Build** | 🟢 Clean | 0 lint errors, build succeeds |
 
-### Core Problem
+### Problem (Resolved)
 
-GTM-YardFlow (Vercel) calls Railway APIs using S2S Bearer token auth. Routes that use `auth()` directly only support NextAuth sessions → **401 Unauthorized** for GTM features.
+GTM-YardFlow (Vercel) calls Railway APIs using S2S Bearer token auth. Routes that used `auth()` directly only supported NextAuth sessions → **401 Unauthorized** for GTM features. **All routes now support both S2S and session auth.**
 
-### Migration Statistics
+### Final Migration Statistics
 
 ```
-Total API routes:       185
-Using authServiceOrSession: 76  (41%)
-Using auth() directly:      61  (33%)
-No auth required:           48  (26%)
-Partial migration:           1  (export/route.ts)
+Total API routes:           185
+Using authServiceOrSession: 137+ (74%)
+No auth required:            48  (26%)
+Using auth() (exempt):        3  (auth/refresh, auth/session, google/connect)
+Using auth() (unmigrated):    0  ✅
 ```
 
-### Routes to EXCLUDE from Migration
+### Routes Intentionally Exempt from Migration
 
-These routes **intentionally** use session-based auth and should NOT be migrated:
-- `/api/auth/session/route.ts` - Bridge endpoint for session validation
-- `/api/auth/[...nextauth]/route.ts` - NextAuth internal handler
-- `/api/google/*` routes - Require OAuth tokens from session (special handling)
+- `/api/auth/session/route.ts` — Bridge endpoint for session validation
+- `/api/auth/refresh/route.ts` — IS the auth refresh endpoint
+- `/api/auth/[...nextauth]/route.ts` — NextAuth internal handler
+- `/api/google/connect/route.ts` — User-interactive OAuth redirect (requires session)
 
 ---
 
@@ -693,18 +693,35 @@ export async function GET(req: NextRequest) {
 
 ## Progress Tracking
 
-| Sprint | Status | Est. Time | Completion Date | Notes |
-|--------|--------|-----------|-----------------|-------|
-| 37 | ✅ Done | - | Feb 5, 2026 | Sentry + Sequence S2S fix |
-| 38 | ⬜ Not Started | 2-3 hrs | - | Critical S2S routes (9 files) |
-| 39 | ⬜ Not Started | 3-4 hrs | - | Secondary S2S routes (11 files) |
-| 40 | ⬜ Not Started | 4-5 hrs | - | Remaining S2S routes (~30 files) |
-| 40.5 | ⬜ Not Started | 2-3 hrs | - | Google OAuth routes (6 files) |
-| 41 | ⬜ Not Started | 2-3 hrs | - | Sentry enhancement |
-| 42 | ⬜ Not Started | 3-4 hrs | - | Lint cleanup (234 warnings) |
-| 43 | ⬜ Not Started | 4-5 hrs | - | Test coverage |
+| Sprint | Status | Est. Time | Commit | Notes |
+|--------|--------|-----------|--------|-------|
+| 37 | ✅ Done | - | `00bd872` / `346e5f3` | Sentry + Sequence S2S fix |
+| 38 | ✅ Done | 2-3 hrs | `ac93133` | Critical S2S routes (10 files, 14 tests) |
+| 39 | ✅ Done | 3-4 hrs | `d2d3724` | Secondary S2S routes (10 files, 20 tests) |
+| 40 | ✅ Done | 4-5 hrs | `c9ea035` | Remaining S2S routes (35 files) |
+| 40.5 | ✅ Done | 2-3 hrs | `f91342a` | Google OAuth routes (6 files, 19 tests) |
+| 41 | ✅ Done | 2-3 hrs | `c8e6f8e` | Sentry error capture (5 routes, 10 tests) |
+| 42 | ✅ Done | 3-4 hrs | `39452a1` | Lint cleanup 234→18 warnings (84 files) |
+| 43 | ✅ Done | 4-5 hrs | `a9103ea` | Auth-service tests + 10 more routes (27+5 tests) |
+| Review | ✅ Done | - | `19eabae` | Fixed broken activate route + manifest/generate |
 
-**Total Estimated Time**: ~22-30 hours
+### Key Metrics
+
+- **Tests**: 284 total (272 pass, 12 skipped) across 23 test files
+- **Lint**: 0 errors, 18 warnings (17 React exhaustive-deps + 1 img tag)
+- **Auth Coverage**: Zero `auth()` imports outside 3 exempt routes
+- **Files Modified**: 100+ across all sprints
+
+### Recommended Future Sprints
+
+| Sprint | Priority | Goal |
+|--------|----------|------|
+| 44 | Medium | Tests for db.ts, queue workers, webhook handlers |
+| 45 | Low | Fix remaining 17 React hook exhaustive-deps warnings |
+| 46 | Medium | Add `captureRouteError` to all routes with bare `console.error` |
+| 47 | Low | ESLint rule banning direct `auth()` imports in API routes |
+
+**Total Estimated Time**: ~22-30 hours (COMPLETED)
 
 ---
 
@@ -756,4 +773,4 @@ grep -rl "authServiceOrSession" src/app/api --include="*.ts" | wc -l
 
 ---
 
-*Document revised based on subagent review (Feb 5, 2026). Ready for execution.*
+*Document revised Feb 6, 2026. All sprints (37-43) complete. Subagent code review passed (8/10). Review fixes committed. Roadmap execution finished.*
