@@ -167,6 +167,14 @@ model outreach {
   @@index([gmailThreadId])
   @@index([lastChecked])
   @@index([status, lastChecked])
+  // Sprint 53: Performance indexes for common query patterns
+  @@index([sentAt])
+  @@index([status, sentAt])
+  @@index([updatedAt])
+  @@index([createdAt])
+  @@index([channel])
+  @@index([sequenceId])
+  @@index([openedAt])
 }
 
 model people {
@@ -209,6 +217,8 @@ model people {
 
   @@index([accountId])
   @@index([assignedTo])
+  // Sprint 53: Email lookups for webhooks (inbound, Calendly)
+  @@index([email])
 }
 
 model roi_calculations {
@@ -328,6 +338,8 @@ model target_accounts {
 
   @@index([eventId])
   @@index([assignedTo])
+  // Sprint 53: ICP score filtering/sorting on dashboard
+  @@index([icpScore])
 }
 
 model users {

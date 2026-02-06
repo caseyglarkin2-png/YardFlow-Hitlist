@@ -1,87 +1,81 @@
-// Rate limiting middleware using in-memory store
-// For distributed systems, use Redis with ioredis
+/**
+ * Shared Redis-backed rate limiter
+ *
+ * Uses Redis INCR + EXPIRE for a sliding-window counter.
+ * Falls back to allowing requests if Redis is unavailable (fail-open).
+ *
+ * Usage:
+ *   const result = await checkRateLimit('ai:content:user123', 10, 60);
+ *   if (!result.allowed) {
+ *     return NextResponse.json({ error: 'Rate limit exceeded' }, {
+ *       status: 429,
+ *       headers: { 'Retry-After': String(result.retryAfter) },
+ *     });
+ *   }
+ */
 
-interface RateLimitEntry {
-  count: number;
-  resetAt: number;
+import { getRedisConnection } from '@/lib/queue/client';
+import { logger } from '@/lib/logger';
+
+export interface RateLimitResult {
+  allowed: boolean;
+  retryAfter?: number;
+  remaining?: number;
 }
 
-class RateLimiter {
-  private limits: Map<string, RateLimitEntry> = new Map();
-  private defaultLimit: number = 100; // requests per window
-  private windowSeconds: number = 60; // 1 minute window
+/**
+ * Check and increment a rate limit counter in Redis.
+ *
+ * @param key       - Unique key for this rate limit (e.g., 'ai:content:user123')
+ * @param maxRequests - Maximum number of requests allowed in the window
+ * @param windowSeconds - Window duration in seconds (default: 60)
+ * @returns RateLimitResult with allowed status and remaining/retryAfter info
+ */
+export async function checkRateLimit(
+  key: string,
+  maxRequests: number = 100,
+  windowSeconds: number = 60,
+): Promise<RateLimitResult> {
+  try {
+    const redis = getRedisConnection();
+    const redisKey = `ratelimit:${key}`;
 
-  async checkLimit(
-    key: string,
-    limit: number = this.defaultLimit,
-    windowSeconds: number = this.windowSeconds
-  ): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
-    const now = Date.now();
-    const entry = this.limits.get(key);
+    const count = await redis.incr(redisKey);
 
-    // No previous entry or window expired
-    if (!entry || now > entry.resetAt) {
-      const resetAt = now + windowSeconds * 1000;
-      this.limits.set(key, { count: 1, resetAt });
-      return {
-        allowed: true,
-        remaining: limit - 1,
-        resetAt,
-      };
+    // Set expiry only on first request in a window
+    if (count === 1) {
+      await redis.expire(redisKey, windowSeconds);
     }
 
-    // Within window
-    if (entry.count >= limit) {
+    if (count > maxRequests) {
+      const ttl = await redis.ttl(redisKey);
       return {
         allowed: false,
+        retryAfter: ttl > 0 ? ttl : windowSeconds,
         remaining: 0,
-        resetAt: entry.resetAt,
       };
     }
-
-    // Increment count
-    entry.count++;
-    this.limits.set(key, entry);
 
     return {
       allowed: true,
-      remaining: limit - entry.count,
-      resetAt: entry.resetAt,
+      remaining: maxRequests - count,
     };
-  }
-
-  // Cleanup expired entries periodically
-  cleanup(): void {
-    const now = Date.now();
-    for (const [key, entry] of this.limits.entries()) {
-      if (now > entry.resetAt) {
-        this.limits.delete(key);
-      }
-    }
-  }
-
-  getStats() {
-    return {
-      totalKeys: this.limits.size,
-      defaultLimit: this.defaultLimit,
-      windowSeconds: this.windowSeconds,
-    };
+  } catch (error) {
+    // Fail open — if Redis is down, allow the request
+    logger.warn('Rate limiter Redis error, failing open', {
+      key,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return { allowed: true, remaining: maxRequests };
   }
 }
 
-export const rateLimiter = new RateLimiter();
-
-// Cleanup expired entries every 5 minutes
-setInterval(() => {
-  rateLimiter.cleanup();
-}, 5 * 60 * 1000);
-
-// Helper function for API routes
-export async function checkRateLimit(
-  userId: string,
-  endpoint: string,
-  limit?: number
-): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
-  const key = `${userId}:${endpoint}`;
-  return rateLimiter.checkLimit(key, limit);
+/**
+ * Build a standard rate limit key from components.
+ * Produces consistent namespacing across the app.
+ *
+ * @example rateLimitKey('ai', 'chat', userId) => 'ai:chat:<userId>'
+ */
+export function rateLimitKey(...parts: string[]): string {
+  return parts.join(':');
 }

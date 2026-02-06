@@ -21,7 +21,7 @@ import {
 } from '@/lib/ai/content-generator';
 import { VOICE_CONFIGS } from '@/lib/ai/voiceConfigs';
 import { captureRouteError } from '@/lib/sentry-utils';
-import { getRedisConnection } from '@/lib/queue/client';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,38 +41,6 @@ const RequestSchema = z.object({
 const RATE_LIMIT_WINDOW_SECONDS = 60;
 const RATE_LIMIT_MAX = 30;
 
-/**
- * Redis-backed rate limiter using INCR + EXPIRE.
- * Survives deploys and works across multiple instances.
- * Falls back to allowing requests if Redis is unavailable.
- */
-async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterMs?: number }> {
-  try {
-    const redis = getRedisConnection();
-    const redisKey = `ratelimit:ai:content:${key}`;
-    const count = await redis.incr(redisKey);
-
-    if (count === 1) {
-      // First request in window — set expiry
-      await redis.expire(redisKey, RATE_LIMIT_WINDOW_SECONDS);
-    }
-
-    if (count > RATE_LIMIT_MAX) {
-      const ttl = await redis.ttl(redisKey);
-      return { allowed: false, retryAfterMs: (ttl > 0 ? ttl : RATE_LIMIT_WINDOW_SECONDS) * 1000 };
-    }
-
-    return { allowed: true };
-  } catch (error) {
-    // If Redis is down, allow the request rather than blocking all AI calls
-    logger.warn('Rate limit check failed, allowing request', {
-      key,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return { allowed: true };
-  }
-}
-
 export async function POST(request: NextRequest) {
   const requestId = crypto.randomUUID().slice(0, 12);
   const startedAt = Date.now();
@@ -84,18 +52,22 @@ export async function POST(request: NextRequest) {
     }
 
     const serviceKey = request.headers.get('x-service-key') || 'unknown-service';
-    const rateCheck = await checkRateLimit(serviceKey);
+    const rateCheck = await checkRateLimit(
+      rateLimitKey('ai', 'content', serviceKey),
+      RATE_LIMIT_MAX,
+      RATE_LIMIT_WINDOW_SECONDS,
+    );
     if (!rateCheck.allowed) {
       logger.warn('AI content generate throttled', {
         requestId,
         serviceKey,
-        retryAfterMs: rateCheck.retryAfterMs,
+        retryAfter: rateCheck.retryAfter,
       });
       return NextResponse.json(
         { error: 'rate_limited' },
         {
           status: 429,
-          headers: { 'Retry-After': String(Math.ceil((rateCheck.retryAfterMs || 0) / 1000)) },
+          headers: { 'Retry-After': String(rateCheck.retryAfter || RATE_LIMIT_WINDOW_SECONDS) },
         }
       );
     }

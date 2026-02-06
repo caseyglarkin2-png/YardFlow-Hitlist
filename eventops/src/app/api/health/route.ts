@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { prisma, getPoolMetrics } from '@/lib/db';
 import { getRedisConnection } from '@/lib/queue/client';
 import { emailQueue, enrichmentQueue, outreachQueue, sequenceQueue } from '@/lib/queue/queues';
 import { checkAIHealth } from '@/lib/ai/provider';
@@ -60,7 +60,8 @@ async function checkDatabase() {
   const start = Date.now();
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return { status: 'ok', latencyMs: Date.now() - start };
+    const pool = getPoolMetrics();
+    return { status: 'ok', latencyMs: Date.now() - start, pool };
   } catch (error) {
     return { status: 'error', error: (error as Error).message, latencyMs: Date.now() - start };
   }

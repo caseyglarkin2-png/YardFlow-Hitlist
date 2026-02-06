@@ -145,32 +145,34 @@ describe('Middleware Security Headers', () => {
 
 describe('AI Content Rate Limiter', () => {
   const rateLimiterPath = path.join(SRC_DIR, 'app/api/ai/content/generate/route.ts');
+  const sharedRateLimiterPath = path.join(SRC_DIR, 'lib/rate-limiter.ts');
 
-  it('uses Redis for rate limiting (not in-memory Map)', () => {
+  it('uses shared Redis rate limiter (not inline implementation)', () => {
     const content = fs.readFileSync(rateLimiterPath, 'utf-8');
     // Should NOT have in-memory Map
     expect(content).not.toContain('new Map()');
     expect(content).not.toContain('new Map<');
-    // Should import Redis connection
-    expect(content).toContain('getRedisConnection');
+    // Should import from shared rate-limiter module
+    expect(content).toContain("from '@/lib/rate-limiter'");
   });
 
-  it('uses Redis INCR + EXPIRE pattern', () => {
-    const content = fs.readFileSync(rateLimiterPath, 'utf-8');
+  it('shared rate limiter uses Redis INCR + EXPIRE pattern', () => {
+    const content = fs.readFileSync(sharedRateLimiterPath, 'utf-8');
     expect(content).toContain('redis.incr(');
     expect(content).toContain('redis.expire(');
   });
 
-  it('gracefully falls back when Redis is unavailable', () => {
-    const content = fs.readFileSync(rateLimiterPath, 'utf-8');
+  it('shared rate limiter gracefully falls back when Redis is unavailable', () => {
+    const content = fs.readFileSync(sharedRateLimiterPath, 'utf-8');
     // Should have a catch block that allows requests through
     expect(content).toContain('allowed: true');
-    expect(content).toContain('Rate limit check failed');
+    expect(content).toContain('failing open');
   });
 
-  it('uses namespaced Redis key to avoid collisions', () => {
+  it('rate limit key includes ai:content namespace', () => {
     const content = fs.readFileSync(rateLimiterPath, 'utf-8');
-    expect(content).toContain('ratelimit:ai:content:');
+    expect(content).toContain("'ai'");
+    expect(content).toContain("'content'");
   });
 });
 

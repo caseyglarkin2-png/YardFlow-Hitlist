@@ -14,12 +14,9 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
-vi.mock('@/lib/queue/client', () => ({
-  getRedisConnection: () => ({
-    incr: vi.fn().mockResolvedValue(1),
-    expire: vi.fn().mockResolvedValue(1),
-    ttl: vi.fn().mockResolvedValue(60),
-  }),
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 29 }),
+  rateLimitKey: (...parts: string[]) => parts.join(':'),
 }));
 
 const generateContentMock = vi.fn();
