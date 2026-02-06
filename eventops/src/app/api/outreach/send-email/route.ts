@@ -237,8 +237,13 @@ export async function POST(req: NextRequest) {
   // 9. Send email via SendGrid
   // -------------------------------------------------------------------------
   try {
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    if (!sendgridApiKey) {
+      throw new Error('SENDGRID_API_KEY environment variable is not configured');
+    }
+
     const sgMail = await import('@sendgrid/mail');
-    sgMail.default.setApiKey(process.env.SENDGRID_API_KEY);
+    sgMail.default.setApiKey(sendgridApiKey);
 
     const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'casey@freightroll.com';
     const fromName = process.env.SENDGRID_FROM_NAME || 'FreightRoll';

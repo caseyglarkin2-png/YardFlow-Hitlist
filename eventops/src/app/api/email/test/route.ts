@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Check SendGrid configuration
-    if (!process.env.SENDGRID_API_KEY) {
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    if (!sendgridApiKey) {
       return NextResponse.json(
         {
           error: 'SendGrid not configured - SENDGRID_API_KEY missing',
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     // Import SendGrid
     const sgMail = await import('@sendgrid/mail');
-    sgMail.default.setApiKey(process.env.SENDGRID_API_KEY);
+    sgMail.default.setApiKey(sendgridApiKey);
 
     const msg = {
       to: toEmail,
