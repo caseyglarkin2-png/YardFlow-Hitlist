@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
+import { parseBody } from '@/lib/validation';
 import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
+
+const UpdateCampaignSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  status: z.enum(['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED']).optional(),
+  goals: z.record(z.unknown()).optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+});
 
 /**
  * GET /api/campaigns/[id]
@@ -78,8 +89,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { name, description, status, goals, startDate, endDate } = body;
+    const body = await parseBody(req, UpdateCampaignSchema);
+    if (!body.success) return body.response;
+    const { name, description, status, goals, startDate, endDate } = body.data;
 
     const campaign = await prisma.campaigns.update({
       where: { id: params.id },

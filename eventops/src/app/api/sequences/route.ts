@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { parseBody } from '@/lib/validation';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 import { captureRouteError } from '@/lib/sentry-utils';
+
+const SequenceStepSchema = z.object({
+  subject: z.string().min(1, 'Subject is required'),
+  emailBody: z.string().min(1, 'Email body is required'),
+  delayHours: z.number().min(0, 'Delay must be >= 0'),
+});
+
+const CreateSequenceSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255),
+  description: z.string().max(2000).optional(),
+  steps: z.array(SequenceStepSchema).min(1, 'At least one step is required'),
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -73,39 +87,19 @@ export async function POST(req: NextRequest) {
         ? authResult.userId
         : req.headers.get('x-user-id') || authResult.userId;
 
-    const body = await req.json();
-    const { name, description, steps } = body;
+    const parsed = await parseBody(req, CreateSequenceSchema);
+    if (!parsed.success) return parsed.response;
+    const { name, description, steps } = parsed.data;
 
-    // Validate input
-    if (!name || !name.trim()) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-    }
-
-    if (!steps || !Array.isArray(steps) || steps.length === 0) {
-      return NextResponse.json({ error: 'At least one step is required' }, { status: 400 });
-    }
-
-    // Validate each step
+    // CAN-SPAM compliance check (beyond structural validation)
     const errors: string[] = [];
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
 
-      if (!step.subject || !step.subject.trim()) {
-        errors.push(`Step ${i + 1}: Subject is required`);
-      }
-
-      if (!step.emailBody || !step.emailBody.trim()) {
-        errors.push(`Step ${i + 1}: Email body is required`);
-      }
-
-      if (step.delayHours === undefined || step.delayHours < 0) {
-        errors.push(`Step ${i + 1}: Delay must be >= 0`);
-      }
-
       // Check CAN-SPAM compliance for each step
       const complianceResult = await checkCanSpamCompliance({
-        subject: step.subject || '',
-        body: step.emailBody || '',
+        subject: step.subject,
+        body: step.emailBody,
       });
 
       if (!complianceResult.compliant) {

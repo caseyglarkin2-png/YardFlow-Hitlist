@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { authServiceOrSession } from '@/lib/auth-service';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
+import { parseBody } from '@/lib/validation';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 import { captureRouteError } from '@/lib/sentry-utils';
 
 export const dynamic = 'force-dynamic';
+
+const SequenceStepSchema = z.object({
+  subject: z.string().min(1, 'Subject is required'),
+  emailBody: z.string().min(1, 'Email body is required'),
+  delayHours: z.number().min(0, 'Delay must be >= 0'),
+});
+
+const UpdateSequenceSchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  steps: z.array(SequenceStepSchema).min(1).optional(),
+  status: z.enum(['draft', 'active', 'paused', 'completed']).optional(),
+});
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -58,8 +73,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { name, description, steps, status } = body;
+    const parsed = await parseBody(req, UpdateSequenceSchema);
+    if (!parsed.success) return parsed.response;
+    const { name, description, steps, status } = parsed.data;
 
     // Find sequence without createdBy filter
     const existingSequence = await prisma.outreachSequence.findUnique({
@@ -71,29 +87,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     if (steps) {
-      if (!Array.isArray(steps) || steps.length === 0) {
-        return NextResponse.json({ error: 'At least one step is required' }, { status: 400 });
-      }
-
       const errors: string[] = [];
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
 
-        if (!step.subject || !step.subject.trim()) {
-          errors.push(`Step ${i + 1}: Subject is required`);
-        }
-
-        if (!step.emailBody || !step.emailBody.trim()) {
-          errors.push(`Step ${i + 1}: Email body is required`);
-        }
-
-        if (step.delayHours === undefined || step.delayHours < 0) {
-          errors.push(`Step ${i + 1}: Delay must be >= 0`);
-        }
-
         const complianceResult = await checkCanSpamCompliance({
-          subject: step.subject || '',
-          body: step.emailBody || '',
+          subject: step.subject,
+          body: step.emailBody,
         });
 
         if (!complianceResult.compliant) {
@@ -109,7 +109,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: any = {};
+    const updateData: Record<string, any> = {};
 
     if (name !== undefined) {
       updateData.name = name.trim();
@@ -120,8 +120,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     if (steps) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      updateData.steps = steps.map((step: any, index: number) => ({
+      updateData.steps = steps.map((step, index: number) => ({
         stepNumber: index,
         delayHours: step.delayHours,
         subject: step.subject.trim(),

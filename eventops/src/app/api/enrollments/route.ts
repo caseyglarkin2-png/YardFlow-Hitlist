@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { enrollContact } from '@/lib/outreach/sequence-engine';
 import { authServiceOrSession, requireAuth } from '@/lib/auth-service';
+import { parseBody } from '@/lib/validation';
 import { Prisma } from '@prisma/client';
 import { captureRouteError } from '@/lib/sentry-utils';
+
+const CreateEnrollmentSchema = z.object({
+  prospectId: z.string().min(1, 'prospectId is required'),
+  flowId: z.string().min(1, 'flowId is required'),
+});
 
 /**
  * GET /api/enrollments
@@ -113,12 +120,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { prospectId, flowId } = body;
-
-    if (!prospectId || !flowId) {
-      return NextResponse.json({ error: 'prospectId and flowId are required' }, { status: 400 });
-    }
+    const parsed = await parseBody(req, CreateEnrollmentSchema);
+    if (!parsed.success) return parsed.response;
+    const { prospectId, flowId } = parsed.data;
 
     const result = await enrollContact(flowId, prospectId);
 

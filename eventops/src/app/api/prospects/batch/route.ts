@@ -1,28 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth-service';
 import { logger } from '@/lib/logger';
+import { parseBody } from '@/lib/validation';
 import { captureRouteError } from '@/lib/sentry-utils';
 
-interface BatchProspect {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  company?: string;
-  accountId?: string;
-  title?: string;
-  tier?: string;
-  score?: number;
-  tags?: string[];
-  customFields?: Record<string, unknown>;
-}
+const BatchProspectSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  name: z.string().optional(),
+  company: z.string().optional(),
+  accountId: z.string().min(1, 'accountId is required'),
+  title: z.string().optional(),
+  tier: z.string().optional(),
+  score: z.number().min(0).max(100).optional(),
+  tags: z.array(z.string()).optional(),
+  customFields: z.record(z.unknown()).optional(),
+});
 
-interface BatchError {
-  index: number;
-  email: string;
-  error: string;
-}
+const BatchRequestSchema = z.object({
+  prospects: z.array(BatchProspectSchema).min(1, 'prospects array must not be empty').max(1000, 'Maximum 1000 prospects per batch'),
+  mode: z.enum(['create', 'upsert']).default('create'),
+});
 
 /**
  * POST /api/prospects/batch
@@ -33,50 +34,22 @@ export async function POST(request: NextRequest) {
   if (error) return response;
 
   try {
-    const body = await request.json();
-    const {
-      prospects,
-      mode = 'create',
-    }: { prospects: BatchProspect[]; mode: 'create' | 'upsert' } = body;
-
-    if (!Array.isArray(prospects) || prospects.length === 0) {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_ERROR',
-          message: 'prospects array is required and must not be empty',
-          statusCode: 400,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (prospects.length > 1000) {
-      return NextResponse.json(
-        {
-          error: 'VALIDATION_ERROR',
-          message: 'Maximum 1000 prospects per batch',
-          statusCode: 400,
-        },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(request, BatchRequestSchema);
+    if (!parsed.success) return parsed.response;
+    const { prospects, mode } = parsed.data;
 
     let created = 0;
     let updated = 0;
+
+    interface BatchError {
+      index: number;
+      email: string;
+      error: string;
+    }
     const errors: BatchError[] = [];
 
     for (let i = 0; i < prospects.length; i++) {
       const p = prospects[i];
-
-      if (!p.email) {
-        errors.push({ index: i, email: p.email || '', error: 'Email is required' });
-        continue;
-      }
-
-      if (!p.accountId) {
-        errors.push({ index: i, email: p.email, error: 'accountId is required' });
-        continue;
-      }
 
       try {
         const name = p.name || `${p.firstName || ''} ${p.lastName || ''}`.trim();
