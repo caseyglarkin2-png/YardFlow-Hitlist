@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { emailQueue } from '@/lib/queue/queues';
 import { captureRouteError } from '@/lib/sentry-utils';
+import { validateEmailConfig } from '@/lib/email/config-validator';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,17 +53,17 @@ export async function GET(request: NextRequest) {
       logger.warn('Last sent check failed', { error: String(e) });
     }
 
-    // Check SendGrid API key existence (not the actual API for rate limiting)
-    const hasSendgridKey = !!process.env.SENDGRID_API_KEY;
+    // Check SendGrid configuration with detailed validation
+    const configValidation = validateEmailConfig();
     checks.sendgrid = {
-      status: hasSendgridKey ? 'configured' : 'missing',
-      rateLimitRemaining: hasSendgridKey ? 100 : 0, // Would need actual API call
+      status: configValidation.valid ? 'configured' : 'misconfigured',
+      rateLimitRemaining: configValidation.valid ? 100 : 0,
     };
 
     // Determine overall health status
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
     
-    if (!hasSendgridKey) {
+    if (!configValidation.valid) {
       status = 'unhealthy';
     } else if (checks.queue.depth > 100) {
       status = 'degraded';
@@ -82,6 +83,12 @@ export async function GET(request: NextRequest) {
       sendgrid: checks.sendgrid,
       queue: checks.queue,
       lastSentAt: checks.lastSentAt,
+      config: {
+        valid: configValidation.valid,
+        fromEmail: configValidation.fromEmail || 'not set',
+        errors: configValidation.errors,
+        warnings: configValidation.warnings,
+      },
     });
   } catch (err) {
     captureRouteError(err, {

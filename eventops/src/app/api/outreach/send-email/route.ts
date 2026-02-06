@@ -7,6 +7,7 @@ import { isValidEmail } from '@/lib/sendgrid';
 import { getRedisConnection } from '@/lib/queue/client';
 import crypto from 'crypto';
 import { captureRouteError } from '@/lib/sentry-utils';
+import { validateEmailConfig } from '@/lib/email/config-validator';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,14 +212,21 @@ export async function POST(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
-  // 8. Check SendGrid configuration
+  // 8. Check SendGrid configuration with detailed validation
   // -------------------------------------------------------------------------
-  if (!process.env.SENDGRID_API_KEY) {
-    logger.error('SendGrid not configured', { errorId });
+  const configValidation = validateEmailConfig();
+  if (!configValidation.valid) {
+    logger.error('SendGrid misconfigured', {
+      errorId,
+      errors: configValidation.errors,
+      warnings: configValidation.warnings,
+    });
     return NextResponse.json(
       {
-        error: 'Email service not configured',
-        code: 'SERVICE_UNAVAILABLE',
+        error: 'Email service misconfigured',
+        code: 'SERVICE_MISCONFIGURED',
+        details: configValidation.errors.join('; '),
+        hint: 'Check Railway environment variables: SENDGRID_API_KEY and SENDGRID_FROM_EMAIL',
         errorId,
       },
       { status: 503 }
