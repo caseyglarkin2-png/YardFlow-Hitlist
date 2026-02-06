@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { prisma } from '@/lib/db';
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export const dynamic = 'force-dynamic';
 
 // TODO: Implement workflows - requires workflows table in schema
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   return NextResponse.json(
     {
       success: false,
@@ -12,6 +19,11 @@ export async function POST(_request: NextRequest) {
   );
 }
 
-export async function GET() {
-  return NextResponse.json([]);
+export async function GET(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  return NextResponse.json({ workflows: [] });
 }

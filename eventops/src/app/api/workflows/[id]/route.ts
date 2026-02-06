@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { prisma } from '@/lib/db';
+import { authServiceOrSession } from '@/lib/auth-service';
+
+export const dynamic = 'force-dynamic';
 
 // TODO: Implement workflows - requires workflows table in schema
-export async function GET(_request: NextRequest, _context: { params: { id: string } }) {
+export async function GET(request: NextRequest, _context: { params: { id: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   return NextResponse.json(
     {
       success: false,
@@ -12,7 +19,12 @@ export async function GET(_request: NextRequest, _context: { params: { id: strin
   );
 }
 
-export async function PUT(_request: NextRequest, _context: { params: { id: string } }) {
+export async function PUT(request: NextRequest, _context: { params: { id: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   return NextResponse.json(
     {
       success: false,
@@ -22,6 +34,17 @@ export async function PUT(_request: NextRequest, _context: { params: { id: strin
   );
 }
 
-export async function DELETE(_request: NextRequest, _context: { params: { id: string } }) {
-  return NextResponse.json({ success: true });
+export async function DELETE(request: NextRequest, _context: { params: { id: string } }) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: 'Workflows feature not yet implemented',
+    },
+    { status: 501 }
+  );
 }

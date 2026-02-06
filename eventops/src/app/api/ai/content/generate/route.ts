@@ -21,6 +21,7 @@ import {
 } from '@/lib/ai/content-generator';
 import { VOICE_CONFIGS } from '@/lib/ai/voiceConfigs';
 import { captureRouteError } from '@/lib/sentry-utils';
+import { getRedisConnection } from '@/lib/queue/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,31 +38,39 @@ const RequestSchema = z.object({
   }),
 });
 
-type RateLimitState = {
-  count: number;
-  resetAt: number;
-};
-
-const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_WINDOW_SECONDS = 60;
 const RATE_LIMIT_MAX = 30;
-const rateLimitStore: Map<string, RateLimitState> = new Map();
 
-function checkRateLimit(key: string): { allowed: boolean; retryAfterMs?: number } {
-  const now = Date.now();
-  const state = rateLimitStore.get(key);
+/**
+ * Redis-backed rate limiter using INCR + EXPIRE.
+ * Survives deploys and works across multiple instances.
+ * Falls back to allowing requests if Redis is unavailable.
+ */
+async function checkRateLimit(key: string): Promise<{ allowed: boolean; retryAfterMs?: number }> {
+  try {
+    const redis = getRedisConnection();
+    const redisKey = `ratelimit:ai:content:${key}`;
+    const count = await redis.incr(redisKey);
 
-  if (!state || now > state.resetAt) {
-    rateLimitStore.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    if (count === 1) {
+      // First request in window — set expiry
+      await redis.expire(redisKey, RATE_LIMIT_WINDOW_SECONDS);
+    }
+
+    if (count > RATE_LIMIT_MAX) {
+      const ttl = await redis.ttl(redisKey);
+      return { allowed: false, retryAfterMs: (ttl > 0 ? ttl : RATE_LIMIT_WINDOW_SECONDS) * 1000 };
+    }
+
+    return { allowed: true };
+  } catch (error) {
+    // If Redis is down, allow the request rather than blocking all AI calls
+    logger.warn('Rate limit check failed, allowing request', {
+      key,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return { allowed: true };
   }
-
-  if (state.count >= RATE_LIMIT_MAX) {
-    return { allowed: false, retryAfterMs: state.resetAt - now };
-  }
-
-  state.count += 1;
-  rateLimitStore.set(key, state);
-  return { allowed: true };
 }
 
 export async function POST(request: NextRequest) {
@@ -75,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     const serviceKey = request.headers.get('x-service-key') || 'unknown-service';
-    const rateCheck = checkRateLimit(serviceKey);
+    const rateCheck = await checkRateLimit(serviceKey);
     if (!rateCheck.allowed) {
       logger.warn('AI content generate throttled', {
         requestId,

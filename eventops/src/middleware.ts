@@ -60,6 +60,7 @@ export async function middleware(request: NextRequest) {
       headers: corsHeaders(origin),
     });
     response.headers.set(REQUEST_ID_HEADER, requestId);
+    response.headers.set('X-Content-Type-Options', 'nosniff');
     return response;
   }
 
@@ -93,6 +94,14 @@ export async function middleware(request: NextRequest) {
     // Add CORS headers
     const cors = corsHeaders(origin);
     cors.forEach((value, key) => response.headers.set(key, value));
+
+    // Security headers
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
     return response;
   }
 

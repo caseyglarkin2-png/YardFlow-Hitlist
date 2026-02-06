@@ -14,6 +14,14 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
+vi.mock('@/lib/queue/client', () => ({
+  getRedisConnection: () => ({
+    incr: vi.fn().mockResolvedValue(1),
+    expire: vi.fn().mockResolvedValue(1),
+    ttl: vi.fn().mockResolvedValue(60),
+  }),
+}));
+
 const generateContentMock = vi.fn();
 vi.mock('@/lib/ai/gemini-client', () => ({
   getGeminiClient: () => ({

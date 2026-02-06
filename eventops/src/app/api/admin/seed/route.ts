@@ -1,17 +1,24 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { captureRouteError } from '@/lib/sentry-utils';
+import { authServiceOrSession } from '@/lib/auth-service';
 
 export const dynamic = 'force-dynamic';
 
-// One-time seed endpoint - protected by secret
-export async function POST(request: Request) {
-  // Require a secret to prevent abuse
-  const { searchParams } = new URL(request.url);
-  const secret = searchParams.get('secret');
+// One-time seed endpoint - protected by auth + admin role check
+// Disabled in production to prevent accidental data mutation
+export async function POST(request: NextRequest) {
+  // Block in production — seed should only run in development/staging
+  if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_SEED) {
+    return NextResponse.json(
+      { error: 'Seed endpoint is disabled in production' },
+      { status: 403 }
+    );
+  }
 
-  if (secret !== process.env.AUTH_SECRET?.slice(0, 16)) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -115,8 +122,13 @@ export async function POST(request: Request) {
   }
 }
 
-// GET to check seed status
-export async function GET() {
+// GET to check seed status - requires authentication
+export async function GET(request: NextRequest) {
+  const authResult = await authServiceOrSession(request);
+  if (!authResult) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const userCount = await prisma.users.count();
     const eventCount = await prisma.events.count();
