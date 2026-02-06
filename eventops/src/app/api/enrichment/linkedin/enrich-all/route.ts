@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/linkedin/enrich-all',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('LinkedIn batch enrichment error:', error);
     return NextResponse.json(

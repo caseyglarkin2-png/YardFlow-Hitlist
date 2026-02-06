@@ -35,7 +35,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     captureRouteError(error, {
       route: '/api/events/[id]/activate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error activating event:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -92,7 +92,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     captureRouteError(error, {
       route: '/api/people/[id]/assign',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error assigning person:', error);
     return NextResponse.json({ error: 'Failed to assign person' }, { status: 500 });
@@ -140,7 +139,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     captureRouteError(error, {
       route: '/api/people/[id]/assign',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error unassigning person:', error);
     return NextResponse.json({ error: 'Failed to unassign person' }, { status: 500 });

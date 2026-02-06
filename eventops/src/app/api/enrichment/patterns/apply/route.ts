@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/patterns/apply',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Pattern application error:', error);
     return NextResponse.json(

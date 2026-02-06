@@ -128,7 +128,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/status',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('AI status check failed', { error: errorMessage });
     return NextResponse.json(

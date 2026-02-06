@@ -99,7 +99,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/export',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error exporting outreach:', error);
     return NextResponse.json({ error: 'Failed to export outreach' }, { status: 500 });

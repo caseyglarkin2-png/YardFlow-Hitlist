@@ -23,8 +23,7 @@ describe('ESLint auth() import ban rule', () => {
     expect(Array.isArray(config.overrides)).toBe(true);
 
     const apiOverride = config.overrides.find(
-      (o: { files?: string[] }) =>
-        o.files && o.files.some((f: string) => f.includes('src/app/api'))
+      (o: { files?: string[] }) => o.files && o.files.some((f: string) => f.includes('src/app/api'))
     );
     expect(apiOverride).toBeDefined();
   });
@@ -32,8 +31,7 @@ describe('ESLint auth() import ban rule', () => {
   it('bans @/auth imports in API routes with error severity', () => {
     const config = JSON.parse(fs.readFileSync(eslintConfigPath, 'utf8'));
     const apiOverride = config.overrides.find(
-      (o: { files?: string[] }) =>
-        o.files && o.files.some((f: string) => f.includes('src/app/api'))
+      (o: { files?: string[] }) => o.files && o.files.some((f: string) => f.includes('src/app/api'))
     );
 
     const rule = apiOverride.rules['no-restricted-imports'];
@@ -54,8 +52,7 @@ describe('ESLint auth() import ban rule', () => {
   it('bans auth from @/lib/auth in API routes', () => {
     const config = JSON.parse(fs.readFileSync(eslintConfigPath, 'utf8'));
     const apiOverride = config.overrides.find(
-      (o: { files?: string[] }) =>
-        o.files && o.files.some((f: string) => f.includes('src/app/api'))
+      (o: { files?: string[] }) => o.files && o.files.some((f: string) => f.includes('src/app/api'))
     );
 
     const patterns = apiOverride.rules['no-restricted-imports'][1].patterns;

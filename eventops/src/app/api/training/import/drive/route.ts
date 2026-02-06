@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
         captureRouteError(error, {
           route: '/api/training/import/drive',
           method: 'POST',
-          userId: authResult?.userId,
         });
         console.error(`Error importing file ${fileId}:`, error);
       }
@@ -83,7 +82,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/training/import/drive',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error importing from Drive:', error);
     return NextResponse.json(

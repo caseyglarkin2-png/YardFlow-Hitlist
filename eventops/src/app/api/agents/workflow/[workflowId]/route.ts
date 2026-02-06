@@ -41,7 +41,6 @@ export async function GET(
     captureRouteError(error, {
       route: '/api/agents/workflow/[workflowId]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Failed to get workflow status', { error, workflowId });
     return NextResponse.json({ error: 'Failed to get workflow status' }, { status: 500 });
@@ -92,7 +91,6 @@ export async function POST(
     captureRouteError(error, {
       route: '/api/agents/workflow/[workflowId]',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Failed to retry task', { error, workflowId });
     return NextResponse.json({ error: 'Failed to retry task' }, { status: 500 });

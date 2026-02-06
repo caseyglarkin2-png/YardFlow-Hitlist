@@ -231,7 +231,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/briefing/daily',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Daily briefing error:', error);
     return NextResponse.json({ error: 'Failed to generate daily briefing' }, { status: 500 });

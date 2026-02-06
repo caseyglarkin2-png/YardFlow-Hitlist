@@ -107,7 +107,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     captureRouteError(error, {
       route: '/api/contact/[id]/insights',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error generating contact insights:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -147,7 +146,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     captureRouteError(error, {
       route: '/api/contact/[id]/insights',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching contact insights:', error);
     return NextResponse.json({ error: 'Failed to fetch contact insights' }, { status: 500 });

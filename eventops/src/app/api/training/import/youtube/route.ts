@@ -71,7 +71,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/training/import/youtube',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error importing YouTube video:', error);
     return NextResponse.json(

@@ -82,7 +82,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/hubspot/sync/contacts',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('HubSpot sync API error', {
       error: errorMessage,

@@ -42,7 +42,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/conversations',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Failed to list conversations', { error: errorMessage });
     return NextResponse.json(
@@ -88,7 +87,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/conversations',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Failed to create conversation', { error: errorMessage });
     return NextResponse.json(

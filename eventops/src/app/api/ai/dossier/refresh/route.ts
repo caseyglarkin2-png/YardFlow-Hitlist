@@ -126,7 +126,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/dossier/refresh',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Dossier refresh error', { error: errorMessage });
     return NextResponse.json(

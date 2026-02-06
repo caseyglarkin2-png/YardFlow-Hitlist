@@ -1,16 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Users } from "lucide-react";
+import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Users } from 'lucide-react';
 
 interface PresenceUser {
   userId: string;
@@ -27,40 +22,38 @@ export function PresenceIndicator() {
   useEffect(() => {
     // Send heartbeat every 30 seconds
     const heartbeat = setInterval(() => {
-      fetch("/api/presence", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      fetch('/api/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ page: pathname }),
       });
     }, 30000);
 
     // Initial heartbeat
-    fetch("/api/presence", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    fetch('/api/presence', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ page: pathname }),
     });
 
     // Cleanup on unmount
     return () => {
       clearInterval(heartbeat);
-      fetch("/api/presence", { method: "DELETE" });
+      fetch('/api/presence', { method: 'DELETE' });
     };
   }, [pathname]);
 
   const fetchPresence = useCallback(async () => {
     try {
-      const res = await fetch("/api/presence");
+      const res = await fetch('/api/presence');
       const data = await res.json();
       setPresence(data.presence || []);
 
       // Filter for current page
-      const viewers = (data.presence || []).filter(
-        (p: PresenceUser) => p.page === pathname
-      );
+      const viewers = (data.presence || []).filter((p: PresenceUser) => p.page === pathname);
       setCurrentPageViewers(viewers);
     } catch (error) {
-      console.error("Failed to fetch presence:", error);
+      console.error('Failed to fetch presence:', error);
     }
   }, [pathname]);
 
@@ -74,9 +67,9 @@ export function PresenceIndicator() {
 
   function getInitials(name: string): string {
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase()
       .substring(0, 2);
   }
@@ -103,7 +96,7 @@ export function PresenceIndicator() {
             <Tooltip key={user.userId}>
               <TooltipTrigger>
                 <Avatar className="h-8 w-8 border-2 border-background">
-                  <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                  <AvatarFallback className="bg-primary text-xs text-primary-foreground">
                     {getInitials(user.userName)}
                   </AvatarFallback>
                 </Avatar>
@@ -111,7 +104,7 @@ export function PresenceIndicator() {
               <TooltipContent>
                 <p className="font-medium">{user.userName}</p>
                 <p className="text-xs text-muted-foreground">
-                  Viewing: {user.page.split("/").pop() || "dashboard"}
+                  Viewing: {user.page.split('/').pop() || 'dashboard'}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -121,9 +114,7 @@ export function PresenceIndicator() {
             <Tooltip>
               <TooltipTrigger>
                 <Avatar className="h-8 w-8 border-2 border-background">
-                  <AvatarFallback className="text-xs bg-muted">
-                    +{totalOnline - 5}
-                  </AvatarFallback>
+                  <AvatarFallback className="bg-muted text-xs">+{totalOnline - 5}</AvatarFallback>
                 </Avatar>
               </TooltipTrigger>
               <TooltipContent>

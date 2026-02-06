@@ -83,7 +83,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/sprints/complete',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Sprint completion error:', error);
     return NextResponse.json(

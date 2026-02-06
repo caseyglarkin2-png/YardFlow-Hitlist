@@ -102,7 +102,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     captureRouteError(error, {
       route: '/api/accounts/[id]/assign',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error assigning account:', error);
     return NextResponse.json({ error: 'Failed to assign account' }, { status: 500 });
@@ -153,7 +152,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     captureRouteError(error, {
       route: '/api/accounts/[id]/assign',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error unassigning account:', error);
     return NextResponse.json({ error: 'Failed to unassign account' }, { status: 500 });

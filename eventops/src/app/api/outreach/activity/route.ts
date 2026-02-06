@@ -86,7 +86,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/activity',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error tracking email activity:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

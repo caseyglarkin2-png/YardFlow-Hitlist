@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/patterns/batch',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Batch pattern application error:', error);
     return NextResponse.json(

@@ -38,7 +38,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     captureRouteError(error, {
       route: '/api/accounts/[id]/override-score',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error overriding score:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

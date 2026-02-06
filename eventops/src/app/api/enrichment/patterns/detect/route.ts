@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/patterns/detect',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Pattern detection error:', error);
     return NextResponse.json(

@@ -101,7 +101,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/import/execute',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error executing import:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

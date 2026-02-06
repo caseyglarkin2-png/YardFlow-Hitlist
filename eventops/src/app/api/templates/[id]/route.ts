@@ -53,7 +53,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     captureRouteError(error, {
       route: '/api/templates/[id]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Template fetch failed', { requestId, id, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
@@ -130,7 +129,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     captureRouteError(error, {
       route: '/api/templates/[id]',
       method: 'PATCH',
-      userId: authResult?.userId,
     });
     logger.error('Template update failed', { requestId, id, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
@@ -169,7 +167,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     captureRouteError(error, {
       route: '/api/templates/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     logger.error('Template delete failed', { requestId, id, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });

@@ -102,7 +102,7 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg">Loading notifications...</div>
       </div>
     );
@@ -110,17 +110,17 @@ export default function NotificationsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Notifications</h1>
-          <p className="text-gray-600 mt-1">
+          <p className="mt-1 text-gray-600">
             {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="space-x-2">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded ${
+            className={`rounded px-4 py-2 ${
               filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200'
             }`}
           >
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
           </button>
           <button
             onClick={() => setFilter('unread')}
-            className={`px-4 py-2 rounded ${
+            className={`rounded px-4 py-2 ${
               filter === 'unread' ? 'bg-blue-600 text-white' : 'bg-gray-200'
             }`}
           >
@@ -137,7 +137,7 @@ export default function NotificationsPage() {
           {unreadCount > 0 && (
             <button
               onClick={markAllAsRead}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
             >
               Mark All Read
             </button>
@@ -146,9 +146,9 @@ export default function NotificationsPage() {
       </div>
 
       {notifications.length === 0 ? (
-        <div className="bg-white p-12 rounded-lg shadow text-center">
-          <div className="text-6xl mb-4">🔔</div>
-          <h2 className="text-2xl font-semibold mb-2">No Notifications</h2>
+        <div className="rounded-lg bg-white p-12 text-center shadow">
+          <div className="mb-4 text-6xl">🔔</div>
+          <h2 className="mb-2 text-2xl font-semibold">No Notifications</h2>
           <p className="text-gray-600">You&apos;re all caught up!</p>
         </div>
       ) : (
@@ -156,38 +156,34 @@ export default function NotificationsPage() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`border-l-4 p-4 rounded-lg shadow ${
+              className={`rounded-lg border-l-4 p-4 shadow ${
                 !notification.read ? 'bg-white' : 'bg-gray-50'
               } ${getPriorityColor(notification.priority)}`}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="mb-1 flex items-center gap-2">
                     <span className="text-2xl">{getTypeIcon(notification.type)}</span>
-                    <h3
-                      className={`text-lg ${!notification.read ? 'font-bold' : 'font-medium'}`}
-                    >
+                    <h3 className={`text-lg ${!notification.read ? 'font-bold' : 'font-medium'}`}>
                       {notification.title}
                     </h3>
                     {!notification.read && (
-                      <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
-                        NEW
-                      </span>
+                      <span className="rounded bg-blue-600 px-2 py-1 text-xs text-white">NEW</span>
                     )}
                   </div>
-                  <p className="text-gray-700 mb-2">{notification.message}</p>
+                  <p className="mb-2 text-gray-700">{notification.message}</p>
                   <p className="text-sm text-gray-500">
                     {new Date(notification.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <div className="flex gap-2 ml-4">
+                <div className="ml-4 flex gap-2">
                   {notification.actionUrl && (
                     <button
                       onClick={() => {
                         markAsRead(notification.id);
                         router.push(notification.actionUrl!);
                       }}
-                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                      className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
                     >
                       View
                     </button>
@@ -195,17 +191,17 @@ export default function NotificationsPage() {
                   {!notification.read && (
                     <button
                       onClick={() => markAsRead(notification.id)}
-                      className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                      className="rounded bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
                     >
                       Mark Read
                     </button>
                   )}
                   <button
                     onClick={() => deleteNotification(notification.id)}
-                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                    className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
                   >
                     Delete
-                    </button>
+                  </button>
                 </div>
               </div>
             </div>

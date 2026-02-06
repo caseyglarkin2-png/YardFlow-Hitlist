@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/company/batch',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Batch company enrichment error:', error);
     return NextResponse.json(

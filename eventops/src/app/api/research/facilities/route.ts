@@ -110,7 +110,6 @@ Format as JSON:
     captureRouteError(error, {
       route: '/api/research/facilities',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error researching facility count:', error);
     return NextResponse.json({ error: 'Failed to research facility count' }, { status: 500 });

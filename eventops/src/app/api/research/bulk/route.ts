@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/research/bulk',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error starting bulk research:', error);
     return NextResponse.json({ error: 'Failed to start bulk research' }, { status: 500 });
@@ -61,7 +60,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/research/bulk',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error getting bulk research status:', error);
     return NextResponse.json({ error: 'Failed to get status' }, { status: 500 });
@@ -85,7 +83,6 @@ export async function DELETE(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/research/bulk',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error clearing results:', error);
     return NextResponse.json({ error: 'Failed to clear results' }, { status: 500 });

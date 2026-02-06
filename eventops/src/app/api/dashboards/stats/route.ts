@@ -167,7 +167,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/dashboards/stats',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching dashboard stats:', error);
     return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });

@@ -158,7 +158,6 @@ export async function POST(req: NextRequest) {
         captureRouteError(error, {
           route: '/api/outreach/generate-ai',
           method: 'POST',
-          userId: authResult?.userId,
         });
         console.error(`Error generating outreach for ${person.name}:`, error);
         results.push({
@@ -181,7 +180,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/generate-ai',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error generating AI outreach:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

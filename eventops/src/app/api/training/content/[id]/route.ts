@@ -21,7 +21,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     captureRouteError(error, {
       route: '/api/training/content/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error deleting content:', error);
     return NextResponse.json(

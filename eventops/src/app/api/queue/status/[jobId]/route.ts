@@ -60,7 +60,6 @@ export async function GET(req: NextRequest, { params }: { params: { jobId: strin
     captureRouteError(error, {
       route: '/api/queue/status/[jobId]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Error fetching job status', { jobId: params.jobId, error });
     return NextResponse.json({ error: 'Failed to fetch job status' }, { status: 500 });

@@ -189,7 +189,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/content/generate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('AI content generate error', {
       requestId,

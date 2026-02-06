@@ -35,7 +35,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/manifest/questions',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Strategic questions generation failed', {
       error,
@@ -96,7 +95,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/manifest/questions',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Failed to fetch strategic questions', {
       error,

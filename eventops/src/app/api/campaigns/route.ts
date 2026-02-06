@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/campaigns',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching campaigns:', error);
     return NextResponse.json({ error: 'Failed to fetch campaigns' }, { status: 500 });
@@ -110,7 +109,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/campaigns',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error creating campaign:', error);
     return NextResponse.json({ error: 'Failed to create campaign' }, { status: 500 });

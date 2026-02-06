@@ -60,7 +60,7 @@ export function useAgentMonitoring(timeRange: '24h' | '7d' | '30d' = '24h', agen
     } finally {
       if (!data) setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange, agentType]);
 
   useEffect(() => {

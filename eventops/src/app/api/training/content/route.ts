@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/training/content',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching content:', error);
     return NextResponse.json(

@@ -100,7 +100,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/templates',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Template list failed', { requestId, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });
@@ -168,7 +167,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/templates',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Template creation failed', { requestId, error: message });
     return NextResponse.json({ error: 'internal_error' }, { status: 500 });

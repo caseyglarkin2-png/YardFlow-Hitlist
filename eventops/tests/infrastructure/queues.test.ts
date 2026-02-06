@@ -118,9 +118,9 @@ describe('queue/queues.ts — Queue definitions and helpers', () => {
     const { addEnrichmentJob } = await import('@/lib/queue/queues');
     const { logger } = await import('@/lib/logger');
 
-    await expect(
-      addEnrichmentJob('email-pattern', { accountId: 'acc-1' })
-    ).rejects.toThrow('Redis down');
+    await expect(addEnrichmentJob('email-pattern', { accountId: 'acc-1' })).rejects.toThrow(
+      'Redis down'
+    );
 
     expect(logger.error).toHaveBeenCalledWith(
       'Error adding enrichment job',
@@ -150,9 +150,9 @@ describe('queue/queues.ts — Queue definitions and helpers', () => {
 
     const { addOutreachJob } = await import('@/lib/queue/queues');
 
-    await expect(
-      addOutreachJob('launch', { sequenceId: 's', accountIds: [] })
-    ).rejects.toThrow('Queue full');
+    await expect(addOutreachJob('launch', { sequenceId: 's', accountIds: [] })).rejects.toThrow(
+      'Queue full'
+    );
   });
 
   it('addSequenceJob passes delay and custom options', async () => {
@@ -188,8 +188,8 @@ describe('queue/queues.ts — Queue definitions and helpers', () => {
 
     const { addSequenceJob } = await import('@/lib/queue/queues');
 
-    await expect(
-      addSequenceJob({ enrollmentId: 'e', stepNumber: 1 })
-    ).rejects.toThrow('Connection lost');
+    await expect(addSequenceJob({ enrollmentId: 'e', stepNumber: 1 })).rejects.toThrow(
+      'Connection lost'
+    );
   });
 });

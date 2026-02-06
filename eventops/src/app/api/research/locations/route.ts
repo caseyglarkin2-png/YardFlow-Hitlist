@@ -117,7 +117,6 @@ Format as JSON with arrays of locations:
     captureRouteError(error, {
       route: '/api/research/locations',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error mapping locations:', error);
     return NextResponse.json({ error: 'Failed to map locations' }, { status: 500 });

@@ -75,7 +75,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/queue/enrich',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Error queuing enrichment job', { error });
     return NextResponse.json({ error: 'Failed to queue job' }, { status: 500 });

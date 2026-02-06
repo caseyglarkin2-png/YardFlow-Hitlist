@@ -123,7 +123,6 @@ Format as JSON:
     captureRouteError(error, {
       route: '/api/research/competitive',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error analyzing company:', error);
     return NextResponse.json({ error: 'Failed to analyze company' }, { status: 500 });

@@ -11,14 +11,14 @@
 
 ### ✅ ROADMAP COMPLETE — Final State
 
-| Category          | Status       | Details                                                                 |
-| ----------------- | ------------ | ----------------------------------------------------------------------- |
-| **S2S Auth**      | 🟢 Complete  | **ALL** API routes migrated to `authServiceOrSession` (65+ files)       |
-| **Lint Warnings** | 🟢 Zero | 234 → **0** warnings (100% reduction) |
-| **Worker**        | 🟢 Healthy   | Retry logic, graceful shutdown, heartbeat working                       |
-| **Tests**         | 🟢 Passing   | **334 tests** pass, 12 skipped (28 test files)                          |
-| **Sentry**        | 🟢 Full      | `captureRouteError()` on **146+ routes** (all except health + 3 webhooks) |
-| **Build**         | 🟢 Clean     | 0 lint errors, build succeeds                                           |
+| Category          | Status      | Details                                                                   |
+| ----------------- | ----------- | ------------------------------------------------------------------------- |
+| **S2S Auth**      | 🟢 Complete | **ALL** API routes migrated to `authServiceOrSession` (65+ files)         |
+| **Lint Warnings** | 🟢 Zero     | 234 → **0** warnings (100% reduction)                                     |
+| **Worker**        | 🟢 Healthy  | Retry logic, graceful shutdown, heartbeat working                         |
+| **Tests**         | 🟢 Passing  | **334 tests** pass, 12 skipped (28 test files)                            |
+| **Sentry**        | 🟢 Full     | `captureRouteError()` on **146+ routes** (all except health + 3 webhooks) |
+| **Build**         | 🟢 Clean    | 0 lint errors, build succeeds                                             |
 
 ### Problem (Resolved)
 
@@ -735,22 +735,22 @@ export async function GET(req: NextRequest) {
 
 ## Progress Tracking
 
-| Sprint | Status  | Est. Time | Commit                | Notes                                            |
-| ------ | ------- | --------- | --------------------- | ------------------------------------------------ |
-| 37     | ✅ Done | -         | `00bd872` / `346e5f3` | Sentry + Sequence S2S fix                        |
-| 38     | ✅ Done | 2-3 hrs   | `ac93133`             | Critical S2S routes (10 files, 14 tests)         |
-| 39     | ✅ Done | 3-4 hrs   | `d2d3724`             | Secondary S2S routes (10 files, 20 tests)        |
-| 40     | ✅ Done | 4-5 hrs   | `c9ea035`             | Remaining S2S routes (35 files)                  |
-| 40.5   | ✅ Done | 2-3 hrs   | `f91342a`             | Google OAuth routes (6 files, 19 tests)          |
-| 41     | ✅ Done | 2-3 hrs   | `c8e6f8e`             | Sentry error capture (5 routes, 10 tests)        |
-| 42     | ✅ Done | 3-4 hrs   | `39452a1`             | Lint cleanup 234→18 warnings (84 files)          |
-| 43     | ✅ Done | 4-5 hrs   | `a9103ea`             | Auth-service tests + 10 more routes (27+5 tests) |
-| Review | ✅ Done | -         | `19eabae`             | Fixed broken activate route + manifest/generate  |
-| 44     | ✅ Done | 2 hrs     | `47e056d`             | Infrastructure tests: db, queue, webhooks (44 tests) |
-| 45     | ✅ Done | 1.5 hrs   | `4e8c7a1`             | React exhaustive-deps 18→0 warnings (15 files)   |
-| 46     | ✅ Done | 3 hrs     | `683b34c`             | Sentry captureRouteError on 142+ routes          |
-| 47     | ✅ Done | 1 hr      | `5ac689d`             | ESLint no-restricted-imports rule for auth()      |
-| Review2| ✅ Done | -         | `5c84af6`             | 4 missed routes added captureRouteError           |
+| Sprint  | Status  | Est. Time | Commit                | Notes                                                |
+| ------- | ------- | --------- | --------------------- | ---------------------------------------------------- |
+| 37      | ✅ Done | -         | `00bd872` / `346e5f3` | Sentry + Sequence S2S fix                            |
+| 38      | ✅ Done | 2-3 hrs   | `ac93133`             | Critical S2S routes (10 files, 14 tests)             |
+| 39      | ✅ Done | 3-4 hrs   | `d2d3724`             | Secondary S2S routes (10 files, 20 tests)            |
+| 40      | ✅ Done | 4-5 hrs   | `c9ea035`             | Remaining S2S routes (35 files)                      |
+| 40.5    | ✅ Done | 2-3 hrs   | `f91342a`             | Google OAuth routes (6 files, 19 tests)              |
+| 41      | ✅ Done | 2-3 hrs   | `c8e6f8e`             | Sentry error capture (5 routes, 10 tests)            |
+| 42      | ✅ Done | 3-4 hrs   | `39452a1`             | Lint cleanup 234→18 warnings (84 files)              |
+| 43      | ✅ Done | 4-5 hrs   | `a9103ea`             | Auth-service tests + 10 more routes (27+5 tests)     |
+| Review  | ✅ Done | -         | `19eabae`             | Fixed broken activate route + manifest/generate      |
+| 44      | ✅ Done | 2 hrs     | `47e056d`             | Infrastructure tests: db, queue, webhooks (44 tests) |
+| 45      | ✅ Done | 1.5 hrs   | `4e8c7a1`             | React exhaustive-deps 18→0 warnings (15 files)       |
+| 46      | ✅ Done | 3 hrs     | `683b34c`             | Sentry captureRouteError on 142+ routes              |
+| 47      | ✅ Done | 1 hr      | `5ac689d`             | ESLint no-restricted-imports rule for auth()         |
+| Review2 | ✅ Done | -         | `5c84af6`             | 4 missed routes added captureRouteError              |
 
 ### Key Metrics
 
@@ -813,4 +813,4 @@ grep -rl "authServiceOrSession" src/app/api --include="*.ts" | wc -l
 
 ---
 
-*Document revised Feb 6, 2026. All sprints (37-47) complete. Two subagent code reviews passed. Full stability roadmap executed: 334 tests, 0 lint warnings, 146+ Sentry-instrumented routes, ESLint auth() guard rule.*
+_Document revised Feb 6, 2026. All sprints (37-47) complete. Two subagent code reviews passed. Full stability roadmap executed: 334 tests, 0 lint warnings, 146+ Sentry-instrumented routes, ESLint auth() guard rule._

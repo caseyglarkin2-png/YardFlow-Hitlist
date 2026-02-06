@@ -153,9 +153,7 @@ describe('queue/client.ts — Redis connection management', () => {
     const { getRedisConnection } = await import('@/lib/queue/client');
     getRedisConnection();
 
-    expect(RedisMock).toHaveBeenCalledWith(
-      expect.objectContaining({ maxRetriesPerRequest: null })
-    );
+    expect(RedisMock).toHaveBeenCalledWith(expect.objectContaining({ maxRetriesPerRequest: null }));
   });
 
   it('registers event handlers on new connection', async () => {

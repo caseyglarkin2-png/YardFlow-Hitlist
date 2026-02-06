@@ -109,11 +109,11 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }
 
   if (!meeting) {
-    return <div className="flex items-center justify-center min-h-screen">Meeting not found</div>;
+    return <div className="flex min-h-screen items-center justify-center">Meeting not found</div>;
   }
 
   const isPast = new Date(meeting.scheduledAt) < new Date();
@@ -122,10 +122,10 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <button onClick={() => router.back()} className="text-blue-600 hover:text-blue-800 mb-4">
+        <button onClick={() => router.back()} className="mb-4 text-blue-600 hover:text-blue-800">
           ← Back to Meetings
         </button>
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold">Meeting with {meeting.people.name}</h1>
             <p className="text-gray-600">
@@ -137,13 +137,13 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
               <>
                 <button
                   onClick={() => setEditing(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
                   Edit
                 </button>
                 <button
                   onClick={deleteMeeting}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                 >
                   Delete
                 </button>
@@ -153,18 +153,18 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Meeting Details */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Meeting Details</h2>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Meeting Details</h2>
           {editing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
+                <label className="mb-1 block text-sm font-medium">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                 >
                   <option value="SCHEDULED">Scheduled</option>
                   <option value="COMPLETED">Completed</option>
@@ -173,7 +173,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Scheduled Time</label>
+                <label className="mb-1 block text-sm font-medium">Scheduled Time</label>
                 <input
                   type="datetime-local"
                   value={
@@ -182,38 +182,39 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
                       : ''
                   }
                   onChange={(e) =>
-                    setFormData({ ...formData, scheduledAt: new Date(e.target.value).toISOString() })
+                    setFormData({
+                      ...formData,
+                      scheduledAt: new Date(e.target.value).toISOString(),
+                    })
                   }
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Duration (minutes)</label>
+                <label className="mb-1 block text-sm font-medium">Duration (minutes)</label>
                 <input
                   type="number"
                   value={formData.duration}
-                  onChange={(e) =>
-                    setFormData({ ...formData, duration: parseInt(e.target.value) })
-                  }
-                  className="w-full px-3 py-2 border rounded"
+                  onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+                  className="w-full rounded border px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Location</label>
+                <label className="mb-1 block text-sm font-medium">Location</label>
                 <input
                   type="text"
                   value={formData.location || ''}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                   placeholder="Booth #123, Conference Room A, Zoom link..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Meeting Type</label>
+                <label className="mb-1 block text-sm font-medium">Meeting Type</label>
                 <select
                   value={formData.meetingType || ''}
                   onChange={(e) => setFormData({ ...formData, meetingType: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                 >
                   <option value="">Select type...</option>
                   <option value="INTRO">Introduction</option>
@@ -225,7 +226,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={updateMeeting}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  className="flex-1 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
                 >
                   Save Changes
                 </button>
@@ -234,7 +235,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
                     setEditing(false);
                     setFormData(meeting);
                   }}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  className="rounded bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
                 >
                   Cancel
                 </button>
@@ -248,9 +249,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
               </div>
               <div>
                 <p className="text-sm text-gray-500">Scheduled</p>
-                <p className="font-medium">
-                  {new Date(meeting.scheduledAt).toLocaleString()}
-                </p>
+                <p className="font-medium">{new Date(meeting.scheduledAt).toLocaleString()}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Duration</p>
@@ -273,8 +272,8 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
         </div>
 
         {/* Contact Info */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Contact Information</h2>
           <div className="space-y-3">
             <div>
               <p className="text-sm text-gray-500">Name</p>
@@ -304,7 +303,7 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
             <div className="pt-4">
               <button
                 onClick={() => router.push(`/dashboard/people/${meeting.personId}`)}
-                className="w-full px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                className="w-full rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
               >
                 View Full Profile
               </button>
@@ -315,23 +314,23 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
 
       {/* Meeting Prep */}
       {!isPast && (
-        <div className="mt-6 bg-white p-6 rounded-lg shadow">
-          <div className="flex justify-between items-center mb-4">
+        <div className="mt-6 rounded-lg bg-white p-6 shadow">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Meeting Preparation</h2>
             <button
               onClick={generatePrep}
               disabled={generatingPrep}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400"
+              className="rounded bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:bg-gray-400"
             >
               {generatingPrep ? 'Generating...' : prepDoc ? 'Regenerate' : 'Generate Prep Doc'}
             </button>
           </div>
           {prepDoc ? (
             <div className="prose max-w-none">
-              <pre className="whitespace-pre-wrap bg-gray-50 p-4 rounded">{prepDoc}</pre>
+              <pre className="whitespace-pre-wrap rounded bg-gray-50 p-4">{prepDoc}</pre>
               <button
                 onClick={() => window.print()}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="mt-4 rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
               >
                 Print / Save as PDF
               </button>
@@ -347,16 +346,16 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
 
       {/* Post-Meeting Outcome */}
       {isPast && (
-        <div className="mt-6 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Meeting Outcome</h2>
+        <div className="mt-6 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Meeting Outcome</h2>
           {editing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Outcome</label>
+                <label className="mb-1 block text-sm font-medium">Outcome</label>
                 <select
                   value={formData.outcome || ''}
                   onChange={(e) => setFormData({ ...formData, outcome: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                 >
                   <option value="">Select outcome...</option>
                   <option value="Interested - Will Follow Up">Interested - Will Follow Up</option>
@@ -366,17 +365,17 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Next Steps</label>
+                <label className="mb-1 block text-sm font-medium">Next Steps</label>
                 <textarea
                   value={formData.nextSteps || ''}
                   onChange={(e) => setFormData({ ...formData, nextSteps: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                   rows={3}
                   placeholder="Send pricing proposal, schedule demo, introduce to procurement team..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Follow-up Date</label>
+                <label className="mb-1 block text-sm font-medium">Follow-up Date</label>
                 <input
                   type="date"
                   value={formData.followUpDate?.split('T')[0] || ''}
@@ -386,15 +385,15 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
                       followUpDate: new Date(e.target.value).toISOString(),
                     })
                   }
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Deal Stage</label>
+                <label className="mb-1 block text-sm font-medium">Deal Stage</label>
                 <select
                   value={formData.dealStage || ''}
                   onChange={(e) => setFormData({ ...formData, dealStage: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                 >
                   <option value="">Select stage...</option>
                   <option value="Qualified Lead">Qualified Lead</option>
@@ -406,11 +405,11 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Notes</label>
+                <label className="mb-1 block text-sm font-medium">Notes</label>
                 <textarea
                   value={formData.notes || ''}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full rounded border px-3 py-2"
                   rows={4}
                   placeholder="Meeting notes, key discussion points, concerns raised..."
                 />
@@ -447,11 +446,11 @@ export default function MeetingDetailPage({ params }: { params: { id: string } }
               {meeting.notes && (
                 <div>
                   <p className="text-sm text-gray-500">Notes</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">{meeting.notes}</p>
+                  <p className="whitespace-pre-wrap text-gray-700">{meeting.notes}</p>
                 </div>
               )}
               {!meeting.outcome && !meeting.notes && (
-                <p className="text-gray-500 italic">
+                <p className="italic text-gray-500">
                   No outcome recorded yet. Click Edit to add meeting notes.
                 </p>
               )}

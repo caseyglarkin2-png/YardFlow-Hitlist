@@ -125,34 +125,35 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="mx-auto max-w-7xl p-6">
       {/* Header */}
       <div className="mb-6">
-        <Link href="/dashboard/campaigns" className="text-blue-600 hover:text-blue-700 mb-2 inline-block">
+        <Link
+          href="/dashboard/campaigns"
+          className="mb-2 inline-block text-blue-600 hover:text-blue-700"
+        >
           ← Back to Campaigns
         </Link>
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="mb-2 flex items-center gap-3">
               <h1 className="text-2xl font-bold text-gray-900">{campaign.name}</h1>
-              <span className={`px-3 py-1 text-sm rounded-full ${getStatusBadge(campaign.status)}`}>
+              <span className={`rounded-full px-3 py-1 text-sm ${getStatusBadge(campaign.status)}`}>
                 {campaign.status}
               </span>
             </div>
-            {campaign.description && (
-              <p className="text-gray-600">{campaign.description}</p>
-            )}
+            {campaign.description && <p className="text-gray-600">{campaign.description}</p>}
           </div>
           <div className="flex gap-2">
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
             >
               {isEditing ? 'Cancel' : 'Edit'}
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              className="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700"
             >
               Delete
             </button>
@@ -162,17 +163,15 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
 
       {/* Edit Form */}
       {isEditing && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Edit Campaign</h2>
+        <div className="mb-6 rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-lg font-semibold">Edit Campaign</h2>
           <form onSubmit={handleUpdate} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Status</label>
               <select
                 value={editData.status}
                 onChange={(e) => setEditData({ ...editData, status: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full rounded-md border border-gray-300 px-3 py-2"
               >
                 <option value="DRAFT">Draft</option>
                 <option value="ACTIVE">Active</option>
@@ -183,31 +182,27 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
-                </label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Start Date</label>
                 <input
                   type="date"
                   value={editData.startDate}
                   onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date
-                </label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">End Date</label>
                 <input
                   type="date"
                   value={editData.endDate}
                   onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </div>
             </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               Save Changes
             </button>
@@ -215,47 +210,47 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Metrics Cards */}
-        <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Total Outreach</div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:col-span-2">
+          <div className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-1 text-sm text-gray-600">Total Outreach</div>
             <div className="text-2xl font-bold text-gray-900">{campaign.metrics.total}</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Sent</div>
+          <div className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-1 text-sm text-gray-600">Sent</div>
             <div className="text-2xl font-bold text-green-600">{campaign.metrics.sent}</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Opened</div>
+          <div className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-1 text-sm text-gray-600">Opened</div>
             <div className="text-2xl font-bold text-blue-600">{campaign.metrics.opened}</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Responded</div>
+          <div className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-1 text-sm text-gray-600">Responded</div>
             <div className="text-2xl font-bold text-purple-600">{campaign.metrics.responded}</div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Response Rate</div>
+          <div className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-1 text-sm text-gray-600">Response Rate</div>
             <div className="text-2xl font-bold text-indigo-600">
               {campaign.metrics.responseRate.toFixed(1)}%
             </div>
           </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Draft</div>
+          <div className="rounded-lg bg-white p-4 shadow">
+            <div className="mb-1 text-sm text-gray-600">Draft</div>
             <div className="text-2xl font-bold text-gray-500">{campaign.metrics.draft}</div>
           </div>
         </div>
 
         {/* Campaign Info */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Campaign Details</h3>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h3 className="mb-4 text-lg font-semibold">Campaign Details</h3>
           <div className="space-y-3 text-sm">
             {campaign.targetPersonas && campaign.targetPersonas.length > 0 && (
               <div>
-                <div className="text-gray-600 mb-1">Target Personas</div>
+                <div className="mb-1 text-gray-600">Target Personas</div>
                 <div className="flex flex-wrap gap-2">
                   {campaign.targetPersonas.map((p) => (
-                    <span key={p} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                    <span key={p} className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
                       {personaLabels[p] || p}
                     </span>
                   ))}
@@ -264,13 +259,13 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
             )}
             {campaign.minIcpScore && (
               <div>
-                <div className="text-gray-600 mb-1">Min ICP Score</div>
+                <div className="mb-1 text-gray-600">Min ICP Score</div>
                 <div className="font-medium">{campaign.minIcpScore}</div>
               </div>
             )}
             {campaign.startDate && (
               <div>
-                <div className="text-gray-600 mb-1">Start Date</div>
+                <div className="mb-1 text-gray-600">Start Date</div>
                 <div className="font-medium">
                   {new Date(campaign.startDate).toLocaleDateString()}
                 </div>
@@ -278,17 +273,13 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
             )}
             {campaign.endDate && (
               <div>
-                <div className="text-gray-600 mb-1">End Date</div>
-                <div className="font-medium">
-                  {new Date(campaign.endDate).toLocaleDateString()}
-                </div>
+                <div className="mb-1 text-gray-600">End Date</div>
+                <div className="font-medium">{new Date(campaign.endDate).toLocaleDateString()}</div>
               </div>
             )}
             <div>
-              <div className="text-gray-600 mb-1">Created</div>
-              <div className="font-medium">
-                {new Date(campaign.createdAt).toLocaleDateString()}
-              </div>
+              <div className="mb-1 text-gray-600">Created</div>
+              <div className="font-medium">{new Date(campaign.createdAt).toLocaleDateString()}</div>
             </div>
           </div>
         </div>
@@ -296,20 +287,20 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
 
       {/* Goals Progress */}
       {campaign.goals && Object.keys(campaign.goals).length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6 mt-6">
-          <h3 className="text-lg font-semibold mb-4">Goal Progress</h3>
+        <div className="mt-6 rounded-lg bg-white p-6 shadow">
+          <h3 className="mb-4 text-lg font-semibold">Goal Progress</h3>
           <div className="space-y-4">
             {campaign.goals.meetings && (
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="mb-1 flex justify-between text-sm">
                   <span>Meetings Booked</span>
                   <span className="font-medium">
                     {campaign.metrics.responded} / {campaign.goals.meetings}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="h-2 w-full rounded-full bg-gray-200">
                   <div
-                    className="bg-purple-600 h-2 rounded-full"
+                    className="h-2 rounded-full bg-purple-600"
                     style={{
                       width: `${Math.min((campaign.metrics.responded / campaign.goals.meetings) * 100, 100)}%`,
                     }}
@@ -319,15 +310,15 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
             )}
             {campaign.goals.emails && (
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="mb-1 flex justify-between text-sm">
                   <span>Emails Sent</span>
                   <span className="font-medium">
                     {campaign.metrics.sent} / {campaign.goals.emails}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="h-2 w-full rounded-full bg-gray-200">
                   <div
-                    className="bg-green-600 h-2 rounded-full"
+                    className="h-2 rounded-full bg-green-600"
                     style={{
                       width: `${Math.min((campaign.metrics.sent / campaign.goals.emails) * 100, 100)}%`,
                     }}
@@ -337,15 +328,15 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
             )}
             {campaign.goals.responses && (
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="mb-1 flex justify-between text-sm">
                   <span>Responses Received</span>
                   <span className="font-medium">
                     {campaign.metrics.responded} / {campaign.goals.responses}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="h-2 w-full rounded-full bg-gray-200">
                   <div
-                    className="bg-blue-600 h-2 rounded-full"
+                    className="h-2 rounded-full bg-blue-600"
                     style={{
                       width: `${Math.min((campaign.metrics.responded / campaign.goals.responses) * 100, 100)}%`,
                     }}
@@ -358,18 +349,18 @@ export default function CampaignDetailsPage({ params }: { params: { id: string }
       )}
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6 mt-6">
-        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+      <div className="mt-6 rounded-lg bg-white p-6 shadow">
+        <h3 className="mb-4 text-lg font-semibold">Quick Actions</h3>
         <div className="flex gap-3">
           <Link
             href={`/dashboard/outreach?campaign=${params.id}`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           >
             View Outreach
           </Link>
           <Link
             href={`/dashboard/outreach/new?campaign=${params.id}`}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="rounded-md border border-gray-300 px-4 py-2 hover:bg-gray-50"
           >
             Add Outreach
           </Link>

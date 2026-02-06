@@ -122,7 +122,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/smart-guess',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Smart email guess error:', error);
     return NextResponse.json(
@@ -250,7 +249,6 @@ export async function PUT(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/smart-guess',
       method: 'PUT',
-      userId: authResult?.userId,
     });
     console.error('Batch smart guess error:', error);
     return NextResponse.json(

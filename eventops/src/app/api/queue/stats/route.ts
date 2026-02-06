@@ -106,7 +106,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/queue/stats',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Error fetching queue stats', { error });
     return NextResponse.json({ error: 'Failed to fetch queue stats' }, { status: 500 });

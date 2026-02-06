@@ -61,7 +61,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     captureRouteError(error, {
       route: '/api/campaigns/[id]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching campaign:', error);
     return NextResponse.json({ error: 'Failed to fetch campaign' }, { status: 500 });
@@ -99,7 +98,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     captureRouteError(error, {
       route: '/api/campaigns/[id]',
       method: 'PATCH',
-      userId: authResult?.userId,
     });
     console.error('Error updating campaign:', error);
     return NextResponse.json({ error: 'Failed to update campaign' }, { status: 500 });
@@ -126,7 +124,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     captureRouteError(error, {
       route: '/api/campaigns/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error deleting campaign:', error);
     return NextResponse.json({ error: 'Failed to delete campaign' }, { status: 500 });

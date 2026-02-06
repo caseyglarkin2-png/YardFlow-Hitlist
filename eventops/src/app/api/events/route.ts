@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/events',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error creating event:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -73,7 +72,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/events',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching events:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

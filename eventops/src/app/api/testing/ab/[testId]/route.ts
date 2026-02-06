@@ -27,7 +27,6 @@ export async function GET(request: NextRequest, { params }: { params: { testId: 
     captureRouteError(error, {
       route: '/api/testing/ab/[testId]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('A/B test analysis failed', { error });
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 });
@@ -63,7 +62,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/testing/ab/[testId]',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('A/B test creation failed', { error });
     return NextResponse.json(

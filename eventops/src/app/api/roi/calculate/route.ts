@@ -94,7 +94,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/roi/calculate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error calculating ROI:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -140,7 +139,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/roi/calculate',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching ROI calculation:', error);
     return NextResponse.json({ error: 'Failed to fetch ROI calculation' }, { status: 500 });

@@ -57,7 +57,11 @@ export async function POST(req: NextRequest) {
 
         results.success++;
       } catch (error) {
-        captureRouteError(error, { route: '/api/bulk/assign-campaign', method: 'POST', userId: authResult?.userId });
+        captureRouteError(error, {
+          route: '/api/bulk/assign-campaign',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         results.failed++;
         results.errors.push(`Failed to assign ${personId}: ${error}`);
       }
@@ -90,7 +94,11 @@ export async function POST(req: NextRequest) {
 
         results.success += people.length;
       } catch (error) {
-        captureRouteError(error, { route: '/api/bulk/assign-campaign', method: 'POST', userId: authResult?.userId });
+        captureRouteError(error, {
+          route: '/api/bulk/assign-campaign',
+          method: 'POST',
+          userId: authResult?.userId,
+        });
         results.failed++;
         results.errors.push(`Failed to assign account ${accountId}: ${error}`);
       }

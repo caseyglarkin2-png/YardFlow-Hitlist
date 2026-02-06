@@ -26,7 +26,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     captureRouteError(error, {
       route: '/api/outreach/[id]/mark-sent',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error marking as sent:', error);
     return NextResponse.json({ error: 'Failed to mark as sent' }, { status: 500 });

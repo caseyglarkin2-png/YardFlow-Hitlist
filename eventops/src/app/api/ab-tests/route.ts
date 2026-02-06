@@ -39,7 +39,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/ab-tests',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching AB tests:', error);
     return NextResponse.json(
@@ -105,7 +104,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/ab-tests',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error creating AB test:', error);
     return NextResponse.json(

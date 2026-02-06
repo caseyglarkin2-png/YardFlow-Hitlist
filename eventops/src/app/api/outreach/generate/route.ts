@@ -119,7 +119,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/generate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error generating outreach:', error);
     return NextResponse.json({ error: 'Failed to generate outreach' }, { status: 500 });

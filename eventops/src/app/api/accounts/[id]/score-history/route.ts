@@ -22,7 +22,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     captureRouteError(error, {
       route: '/api/accounts/[id]/score-history',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching score history:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

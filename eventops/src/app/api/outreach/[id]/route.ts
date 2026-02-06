@@ -30,7 +30,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     captureRouteError(error, {
       route: '/api/outreach/[id]',
       method: 'PATCH',
-      userId: authResult?.userId,
     });
     console.error('Error updating outreach:', error);
     return NextResponse.json({ error: 'Failed to update outreach' }, { status: 500 });
@@ -53,7 +52,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     captureRouteError(error, {
       route: '/api/outreach/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error deleting outreach:', error);
     return NextResponse.json({ error: 'Failed to delete outreach' }, { status: 500 });

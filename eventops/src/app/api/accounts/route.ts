@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/accounts',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error creating account:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -125,7 +124,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/accounts',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching accounts:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

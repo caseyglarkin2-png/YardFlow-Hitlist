@@ -128,7 +128,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/accounts/bulk',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Bulk action error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

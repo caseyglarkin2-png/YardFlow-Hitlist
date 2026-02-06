@@ -89,7 +89,6 @@ export async function POST(req: NextRequest) {
         captureRouteError(error, {
           route: '/api/training/import/hubspot',
           method: 'POST',
-          userId: authResult?.userId,
         });
         console.error(`Error importing call ${engagement.engagement.id}:`, error);
       }
@@ -104,7 +103,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/training/import/hubspot',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error importing from HubSpot:', error);
     return NextResponse.json(

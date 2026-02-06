@@ -108,7 +108,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(err, {
       route: '/api/agents/status',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Agent status update error', { error: err });
     return NextResponse.json(

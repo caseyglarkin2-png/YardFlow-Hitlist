@@ -44,7 +44,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     captureRouteError(error, {
       route: '/api/sequences/[id]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Error fetching sequence', { error });
     return NextResponse.json({ error: 'Failed to fetch sequence' }, { status: 500 });
@@ -146,7 +145,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     captureRouteError(error, {
       route: '/api/sequences/[id]',
       method: 'PUT',
-      userId: authResult?.userId,
     });
     logger.error('Error updating sequence', { id, error });
     return NextResponse.json({ error: 'Failed to update sequence' }, { status: 500 });
@@ -196,7 +194,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     captureRouteError(error, {
       route: '/api/sequences/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     logger.error('Error deleting sequence', { id, error });
     return NextResponse.json({ error: 'Failed to delete sequence' }, { status: 500 });

@@ -139,7 +139,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     captureRouteError(error, {
       route: '/api/sequences/[id]/analytics',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Error fetching sequence analytics', { error });
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });

@@ -79,7 +79,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     captureRouteError(error, {
       route: '/api/accounts/[id]/research',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error generating research:', error);
     return NextResponse.json({ error: 'Failed to generate research' }, { status: 500 });

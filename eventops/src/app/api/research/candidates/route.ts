@@ -91,7 +91,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/research/candidates',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error getting research candidates:', error);
     return NextResponse.json({ error: 'Failed to get candidates' }, { status: 500 });

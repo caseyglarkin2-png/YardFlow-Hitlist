@@ -305,7 +305,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/send-email',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('SendGrid send failed', {
       errorId,

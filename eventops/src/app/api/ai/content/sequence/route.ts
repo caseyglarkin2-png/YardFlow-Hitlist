@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/content/sequence',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Sequence generation error', { error: message });
     return NextResponse.json({ error: message }, { status: 500 });

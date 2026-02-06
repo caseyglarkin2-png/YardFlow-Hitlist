@@ -87,7 +87,6 @@ export async function POST(req: NextRequest) {
         captureRouteError(error, {
           route: '/api/manifest/generate',
           method: 'POST',
-          userId: authResult?.userId,
         });
         console.error(`Error generating Manifest request for ${person.name}:`, error);
         results.push({
@@ -112,7 +111,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/manifest/generate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error generating Manifest requests:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

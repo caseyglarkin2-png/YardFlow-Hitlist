@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/company/enrich',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Company enrichment error:', error);
     return NextResponse.json(

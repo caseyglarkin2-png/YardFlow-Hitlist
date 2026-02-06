@@ -42,7 +42,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     captureRouteError(error, {
       route: '/api/team/[id]',
       method: 'PATCH',
-      userId: authResult?.userId,
     });
     console.error('Error updating team member:', error);
     return NextResponse.json({ error: 'Failed to update team member' }, { status: 500 });
@@ -79,7 +78,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     captureRouteError(error, {
       route: '/api/team/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error removing team member:', error);
     return NextResponse.json({ error: 'Failed to remove team member' }, { status: 500 });

@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/team',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching team:', error);
     return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 });
@@ -102,7 +101,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/team',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error inviting team member:', error);
     return NextResponse.json({ error: 'Failed to invite team member' }, { status: 500 });

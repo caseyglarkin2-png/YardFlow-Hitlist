@@ -62,7 +62,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/dossier/generate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Dossier generation error', { error: errorMessage });
     return NextResponse.json(

@@ -55,7 +55,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/sequences',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Error fetching sequences', { error });
     return NextResponse.json({ error: 'Failed to fetch sequences' }, { status: 500 });
@@ -150,7 +149,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/sequences',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Error creating sequence', { error });
     return NextResponse.json({ error: 'Failed to create sequence' }, { status: 500 });

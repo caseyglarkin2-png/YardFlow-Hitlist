@@ -63,7 +63,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/activity/stream',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching activity stream:', error);
     return NextResponse.json({ error: 'Failed to fetch activity stream' }, { status: 500 });

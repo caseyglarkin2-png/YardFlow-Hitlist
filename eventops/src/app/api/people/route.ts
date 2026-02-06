@@ -94,7 +94,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/people',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error creating person:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -181,7 +180,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/people',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching people:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

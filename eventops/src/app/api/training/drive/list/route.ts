@@ -49,7 +49,6 @@ export async function GET(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/training/drive/list',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error listing Drive files:', error);
     return NextResponse.json(

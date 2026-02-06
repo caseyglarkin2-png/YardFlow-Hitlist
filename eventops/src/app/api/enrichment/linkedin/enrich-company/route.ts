@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/linkedin/enrich-company',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('LinkedIn company enrichment error:', error);
     return NextResponse.json(

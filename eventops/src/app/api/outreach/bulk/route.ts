@@ -38,7 +38,6 @@ export async function PATCH(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/bulk',
       method: 'PATCH',
-      userId: authResult?.userId,
     });
     console.error('Error bulk updating outreach:', error);
     return NextResponse.json({ error: 'Failed to update outreach' }, { status: 500 });
@@ -71,7 +70,6 @@ export async function DELETE(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/outreach/bulk',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error bulk deleting outreach:', error);
     return NextResponse.json({ error: 'Failed to delete outreach' }, { status: 500 });

@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/notifications/mark-read',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error marking notifications as read:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

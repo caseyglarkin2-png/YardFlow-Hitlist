@@ -96,7 +96,12 @@ describe('SendGrid webhook handler', () => {
 
     const { POST } = await import('@/app/api/webhooks/sendgrid/route');
     const req = createWebhookRequest([
-      { event: 'click', sg_message_id: 'msg-123', email: 'test@example.com', timestamp: 1234567890 },
+      {
+        event: 'click',
+        sg_message_id: 'msg-123',
+        email: 'test@example.com',
+        timestamp: 1234567890,
+      },
     ]);
 
     const res = await POST(req);
@@ -185,7 +190,12 @@ describe('SendGrid webhook handler', () => {
 
     const { POST } = await import('@/app/api/webhooks/sendgrid/route');
     const req = createWebhookRequest([
-      { event: 'spamreport', sg_message_id: 'msg-123', email: 'test@example.com', timestamp: 1234567890 },
+      {
+        event: 'spamreport',
+        sg_message_id: 'msg-123',
+        email: 'test@example.com',
+        timestamp: 1234567890,
+      },
     ]);
 
     const res = await POST(req);
@@ -199,7 +209,12 @@ describe('SendGrid webhook handler', () => {
 
     const { POST } = await import('@/app/api/webhooks/sendgrid/route');
     const req = createWebhookRequest([
-      { event: 'unsubscribe', sg_message_id: 'msg-123', email: 'test@example.com', timestamp: 1234567890 },
+      {
+        event: 'unsubscribe',
+        sg_message_id: 'msg-123',
+        email: 'test@example.com',
+        timestamp: 1234567890,
+      },
     ]);
 
     const res = await POST(req);
@@ -213,7 +228,12 @@ describe('SendGrid webhook handler', () => {
 
     const { POST } = await import('@/app/api/webhooks/sendgrid/route');
     const req = createWebhookRequest([
-      { event: 'delivered', sg_message_id: 'msg-123', email: 'test@example.com', timestamp: 1234567890 },
+      {
+        event: 'delivered',
+        sg_message_id: 'msg-123',
+        email: 'test@example.com',
+        timestamp: 1234567890,
+      },
     ]);
 
     const res = await POST(req);
@@ -229,7 +249,12 @@ describe('SendGrid webhook handler', () => {
 
     const { POST } = await import('@/app/api/webhooks/sendgrid/route');
     const req = createWebhookRequest([
-      { event: 'open', sg_message_id: 'unknown-msg', email: 'test@example.com', timestamp: 1234567890 },
+      {
+        event: 'open',
+        sg_message_id: 'unknown-msg',
+        email: 'test@example.com',
+        timestamp: 1234567890,
+      },
     ]);
 
     const res = await POST(req);

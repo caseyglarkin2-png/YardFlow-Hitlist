@@ -85,7 +85,6 @@ export async function POST(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/email',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Email enrichment error:', error);
     return NextResponse.json(
@@ -183,7 +182,6 @@ export async function PUT(req: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/email',
       method: 'PUT',
-      userId: authResult?.userId,
     });
     console.error('Batch enrichment error:', error);
     return NextResponse.json(

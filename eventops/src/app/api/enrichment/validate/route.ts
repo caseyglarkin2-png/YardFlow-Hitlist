@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/enrichment/validate',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Email validation error:', error);
     return NextResponse.json(

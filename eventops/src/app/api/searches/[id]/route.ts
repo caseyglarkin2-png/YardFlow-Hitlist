@@ -41,7 +41,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     captureRouteError(error, {
       route: '/api/searches/[id]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     console.error('Error fetching saved search:', error);
     return NextResponse.json({ error: 'Failed to fetch saved search' }, { status: 500 });
@@ -95,7 +94,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     captureRouteError(error, {
       route: '/api/searches/[id]',
       method: 'PATCH',
-      userId: authResult?.userId,
     });
     console.error('Error updating saved search:', error);
     return NextResponse.json({ error: 'Failed to update saved search' }, { status: 500 });
@@ -140,7 +138,6 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     captureRouteError(error, {
       route: '/api/searches/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     console.error('Error deleting saved search:', error);
     return NextResponse.json({ error: 'Failed to delete saved search' }, { status: 500 });

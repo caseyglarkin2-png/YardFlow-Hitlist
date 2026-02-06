@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(err, {
       route: '/api/auth/session',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Session check failed', { error: String(err) });
     return NextResponse.json(

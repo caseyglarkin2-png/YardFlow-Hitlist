@@ -55,7 +55,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     captureRouteError(error, {
       route: '/api/ai/conversations/[id]',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Failed to get conversation', { error: errorMessage });
     return NextResponse.json(
@@ -97,7 +96,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     captureRouteError(error, {
       route: '/api/ai/conversations/[id]',
       method: 'DELETE',
-      userId: authResult?.userId,
     });
     logger.error('Failed to delete conversation', { error: errorMessage });
     return NextResponse.json(

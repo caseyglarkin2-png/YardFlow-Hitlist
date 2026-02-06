@@ -209,7 +209,6 @@ export async function POST(request: NextRequest) {
         captureRouteError(error, {
           route: '/api/ai/research/batch',
           method: 'POST',
-          userId: authResult?.userId,
         });
         logger.error('Failed to research account', {
           accountId,
@@ -251,7 +250,6 @@ export async function POST(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/research/batch',
       method: 'POST',
-      userId: authResult?.userId,
     });
     logger.error('Batch research error', { error: errorMessage });
 
@@ -294,7 +292,6 @@ export async function GET(request: NextRequest) {
     captureRouteError(error, {
       route: '/api/ai/research/batch',
       method: 'GET',
-      userId: authResult?.userId,
     });
     logger.error('Rate limit check error', { error: errorMessage });
     return NextResponse.json(

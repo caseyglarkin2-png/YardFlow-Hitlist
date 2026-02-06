@@ -34,7 +34,11 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    captureRouteError(error, { route: '/api/queue/status', method: 'GET', userId: authResult?.userId });
+    captureRouteError(error, {
+      route: '/api/queue/status',
+      method: 'GET',
+      userId: authResult?.userId,
+    });
     return NextResponse.json(
       {
         status: 'error',

@@ -29,7 +29,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     captureRouteError(error, {
       route: '/api/accounts/[id]/calculate-score',
       method: 'POST',
-      userId: authResult?.userId,
     });
     console.error('Error calculating score:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

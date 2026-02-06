@@ -94,7 +94,11 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (error) {
-      captureRouteError(error, { route: '/api/crm/hubspot/sync', method: 'POST', userId: authResult?.userId });
+      captureRouteError(error, {
+        route: '/api/crm/hubspot/sync',
+        method: 'POST',
+        userId: authResult?.userId,
+      });
       results.failed++;
       results.errors.push(
         `Error syncing ${personId}: ${error instanceof Error ? error.message : 'Unknown error'}`
