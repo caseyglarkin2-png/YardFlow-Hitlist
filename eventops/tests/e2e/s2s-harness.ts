@@ -96,7 +96,7 @@ export function createAuthenticatedRequest(
     }
   }
 
-  const init: RequestInit & { headers: Record<string, string> } = {
+  const init: RequestInit = {
     method: options.method || 'GET',
     headers: { 'Content-Type': 'application/json' },
   };
@@ -127,7 +127,7 @@ export function createS2SRequest(
     }
   }
 
-  const init: RequestInit & { headers: Record<string, string> } = {
+  const init: RequestInit = {
     method: options.method || 'POST',
     headers: {
       'Content-Type': 'application/json',
