@@ -6,12 +6,12 @@
 
 ## Error Symptoms from Frontend Console
 
-| Error | Root Cause | Resolution |
-|-------|------------|------------|
-| `403 Forbidden` on `/api/railway/*` | **Frontend proxy** returning 403, NOT Railway backend | Check S2S auth headers in Vercel proxy |
-| `Unexpected token 'A', "A server e"...` | Next.js HTML error page returned instead of JSON | Uncaught exception in backend - check Railway logs |
-| `500` on `/api/email/send` | Database/Redis connection or SendGrid failure | Check Railway logs for actual error |
-| `401 Unauthorized` on any route | Missing or invalid S2S auth headers | Verify `x-service-key` or `Bearer` token |
+| Error                                   | Root Cause                                            | Resolution                                         |
+| --------------------------------------- | ----------------------------------------------------- | -------------------------------------------------- |
+| `403 Forbidden` on `/api/railway/*`     | **Frontend proxy** returning 403, NOT Railway backend | Check S2S auth headers in Vercel proxy             |
+| `Unexpected token 'A', "A server e"...` | Next.js HTML error page returned instead of JSON      | Uncaught exception in backend - check Railway logs |
+| `500` on `/api/email/send`              | Database/Redis connection or SendGrid failure         | Check Railway logs for actual error                |
+| `401 Unauthorized` on any route         | Missing or invalid S2S auth headers                   | Verify `x-service-key` or `Bearer` token           |
 
 ---
 
@@ -22,12 +22,14 @@
 **Finding**: The Railway backend returns `401 Unauthorized` (JSON) for auth failures, **never 403**.
 
 The only routes returning 403 in the backend are:
+
 - `/api/team/*` — Admin role check
-- `/api/admin/*` — Admin role check  
+- `/api/admin/*` — Admin role check
 - `/api/webhooks/sendgrid` — Signature validation
 - `/api/webhooks/calendly` — Signature validation
 
 **If frontend sees 403 on `/api/railway/outreach`:**
+
 1. The Vercel proxy route is returning 403 before forwarding to Railway
 2. Check the proxy route implementation for auth checks
 3. Verify `SERVICE_TO_SERVICE_SECRET` matches between Vercel and Railway
@@ -37,10 +39,15 @@ The only routes returning 403 in the backend are:
 **Finding**: The string `"A server e"...` is a truncated HTML error page from Next.js:
 
 ```html
-<html><body><h1>A server error has occurred</h1></body></html>
+<html>
+  <body>
+    <h1>A server error has occurred</h1>
+  </body>
+</html>
 ```
 
 **This happens when:**
+
 1. An uncaught exception occurs before the route handler runs
 2. Module import fails at runtime
 3. Database/Redis connection fails during initialization
@@ -58,7 +65,8 @@ Verified Senders in SendGrid:
 - jake@freightroll.com ❌ NOT Verified
 ```
 
-**Fix**: 
+**Fix**:
+
 - Use a verified sender in the "Send As" dropdown
 - OR verify the sender in SendGrid → Settings → Sender Authentication
 
@@ -179,11 +187,11 @@ curl -s -H "x-service-key: $SERVICE_TO_SERVICE_SECRET" \
 
 ## Sprint 57 Fixes Applied
 
-| File | Issue | Fix |
-|------|-------|-----|
-| `src/app/api/campaigns/[id]/status/route.ts` | Returns plain text on errors | Converted to `NextResponse.json()` |
-| `tests/api/json-response-consistency.test.ts` | No test for JSON consistency | Added test to catch regressions |
-| `docs/current/EMAIL_TROUBLESHOOTING.md` | No troubleshooting guide | Created this document |
+| File                                          | Issue                        | Fix                                |
+| --------------------------------------------- | ---------------------------- | ---------------------------------- |
+| `src/app/api/campaigns/[id]/status/route.ts`  | Returns plain text on errors | Converted to `NextResponse.json()` |
+| `tests/api/json-response-consistency.test.ts` | No test for JSON consistency | Added test to catch regressions    |
+| `docs/current/EMAIL_TROUBLESHOOTING.md`       | No troubleshooting guide     | Created this document              |
 
 ---
 

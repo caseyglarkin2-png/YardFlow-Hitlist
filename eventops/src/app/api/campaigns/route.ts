@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json({ campaigns: [] });
+      return NextResponse.json({ data: [] });
     }
 
     const campaigns = await prisma.campaigns.findMany({
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json({ campaigns });
+    return NextResponse.json({ data: campaigns });
   } catch (error) {
     captureRouteError(error, {
       route: '/api/campaigns',

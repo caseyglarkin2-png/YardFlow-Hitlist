@@ -33,7 +33,7 @@ const ALLOWED_NON_JSON_PATTERNS = [
 function isAllowedNonJson(filePath: string): boolean {
   // Convert file path to API route path
   const relativePath = filePath.replace(API_DIR, '/api').replace('/route.ts', '');
-  return ALLOWED_NON_JSON_PATTERNS.some(pattern => pattern.test(relativePath));
+  return ALLOWED_NON_JSON_PATTERNS.some((pattern) => pattern.test(relativePath));
 }
 
 describe('JSON Response Consistency', () => {
@@ -43,11 +43,11 @@ describe('JSON Response Consistency', () => {
       // Pattern: new NextResponse('...',  { status: 4xx|5xx })
       const grepCommand = `grep -r "new NextResponse('[^']*'," "${API_DIR}" --include="*.ts" -l 2>/dev/null || true`;
       const result = execSync(grepCommand, { encoding: 'utf-8' }).trim();
-      
+
       const filesWithPlainText = result
         .split('\n')
-        .filter(line => line.trim() !== '')
-        .filter(file => !isAllowedNonJson(file));
+        .filter((line) => line.trim() !== '')
+        .filter((file) => !isAllowedNonJson(file));
 
       // For each file, check if the plain text responses are error codes (4xx, 5xx)
       const violatingFiles: Array<{ file: string; lines: string[] }> = [];
@@ -77,7 +77,7 @@ describe('JSON Response Consistency', () => {
 
       if (violatingFiles.length > 0) {
         const report = violatingFiles
-          .map(v => `${v.file}:\n  ${v.lines.join('\n  ')}`)
+          .map((v) => `${v.file}:\n  ${v.lines.join('\n  ')}`)
           .join('\n\n');
         console.error('Found plain text error responses that should be JSON:\n' + report);
       }
@@ -114,7 +114,9 @@ describe('JSON Response Consistency', () => {
       const content = fs.readFileSync(routePath, 'utf-8');
 
       // Should use NextResponse.json for 404
-      expect(content).toContain("NextResponse.json({ error: 'Campaign/Task not found' }, { status: 404 })");
+      expect(content).toContain(
+        "NextResponse.json({ error: 'Campaign/Task not found' }, { status: 404 })"
+      );
     });
 
     it('returns JSON for 500 Internal Server Error', async () => {
@@ -122,7 +124,9 @@ describe('JSON Response Consistency', () => {
       const content = fs.readFileSync(routePath, 'utf-8');
 
       // Should use NextResponse.json for 500
-      expect(content).toContain("NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })");
+      expect(content).toContain(
+        "NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })"
+      );
     });
   });
 
@@ -159,7 +163,7 @@ describe('JSON Response Consistency', () => {
 
       // Should use NextResponse.json for errors
       expect(content).toContain("NextResponse.json({ error: 'Unauthorized' }, { status: 401 })");
-      expect(content).toContain("NextResponse.json({ error:");
+      expect(content).toContain('NextResponse.json({ error:');
 
       // Should NOT have plain text error responses
       expect(content).not.toMatch(/new NextResponse\('[^']+',\s*\{\s*status:\s*[45]\d{2}/);

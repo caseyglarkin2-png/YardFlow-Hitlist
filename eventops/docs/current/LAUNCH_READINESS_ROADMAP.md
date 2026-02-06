@@ -2,7 +2,7 @@
 
 **Created**: February 6, 2026
 **Updated**: February 6, 2026
-**Status**: Sprints 48-57 ✅ Complete — Production Live & Verified
+**Status**: Sprints 48-58A ✅ Complete — Production Live & Verified
 **Prerequisite**: Stability Roadmap v2 (Sprints 37-47) ✅ Complete
 **Goal**: Production-hardened backend ready for live event traffic at Manifest 2026
 **Philosophy**: Ship Fast, Ship Often — atomic commits with validation
@@ -18,7 +18,7 @@
 | **Build**            | 🟢 Live       | Railway build passing, production deployed, `.dockerignore` added    |
 | **S2S Auth**         | 🟢 Complete   | All routes use `authServiceOrSession`, `requireAuth`, or equiv.      |
 | **Lint**             | 🟢 Zero       | 0 errors, 0 warnings                                                 |
-| **Tests**            | 🟢 471        | 471 pass, 12 skipped, 35 files (Sprint 57: +8 JSON consistency)     |
+| **Tests**            | 🟢 471        | 471 pass, 12 skipped, 35 files (Sprint 57: +8 JSON consistency)      |
 | **Sentry**           | 🟢 Active     | `captureRouteError` on 146+ routes, 10% sample rate                  |
 | **Worker**           | 🟢 Healthy    | Heartbeat, graceful shutdown, BullMQ job cleanup configured          |
 | **TypeScript**       | 🟢 Strict     | 0 errors, `ignoreBuildErrors: false` (Sprint 55)                     |
@@ -865,6 +865,7 @@ Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHEC
 #### Incident Report: Railway Build Failure
 
 **Symptom**: Railway build failed at commit `43bb166d` with:
+
 ```
 ./tests/e2e/s2s-harness.ts:108:42
 Type error: Argument of type 'RequestInit & { headers: Record<string, string>; }'
@@ -880,10 +881,12 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 #### Ticket 56b.1: Fix Build-Breaking Type Error ✅
 
 **Files Modified**:
+
 - `tsconfig.json` — Added `"tests/**"` to exclude array
 - `tests/e2e/s2s-harness.ts` — Changed `RequestInit & { headers: Record<string, string> }` to `RequestInit` in both `createAuthenticatedRequest()` and `createS2SRequest()`
 
 **Validation**:
+
 - Node script confirmed 0 files from `tests/` in tsc compilation
 - `npm run lint` → 0 errors
 - `npx vitest run` → 464 passed, 12 skipped
@@ -894,20 +897,33 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 #### Ticket 56b.2: Harden Build Exclusions ✅
 
 **Problem**: Subagent review identified additional files NOT excluded from tsconfig that could break builds:
+
 - 4 root-level debug scripts: `test-prisma-crash.ts`, `test-db-crash.ts`, `test-migration.ts`, `test-redis-crash.ts`
 - 11 files in `scripts/` including `verify-health-check-local.ts` (uses `@/` path aliases)
 
 **Files Modified**:
+
 - `tsconfig.json` — Added `"scripts/**"` and `"test-*.ts"` to exclude array
 - Created `.dockerignore` — Excludes tests, scripts, docs, backups from Docker build context
 
 **Final tsconfig exclude**:
+
 ```json
-["node_modules", "prisma/seed*.ts", "tests/**", "scripts/**", "test-*.ts", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"]
+[
+  "node_modules",
+  "prisma/seed*.ts",
+  "tests/**",
+  "scripts/**",
+  "test-*.ts",
+  "**/__tests__/**",
+  "**/*.test.ts",
+  "**/*.test.tsx"
+]
 ```
 
 **Validation**:
-- Node script confirmed 0 risky files (tests/, scripts/, test-*) in tsc compilation
+
+- Node script confirmed 0 risky files (tests/, scripts/, test-\*) in tsc compilation
 - `npm run lint` → 0 errors
 - `npx vitest run` → 464 passed, 12 skipped
 
@@ -931,12 +947,12 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 
 #### Root Cause Analysis
 
-| Error | Root Cause | Location |
-|-------|------------|----------|
-| `403 Forbidden` on `/api/railway/*` | **Frontend Vercel proxy** returning 403, NOT Railway backend | GTM-YardFlow proxy route |
-| `"Unexpected token 'A', 'A server e'..."` | Next.js HTML error page returned on uncaught exceptions | Railway server-side error |
-| `500` on `/api/email/send` | Database/Redis/SendGrid failure OR exception before try/catch | Railway backend |
-| `Email send failed: Error: Forbidden` | **SendGrid 403** - Unverified sender `jake@freightroll.com` | SendGrid config |
+| Error                                     | Root Cause                                                    | Location                  |
+| ----------------------------------------- | ------------------------------------------------------------- | ------------------------- |
+| `403 Forbidden` on `/api/railway/*`       | **Frontend Vercel proxy** returning 403, NOT Railway backend  | GTM-YardFlow proxy route  |
+| `"Unexpected token 'A', 'A server e'..."` | Next.js HTML error page returned on uncaught exceptions       | Railway server-side error |
+| `500` on `/api/email/send`                | Database/Redis/SendGrid failure OR exception before try/catch | Railway backend           |
+| `Email send failed: Error: Forbidden`     | **SendGrid 403** - Unverified sender `jake@freightroll.com`   | SendGrid config           |
 
 **Key Finding**: Railway backend returns `401 Unauthorized` (JSON) for auth failures, never 403. The 403 is from the **Vercel proxy**.
 
@@ -944,11 +960,11 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 
 **File**: `src/app/api/campaigns/[id]/status/route.ts`
 
-| Before | After |
-|--------|-------|
-| `new NextResponse('Unauthorized', { status: 401 })` | `NextResponse.json({ error: 'Unauthorized' }, { status: 401 })` |
+| Before                                                         | After                                                                      |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `new NextResponse('Unauthorized', { status: 401 })`            | `NextResponse.json({ error: 'Unauthorized' }, { status: 401 })`            |
 | `new NextResponse('Campaign/Task not found', { status: 404 })` | `NextResponse.json({ error: 'Campaign/Task not found' }, { status: 404 })` |
-| `new NextResponse('Internal Server Error', { status: 500 })` | `NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })` |
+| `new NextResponse('Internal Server Error', { status: 500 })`   | `NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })`   |
 
 **Validation**: `grep -n "new NextResponse(" src/app/api/campaigns/[id]/status/route.ts` returns 0 matches
 **Commit**: `fix(api): Return JSON errors from campaigns status route`
@@ -958,6 +974,7 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 **File**: `tests/api/json-response-consistency.test.ts`
 
 Tests:
+
 1. No plain text error responses in API routes (excluding allowlisted routes)
 2. Verify many files use `NextResponse.json()` for errors
 3. Campaign status route returns JSON for 401, 404, 500
@@ -966,6 +983,7 @@ Tests:
 6. Email stats route returns JSON for all errors
 
 **Allowlisted Routes** (intentionally return non-JSON):
+
 - `/api/unsubscribe` — HTML page for users
 - `/api/tracking/*` — Pixel images
 - `/api/outreach/track/*` — Pixel images
@@ -980,6 +998,7 @@ Tests:
 **File**: `docs/current/EMAIL_TROUBLESHOOTING.md`
 
 Contents:
+
 - Error symptom → root cause mapping
 - S2S authentication reference (headers, secrets)
 - Email sending flow diagram (ASCII)
@@ -999,12 +1018,12 @@ Contents:
 
 #### Sprint 57 Follow-up Tasks
 
-| # | Task | Priority | Notes |
-|---|------|----------|-------|
-| F6 | Verify `jake@freightroll.com` in SendGrid | P1 | Operational fix needed |
-| F7 | Audit Vercel proxy routes for auth handling | P1 | 403 originates there |
-| F8 | Standardize error response schema | P2 | Mix of `{ error }` and `{ success, error }` |
-| F9 | Runtime integration tests for error scenarios | P2 | Current tests are static analysis |
+| #   | Task                                          | Priority | Notes                                       |
+| --- | --------------------------------------------- | -------- | ------------------------------------------- |
+| F6  | Verify `jake@freightroll.com` in SendGrid     | P1       | Operational fix needed                      |
+| F7  | Audit Vercel proxy routes for auth handling   | P1       | 403 originates there                        |
+| F8  | Standardize error response schema             | P2       | Mix of `{ error }` and `{ success, error }` |
+| F9  | Runtime integration tests for error scenarios | P2       | Current tests are static analysis           |
 
 ---
 
@@ -1012,38 +1031,39 @@ Contents:
 
 **Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
 
-| Check | Result | Details |
-|-------|--------|---------|
-| Health endpoint | 🟢 200 | DB 5ms, Redis 3ms, Worker OK, Queues idle |
-| Auth enforcement | 🟢 401 | Unauthenticated requests correctly rejected |
-| Tracking pixel | 🟢 200 | Returns `image/gif` content type |
-| Unsubscribe | 🟢 400 | Returns error without valid token (expected) |
-| Email service | 🟢 OK | 0 failures, SendGrid configured |
-| AI fallback | 🟢 OK | OpenAI active (Gemini transiently rate-limited) |
-| `post-deploy-verify.sh` | 🟢 Pass | All integration checks passed |
+| Check                   | Result  | Details                                         |
+| ----------------------- | ------- | ----------------------------------------------- |
+| Health endpoint         | 🟢 200  | DB 5ms, Redis 3ms, Worker OK, Queues idle       |
+| Auth enforcement        | 🟢 401  | Unauthenticated requests correctly rejected     |
+| Tracking pixel          | 🟢 200  | Returns `image/gif` content type                |
+| Unsubscribe             | 🟢 400  | Returns error without valid token (expected)    |
+| Email service           | 🟢 OK   | 0 failures, SendGrid configured                 |
+| AI fallback             | 🟢 OK   | OpenAI active (Gemini transiently rate-limited) |
+| `post-deploy-verify.sh` | 🟢 Pass | All integration checks passed                   |
 
 ---
 
 ## Sprint Ordering Rationale
 
-| Sprint | Focus                | Why This Order                                                        |
-| ------ | -------------------- | --------------------------------------------------------------------- |
-| **48** | FreightRoll Branding | Wrong brand at event = visible embarrassment. Fix first.              |
-| **49** | Runtime TS Safety    | 19 errors in `src/lib/` = real crash risks. Fix before event.         |
-| **50** | Security Hardening   | Data exposure + abuse vectors must be closed before live traffic.     |
-| **51** | Input Validation     | Bad data in DB during event is painful to clean up.                   |
-| **52** | API Contracts        | Frontend coordination — give them types before final frontend polish. |
-| **53** | DB Performance       | Burst traffic at event requires indexed queries.                      |
-| **54** | Rate Limiting        | Abuse protection before public attention at Manifest.                 |
-| **55** | Dashboard TS Fixes   | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
-| **56** | E2E Tests & Launch   | Final validation gate. Proves everything works together.              |
-| **56b** | Build Hotfix + Hygiene | Railway build broken by test utility — fix + harden exclusions.    |
-| **57** | Email Pipeline Reliability | Frontend seeing 403/500 on email sends — diagnose and fix.       |
-| **53** | DB Performance       | Burst traffic at event requires indexed queries.                      |
-| **54** | Rate Limiting        | Abuse protection before public attention at Manifest.                 |
-| **55** | Dashboard TS Fixes   | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
-| **56** | E2E Tests & Launch   | Final validation gate. Proves everything works together.              |
-| **56b** | Build Hotfix + Hygiene | Railway build broken by test utility — fix + harden exclusions.    |
+| Sprint  | Focus                      | Why This Order                                                        |
+| ------- | -------------------------- | --------------------------------------------------------------------- |
+| **48**  | FreightRoll Branding       | Wrong brand at event = visible embarrassment. Fix first.              |
+| **49**  | Runtime TS Safety          | 19 errors in `src/lib/` = real crash risks. Fix before event.         |
+| **50**  | Security Hardening         | Data exposure + abuse vectors must be closed before live traffic.     |
+| **51**  | Input Validation           | Bad data in DB during event is painful to clean up.                   |
+| **52**  | API Contracts              | Frontend coordination — give them types before final frontend polish. |
+| **53**  | DB Performance             | Burst traffic at event requires indexed queries.                      |
+| **54**  | Rate Limiting              | Abuse protection before public attention at Manifest.                 |
+| **55**  | Dashboard TS Fixes         | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
+| **56**  | E2E Tests & Launch         | Final validation gate. Proves everything works together.              |
+| **56b** | Build Hotfix + Hygiene     | Railway build broken by test utility — fix + harden exclusions.       |
+| **57**  | Email Pipeline Reliability | Frontend seeing 403/500 on email sends — diagnose and fix.            |
+| **58A** | API Contract Standardization | Fix `L.data.map` errors — standardize list endpoints to `{ data: [...] }`. |
+| **53**  | DB Performance             | Burst traffic at event requires indexed queries.                      |
+| **54**  | Rate Limiting              | Abuse protection before public attention at Manifest.                 |
+| **55**  | Dashboard TS Fixes         | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
+| **56**  | E2E Tests & Launch         | Final validation gate. Proves everything works together.              |
+| **56b** | Build Hotfix + Hygiene     | Railway build broken by test utility — fix + harden exclusions.       |
 
 ---
 
@@ -1058,6 +1078,7 @@ Contents:
 | Test files                 | **35**    | 35+ ✅                  |
 | E2E integration tests      | **42**    | 40+ ✅                  |
 | JSON consistency tests     | **8**     | 8+ ✅                   |
+| API contract tests         | **10**    | 10+ ✅                  |
 | Lint warnings              | 0         | 0 ✅                    |
 | `ignoreBuildErrors`        | **false** | **removed** ✅          |
 | Wrong branding occurrences | 0         | 0 ✅                    |
@@ -1071,17 +1092,17 @@ Contents:
 
 ## Risk Matrix
 
-| Risk                                         | Probability | Impact | Mitigation                                   |
-| -------------------------------------------- | ----------- | ------ | -------------------------------------------- |
-| Branding slip at Manifest                    | Low         | High   | Sprint 48 + CI grep test ✅                   |
-| Runtime crash from suppressed TS error       | **None**    | High   | Sprint 49+55 fixed all errors ✅              |
-| Database slow under event load               | Low         | Medium | Sprint 53 indexes + connection pool tuning ✅ |
-| API abuse during event                       | Low         | Medium | Sprint 54 rate limiting ✅                    |
-| Frontend type errors from changed shapes     | Low         | Medium | Sprint 52 documents contracts ✅              |
-| `ignoreBuildErrors` hides new TS regressions | **None**    | Medium | Sprint 55 removed it entirely ✅              |
+| Risk                                         | Probability | Impact | Mitigation                                           |
+| -------------------------------------------- | ----------- | ------ | ---------------------------------------------------- |
+| Branding slip at Manifest                    | Low         | High   | Sprint 48 + CI grep test ✅                          |
+| Runtime crash from suppressed TS error       | **None**    | High   | Sprint 49+55 fixed all errors ✅                     |
+| Database slow under event load               | Low         | Medium | Sprint 53 indexes + connection pool tuning ✅        |
+| API abuse during event                       | Low         | Medium | Sprint 54 rate limiting ✅                           |
+| Frontend type errors from changed shapes     | Low         | Medium | Sprint 52 documents contracts ✅                     |
+| `ignoreBuildErrors` hides new TS regressions | **None**    | Medium | Sprint 55 removed it entirely ✅                     |
 | Test/script files break `next build`         | **None**    | High   | Sprint 56b: tsconfig excludes tests/scripts/debug ✅ |
-| Docker build includes unnecessary files      | **None**    | Low    | Sprint 56b: `.dockerignore` added ✅          |
-| Unsubscribe IDOR (personId as token)         | Low         | Medium | Follow-up: HMAC-signed unsubscribe tokens   |
+| Docker build includes unnecessary files      | **None**    | Low    | Sprint 56b: `.dockerignore` added ✅                 |
+| Unsubscribe IDOR (personId as token)         | Low         | Medium | Follow-up: HMAC-signed unsubscribe tokens            |
 
 ---
 
@@ -1089,15 +1110,15 @@ Contents:
 
 These were identified during code review and should be addressed post-Manifest:
 
-| # | Finding | Severity | Status |
-|---|---------|----------|--------|
-| 1 | Rate limiter EXPIRE NX flag to prevent window drift | Critical | ✅ Fixed (Sprint 55b) |
-| 2 | PersonData.account typed as boolean (should use target_accounts) | Critical | ✅ Fixed (Sprint 55b) |
-| 3 | Unsubscribe uses raw personId as token (IDOR risk) | Medium | 📋 Follow-up ticket |
-| 4 | Webhook 429 may cause SendGrid retry storm | Low | 📋 Follow-up: return 200 on limit |
-| 5 | AI content/generate restricts to service auth only | Informational | Intentional S2S design |
-| 6 | Rate limit tests use static analysis, not behavioral testing | Low | 📋 Follow-up ticket |
-| 7 | x-forwarded-for fallback to 'unknown' shares rate limit bucket | Low | 📋 Follow-up ticket |
+| #   | Finding                                                          | Severity      | Status                            |
+| --- | ---------------------------------------------------------------- | ------------- | --------------------------------- |
+| 1   | Rate limiter EXPIRE NX flag to prevent window drift              | Critical      | ✅ Fixed (Sprint 55b)             |
+| 2   | PersonData.account typed as boolean (should use target_accounts) | Critical      | ✅ Fixed (Sprint 55b)             |
+| 3   | Unsubscribe uses raw personId as token (IDOR risk)               | Medium        | 📋 Follow-up ticket               |
+| 4   | Webhook 429 may cause SendGrid retry storm                       | Low           | 📋 Follow-up: return 200 on limit |
+| 5   | AI content/generate restricts to service auth only               | Informational | Intentional S2S design            |
+| 6   | Rate limit tests use static analysis, not behavioral testing     | Low           | 📋 Follow-up ticket               |
+| 7   | x-forwarded-for fallback to 'unknown' shares rate limit bucket   | Low           | 📋 Follow-up ticket               |
 
 ---
 
@@ -1105,25 +1126,25 @@ These were identified during code review and should be addressed post-Manifest:
 
 These were identified during subagent code review of the build fix:
 
-| # | Finding | Severity | Status |
-|---|---------|----------|--------|
-| 1 | `tests/e2e/s2s-harness.ts` RequestInit type broke Railway build | Critical | ✅ Fixed (`b92c915`) |
-| 2 | tsconfig did not exclude `tests/` directory (only `*.test.ts` patterns) | Critical | ✅ Fixed (`b92c915`) |
-| 3 | Root-level `test-*.ts` debug scripts not excluded from tsconfig | Medium | ✅ Fixed (`7dfdb19`) |
-| 4 | `scripts/**/*.ts` (11 files) not excluded from tsconfig | Medium | ✅ Fixed (`7dfdb19`) |
-| 5 | No `.dockerignore` — all docs/tests/scripts copied into Docker image | Low | ✅ Fixed (`7dfdb19`) |
-| 6 | `scripts/verify-health-check-local.ts` uses `@/` path alias (would fail tsc) | Medium | ✅ Excluded from build |
-| 7 | Codespace OOM prevents local `next build` validation (2GB limit) | Low | 📋 Dev experience: add `NODE_OPTIONS=--max-old-space-size=4096` to npm scripts |
+| #   | Finding                                                                      | Severity | Status                                                                         |
+| --- | ---------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 1   | `tests/e2e/s2s-harness.ts` RequestInit type broke Railway build              | Critical | ✅ Fixed (`b92c915`)                                                           |
+| 2   | tsconfig did not exclude `tests/` directory (only `*.test.ts` patterns)      | Critical | ✅ Fixed (`b92c915`)                                                           |
+| 3   | Root-level `test-*.ts` debug scripts not excluded from tsconfig              | Medium   | ✅ Fixed (`7dfdb19`)                                                           |
+| 4   | `scripts/**/*.ts` (11 files) not excluded from tsconfig                      | Medium   | ✅ Fixed (`7dfdb19`)                                                           |
+| 5   | No `.dockerignore` — all docs/tests/scripts copied into Docker image         | Low      | ✅ Fixed (`7dfdb19`)                                                           |
+| 6   | `scripts/verify-health-check-local.ts` uses `@/` path alias (would fail tsc) | Medium   | ✅ Excluded from build                                                         |
+| 7   | Codespace OOM prevents local `next build` validation (2GB limit)             | Low      | 📋 Dev experience: add `NODE_OPTIONS=--max-old-space-size=4096` to npm scripts |
 
 ### Post-Manifest Follow-up Tickets
 
-| # | Ticket | Priority | Description |
-|---|--------|----------|-------------|
-| F1 | CI Build Gate | P2 | Add GitHub Actions workflow for `next build` on PR — prevents build-breaking commits from merging |
-| F2 | Unsubscribe HMAC Tokens | P2 | Replace raw personId with HMAC-signed tokens for unsubscribe links (IDOR risk) |
-| F3 | Webhook 429 → 200 | P3 | Return 200 instead of 429 on rate-limited webhooks to prevent SendGrid retry storms |
-| F4 | Behavioral Rate Limit Tests | P3 | Replace static analysis rate limit tests with actual Redis-backed behavioral tests |
-| F5 | Load Testing | P3 | Run `autocannon`/`k6` against top 5 endpoints, document P95 latency baselines |
+| #   | Ticket                      | Priority | Description                                                                                       |
+| --- | --------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| F1  | CI Build Gate               | P2       | Add GitHub Actions workflow for `next build` on PR — prevents build-breaking commits from merging |
+| F2  | Unsubscribe HMAC Tokens     | P2       | Replace raw personId with HMAC-signed tokens for unsubscribe links (IDOR risk)                    |
+| F3  | Webhook 429 → 200           | P3       | Return 200 instead of 429 on rate-limited webhooks to prevent SendGrid retry storms               |
+| F4  | Behavioral Rate Limit Tests | P3       | Replace static analysis rate limit tests with actual Redis-backed behavioral tests                |
+| F5  | Load Testing                | P3       | Run `autocannon`/`k6` against top 5 endpoints, document P95 latency baselines                     |
 
 ---
 

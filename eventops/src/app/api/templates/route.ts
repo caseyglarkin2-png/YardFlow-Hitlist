@@ -90,10 +90,12 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({
-      templates,
-      total,
-      limit: limit ? parseInt(limit, 10) : 50,
-      offset: offset ? parseInt(offset, 10) : 0,
+      data: templates,
+      pagination: {
+        total,
+        limit: limit ? parseInt(limit, 10) : 50,
+        offset: offset ? parseInt(offset, 10) : 0,
+      },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';

@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ sequences });
+    return NextResponse.json({ data: sequences });
   } catch (error) {
     captureRouteError(error, {
       route: '/api/sequences',
