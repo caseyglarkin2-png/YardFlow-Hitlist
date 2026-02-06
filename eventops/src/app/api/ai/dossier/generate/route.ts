@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { AIDossierGenerator } from '@/lib/ai/dossier-generator';
 import { transformToFrontendResponse } from '@/lib/ai/dossier-transformer';
 import { prisma } from '@/lib/db';
@@ -21,6 +22,19 @@ export async function POST(request: NextRequest) {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 10 req/min per user (dossier gen is expensive)
+    const rateCheck = await checkRateLimit(
+      rateLimitKey('ai', 'dossier', authResult.userId),
+      10,
+      60
+    );
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
+      );
     }
 
     const { accountId, dryRun = false } = await request.json();
@@ -65,9 +79,9 @@ export async function POST(request: NextRequest) {
     });
     logger.error('Dossier generation error', { error: errorMessage });
     return NextResponse.json(
-      { 
-        success: false, 
-        data: null, 
+      {
+        success: false,
+        data: null,
         error: errorMessage,
         researchedAt: new Date().toISOString(),
       },

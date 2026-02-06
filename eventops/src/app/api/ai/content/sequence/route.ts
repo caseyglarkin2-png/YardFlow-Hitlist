@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { BrandVoiceContentGenerator } from '@/lib/ai/brand-voice-generator';
 import { logger } from '@/lib/logger';
 import { captureRouteError } from '@/lib/sentry-utils';
@@ -18,6 +19,19 @@ export async function POST(request: NextRequest) {
     const authResult = await authServiceOrSession(request);
     if (!authResult) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit: 5 req/min per user (sequence gen is most expensive)
+    const rateCheck = await checkRateLimit(
+      rateLimitKey('ai', 'sequence', authResult.userId),
+      5,
+      60
+    );
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
+      );
     }
 
     const { recipientName, companyName, context, tone } = await request.json();

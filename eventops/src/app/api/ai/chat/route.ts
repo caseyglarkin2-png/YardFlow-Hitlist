@@ -12,6 +12,7 @@ import { captureRouteError } from '@/lib/sentry-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authServiceOrSession } from '@/lib/auth-service';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import { logger } from '@/lib/logger';
 import { generateContent } from '@/lib/ai/provider';
 import { prisma } from '@/lib/db';
@@ -236,6 +237,16 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = authResult.userId;
+
+    // Rate limit: 20 req/min per user
+    const rateCheck = await checkRateLimit(rateLimitKey('ai', 'chat', userId), 20, 60);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
+      );
+    }
+
     const body = await request.json();
     const validationResult = ChatRequestSchema.safeParse(body);
 

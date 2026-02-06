@@ -3,9 +3,19 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleUnsubscribe } from '@/lib/outreach/compliance';
 import { captureRouteError } from '@/lib/sentry-utils';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    // Rate limit: 10 req/min per IP (public endpoint)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rateCheck = await checkRateLimit(rateLimitKey('unsubscribe', ip), 10, 60);
+    if (!rateCheck.allowed) {
+      return new NextResponse('Too many requests', { status: 429 });
+    }
+
     const { searchParams } = new URL(req.url);
     const token = searchParams.get('token');
 

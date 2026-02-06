@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
 import { handleBounce, handleSpamComplaint, handleUnsubscribe } from '@/lib/outreach/compliance';
 import { pauseEnrollment } from '@/lib/outreach/sequence-engine';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
 import crypto from 'crypto';
 
 interface SendGridEvent {
@@ -46,6 +47,16 @@ function verifySendGridSignature(
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 500 req/min per IP (SendGrid sends batches)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rateCheck = await checkRateLimit(rateLimitKey('webhook', 'sendgrid', ip), 500, 60);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfter || 60) } }
+      );
+    }
+
     // Get raw body for signature verification
     const rawBody = await req.text();
     const events: SendGridEvent[] = JSON.parse(rawBody);

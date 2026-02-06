@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { captureRouteError } from '@/lib/sentry-utils';
+import { checkRateLimit, rateLimitKey } from '@/lib/rate-limiter';
+
+export const dynamic = 'force-dynamic';
 
 // Transparent 1x1 pixel GIF
 const TRACKING_PIXEL = Buffer.from(
@@ -17,8 +20,17 @@ export async function GET(request: NextRequest) {
       headers: {
         'Content-Type': 'image/gif',
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Expires': '0',
+        Expires: '0',
       },
+    });
+  }
+
+  // Rate limit: 100 req/min per IP (tracking pixels fire frequently)
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const rateCheck = await checkRateLimit(rateLimitKey('track', ip), 100, 60);
+  if (!rateCheck.allowed) {
+    return new NextResponse(TRACKING_PIXEL, {
+      headers: { 'Content-Type': 'image/gif' },
     });
   }
 
@@ -70,7 +82,7 @@ export async function GET(request: NextRequest) {
     headers: {
       'Content-Type': 'image/gif',
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Expires': '0',
+      Expires: '0',
     },
   });
 }

@@ -42,6 +42,11 @@ vi.mock('@/lib/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock('@/lib/rate-limiter', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 499, retryAfter: 0 }),
+  rateLimitKey: (...parts: string[]) => parts.join(':'),
+}));
+
 // Helper to create a webhook request
 function createWebhookRequest(events: Record<string, unknown>[]): NextRequest {
   return new NextRequest('http://localhost/api/webhooks/sendgrid', {
