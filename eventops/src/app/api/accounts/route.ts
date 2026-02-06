@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user?.activeEventId) {
-      return NextResponse.json([]);
+      return NextResponse.json({ data: [], hasMore: false });
     }
 
     const { searchParams } = new URL(request.url);

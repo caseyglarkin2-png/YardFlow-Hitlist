@@ -344,7 +344,7 @@ describe('Base webhook routes (/api/webhooks)', () => {
     const res = await GET(req);
     const body = await res.json();
     expect(res.status).toBe(200);
-    expect(body).toEqual([]);
+    expect(body).toEqual({ webhooks: [] });
   });
 
   it('POST returns 401 without auth', async () => {
