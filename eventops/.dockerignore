@@ -1,0 +1,45 @@
+# Version control
+.git
+.gitignore
+
+# Tests (not needed in production image)
+tests/
+**/*.test.ts
+**/*.test.tsx
+**/__tests__/
+vitest.config.ts
+
+# Root-level debug/test scripts
+test-*.ts
+
+# Scripts (dev-only utilities)
+scripts/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (prevent recursive COPY)
+Dockerfile
+Dockerfile.worker
+docker-compose.yml
+.dockerignore
+
+# Backups
+backups/
+
+# Local env files
+.env
+.env.local
+.env.*.local
