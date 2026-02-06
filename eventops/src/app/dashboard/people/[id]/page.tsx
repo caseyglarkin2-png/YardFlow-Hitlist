@@ -16,7 +16,6 @@ interface PersonData {
   phone?: string;
   linkedin?: string;
   accountId?: string;
-  account?: boolean;
   isExecOps?: boolean;
   isOps?: boolean;
   isProc?: boolean;
@@ -238,7 +237,7 @@ export default function PersonDetailPage() {
                   </a>
                 </div>
               )}
-              {person.account && person.target_accounts && (
+              {person.target_accounts && (
                 <div>
                   <span className="font-medium">Company:</span>{' '}
                   <Link

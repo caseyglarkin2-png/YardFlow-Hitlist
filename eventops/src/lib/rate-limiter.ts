@@ -1,7 +1,8 @@
 /**
  * Shared Redis-backed rate limiter
  *
- * Uses Redis INCR + EXPIRE for a sliding-window counter.
+ * Uses Redis INCR + EXPIRE (NX) for a fixed-window counter.
+ * EXPIRE is only set on first increment (NX flag) to prevent window drift.
  * Falls back to allowing requests if Redis is unavailable (fail-open).
  *
  * Usage:
@@ -41,10 +42,12 @@ export async function checkRateLimit(
     const redisKey = `ratelimit:${key}`;
 
     // Atomic INCR + EXPIRE via MULTI/EXEC to prevent orphaned keys
-    // if process crashes between the two commands
+    // if process crashes between the two commands.
+    // Uses NX flag on EXPIRE so TTL is only set on first hit —
+    // prevents window drift where active users get their TTL extended.
     const multi = redis.multi();
     multi.incr(redisKey);
-    multi.expire(redisKey, windowSeconds);
+    multi.expire(redisKey, windowSeconds, 'NX');
     const results = await multi.exec();
 
     // results[0] = [err, count], results[1] = [err, expireResult]
