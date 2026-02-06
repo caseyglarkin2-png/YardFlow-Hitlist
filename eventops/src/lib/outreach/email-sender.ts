@@ -5,8 +5,8 @@ import { logger } from '@/lib/logger';
 
 // Initialize SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
-const FROM_EMAIL = process.env.FROM_EMAIL || 'outreach@yardflow.com';
-const FROM_NAME = process.env.FROM_NAME || 'YardFlow Outreach';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'outreach@freightroll.com';
+const FROM_NAME = process.env.FROM_NAME || 'FreightRoll';
 const COMPANY_ADDRESS =
   process.env.COMPANY_ADDRESS || '123 Main St, Suite 100, San Francisco, CA 94105';
 
@@ -42,7 +42,7 @@ function substituteVariables(template: string, variables: Record<string, unknown
   // Add system variables
   const allVariables = {
     ...variables,
-    unsubscribeLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.yardflow.com'}/unsubscribe?token={{unsubscribeToken}}`,
+    unsubscribeLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.freightroll.com'}/unsubscribe?token={{unsubscribeToken}}`,
     companyAddress: COMPANY_ADDRESS,
   };
 
@@ -59,7 +59,7 @@ function substituteVariables(template: string, variables: Record<string, unknown
  * Add tracking pixel to email HTML
  */
 function addTrackingPixel(html: string, trackingId: string): string {
-  const trackingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.yardflow.com'}/api/tracking/open?id=${trackingId}`;
+  const trackingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.freightroll.com'}/api/tracking/open?id=${trackingId}`;
   const trackingPixel = `<img src="${trackingUrl}" width="1" height="1" alt="" style="display:none" />`;
 
   // Insert before closing body tag
@@ -70,7 +70,7 @@ function addTrackingPixel(html: string, trackingId: string): string {
  * Rewrite links for click tracking
  */
 function rewriteLinksForTracking(html: string, trackingId: string): string {
-  const trackingBase = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.yardflow.com'}/api/tracking/click?id=${trackingId}&url=`;
+  const trackingBase = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.freightroll.com'}/api/tracking/click?id=${trackingId}&url=`;
 
   // Replace href attributes
   return html.replace(/href=["']([^"']+)["']/g, (match, url) => {

@@ -20,7 +20,7 @@ const TUTORIALS: Tutorial[] = [
   {
     id: 'quick-start',
     title: 'Quick Start Guide',
-    description: 'Get started with EventOps in 5 minutes. Learn the basics of account management and meeting scheduling.',
+    description: 'Get started with FreightRoll in 5 minutes. Learn the basics of account management and meeting scheduling.',
     duration: '5:30',
     videoId: 'dQw4w9WgXcQ', // Replace with actual video ID
     category: 'getting-started',
@@ -86,7 +86,7 @@ export default function HelpPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Video Tutorials</h1>
         <p className="mt-1 text-sm text-gray-600">
-          Learn how to get the most out of EventOps
+          Learn how to get the most out of FreightRoll
         </p>
       </div>
 
@@ -189,7 +189,7 @@ export default function HelpPage() {
               Visit our comprehensive documentation for detailed guides and API references.
             </p>
             <Button variant="link" className="p-0 h-auto text-xs" asChild>
-              <a href="https://docs.eventops.io" target="_blank" rel="noopener noreferrer">
+              <a href="https://docs.freightroll.com" target="_blank" rel="noopener noreferrer">
                 View Docs →
               </a>
             </Button>
@@ -200,7 +200,7 @@ export default function HelpPage() {
               Get in touch with our support team for personalized assistance.
             </p>
             <Button variant="link" className="p-0 h-auto text-xs" asChild>
-              <a href="mailto:support@eventops.io">
+              <a href="mailto:support@freightroll.com">
                 Contact Support →
               </a>
             </Button>

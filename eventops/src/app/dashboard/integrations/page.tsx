@@ -83,7 +83,7 @@ export default function IntegrationsPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Integrations</h1>
         <p className="text-muted-foreground">
-          Connect EventOps with your favorite tools
+          Connect FreightRoll with your favorite tools
         </p>
       </div>
 
@@ -150,7 +150,7 @@ export default function IntegrationsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Receive real-time notifications when events occur in EventOps. Perfect for custom workflows and automation.
+            Receive real-time notifications when events occur in FreightRoll. Perfect for custom workflows and automation.
           </p>
           <Button variant="outline">
             Manage Webhooks

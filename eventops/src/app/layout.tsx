@@ -7,7 +7,7 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'EventOps - Event Intelligence Platform',
+  title: 'FreightRoll - Event Intelligence Platform',
   description: 'Intelligent event operations and outreach platform for B2B sales teams',
   manifest: '/manifest.json',
   themeColor: '#2563eb',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'EventOps',
+    title: 'FreightRoll',
   },
 };
 

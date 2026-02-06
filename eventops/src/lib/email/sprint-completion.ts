@@ -2,7 +2,7 @@
  * Sprint Completion Email Service
  *
  * Automatically sends performance summary emails to casey@freightroll.com
- * when sprints are completed in YardFlow projects.
+ * when sprints are completed in FreightRoll projects.
  */
 
 import { Resend } from 'resend';
@@ -332,7 +332,7 @@ function generateEmailHtml(metrics: SprintMetrics): string {
 
   <div class="footer">
     <p><em>"Atomic tasks. Clear validation. Demoable sprints. Every time."</em></p>
-    <p>YardFlow Philosophy · Generated ${new Date().toLocaleString()}</p>
+    <p>FreightRoll Philosophy · Generated ${new Date().toLocaleString()}</p>
   </div>
 </body>
 </html>
@@ -394,7 +394,7 @@ Goal: ${metrics.nextSprint.goal}
 
 ---
 "Atomic tasks. Clear validation. Demoable sprints. Every time."
-YardFlow Philosophy
+FreightRoll Philosophy
   `.trim();
 }
 
@@ -408,10 +408,10 @@ export async function sendSprintCompletionEmail(
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'YardFlow Sprints <onboarding@resend.dev>',
+      from: 'FreightRoll Sprints <onboarding@resend.dev>',
       replyTo: 'casey@freightroll.com',
       to: ['casey@freightroll.com'],
-      subject: `[YardFlow] Sprint ${metrics.sprintNumber} Complete: ${metrics.sprintName}`,
+      subject: `[FreightRoll] Sprint ${metrics.sprintNumber} Complete: ${metrics.sprintName}`,
       html: generateEmailHtml(metrics),
       text: generateEmailText(metrics),
       tags: [

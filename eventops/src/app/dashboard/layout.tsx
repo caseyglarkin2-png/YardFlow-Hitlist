@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex h-16 justify-between">
             <div className="flex">
               <div className="flex flex-shrink-0 items-center">
-                <h1 className="text-xl font-bold text-gray-900">EventOps</h1>
+                <h1 className="text-xl font-bold text-gray-900">FreightRoll</h1>
               </div>
               <DashboardNav />
             </div>

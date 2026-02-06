@@ -13,7 +13,7 @@ export default function ReportsPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `EventOps_Full_Export_${new Date().toISOString().split('T')[0]}.${format}`;
+      a.download = `FreightRoll_Export_${new Date().toISOString().split('T')[0]}.${format}`;
       a.click();
     } catch (error) {
       console.error('Export failed:', error);

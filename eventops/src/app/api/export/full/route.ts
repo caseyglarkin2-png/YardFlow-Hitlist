@@ -172,7 +172,7 @@ ${activitiesCsv}
       return new NextResponse(fullExport, {
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="EventOps_Full_Export_${new Date().toISOString().split('T')[0]}.csv"`,
+          'Content-Disposition': `attachment; filename="FreightRoll_Export_${new Date().toISOString().split('T')[0]}.csv"`,
         },
       });
     }

@@ -30,7 +30,7 @@ export interface HubSpotActivity {
 }
 
 /**
- * Convert EventOps person to HubSpot contact format
+ * Convert FreightRoll person to HubSpot contact format
  */
 export function personToHubSpotContact(people: {
   name: string;
@@ -93,7 +93,7 @@ export function outreachToHubSpotActivity(outreach: {
       contactIds: [], // Will be populated by HubSpot contact ID
     },
     metadata: {
-      subject: outreach.subject || 'Outreach from EventOps',
+      subject: outreach.subject || 'Outreach from FreightRoll',
       body: outreach.message,
       status: outreach.status,
     },
@@ -120,7 +120,7 @@ export function meetingToHubSpotActivity(meeting: {
     },
     metadata: {
       subject: `Event Meeting - ${meeting.duration} min`,
-      body: meeting.notes || meeting.outcome || 'Meeting scheduled via EventOps',
+      body: meeting.notes || meeting.outcome || 'Meeting scheduled via FreightRoll',
       status: 'COMPLETED',
     },
   };
