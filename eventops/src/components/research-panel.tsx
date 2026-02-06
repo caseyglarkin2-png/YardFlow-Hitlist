@@ -3,6 +3,31 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface FacilityResearch {
+  estimatedFacilities?: number;
+  confidenceLevel?: string;
+  footprintType?: string;
+}
+
+interface CompetitiveAnalysis {
+  scaleTier?: string;
+  marketPosition?: string;
+  techSophistication?: string;
+}
+
+interface LocationData {
+  headquarters?: { city?: string; state?: string };
+  geographicSpread?: { concentration?: string };
+  facilities?: unknown[];
+}
+
+interface ResearchResults {
+  message?: string;
+  research?: FacilityResearch;
+  analysis?: CompetitiveAnalysis;
+  locationData?: LocationData;
+}
+
 interface ResearchPanelProps {
   accountId: string;
   companyDossierId: string | null;
@@ -11,7 +36,7 @@ interface ResearchPanelProps {
 export function ResearchPanel({ accountId: _accountId, companyDossierId }: ResearchPanelProps) {
   const router = useRouter();
   const [isResearching, setIsResearching] = useState<string | null>(null);
-  const [results, setResults] = useState<Record<string, unknown> | null>(null);
+  const [results, setResults] = useState<ResearchResults | null>(null);
 
   const runResearch = async (type: 'facilities' | 'competitive' | 'locations') => {
     if (!companyDossierId) {

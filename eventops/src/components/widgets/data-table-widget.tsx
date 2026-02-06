@@ -56,7 +56,7 @@ export function DataTableWidget({ title, columns, data, maxRows = 10 }: DataTabl
                   <TableRow key={index}>
                     {columns.map((col) => (
                       <TableCell key={col.key}>
-                        {col.render ? col.render(row[col.key], row) : row[col.key]}
+                        {col.render ? col.render(row[col.key], row) : String(row[col.key] ?? '')}
                       </TableCell>
                     ))}
                   </TableRow>

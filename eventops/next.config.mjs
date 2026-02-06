@@ -28,7 +28,7 @@ const nextConfig = {
   },
   // Disable type checking and linting during builds (run in CI instead)
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
     ignoreDuringBuilds: true,

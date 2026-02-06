@@ -3,12 +3,21 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+interface AccountData {
+  name: string;
+  website?: string | null;
+  industry?: string | null;
+  headquarters?: string | null;
+  icpScore?: number | null;
+  notes?: string | null;
+}
+
 export default function EditAccountPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [account, setAccount] = useState<Record<string, unknown> | null>(null);
+  const [account, setAccount] = useState<AccountData | null>(null);
 
   useEffect(() => {
     async function fetchAccount() {

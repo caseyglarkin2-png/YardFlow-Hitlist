@@ -39,7 +39,8 @@ export default function PreviewImportPage() {
         skipEmptyLines: true,
         complete: async (results) => {
           try {
-            const mappedData = results.data.map((row: Record<string, unknown>) => {
+            const parsedRows = results.data as Record<string, unknown>[];
+            const mappedData = parsedRows.map((row) => {
               const mapped: Record<string, unknown> = {};
               Object.keys(mapping).forEach((fieldKey) => {
                 const csvColumn = mapping[fieldKey];
@@ -236,12 +237,12 @@ export default function PreviewImportPage() {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-2 text-sm text-gray-900">
-                    {row.data.name || row.data.accountName}
+                    {String(row.data.name || row.data.accountName || '-')}
                   </td>
                   <td className="px-3 py-2 text-sm text-gray-500">
                     {importType === 'accounts'
-                      ? row.data.website || row.data.industry || '-'
-                      : row.data.title || row.data.email || '-'}
+                      ? String(row.data.website || row.data.industry || '-')
+                      : String(row.data.title || row.data.email || '-')}
                   </td>
                   <td className="px-3 py-2 text-sm text-gray-500">{row.message || '-'}</td>
                 </tr>

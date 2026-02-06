@@ -284,8 +284,14 @@ export default function TrainingPage() {
 }
 
 // Sub-components for import dialogs
+interface DriveFile {
+  id: string;
+  name: string;
+  mimeType: string;
+}
+
 function DriveImportDialog({ onSuccess }: { onSuccess: () => void }) {
-  const [files, setFiles] = useState<Record<string, unknown>[]>([]);
+  const [files, setFiles] = useState<DriveFile[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();

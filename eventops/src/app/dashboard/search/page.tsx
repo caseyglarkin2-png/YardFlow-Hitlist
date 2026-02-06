@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdvancedFilters, FilterCondition } from '@/components/search/advanced-filters';
-import { SearchResults } from '@/components/search/search-results';
+import { SearchResults, SearchResult } from '@/components/search/search-results';
 import { SavedSearches } from '@/components/search/saved-searches';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,7 +15,7 @@ export default function AdvancedSearchPage() {
     'people'
   );
   const [filters, setFilters] = useState<FilterCondition[]>([]);
-  const [results, setResults] = useState<Record<string, unknown>[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [resultCount, setResultCount] = useState(0);
   const [searching, setSearching] = useState(false);
 
@@ -65,7 +65,7 @@ export default function AdvancedSearchPage() {
     a.click();
   }
 
-  function convertToCSV(data: Record<string, unknown>[]): string {
+  function convertToCSV(data: SearchResult[]): string {
     if (data.length === 0) return '';
 
     const headers = Object.keys(data[0]).join(',');
@@ -110,7 +110,10 @@ export default function AdvancedSearchPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-1">
-          <SavedSearches entityType={entityType} onLoad={setFilters} />
+          <SavedSearches entityType={entityType} onLoad={(filters) => {
+            const conditions = Array.isArray(filters) ? filters as FilterCondition[] : [];
+            setFilters(conditions);
+          }} />
 
           <AdvancedFilters
             entityType={entityType}

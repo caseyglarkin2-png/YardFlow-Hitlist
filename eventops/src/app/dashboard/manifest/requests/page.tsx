@@ -3,6 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface ManifestRequestResult {
+  success: boolean;
+  personName: string;
+  companyName: string;
+  email?: string;
+  message: string;
+  characterCount: number;
+  error?: string;
+}
+
 export default function ManifestRequestsPage() {
   const _router = useRouter();
   const [personaFilters, setPersonaFilters] = useState({
@@ -15,7 +25,7 @@ export default function ManifestRequestsPage() {
   });
   const [minIcpScore, setMinIcpScore] = useState(90);
   const [generating, setGenerating] = useState(false);
-  const [results, setResults] = useState<Record<string, unknown>[]>([]);
+  const [results, setResults] = useState<ManifestRequestResult[]>([]);
   const [showResults, setShowResults] = useState(false);
 
   async function handleGenerate() {
@@ -94,7 +104,7 @@ export default function ManifestRequestsPage() {
           `"${r.companyName}"`,
           `"${r.email || ''}"`,
           `"${r.message.replace(/"/g, '""')}"`,
-          r.characterCount,
+          String(r.characterCount),
         ].join(',')
       ),
     ].join('\n');
@@ -232,10 +242,10 @@ export default function ManifestRequestsPage() {
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
-                          {result.characterCount} chars
+                          {String(result.characterCount)} chars
                         </span>
                         <button
-                          onClick={() => copyToClipboard(result.message)}
+                          onClick={() => copyToClipboard(String(result.message))}
                           className="rounded bg-blue-100 px-3 py-1 text-xs text-blue-800 hover:bg-blue-200"
                         >
                           Copy

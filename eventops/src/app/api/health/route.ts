@@ -150,14 +150,17 @@ export async function GET() {
   const dbCheck = settled(dbResult, {
     status: 'fatal',
     error: String((dbResult as PromiseRejectedResult).reason),
+    latencyMs: 0,
   });
   const redisCheck = settled(redisResult, {
     status: 'fatal',
     error: String((redisResult as PromiseRejectedResult).reason),
+    latencyMs: 0,
   });
   const workerCheck = settled(workerResult, {
     status: 'fatal',
     error: String((workerResult as PromiseRejectedResult).reason),
+    latencyMs: 0,
   });
   const queueCheck = settled(queueResult, {
     status: 'fatal',
@@ -168,8 +171,9 @@ export async function GET() {
     error: String((emailResult as PromiseRejectedResult).reason),
   });
   const aiCheck = settled(aiResult, {
-    status: 'fatal',
-    error: String((aiResult as PromiseRejectedResult).reason),
+    gemini: { status: 'error', error: String((aiResult as PromiseRejectedResult).reason) },
+    openai: { status: 'error', error: String((aiResult as PromiseRejectedResult).reason) },
+    preferredProvider: 'gemini' as const,
   });
 
   // Healthy = DB + Redis + Worker + Critical Env Vars

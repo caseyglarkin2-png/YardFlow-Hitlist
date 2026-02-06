@@ -110,12 +110,13 @@ export async function POST(req: NextRequest) {
           : undefined;
 
         // Get ROI data if available
-        const roiData = person.target_accounts.roi_calculations?.[0]
+        const calc = person.target_accounts.roi_calculations?.[0];
+        const roiData = calc && calc.annualSavings != null && calc.paybackPeriod != null
           ? {
-              annualSavings: person.target_accounts.roi_calculations[0].annualSavings,
-              paybackPeriod: person.target_accounts.roi_calculations[0].paybackPeriod,
-              assumptions: person.target_accounts.roi_calculations[0].assumptions
-                ? JSON.parse(person.target_accounts.roi_calculations[0].assumptions)
+              annualSavings: Number(calc.annualSavings),
+              paybackPeriod: Number(calc.paybackPeriod),
+              assumptions: calc.assumptions
+                ? JSON.parse(calc.assumptions) as { totalFacilities?: string }
                 : undefined,
             }
           : undefined;

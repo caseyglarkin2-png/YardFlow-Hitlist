@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ContentGenerator } from '@/components/ai/ContentGenerator';
+import { ContentGenerator, ContentRequest, GeneratedContent } from '@/components/ai/ContentGenerator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 export default function ContentGeneratorPage() {
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = async (request: Record<string, unknown>) => {
+  const handleGenerate = async (request: ContentRequest): Promise<GeneratedContent> => {
     setError(null);
     try {
       const response = await fetch('/api/ai/content/generate', {

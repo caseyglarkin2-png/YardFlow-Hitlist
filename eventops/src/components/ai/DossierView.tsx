@@ -10,7 +10,7 @@ import { FacilityIntelligenceCard } from './FacilityIntelligenceCard';
 import { StrategicQuestionsPanel } from './StrategicQuestionsPanel';
 import { ManifestOpportunitiesCard } from './ManifestOpportunitiesCard';
 
-interface CompanyDossier {
+export interface CompanyDossier {
   id: string;
   accountId: string;
   companyOverview: string;

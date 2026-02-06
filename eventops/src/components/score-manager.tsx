@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface ScoreBreakdown {
+  total: number;
+  personaMatch: number;
+  executiveCount: number;
+  totalContacts: number;
+  dataCompleteness: number;
+}
+
 type Props = {
   accountId: string;
   currentScore: number | null;
@@ -15,7 +23,7 @@ export function ScoreManager({ accountId, currentScore }: Props) {
   const [showOverrideForm, setShowOverrideForm] = useState(false);
   const [overrideScore, setOverrideScore] = useState(currentScore?.toString() || '');
   const [overrideNotes, setOverrideNotes] = useState('');
-  const [breakdown, setBreakdown] = useState<Record<string, unknown> | null>(null);
+  const [breakdown, setBreakdown] = useState<ScoreBreakdown | null>(null);
 
   async function handleCalculate() {
     setIsCalculating(true);

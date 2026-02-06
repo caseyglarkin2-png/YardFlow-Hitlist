@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-interface SearchResult {
+export interface SearchResult {
   id: string;
   type: 'person' | 'account' | 'outreach' | 'meeting';
   title: string;

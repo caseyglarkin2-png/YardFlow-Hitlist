@@ -30,7 +30,7 @@ export default function ImportPage() {
           return;
         }
         setHeaders(results.meta.fields || []);
-        setPreview(results.data);
+        setPreview(results.data as Record<string, unknown>[]);
       },
       error: (err) => {
         setError(`Failed to parse CSV: ${err.message}`);
@@ -179,7 +179,7 @@ export default function ImportPage() {
                               key={cellIdx}
                               className="whitespace-nowrap px-3 py-2 text-sm text-gray-900"
                             >
-                              {row[header] || '-'}
+                              {String(row[header] ?? '-')}
                             </td>
                           ))}
                           {headers.length > 5 && (

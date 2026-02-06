@@ -131,15 +131,7 @@ export default async function AccountDetailPage({ params }: { params: { id: stri
           {account.people.length > 0 ? (
             <ul className="divide-y divide-gray-200">
               {account.people.map(
-                (person: {
-                  id: string;
-                  name: string;
-                  title?: string;
-                  email?: string;
-                  isExecOps?: boolean;
-                  isOpsManager?: boolean;
-                  isSales?: boolean;
-                }) => (
+                (person) => (
                   <li key={person.id} className="py-4">
                     <div className="flex items-center justify-between">
                       <div>

@@ -10,7 +10,7 @@ function NewPersonForm() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<Record<string, unknown>[]>([]);
+  const [accounts, setAccounts] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     async function fetchAccounts() {

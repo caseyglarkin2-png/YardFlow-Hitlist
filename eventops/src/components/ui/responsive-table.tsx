@@ -39,13 +39,13 @@ export function ResponsiveTable({ columns, data, onRowClick }: ResponsiveTablePr
           <TableBody>
             {data.map((row, index) => (
               <TableRow
-                key={row.id || index}
+                key={String(row.id ?? index)}
                 onClick={() => onRowClick?.(row)}
                 className={onRowClick ? 'cursor-pointer hover:bg-accent' : ''}
               >
                 {columns.map((column) => (
                   <TableCell key={column.key}>
-                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                    {column.render ? column.render(row[column.key], row) : String(row[column.key] ?? '')}
                   </TableCell>
                 ))}
               </TableRow>
@@ -58,7 +58,7 @@ export function ResponsiveTable({ columns, data, onRowClick }: ResponsiveTablePr
       <div className="space-y-3 md:hidden">
         {data.map((row, index) => (
           <Card
-            key={row.id || index}
+            key={String(row.id ?? index)}
             className={`p-4 ${onRowClick ? 'cursor-pointer hover:bg-accent' : ''}`}
             onClick={() => onRowClick?.(row)}
           >
@@ -66,7 +66,7 @@ export function ResponsiveTable({ columns, data, onRowClick }: ResponsiveTablePr
               <div key={column.key} className="flex justify-between border-b py-2 last:border-0">
                 <span className="text-sm font-semibold text-muted-foreground">{column.label}</span>
                 <span className="text-sm">
-                  {column.render ? column.render(row[column.key], row) : row[column.key]}
+                  {column.render ? column.render(row[column.key], row) : String(row[column.key] ?? '')}
                 </span>
               </div>
             ))}

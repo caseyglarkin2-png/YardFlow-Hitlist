@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import { DossierView } from '@/components/ai/DossierView';
+import { DossierView, CompanyDossier } from '@/components/ai/DossierView';
 import { DossierGeneratorForm } from '@/components/ai/DossierGeneratorForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -12,7 +12,7 @@ function DossierPageContent() {
   const searchParams = useSearchParams();
   const accountId = searchParams.get('accountId') || undefined;
 
-  const [dossier, setDossier] = useState<Record<string, unknown> | null>(null);
+  const [dossier, setDossier] = useState<CompanyDossier | null>(null);
   const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +101,7 @@ function DossierPageContent() {
 
   const handleRegenerate = async () => {
     if (!dossier?.accountId) return;
-    await handleGenerate(dossier.accountId, false);
+    await handleGenerate(String(dossier.accountId), false);
   };
 
   const handleExport = () => {

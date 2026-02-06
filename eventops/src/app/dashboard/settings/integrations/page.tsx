@@ -26,7 +26,13 @@ export default async function IntegrationsPage() {
       
       <div className="space-y-6">
         <GoogleIntegrationCard 
-          user={user}
+          user={user ? {
+            googleSyncEnabled: user.googleSyncEnabled,
+            googleSyncPaused: user.googleSyncPaused,
+            googleSyncDryRun: user.googleSyncDryRun,
+            lastGoogleSync: user.lastGoogleSync ?? undefined,
+            googleSyncAuditLog: Array.isArray(user.googleSyncAuditLog) ? user.googleSyncAuditLog : undefined,
+          } : {}}
           onUpdate={() => {
             window.location.reload();
           }}

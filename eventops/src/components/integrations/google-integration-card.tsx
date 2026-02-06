@@ -8,11 +8,19 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
+interface GoogleUser {
+  googleSyncEnabled?: boolean;
+  googleSyncPaused?: boolean;
+  googleSyncDryRun?: boolean;
+  lastGoogleSync?: string | number | Date;
+  googleSyncAuditLog?: unknown[];
+}
+
 export function GoogleIntegrationCard({
   user,
   onUpdate,
 }: {
-  user: Record<string, unknown>;
+  user: GoogleUser;
   onUpdate: () => void;
 }) {
   const [syncing, setSyncing] = useState(false);

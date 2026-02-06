@@ -56,7 +56,7 @@ export default function MapColumnsPage() {
       complete: (results) => {
         const headers = results.meta.fields || [];
         setCsvHeaders(headers);
-        setData(results.data);
+        setData(results.data as Record<string, unknown>[]);
 
         // Auto-map columns based on header names
         const autoMapping: FieldMapping = {};
@@ -163,7 +163,7 @@ export default function MapColumnsPage() {
                 </select>
                 {mapping[fieldKey] && data[0] && (
                   <p className="mt-1 text-xs text-gray-500">
-                    Example: {data[0][mapping[fieldKey]] || '(empty)'}
+                    Example: {String(data[0][mapping[fieldKey]] ?? '(empty)')}
                   </p>
                 )}
               </div>

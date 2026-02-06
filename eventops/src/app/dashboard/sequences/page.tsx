@@ -16,10 +16,15 @@ interface Sequence {
   _count: { outreach: number };
 }
 
+interface Campaign {
+  id: string;
+  name: string;
+}
+
 export default function SequencesPage() {
   const _router = useRouter();
   const [sequences, setSequences] = useState<Sequence[]>([]);
-  const [campaigns, setCampaigns] = useState<Record<string, unknown>[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({

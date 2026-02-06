@@ -3,13 +3,34 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+interface PersonFormData {
+  accountId?: string;
+  name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  notes?: string;
+  isExecOps?: boolean;
+  isOps?: boolean;
+  isProc?: boolean;
+  isSales?: boolean;
+  isTech?: boolean;
+  isNonOps?: boolean;
+}
+
+interface AccountOption {
+  id: string;
+  name: string;
+}
+
 export default function EditPersonPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [person, setPerson] = useState<Record<string, unknown> | null>(null);
-  const [accounts, setAccounts] = useState<Record<string, unknown>[]>([]);
+  const [person, setPerson] = useState<PersonFormData | null>(null);
+  const [accounts, setAccounts] = useState<AccountOption[]>([]);
 
   useEffect(() => {
     async function fetchData() {

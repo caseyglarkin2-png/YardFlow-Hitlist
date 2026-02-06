@@ -22,7 +22,7 @@ interface ContentGeneratorProps {
   defaultCompany?: string;
 }
 
-interface ContentRequest {
+export interface ContentRequest {
   recipientName: string;
   companyName: string;
   channel: 'email' | 'linkedin' | 'phone';
@@ -35,7 +35,7 @@ interface ContentRequest {
   tone?: 'professional' | 'casual' | 'urgent' | 'friendly';
 }
 
-interface GeneratedContent {
+export interface GeneratedContent {
   channel: string;
   subject?: string;
   body: string;

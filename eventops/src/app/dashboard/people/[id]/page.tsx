@@ -4,14 +4,52 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+interface PersonAccount {
+  name: string;
+  icpScore?: number;
+}
+
+interface PersonData {
+  name: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  accountId?: string;
+  account?: boolean;
+  isExecOps?: boolean;
+  isOps?: boolean;
+  isProc?: boolean;
+  isSales?: boolean;
+  isTech?: boolean;
+  isNonOps?: boolean;
+  target_accounts?: PersonAccount;
+}
+
+interface ContactInsights {
+  roleContext?: string;
+  likelyPainPoints?: string;
+  suggestedApproach?: string;
+  roiOpportunity?: string;
+  confidence?: string;
+  generatedAt?: string;
+}
+
+interface RoiCalculation {
+  annualSavings?: number;
+  paybackPeriod?: number;
+  facilityCount?: number;
+  calculatedAt?: string;
+}
+
 export default function PersonDetailPage() {
   const params = useParams();
   const _router = useRouter();
   const personId = params.id as string;
 
-  const [person, setPerson] = useState<Record<string, unknown> | null>(null);
-  const [insights, setInsights] = useState<Record<string, unknown> | null>(null);
-  const [roiData, setRoiData] = useState<Record<string, unknown> | null>(null);
+  const [person, setPerson] = useState<PersonData | null>(null);
+  const [insights, setInsights] = useState<ContactInsights | null>(null);
+  const [roiData, setRoiData] = useState<RoiCalculation | null>(null);
   const [loading, setLoading] = useState(true);
   const [generatingInsights, setGeneratingInsights] = useState(false);
   const [calculatingRoi, setCalculatingRoi] = useState(false);
@@ -191,7 +229,7 @@ export default function PersonDetailPage() {
                 <div>
                   <span className="font-medium">LinkedIn:</span>{' '}
                   <a
-                    href={person.linkedin}
+                    href={String(person.linkedin)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
@@ -200,7 +238,7 @@ export default function PersonDetailPage() {
                   </a>
                 </div>
               )}
-              {person.account && (
+              {person.account && person.target_accounts && (
                 <div>
                   <span className="font-medium">Company:</span>{' '}
                   <Link
@@ -246,7 +284,7 @@ export default function PersonDetailPage() {
                 <div>
                   <h3 className="mb-1 text-sm font-medium text-gray-600">Likely Pain Points</h3>
                   <ul className="list-inside list-disc space-y-1 text-sm">
-                    {JSON.parse(insights.likelyPainPoints || '[]').map(
+                    {JSON.parse(String(insights.likelyPainPoints || '[]')).map(
                       (point: string, idx: number) => (
                         <li key={idx}>{point}</li>
                       )
@@ -266,7 +304,7 @@ export default function PersonDetailPage() {
 
                 <div className="text-xs text-gray-500">
                   Confidence: {insights.confidence} | Generated:{' '}
-                  {new Date(insights.generatedAt).toLocaleDateString()}
+                  {new Date(String(insights.generatedAt)).toLocaleDateString()}
                 </div>
               </div>
             ) : (
@@ -325,7 +363,7 @@ export default function PersonDetailPage() {
                 <div>
                   <div className="text-sm text-gray-600">Annual Savings</div>
                   <div className="text-2xl font-bold text-green-600">
-                    ${roiData.annualSavings?.toLocaleString()}
+                    ${Number(roiData.annualSavings || 0).toLocaleString()}
                   </div>
                 </div>
                 <div>
@@ -339,7 +377,7 @@ export default function PersonDetailPage() {
                   </div>
                 )}
                 <div className="border-t pt-2 text-xs text-gray-500">
-                  Calculated: {new Date(roiData.calculatedAt).toLocaleDateString()}
+                  Calculated: {new Date(String(roiData.calculatedAt)).toLocaleDateString()}
                 </div>
               </div>
             ) : (
