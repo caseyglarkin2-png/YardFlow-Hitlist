@@ -1,7 +1,8 @@
 # YardFlow-Hitlist: Launch Readiness Roadmap — Manifest 2026
 
 **Created**: February 6, 2026
-**Status**: Sprints 48-56 ✅ Complete — Launch Ready
+**Updated**: February 6, 2026
+**Status**: Sprints 48-56b ✅ Complete — Production Live & Verified
 **Prerequisite**: Stability Roadmap v2 (Sprints 37-47) ✅ Complete
 **Goal**: Production-hardened backend ready for live event traffic at Manifest 2026
 **Philosophy**: Ship Fast, Ship Often — atomic commits with validation
@@ -14,7 +15,7 @@
 
 | Category             | Status        | Details                                                              |
 | -------------------- | ------------- | -------------------------------------------------------------------- |
-| **Build**            | 🟢 Deploying  | Config consolidated to single `next.config.mjs`, Railway builds OK   |
+| **Build**            | 🟢 Live       | Railway build passing, production deployed, `.dockerignore` added    |
 | **S2S Auth**         | 🟢 Complete   | All routes use `authServiceOrSession`, `requireAuth`, or equiv.      |
 | **Lint**             | 🟢 Zero       | 0 errors, 0 warnings                                                 |
 | **Tests**            | 🟢 464        | 464 pass, 12 skipped, 34 files (Sprint 56: +42 E2E tests)           |
@@ -28,6 +29,7 @@
 | **Security**         | 🟢 Hardened   | Headers on all routes, auth on stubs, admin lockdown (Sprint 50)     |
 | **DB Performance**   | 🟢 Indexed    | 9 new indexes, env-aware pool, parallel health checks (Sprint 53)    |
 | **E2E Tests**        | 🟢 Complete   | 42 E2E tests: critical flows + error handling (Sprint 56)            |
+| **Build Hygiene**    | 🟢 Hardened   | tsconfig excludes tests/scripts/debug files, .dockerignore (56b)     |
 
 ### What GTM-YardFlow (Frontend) Needs From Us
 
@@ -854,6 +856,89 @@ Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHEC
 
 ---
 
+### Sprint 56b: Build Failure Hotfix & Build Hygiene ✅ COMPLETE (commits `b92c915`, `7dfdb19`)
+
+**Goal**: Fix Railway build failure caused by test utility file type-checked during `next build`, then harden tsconfig exclusions to prevent recurrence.
+**Priority**: P0 — Build was broken, production couldn't deploy.
+
+#### Incident Report: Railway Build Failure
+
+**Symptom**: Railway build failed at commit `43bb166d` with:
+```
+./tests/e2e/s2s-harness.ts:108:42
+Type error: Argument of type 'RequestInit & { headers: Record<string, string>; }'
+is not assignable to parameter of type 'RequestInit | undefined'.
+```
+
+**Root Cause**: The Sprint 56 E2E test harness (`tests/e2e/s2s-harness.ts`) was a utility file, not a `*.test.ts` file. The tsconfig.json `exclude` patterns (`**/*.test.ts`, `**/__tests__/**`) did not cover it. Since `next build` type-checks ALL files in tsconfig `include`, this utility was compiled during the Railway build. The `RequestInit & { headers: Record<string, string> }` intersection type created a `signal` property conflict with `AbortSignal | null` vs `AbortSignal | undefined`.
+
+**Why It Wasn't Caught Locally**: The codespace OOM'd on `next build` (2GB heap limit), so the type error couldn't be reproduced locally. Tests passed because Vitest has its own independent config.
+
+**Lesson**: Any `.ts` file not matching exclude patterns will be type-checked by `next build`. Must exclude entire directories, not just file patterns.
+
+#### Ticket 56b.1: Fix Build-Breaking Type Error ✅
+
+**Files Modified**:
+- `tsconfig.json` — Added `"tests/**"` to exclude array
+- `tests/e2e/s2s-harness.ts` — Changed `RequestInit & { headers: Record<string, string> }` to `RequestInit` in both `createAuthenticatedRequest()` and `createS2SRequest()`
+
+**Validation**:
+- Node script confirmed 0 files from `tests/` in tsc compilation
+- `npm run lint` → 0 errors
+- `npx vitest run` → 464 passed, 12 skipped
+- Railway build succeeded, production healthy (200 on `/api/health`)
+
+**Commit**: `b92c915` — `fix: Exclude tests/ from tsconfig build + fix RequestInit type`
+
+#### Ticket 56b.2: Harden Build Exclusions ✅
+
+**Problem**: Subagent review identified additional files NOT excluded from tsconfig that could break builds:
+- 4 root-level debug scripts: `test-prisma-crash.ts`, `test-db-crash.ts`, `test-migration.ts`, `test-redis-crash.ts`
+- 11 files in `scripts/` including `verify-health-check-local.ts` (uses `@/` path aliases)
+
+**Files Modified**:
+- `tsconfig.json` — Added `"scripts/**"` and `"test-*.ts"` to exclude array
+- Created `.dockerignore` — Excludes tests, scripts, docs, backups from Docker build context
+
+**Final tsconfig exclude**:
+```json
+["node_modules", "prisma/seed*.ts", "tests/**", "scripts/**", "test-*.ts", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"]
+```
+
+**Validation**:
+- Node script confirmed 0 risky files (tests/, scripts/, test-*) in tsc compilation
+- `npm run lint` → 0 errors
+- `npx vitest run` → 464 passed, 12 skipped
+
+**Commit**: `7dfdb19` — `chore: Harden build — exclude scripts/ and test-*.ts from tsconfig, add .dockerignore`
+
+#### Sprint 56b Completion Criteria
+
+- [x] Railway build passing (`b92c915`)
+- [x] Production deployed and healthy (DB 5ms, Redis 3ms, Worker OK)
+- [x] All test/script/debug files excluded from tsc compilation (verified: 0 risky files)
+- [x] `.dockerignore` added to reduce build context size
+- [x] 464 tests still passing
+- [x] 0 lint errors
+
+---
+
+### Production Launch Verification ✅ (February 6, 2026)
+
+**Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
+
+| Check | Result | Details |
+|-------|--------|---------|
+| Health endpoint | 🟢 200 | DB 5ms, Redis 3ms, Worker OK, Queues idle |
+| Auth enforcement | 🟢 401 | Unauthenticated requests correctly rejected |
+| Tracking pixel | 🟢 200 | Returns `image/gif` content type |
+| Unsubscribe | 🟢 400 | Returns error without valid token (expected) |
+| Email service | 🟢 OK | 0 failures, SendGrid configured |
+| AI fallback | 🟢 OK | OpenAI active (Gemini transiently rate-limited) |
+| `post-deploy-verify.sh` | 🟢 Pass | All integration checks passed |
+
+---
+
 ## Sprint Ordering Rationale
 
 | Sprint | Focus                | Why This Order                                                        |
@@ -867,6 +952,7 @@ Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHEC
 | **54** | Rate Limiting        | Abuse protection before public attention at Manifest.                 |
 | **55** | Dashboard TS Fixes   | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
 | **56** | E2E Tests & Launch   | Final validation gate. Proves everything works together.              |
+| **56b** | Build Hotfix + Hygiene | Railway build broken by test utility — fix + harden exclusions.    |
 
 ---
 
@@ -900,6 +986,8 @@ Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHEC
 | API abuse during event                       | Low         | Medium | Sprint 54 rate limiting ✅                    |
 | Frontend type errors from changed shapes     | Low         | Medium | Sprint 52 documents contracts ✅              |
 | `ignoreBuildErrors` hides new TS regressions | **None**    | Medium | Sprint 55 removed it entirely ✅              |
+| Test/script files break `next build`         | **None**    | High   | Sprint 56b: tsconfig excludes tests/scripts/debug ✅ |
+| Docker build includes unnecessary files      | **None**    | Low    | Sprint 56b: `.dockerignore` added ✅          |
 | Unsubscribe IDOR (personId as token)         | Low         | Medium | Follow-up: HMAC-signed unsubscribe tokens   |
 
 ---
@@ -917,6 +1005,32 @@ These were identified during code review and should be addressed post-Manifest:
 | 5 | AI content/generate restricts to service auth only | Informational | Intentional S2S design |
 | 6 | Rate limit tests use static analysis, not behavioral testing | Low | 📋 Follow-up ticket |
 | 7 | x-forwarded-for fallback to 'unknown' shares rate limit bucket | Low | 📋 Follow-up ticket |
+
+---
+
+## Sprint 56b Review Findings (Follow-up Tickets)
+
+These were identified during subagent code review of the build fix:
+
+| # | Finding | Severity | Status |
+|---|---------|----------|--------|
+| 1 | `tests/e2e/s2s-harness.ts` RequestInit type broke Railway build | Critical | ✅ Fixed (`b92c915`) |
+| 2 | tsconfig did not exclude `tests/` directory (only `*.test.ts` patterns) | Critical | ✅ Fixed (`b92c915`) |
+| 3 | Root-level `test-*.ts` debug scripts not excluded from tsconfig | Medium | ✅ Fixed (`7dfdb19`) |
+| 4 | `scripts/**/*.ts` (11 files) not excluded from tsconfig | Medium | ✅ Fixed (`7dfdb19`) |
+| 5 | No `.dockerignore` — all docs/tests/scripts copied into Docker image | Low | ✅ Fixed (`7dfdb19`) |
+| 6 | `scripts/verify-health-check-local.ts` uses `@/` path alias (would fail tsc) | Medium | ✅ Excluded from build |
+| 7 | Codespace OOM prevents local `next build` validation (2GB limit) | Low | 📋 Dev experience: add `NODE_OPTIONS=--max-old-space-size=4096` to npm scripts |
+
+### Post-Manifest Follow-up Tickets
+
+| # | Ticket | Priority | Description |
+|---|--------|----------|-------------|
+| F1 | CI Build Gate | P2 | Add GitHub Actions workflow for `next build` on PR — prevents build-breaking commits from merging |
+| F2 | Unsubscribe HMAC Tokens | P2 | Replace raw personId with HMAC-signed tokens for unsubscribe links (IDOR risk) |
+| F3 | Webhook 429 → 200 | P3 | Return 200 instead of 429 on rate-limited webhooks to prevent SendGrid retry storms |
+| F4 | Behavioral Rate Limit Tests | P3 | Replace static analysis rate limit tests with actual Redis-backed behavioral tests |
+| F5 | Load Testing | P3 | Run `autocannon`/`k6` against top 5 endpoints, document P95 latency baselines |
 
 ---
 
