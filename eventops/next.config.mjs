@@ -5,16 +5,27 @@ const nextConfig = {
   reactStrictMode: true,
   // Use standalone output for Railway deployment
   output: 'standalone',
+  poweredByHeader: false,
+  compress: true,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    optimizePackageImports: ['@/components', '@/lib'],
     // Emergency OOM Fix: Force single-threaded build
     workerThreads: false,
     cpus: 1,
   },
   // Optimize build for Railway memory limits
   swcMinify: true,
+  // Performance: strip console.log in production
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   // Disable type checking and linting during builds (run in CI instead)
   typescript: {
     ignoreBuildErrors: true,

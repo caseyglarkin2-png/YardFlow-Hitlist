@@ -103,9 +103,9 @@ export async function POST(req: NextRequest) {
         // Get contact insights if available
         const contactInsights = person.contact_insights
           ? {
-              roleContext: person.contact_insights.roleContext,
-              likelyPainPoints: person.contact_insights.likelyPainPoints,
-              roiOpportunity: person.contact_insights.roiOpportunity,
+              roleContext: person.contact_insights.roleContext ?? '',
+              likelyPainPoints: person.contact_insights.likelyPainPoints ?? '',
+              roiOpportunity: person.contact_insights.roiOpportunity ?? '',
             }
           : undefined;
 
