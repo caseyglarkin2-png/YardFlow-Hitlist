@@ -9,7 +9,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   // 1. Auth check
   const authResult = await authServiceOrSession(req);
   if (!authResult) {
-    return new NextResponse('Unauthorized', { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // 2. Fetch Root Task with Children
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     });
 
     if (!rootTask) {
-      return new NextResponse('Campaign/Task not found', { status: 404 });
+      return NextResponse.json({ error: 'Campaign/Task not found' }, { status: 404 });
     }
 
     // 3. Format Response
@@ -50,6 +50,6 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       userId: authResult?.userId,
     });
     console.error('Failed to fetch campaign status', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

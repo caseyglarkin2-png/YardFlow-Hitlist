@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 
 // Initialize SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
-const FROM_EMAIL = process.env.FROM_EMAIL || 'outreach@freightroll.com';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'casey@freightroll.com';
 const FROM_NAME = process.env.FROM_NAME || 'FreightRoll';
 const COMPANY_ADDRESS =
   process.env.COMPANY_ADDRESS || '123 Main St, Suite 100, San Francisco, CA 94105';

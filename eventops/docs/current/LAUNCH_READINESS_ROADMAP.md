@@ -2,7 +2,7 @@
 
 **Created**: February 6, 2026
 **Updated**: February 6, 2026
-**Status**: Sprints 48-56b ✅ Complete — Production Live & Verified
+**Status**: Sprints 48-57 ✅ Complete — Production Live & Verified
 **Prerequisite**: Stability Roadmap v2 (Sprints 37-47) ✅ Complete
 **Goal**: Production-hardened backend ready for live event traffic at Manifest 2026
 **Philosophy**: Ship Fast, Ship Often — atomic commits with validation
@@ -11,14 +11,14 @@
 
 ## Executive Summary
 
-### Current State (Post-Sprint 56)
+### Current State (Post-Sprint 57)
 
 | Category             | Status        | Details                                                              |
 | -------------------- | ------------- | -------------------------------------------------------------------- |
 | **Build**            | 🟢 Live       | Railway build passing, production deployed, `.dockerignore` added    |
 | **S2S Auth**         | 🟢 Complete   | All routes use `authServiceOrSession`, `requireAuth`, or equiv.      |
 | **Lint**             | 🟢 Zero       | 0 errors, 0 warnings                                                 |
-| **Tests**            | 🟢 464        | 464 pass, 12 skipped, 34 files (Sprint 56: +42 E2E tests)           |
+| **Tests**            | 🟢 471        | 471 pass, 12 skipped, 35 files (Sprint 57: +8 JSON consistency)     |
 | **Sentry**           | 🟢 Active     | `captureRouteError` on 146+ routes, 10% sample rate                  |
 | **Worker**           | 🟢 Healthy    | Heartbeat, graceful shutdown, BullMQ job cleanup configured          |
 | **TypeScript**       | 🟢 Strict     | 0 errors, `ignoreBuildErrors: false` (Sprint 55)                     |
@@ -30,6 +30,7 @@
 | **DB Performance**   | 🟢 Indexed    | 9 new indexes, env-aware pool, parallel health checks (Sprint 53)    |
 | **E2E Tests**        | 🟢 Complete   | 42 E2E tests: critical flows + error handling (Sprint 56)            |
 | **Build Hygiene**    | 🟢 Hardened   | tsconfig excludes tests/scripts/debug files, .dockerignore (56b)     |
+| **JSON Responses**   | 🟢 Validated  | All API routes return JSON on errors (Sprint 57)                     |
 
 ### What GTM-YardFlow (Frontend) Needs From Us
 
@@ -923,6 +924,90 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 
 ---
 
+### Sprint 57: Email Pipeline Reliability ✅ COMPLETE (February 6, 2026)
+
+**Goal**: Fix email sending failures from frontend. Ensure all API routes return JSON on errors.
+**Priority**: P0 — Sending emails is core functionality for Manifest.
+
+#### Root Cause Analysis
+
+| Error | Root Cause | Location |
+|-------|------------|----------|
+| `403 Forbidden` on `/api/railway/*` | **Frontend Vercel proxy** returning 403, NOT Railway backend | GTM-YardFlow proxy route |
+| `"Unexpected token 'A', 'A server e'..."` | Next.js HTML error page returned on uncaught exceptions | Railway server-side error |
+| `500` on `/api/email/send` | Database/Redis/SendGrid failure OR exception before try/catch | Railway backend |
+| `Email send failed: Error: Forbidden` | **SendGrid 403** - Unverified sender `jake@freightroll.com` | SendGrid config |
+
+**Key Finding**: Railway backend returns `401 Unauthorized` (JSON) for auth failures, never 403. The 403 is from the **Vercel proxy**.
+
+#### Ticket 57.1: Fix Campaign Status Route Plain Text Errors
+
+**File**: `src/app/api/campaigns/[id]/status/route.ts`
+
+| Before | After |
+|--------|-------|
+| `new NextResponse('Unauthorized', { status: 401 })` | `NextResponse.json({ error: 'Unauthorized' }, { status: 401 })` |
+| `new NextResponse('Campaign/Task not found', { status: 404 })` | `NextResponse.json({ error: 'Campaign/Task not found' }, { status: 404 })` |
+| `new NextResponse('Internal Server Error', { status: 500 })` | `NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })` |
+
+**Validation**: `grep -n "new NextResponse(" src/app/api/campaigns/[id]/status/route.ts` returns 0 matches
+**Commit**: `fix(api): Return JSON errors from campaigns status route`
+
+#### Ticket 57.2: Add JSON Response Consistency Tests
+
+**File**: `tests/api/json-response-consistency.test.ts`
+
+Tests:
+1. No plain text error responses in API routes (excluding allowlisted routes)
+2. Verify many files use `NextResponse.json()` for errors
+3. Campaign status route returns JSON for 401, 404, 500
+4. Email send route returns JSON for all errors
+5. Outreach route returns JSON for all errors
+6. Email stats route returns JSON for all errors
+
+**Allowlisted Routes** (intentionally return non-JSON):
+- `/api/unsubscribe` — HTML page for users
+- `/api/tracking/*` — Pixel images
+- `/api/outreach/track/*` — Pixel images
+- `/api/reports/pdf` — PDF binary
+- `/api/export/*` — CSV/other formats
+
+**Validation**: `npx vitest run tests/api/json-response-consistency.test.ts` → 8 passing
+**Commit**: `test(api): Add JSON response consistency tests`
+
+#### Ticket 57.3: Create Email Troubleshooting Guide
+
+**File**: `docs/current/EMAIL_TROUBLESHOOTING.md`
+
+Contents:
+- Error symptom → root cause mapping
+- S2S authentication reference (headers, secrets)
+- Email sending flow diagram (ASCII)
+- Debug checklist for Vercel and Railway
+- Quick verification curl commands
+
+**Validation**: Document exists and covers all error scenarios
+**Commit**: `docs: Add email troubleshooting guide`
+
+#### Sprint 57 Completion Criteria
+
+- [x] Campaign status route returns JSON on errors
+- [x] 8 JSON consistency tests passing
+- [x] Email troubleshooting guide created
+- [x] `npm run lint` passes (0 errors)
+- [x] All tests pass (471 passed, 12 skipped)
+
+#### Sprint 57 Follow-up Tasks
+
+| # | Task | Priority | Notes |
+|---|------|----------|-------|
+| F6 | Verify `jake@freightroll.com` in SendGrid | P1 | Operational fix needed |
+| F7 | Audit Vercel proxy routes for auth handling | P1 | 403 originates there |
+| F8 | Standardize error response schema | P2 | Mix of `{ error }` and `{ success, error }` |
+| F9 | Runtime integration tests for error scenarios | P2 | Current tests are static analysis |
+
+---
+
 ### Production Launch Verification ✅ (February 6, 2026)
 
 **Production URL**: `https://yardflow-hitlist-production-2f41.up.railway.app`
@@ -953,19 +1038,26 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 | **55** | Dashboard TS Fixes   | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
 | **56** | E2E Tests & Launch   | Final validation gate. Proves everything works together.              |
 | **56b** | Build Hotfix + Hygiene | Railway build broken by test utility — fix + harden exclusions.    |
+| **57** | Email Pipeline Reliability | Frontend seeing 403/500 on email sends — diagnose and fix.       |
+| **53** | DB Performance       | Burst traffic at event requires indexed queries.                      |
+| **54** | Rate Limiting        | Abuse protection before public attention at Manifest.                 |
+| **55** | Dashboard TS Fixes   | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
+| **56** | E2E Tests & Launch   | Final validation gate. Proves everything works together.              |
+| **56b** | Build Hotfix + Hygiene | Railway build broken by test utility — fix + harden exclusions.    |
 
 ---
 
 ## Key Metrics to Track
 
-| Metric                     | Current   | Target (Post-Sprint 56) |
+| Metric                     | Current   | Target (Post-Sprint 57) |
 | -------------------------- | --------- | ----------------------- |
 | TypeScript errors          | **0**     | 0 ✅                    |
 | Routes with Zod validation | 16        | 30+                     |
 | Routes with auth           | 148       | 155+                    |
-| Test count                 | **464**   | 450+ ✅                 |
-| Test files                 | **34**    | 35+ ✅                  |
+| Test count                 | **471**   | 470+ ✅                 |
+| Test files                 | **35**    | 35+ ✅                  |
 | E2E integration tests      | **42**    | 40+ ✅                  |
+| JSON consistency tests     | **8**     | 8+ ✅                   |
 | Lint warnings              | 0         | 0 ✅                    |
 | `ignoreBuildErrors`        | **false** | **removed** ✅          |
 | Wrong branding occurrences | 0         | 0 ✅                    |
@@ -973,6 +1065,7 @@ is not assignable to parameter of type 'RequestInit | undefined'.
 | Documented API contracts   | 10+       | 10+ ✅                  |
 | Security headers           | 4         | 4 ✅                    |
 | Database indexes (custom)  | 9         | 6+ ✅                   |
+| Routes with JSON errors    | **All**   | All ✅                  |
 
 ---
 

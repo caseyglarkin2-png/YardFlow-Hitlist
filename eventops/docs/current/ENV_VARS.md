@@ -95,8 +95,8 @@ These variables MUST be set or the application will not start.
 
 | Variable          | Description             | Default                 | Required         |
 | ----------------- | ----------------------- | ----------------------- | ---------------- |
-| `FROM_EMAIL`      | Outreach sender email   | `outreach@yardflow.com` | Optional         |
-| `FROM_NAME`       | Outreach sender name    | `YardFlow Outreach`     | Optional         |
+| `FROM_EMAIL`      | Outreach sender email   | `casey@freightroll.com` | Optional         |
+| `FROM_NAME`       | Outreach sender name    | `FreightRoll`           | Optional         |
 | `COMPANY_ADDRESS` | CAN-SPAM footer address | `123 Main St...`        | Yes (compliance) |
 
 ---
