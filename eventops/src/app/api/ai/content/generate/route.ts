@@ -51,16 +51,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
     }
 
-    const serviceKey = request.headers.get('x-service-key') || 'unknown-service';
+    // Use authenticated identity for rate-limit key (not untrusted x-service-key header)
+    const rateLimitId = authResult.userId || 'service';
     const rateCheck = await checkRateLimit(
-      rateLimitKey('ai', 'content', serviceKey),
+      rateLimitKey('ai', 'content', rateLimitId),
       RATE_LIMIT_MAX,
       RATE_LIMIT_WINDOW_SECONDS,
     );
     if (!rateCheck.allowed) {
       logger.warn('AI content generate throttled', {
         requestId,
-        serviceKey,
+        rateLimitId,
         retryAfter: rateCheck.retryAfter,
       });
       return NextResponse.json(

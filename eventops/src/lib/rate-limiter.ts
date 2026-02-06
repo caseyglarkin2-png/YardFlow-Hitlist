@@ -40,12 +40,20 @@ export async function checkRateLimit(
     const redis = getRedisConnection();
     const redisKey = `ratelimit:${key}`;
 
-    const count = await redis.incr(redisKey);
+    // Atomic INCR + EXPIRE via MULTI/EXEC to prevent orphaned keys
+    // if process crashes between the two commands
+    const multi = redis.multi();
+    multi.incr(redisKey);
+    multi.expire(redisKey, windowSeconds);
+    const results = await multi.exec();
 
-    // Set expiry only on first request in a window
-    if (count === 1) {
-      await redis.expire(redisKey, windowSeconds);
+    // results[0] = [err, count], results[1] = [err, expireResult]
+    if (!results || results[0][0]) {
+      // Pipeline error — fail open
+      return { allowed: true, remaining: maxRequests };
     }
+
+    const count = results[0][1] as number;
 
     if (count > maxRequests) {
       const ttl = await redis.ttl(redisKey);

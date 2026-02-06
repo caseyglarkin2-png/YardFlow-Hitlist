@@ -139,6 +139,15 @@ describe('Middleware Security Headers', () => {
     const content = fs.readFileSync(middlewarePath, 'utf-8');
     expect(content).toContain("'DENY'");
   });
+
+  it('applies security headers to both API and non-API routes', () => {
+    const content = fs.readFileSync(middlewarePath, 'utf-8');
+    // Security headers should be in a shared function, not only in the /api block
+    expect(content).toContain('setSecurityHeaders');
+    // Should be called for non-API routes too
+    const callCount = (content.match(/setSecurityHeaders\(/g) || []).length;
+    expect(callCount).toBeGreaterThanOrEqual(2);
+  });
 });
 
 // ─── Rate Limiter Architecture ─────────────────────────────────────────
@@ -156,10 +165,12 @@ describe('AI Content Rate Limiter', () => {
     expect(content).toContain("from '@/lib/rate-limiter'");
   });
 
-  it('shared rate limiter uses Redis INCR + EXPIRE pattern', () => {
+  it('shared rate limiter uses atomic MULTI/EXEC for INCR + EXPIRE', () => {
     const content = fs.readFileSync(sharedRateLimiterPath, 'utf-8');
-    expect(content).toContain('redis.incr(');
-    expect(content).toContain('redis.expire(');
+    expect(content).toContain('redis.multi()');
+    expect(content).toContain('multi.incr(');
+    expect(content).toContain('multi.expire(');
+    expect(content).toContain('multi.exec()');
   });
 
   it('shared rate limiter gracefully falls back when Redis is unavailable', () => {

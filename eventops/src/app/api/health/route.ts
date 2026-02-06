@@ -132,40 +132,27 @@ export async function GET() {
   const criticalMissing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
   const optionalMissing = OPTIONAL_ENV_VARS.filter((key) => !process.env[key]);
 
-  // Run checks in parallel but catch all errors individually
-  // We want to return a 200/503 response, not a 500 runtime exception
-  let dbCheck, redisCheck, queueCheck, workerCheck, emailCheck, aiCheck;
+  // Run checks in parallel — never let one slow check block the entire health endpoint
+  // Use Promise.allSettled so a timeout in one check doesn't crash the rest
+  const [dbResult, redisResult, workerResult, queueResult, emailResult, aiResult] =
+    await Promise.allSettled([
+      checkDatabase(),
+      checkRedis(),
+      checkWorkerHealth(),
+      getQueueCounts(),
+      checkEmailService(),
+      checkAIHealth(),
+    ]);
 
-  try {
-    dbCheck = await checkDatabase();
-  } catch (e) {
-    dbCheck = { status: 'fatal', error: String(e) };
-  }
-  try {
-    redisCheck = await checkRedis();
-  } catch (e) {
-    redisCheck = { status: 'fatal', error: String(e) };
-  }
-  try {
-    workerCheck = await checkWorkerHealth();
-  } catch (e) {
-    workerCheck = { status: 'fatal', error: String(e) };
-  }
-  try {
-    queueCheck = await getQueueCounts();
-  } catch (e) {
-    queueCheck = { status: 'fatal', error: String(e) };
-  }
-  try {
-    emailCheck = await checkEmailService();
-  } catch (e) {
-    emailCheck = { status: 'fatal', error: String(e) };
-  }
-  try {
-    aiCheck = await checkAIHealth();
-  } catch (e) {
-    aiCheck = { status: 'fatal', error: String(e) };
-  }
+  const settled = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
+    result.status === 'fulfilled' ? result.value : fallback;
+
+  const dbCheck = settled(dbResult, { status: 'fatal', error: String((dbResult as PromiseRejectedResult).reason) });
+  const redisCheck = settled(redisResult, { status: 'fatal', error: String((redisResult as PromiseRejectedResult).reason) });
+  const workerCheck = settled(workerResult, { status: 'fatal', error: String((workerResult as PromiseRejectedResult).reason) });
+  const queueCheck = settled(queueResult, { status: 'fatal', error: String((queueResult as PromiseRejectedResult).reason) });
+  const emailCheck = settled(emailResult, { status: 'fatal', error: String((emailResult as PromiseRejectedResult).reason) });
+  const aiCheck = settled(aiResult, { status: 'fatal', error: String((aiResult as PromiseRejectedResult).reason) });
 
   // Healthy = DB + Redis + Worker + Critical Env Vars
   const healthy =

@@ -95,19 +95,30 @@ export async function middleware(request: NextRequest) {
     const cors = corsHeaders(origin);
     cors.forEach((value, key) => response.headers.set(key, value));
 
-    // Security headers
-    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    // Security headers (applied to all matched routes)
+    setSecurityHeaders(response);
 
     return response;
   }
 
-  return NextResponse.next();
+  // Non-API routes (dashboard, login, etc.) — apply security headers
+  const response = NextResponse.next();
+  setSecurityHeaders(response);
+  return response;
+}
+
+/**
+ * Apply standard security headers to any response.
+ * Called for both API and page routes.
+ */
+function setSecurityHeaders(response: NextResponse): void {
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/api/:path*'],
+  matcher: ['/dashboard/:path*', '/api/:path*', '/login'],
 };

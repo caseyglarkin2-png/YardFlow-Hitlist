@@ -17,14 +17,16 @@ const globalForPrisma = globalThis as unknown as {
 function createPrismaClient(): PrismaClient {
   // Create PostgreSQL connection pool using helper that checks both env vars
   // Pool settings tuned for Railway shared PostgreSQL:
-  //   max: 15          — Railway allows ~20 connections; leave headroom for worker
+  //   Web: max 10 connections, Worker: max 5 — total stays under Railway's ~20 limit
   //   idleTimeoutMillis: 30s — free idle connections quickly under burst
   //   connectionTimeoutMillis: 5s — fail fast if DB is unreachable
+  const isWorker = process.env.WORKER_MODE === 'true';
+  const maxPoolSize = isWorker ? 5 : 10;
   const pool =
     globalForPrisma.pool ??
     new Pool({
       connectionString: getDatabaseUrl(),
-      max: 15,
+      max: maxPoolSize,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     });
@@ -88,16 +90,20 @@ export function getPoolMetrics(): {
   totalCount: number;
   idleCount: number;
   waitingCount: number;
+  activeCount: number;
   maxConnections: number;
 } {
   const pool = globalForPrisma.pool;
+  const isWorker = process.env.WORKER_MODE === 'true';
+  const maxPoolSize = isWorker ? 5 : 10;
   if (!pool) {
-    return { totalCount: 0, idleCount: 0, waitingCount: 0, maxConnections: 15 };
+    return { totalCount: 0, idleCount: 0, waitingCount: 0, activeCount: 0, maxConnections: maxPoolSize };
   }
   return {
     totalCount: pool.totalCount,
     idleCount: pool.idleCount,
     waitingCount: pool.waitingCount,
-    maxConnections: 15,
+    activeCount: pool.totalCount - pool.idleCount,
+    maxConnections: maxPoolSize,
   };
 }
