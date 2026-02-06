@@ -1,0 +1,874 @@
+# YardFlow-Hitlist: Launch Readiness Roadmap — Manifest 2026
+
+**Created**: February 6, 2026
+**Status**: Planning — Sprints 48-56
+**Prerequisite**: Stability Roadmap v2 (Sprints 37-47) ✅ Complete
+**Goal**: Production-hardened backend ready for live event traffic at Manifest 2026
+**Philosophy**: Ship Fast, Ship Often — atomic commits with validation
+
+---
+
+## Executive Summary
+
+### Current State (Post-Stability Roadmap)
+
+| Category          | Status       | Details                                                             |
+| ----------------- | ------------ | ------------------------------------------------------------------- |
+| **Build**         | 🟢 Deploying | Config consolidated to single `next.config.mjs`, Railway builds OK  |
+| **S2S Auth**      | 🟢 Complete  | 148/185 routes use `authServiceOrSession` or `requireAuth`          |
+| **Lint**          | 🟢 Zero      | 0 errors, 0 warnings                                               |
+| **Tests**         | 🟢 334       | 322 pass, 12 skipped, 28 files                                     |
+| **Sentry**        | 🟢 Active    | `captureRouteError` on 146+ routes, 10% sample rate                 |
+| **Worker**        | 🟢 Healthy   | Heartbeat, graceful shutdown, BullMQ job cleanup configured         |
+| **TypeScript**    | 🟡 Suppressed| 149 errors suppressed by `ignoreBuildErrors: true`                  |
+| **Branding**      | 🔴 Wrong     | Email/UI defaults say "YardFlow" and "EventOps" instead of "FreightRoll" |
+| **Input Validation** | 🟡 Partial | 16/185 routes use Zod; critical CRUD routes covered, many gaps     |
+| **Rate Limiting** | 🟡 Partial   | Only on email send + AI content; no global API protection           |
+| **API Contracts** | 🔴 Missing   | No shared types or docs for GTM-YardFlow frontend                   |
+
+### What GTM-YardFlow (Frontend) Needs From Us
+
+The Vercel frontend does NOT need code changes from us. But it needs **documentation** to fully leverage what we've built:
+
+1. **API Response Type Definitions** — Typed interfaces for all endpoint responses so the frontend can drop `as any` casts
+2. **Error Contract** — Consistent `{ error: string, details?: unknown }` shape across all routes
+3. **Pagination Contract** — Standard `{ data: T[], meta: { total, offset, limit } }` for list endpoints
+4. **S2S Auth Reference** — Which headers to send, which endpoints require auth, which are public
+5. **Branding Compliance** — All customer-facing output uses "FreightRoll" branding
+
+**None of this requires frontend code changes.** The frontend already calls our APIs correctly via S2S Bearer tokens. These improvements make the backend more reliable and the contract more explicit.
+
+---
+
+## Audit Findings (February 6, 2026)
+
+### Security
+
+| Finding                              | Severity | Status      |
+| ------------------------------------ | -------- | ----------- |
+| 148 routes protected with auth       | —        | ✅ Done     |
+| SendGrid webhook signature verified  | —        | ✅ Done     |
+| Cron routes check `CRON_SECRET`      | —        | ✅ Done     |
+| 501 stub routes (dashboards, workflows) unprotected | Low | ⚠️ Add auth proactively |
+| `admin/seed` uses `AUTH_SECRET.slice(0,16)` for protection | Medium | ⚠️ Fragile |
+| No security headers (HSTS, X-Frame-Options) | Medium | 🔴 Missing |
+| AI content rate limiter uses in-memory Map (lost on restart) | Medium | 🔴 Fragile |
+
+### Branding (Customer-Facing)
+
+| File                             | Wrong Brand | Occurrences |
+| -------------------------------- | ----------- | ----------- |
+| `src/lib/outreach/email-sender.ts` | YardFlow    | 5           |
+| `src/lib/sendgrid.ts`           | EventOps    | 1           |
+| `src/lib/hubspot-integration.ts` | EventOps    | 3           |
+| `src/lib/email/sprint-completion.ts` | YardFlow | 7           |
+| `src/app/api/reports/pdf/route.ts` | EventOps  | 4           |
+| `src/app/api/export/full/route.ts` | EventOps  | 1           |
+| `src/app/layout.tsx`            | EventOps    | 2           |
+| `src/app/login/page.tsx`        | EventOps    | 1           |
+| `src/app/dashboard/layout.tsx`  | EventOps    | 1           |
+| `src/app/dashboard/help/page.tsx` | EventOps  | 2           |
+| `src/app/dashboard/integrations/page.tsx` | EventOps | 2     |
+| `src/app/dashboard/reports/page.tsx` | EventOps | 1          |
+
+### TypeScript Errors (149 total, suppressed)
+
+| File                                     | Errors | Category    |
+| ---------------------------------------- | ------ | ----------- |
+| `src/app/dashboard/people/[id]/page.tsx` | 24     | UI          |
+| `src/components/research-panel.tsx`      | 22     | Component   |
+| `src/app/dashboard/people/[id]/edit/page.tsx` | 16 | UI         |
+| `src/app/dashboard/manifest/requests/page.tsx` | 11 | UI       |
+| `src/lib/google/calendar.ts`            | 7      | **Runtime** |
+| `src/lib/queue/workers.ts`              | 6      | **Runtime** |
+| `src/lib/contact-enrichment.ts`         | 6      | **Runtime** |
+| `src/app/dashboard/training/page.tsx`   | 6      | UI          |
+| `src/app/dashboard/accounts/[id]/edit/page.tsx` | 6 | UI       |
+| `src/components/score-manager.tsx`       | 5      | Component   |
+| Remaining 20+ files                     | 40     | Mixed       |
+
+**Critical**: 19 errors are in `src/lib/` (runtime code) — `workers.ts`, `calendar.ts`, `contact-enrichment.ts`. These can cause real crashes.
+
+### API Consistency
+
+| Issue                                    | Count | Risk   |
+| ---------------------------------------- | ----- | ------ |
+| Bare array responses (no wrapper object) | 3     | Low    |
+| Inconsistent error shapes                | ~5    | Medium |
+| Routes without Zod validation            | 117   | Medium |
+| In-memory rate limiter (AI content)      | 1     | Medium |
+
+---
+
+## Sprint Plan
+
+### Sprint 48: FreightRoll Branding Compliance
+
+**Goal**: All customer-facing output uses "FreightRoll" branding. Zero "YardFlow" or "EventOps" in emails, exports, reports, or UI defaults.
+**Priority**: P0 — Wrong branding at Manifest is a visible embarrassment.
+
+#### Ticket 48.1: Fix Email Sender Defaults
+
+**File**: `src/lib/outreach/email-sender.ts`
+
+| Line | Current                          | Target                              |
+| ---- | -------------------------------- | ----------------------------------- |
+| 8    | `'outreach@yardflow.com'`       | `'outreach@freightroll.com'`        |
+| 9    | `'YardFlow Outreach'`           | `'FreightRoll'`                     |
+| 45   | `'https://app.yardflow.com'`    | `'https://app.freightroll.com'`     |
+| 62   | `'https://app.yardflow.com'`    | `'https://app.freightroll.com'`     |
+| 73   | `'https://app.yardflow.com'`    | `'https://app.freightroll.com'`     |
+
+**Validation**: `grep -n "yardflow\|YardFlow" src/lib/outreach/email-sender.ts` returns 0 matches
+**Commit**: `fix: FreightRoll branding in email sender defaults`
+
+#### Ticket 48.2: Fix SendGrid and HubSpot Defaults
+
+**Files**:
+- `src/lib/sendgrid.ts` — Line 7: `'EventOps'` → `'FreightRoll'`
+- `src/lib/hubspot-integration.ts` — Lines 96, 123: `'EventOps'` → `'FreightRoll'`
+
+**Validation**: `grep -rn "EventOps" src/lib/sendgrid.ts src/lib/hubspot-integration.ts` returns 0 matches (comments excluded)
+**Commit**: `fix: FreightRoll branding in SendGrid and HubSpot`
+
+#### Ticket 48.3: Fix Reports and Exports
+
+**Files**:
+- `src/app/api/reports/pdf/route.ts` — Lines 94, 117, 155, 299: `'EventOps'` → `'FreightRoll'`
+- `src/app/api/export/full/route.ts` — Line 175: `'EventOps_Full_Export'` → `'FreightRoll_Export'`
+
+**Validation**: `grep -rn "EventOps" src/app/api/reports/ src/app/api/export/` returns 0 matches
+**Commit**: `fix: FreightRoll branding in reports and exports`
+
+#### Ticket 48.4: Fix Dashboard UI Defaults
+
+**Files**:
+- `src/app/layout.tsx` — Lines 10, 23: `'EventOps'` → `'FreightRoll'`
+- `src/app/login/page.tsx` — Line 47: `EventOps` → `FreightRoll`
+- `src/app/dashboard/layout.tsx` — Line 19: `EventOps` → `FreightRoll`
+- `src/app/dashboard/help/page.tsx` — Lines 23, 89: `EventOps` → `FreightRoll`
+- `src/app/dashboard/integrations/page.tsx` — Lines 86, 153: `EventOps` → `FreightRoll`
+- `src/app/dashboard/reports/page.tsx` — Line 16: `EventOps_Full_Export` → `FreightRoll_Export`
+
+**Validation**: `grep -rn "EventOps" src/app/layout.tsx src/app/login/ src/app/dashboard/layout.tsx src/app/dashboard/help/ src/app/dashboard/integrations/ src/app/dashboard/reports/` returns 0 matches
+**Commit**: `fix: FreightRoll branding in dashboard UI`
+
+#### Ticket 48.5: Add Branding Compliance Test
+
+**File**: `tests/branding/freightroll-compliance.test.ts`
+
+```typescript
+// Test that no customer-facing files contain "YardFlow" or "EventOps"
+// Allowlist: voiceConfigs.ts (tells AI NOT to use YardFlow), content-generator.ts (sanitizer)
+// Allowlist: copilot-instructions.md, README.md, docs/, .github/
+```
+
+Tests:
+1. No "EventOps" in `src/` (excluding comments and allowlisted files)
+2. No "YardFlow" in email templates or outreach code (excluding sanitizer references)
+3. `sanitizeFreightRollContent()` correctly replaces "YardFlow" → "FreightRoll"
+4. FROM_NAME/FROM_EMAIL defaults use FreightRoll
+
+**Validation**: Test file passes via `npx vitest run tests/branding/`
+**Commit**: `test: Add FreightRoll branding compliance tests`
+
+#### Sprint 48 Completion Criteria
+- [ ] Zero "EventOps" in `src/` outside allowlisted comments
+- [ ] Zero "YardFlow" in customer-facing output defaults
+- [ ] Branding test suite passes
+- [ ] `npm run lint` passes
+- [ ] All 334+ tests pass
+
+---
+
+### Sprint 49: Runtime TypeScript Safety
+
+**Goal**: Fix the 19 type errors in `src/lib/` (runtime code). These are actual crash risks — not cosmetic UI issues.
+**Priority**: P0 — Runtime crashes at a live event are unacceptable.
+
+#### Ticket 49.1: Fix `src/lib/google/calendar.ts` (7 errors)
+
+All errors are `string | null | undefined` vs `string` mismatches from Google Calendar API responses.
+
+**Pattern**: Add null coalescing (`?? ''`) or proper type narrowing.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "calendar.ts" | wc -l` returns 0
+**Commit**: `fix: Type safety in Google Calendar sync`
+
+#### Ticket 49.2: Fix `src/lib/queue/workers.ts` (6 errors)
+
+Errors are `Record<string, unknown>` not assignable to typed job data interfaces (`ResearchInput`, `ContentRequest`, etc.).
+
+**Pattern**: Add type assertions with runtime validation, or create proper type guards.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "workers.ts" | wc -l` returns 0
+**Commit**: `fix: Type safety in queue worker job dispatching`
+
+#### Ticket 49.3: Fix `src/lib/contact-enrichment.ts` (6 errors)
+
+Errors are `{} | null` not assignable to `string | null` — JSON field type mismatches from Prisma.
+
+**Pattern**: Cast JSON fields or add type guards.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "contact-enrichment.ts" | wc -l` returns 0
+**Commit**: `fix: Type safety in contact enrichment`
+
+#### Ticket 49.4: Fix `src/lib/hubspot/rate-limiter.ts` (2 errors)
+
+Generic type constraint errors in the queue implementation.
+
+**Pattern**: Fix generic parameter variance.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "rate-limiter.ts" | wc -l` returns 0
+**Commit**: `fix: Type safety in HubSpot rate limiter`
+
+#### Ticket 49.5: Fix `src/lib/hubspot/sync-contacts.ts` (1 error)
+
+`SimplePublicObjectWithAssociations` type mismatch in map callback.
+
+**Pattern**: Use proper HubSpot SDK types.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "sync-contacts.ts" | wc -l` returns 0
+**Commit**: `fix: Type safety in HubSpot contact sync`
+
+#### Ticket 49.6: Fix `src/lib/outreach/email-sender.ts` (1 error)
+
+`error` is of type `unknown` in catch block.
+
+**Pattern**: `error instanceof Error ? error.message : String(error)`
+**Validation**: `npx tsc --noEmit 2>&1 | grep "email-sender.ts" | wc -l` returns 0
+**Commit**: `fix: Type safety in email sender error handling`
+
+#### Sprint 49 Completion Criteria
+- [ ] `npx tsc --noEmit 2>&1 | grep "src/lib/" | wc -l` returns 0
+- [ ] Runtime type error count: 149 → 126 (19 fixed in lib/)
+- [ ] All 334+ tests pass
+- [ ] `npm run lint` passes
+
+---
+
+### Sprint 50: Security Hardening
+
+**Goal**: Close the remaining security gaps before going live with real customer data.
+**Priority**: P0 — Data exposure at a live event is catastrophic.
+
+#### Ticket 50.1: Add Auth to Stub Routes
+
+**Files** (all return 501 but should still require auth to prevent future accidental exposure):
+- `src/app/api/dashboards/route.ts` — Add `authServiceOrSession` check
+- `src/app/api/dashboards/[id]/route.ts` — Add `authServiceOrSession` check
+- `src/app/api/workflows/route.ts` — Add `authServiceOrSession` check
+- `src/app/api/workflows/[id]/route.ts` — Add `authServiceOrSession` check
+- `src/app/api/workflows/[id]/execute/route.ts` — Add `authServiceOrSession` check
+
+**Pattern**: Even 501 stubs must authenticate so that when the feature is implemented, auth isn't forgotten.
+**Validation**: `find src/app/api -name "route.ts" -exec grep -rL "authServiceOrSession\|requireAuth\|auth()\|CRON_SECRET" {} \; | grep -v webhooks | grep -v health | grep -v ping | grep -v nextauth | grep -v unsubscribe | grep -v track | grep -v callback | grep -v register` returns 0
+**Commit**: `fix: Add auth to stub routes (dashboards, workflows)`
+
+#### Ticket 50.2: Harden Admin Seed Route
+
+**File**: `src/app/api/admin/seed/route.ts`
+
+Current protection: `AUTH_SECRET.slice(0,16)` — fragile, leaks secret structure.
+
+**Fix**: Either:
+- A) Gate behind `authServiceOrSession` + admin check, OR
+- B) Disable entirely when `NODE_ENV === 'production'`
+
+**Validation**: Calling POST without valid auth returns 401 or 403
+**Commit**: `fix: Harden admin seed route for production`
+
+#### Ticket 50.3: Add Security Headers
+
+**File**: `src/middleware.ts`
+
+Add these headers to all responses:
+```typescript
+response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+response.headers.set('X-Content-Type-Options', 'nosniff');
+response.headers.set('X-Frame-Options', 'DENY');
+response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+```
+
+**Validation**: `curl -I https://yardflow-hitlist-production-2f41.up.railway.app/api/health` shows all 4 headers
+**Commit**: `feat: Add security response headers`
+
+#### Ticket 50.4: Migrate AI Rate Limiter to Redis
+
+**File**: `src/app/api/ai/content/generate/route.ts`
+
+Current: In-memory `Map<string, RateLimitState>` — lost on restart, doesn't work across instances.
+
+**Fix**: Replace with Redis-based rate limiter (copy pattern from `src/app/api/outreach/send-email/route.ts` lines 24-48).
+
+**Validation**: Rate limit persists after server restart
+**Commit**: `fix: Move AI content rate limiter from memory to Redis`
+
+#### Ticket 50.5: Add Security Hardening Tests
+
+**File**: `tests/security/hardening.test.ts`
+
+Tests:
+1. Stub routes (dashboards, workflows) return 401 without auth
+2. Admin seed route is blocked in production mode
+3. Security headers are present on responses
+4. Rate limiter survives conceptual restart (Redis-based)
+
+**Validation**: `npx vitest run tests/security/`
+**Commit**: `test: Add security hardening test suite`
+
+#### Sprint 50 Completion Criteria
+- [ ] Zero unprotected routes (excluding intentional public endpoints)
+- [ ] Security headers on all responses
+- [ ] AI rate limiting is durable (Redis-backed)
+- [ ] Admin seed blocked in production
+- [ ] All 334+ tests pass
+
+---
+
+### Sprint 51: Input Validation (Remaining Routes)
+
+**Goal**: Add Zod validation to POST/PUT routes that currently accept unvalidated input.
+**Priority**: P1 — Prevents bad data from corrupting the database during live use.
+
+**Already validated (16 routes with Zod)**: accounts CRUD, people CRUD, outreach CRUD, AI chat, AI content, AI dossier, templates, events
+
+#### Ticket 51.1: Create Shared Validation Wrapper
+
+**File**: `src/lib/validation.ts`
+
+```typescript
+import { z, ZodSchema } from 'zod';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function parseBody<T>(req: NextRequest, schema: ZodSchema<T>): Promise<
+  { success: true; data: T } | { success: false; response: NextResponse }
+> {
+  try {
+    const body = await req.json();
+    const data = schema.parse(body);
+    return { success: true, data };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        response: NextResponse.json(
+          { error: 'Validation error', details: error.errors },
+          { status: 400 }
+        ),
+      };
+    }
+    return {
+      success: false,
+      response: NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 }),
+    };
+  }
+}
+```
+
+**Validation**: Unit tests for valid/invalid input parsing
+**Commit**: `feat: Shared Zod validation wrapper for API routes`
+
+#### Ticket 51.2: Add Validation to Campaign Routes
+
+**Files**: `src/app/api/campaigns/route.ts`, `src/app/api/campaigns/[id]/route.ts`
+
+**Schema**: Name (required string), type (enum), eventId (required), description (optional)
+**Validation**: POST with missing `name` returns 400
+**Commit**: `feat: Zod validation for campaign routes`
+
+#### Ticket 51.3: Add Validation to Sequence Routes
+
+**Files**: `src/app/api/sequences/route.ts`, `src/app/api/sequences/[id]/route.ts`
+
+**Schema**: Name (required), status (enum), steps (array of step objects)
+**Validation**: POST with empty name returns 400
+**Commit**: `feat: Zod validation for sequence routes`
+
+#### Ticket 51.4: Add Validation to Enrollment Routes
+
+**Files**: `src/app/api/enrollments/[id]/route.ts`, pause, resume
+
+**Schema**: Status (enum), personId (uuid), sequenceId (uuid)
+**Validation**: Invalid UUID returns 400
+**Commit**: `feat: Zod validation for enrollment routes`
+
+#### Ticket 51.5: Add Validation to Prospect Routes
+
+**Files**: `src/app/api/prospects/route.ts`, `src/app/api/prospects/batch/route.ts`
+
+**Schema**: Name (required), company (optional), email (email format)
+**Validation**: Invalid email format returns 400
+**Commit**: `feat: Zod validation for prospect routes`
+
+#### Sprint 51 Completion Criteria
+- [ ] Shared `parseBody()` wrapper available and tested
+- [ ] Campaign, sequence, enrollment, prospect routes validated
+- [ ] Invalid payloads return 400 with descriptive error messages
+- [ ] All tests pass
+
+---
+
+### Sprint 52: API Contract Documentation
+
+**Goal**: Give the GTM-YardFlow frontend team everything they need to type their API calls.
+**Priority**: P1 — Frontend can use untyped APIs but this eliminates runtime surprises.
+
+#### Ticket 52.1: Create API Response Types
+
+**File**: `src/types/api-contracts.ts`
+
+Define TypeScript interfaces for the 10 most-used endpoints:
+
+```typescript
+// GET /api/accounts
+export interface AccountsResponse {
+  accounts: Account[];
+  meta: { total: number; cursor?: string };
+}
+
+// GET /api/people
+export interface PeopleResponse { ... }
+
+// POST /api/ai/chat
+export interface AIChatResponse { ... }
+
+// GET /api/sequences
+export interface SequencesResponse { sequences: Sequence[] }
+
+// GET /api/campaigns
+export interface CampaignsResponse { campaigns: Campaign[] }
+
+// GET /api/outreach
+export interface OutreachResponse { ... }
+
+// GET /api/dashboards/stats
+export interface DashboardStatsResponse { ... }
+
+// GET /api/dashboards/email
+export interface EmailDashboardResponse { ... }
+
+// GET /api/analytics/*
+export interface AnalyticsResponse { ... }
+
+// Standard error shape
+export interface APIError {
+  error: string;
+  details?: unknown;
+  code?: string;
+}
+```
+
+**Validation**: Types compile without errors
+**Commit**: `feat: API response type definitions for frontend consumption`
+
+#### Ticket 52.2: Standardize Error Responses
+
+Find and fix routes that return non-standard error shapes. The standard is:
+
+```typescript
+{ error: string, details?: unknown }
+```
+
+**Validation**: `grep -rn "NextResponse.json.*message" src/app/api/ --include="route.ts" | grep -v "error:" | wc -l` returns 0 (all use `error` key, not `message`)
+**Commit**: `fix: Standardize error response shape across all routes`
+
+#### Ticket 52.3: Fix Bare Array Responses
+
+3 routes return bare arrays instead of wrapped objects:
+
+| Route              | Current           | Target                          |
+| ------------------ | ----------------- | ------------------------------- |
+| `accounts/route.ts`| `[{account}...]`  | `{ accounts: [...], meta: {} }` |
+| `webhooks/route.ts`| `[{webhook}...]`  | `{ webhooks: [...] }`           |
+| `workflows/route.ts`| `[{workflow}...]` | `{ workflows: [...] }`         |
+
+**Validation**: All list endpoints return `{ <key>: [...] }` shape
+**Commit**: `fix: Wrap bare array responses in standard envelope`
+
+#### Ticket 52.4: Write API Reference
+
+**File**: `docs/current/API_REFERENCE.md`
+
+Document all endpoints GTM-YardFlow uses:
+- Method, path, auth requirement
+- Request body schema (link to Zod schema if exists)
+- Response shape (link to type in `api-contracts.ts`)
+- Error codes and status codes
+- Rate limits (if applicable)
+
+**Validation**: Every endpoint referenced by GTM-YardFlow is documented
+**Commit**: `docs: API reference for GTM-YardFlow integration`
+
+#### Sprint 52 Completion Criteria
+- [ ] `api-contracts.ts` with types for 10+ endpoints
+- [ ] Error responses standardized
+- [ ] Bare arrays wrapped
+- [ ] API reference doc created
+
+---
+
+### Sprint 53: Database & Performance Optimization
+
+**Goal**: Ensure the database can handle burst traffic during a live event.
+**Priority**: P1 — Slow queries under load = degraded UX at Manifest.
+
+#### Ticket 53.1: Add Missing Database Indexes
+
+**File**: `prisma/schema.prisma`
+
+Audit and add indexes for common query patterns:
+- `outreach.personId` — used in person detail views
+- `outreach.sentAt` — used in email stats queries
+- `emailTracking.outreachId` — used in delivery tracking
+- `activities.accountId` — used in activity stream
+- `people.accountId` — used in account detail views
+- `sequenceSteps.sequenceId` — used in sequence detail
+
+**Validation**: `npx prisma migrate dev --name add-perf-indexes` succeeds
+**Commit**: `perf: Add database indexes for common query patterns`
+
+#### Ticket 53.2: Audit Top Query Performance
+
+Run `EXPLAIN ANALYZE` on the 5 most common queries:
+1. Account list with pagination
+2. People list by account
+3. Outreach list with status filter
+4. Email stats aggregation
+5. Dashboard stats (counts across tables)
+
+**Validation**: No sequential scans on tables > 1000 rows
+**Commit**: `docs: Query performance audit results`
+
+#### Ticket 53.3: Connection Pool Configuration
+
+**File**: `src/lib/db.ts`
+
+Verify Prisma connection pool settings are appropriate for Railway:
+- `connection_limit` — should be 10-20 for Railway (shared DB)
+- `pool_timeout` — should be 10-15 seconds
+- `connect_timeout` — should be 5 seconds
+
+**Validation**: Add connection pool metrics to `/api/health` response
+**Commit**: `perf: Optimize database connection pool for Railway`
+
+#### Sprint 53 Completion Criteria
+- [ ] Indexes added for top query patterns
+- [ ] Query audit documented
+- [ ] Connection pool configured for production load
+
+---
+
+### Sprint 54: Rate Limiting & Abuse Protection
+
+**Goal**: Prevent API abuse during the live event.
+**Priority**: P1 — A rate-limit-less API + public attention at Manifest = risk.
+
+#### Ticket 54.1: Create Shared Redis Rate Limiter
+
+**File**: `src/lib/rate-limiter.ts`
+
+Based on the proven pattern in `src/app/api/outreach/send-email/route.ts`:
+
+```typescript
+import { getRedisConnection } from '@/lib/queue/client';
+
+interface RateLimitResult {
+  allowed: boolean;
+  retryAfter?: number;
+  remaining?: number;
+}
+
+export async function checkRateLimit(
+  key: string,
+  maxRequests: number,
+  windowSeconds: number,
+): Promise<RateLimitResult> {
+  const redis = getRedisConnection();
+  const redisKey = `ratelimit:${key}`;
+  const count = await redis.incr(redisKey);
+  if (count === 1) {
+    await redis.expire(redisKey, windowSeconds);
+  }
+  if (count > maxRequests) {
+    const ttl = await redis.ttl(redisKey);
+    return { allowed: false, retryAfter: ttl > 0 ? ttl : windowSeconds };
+  }
+  return { allowed: true, remaining: maxRequests - count };
+}
+```
+
+**Validation**: Unit test with mocked Redis
+**Commit**: `feat: Shared Redis-based rate limiter`
+
+#### Ticket 54.2: Apply Rate Limiting to AI Endpoints
+
+**Files**:
+- `src/app/api/ai/chat/route.ts` — 20 req/min per user
+- `src/app/api/ai/content/generate/route.ts` — Replace in-memory Map with Redis limiter
+- `src/app/api/ai/dossier/generate/route.ts` — 10 req/min per user
+- `src/app/api/ai/content/sequence/route.ts` — 5 req/min per user
+
+**Validation**: 21st request within 60s returns 429 with `Retry-After` header
+**Commit**: `feat: Redis rate limiting on AI endpoints`
+
+#### Ticket 54.3: Apply Rate Limiting to Public Endpoints
+
+**Files**:
+- `src/app/api/unsubscribe/route.ts` — 10 req/min per IP
+- `src/app/api/outreach/track/route.ts` — 100 req/min per IP (tracking pixels fire frequently)
+- `src/app/api/webhooks/sendgrid/route.ts` — 500 req/min (SendGrid batch sends events)
+
+**Validation**: Abuse-level traffic returns 429
+**Commit**: `feat: Rate limiting on public endpoints`
+
+#### Ticket 54.4: Rate Limiting Tests
+
+**File**: `tests/security/rate-limiting.test.ts`
+
+Tests:
+1. Requests under limit succeed
+2. Requests over limit return 429
+3. Rate limit resets after window expires
+4. Different users have independent limits
+5. `Retry-After` header is present on 429 responses
+
+**Validation**: `npx vitest run tests/security/rate-limiting.test.ts`
+**Commit**: `test: Rate limiting test suite`
+
+#### Sprint 54 Completion Criteria
+- [ ] Shared rate limiter using Redis
+- [ ] AI endpoints rate-limited (most expensive compute)
+- [ ] Public endpoints rate-limited (abuse vector)
+- [ ] Test suite validates all rate limiting behavior
+
+---
+
+### Sprint 55: TypeScript Strictness (Dashboard/UI)
+
+**Goal**: Fix the remaining 130 TypeScript errors in dashboard pages and components. Remove `ignoreBuildErrors: true`.
+**Priority**: P2 — These are UI rendering issues, lower blast radius than runtime errors.
+
+#### Ticket 55.1: Fix People Pages (40 errors)
+
+**Files**:
+- `src/app/dashboard/people/[id]/page.tsx` (24 errors)
+- `src/app/dashboard/people/[id]/edit/page.tsx` (16 errors)
+
+**Pattern**: Interface mismatches between Prisma types and component props. Add proper type annotations.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "people" | wc -l` returns 0
+**Commit**: `fix: TypeScript strictness in people dashboard pages`
+
+#### Ticket 55.2: Fix Research Panel (22 errors)
+
+**File**: `src/components/research-panel.tsx`
+
+**Pattern**: Component expects typed props but receives Prisma query results with optional fields.
+**Validation**: `npx tsc --noEmit 2>&1 | grep "research-panel" | wc -l` returns 0
+**Commit**: `fix: TypeScript strictness in research panel component`
+
+#### Ticket 55.3: Fix Manifest/Training Pages (17 errors)
+
+**Files**:
+- `src/app/dashboard/manifest/requests/page.tsx` (11 errors)
+- `src/app/dashboard/training/page.tsx` (6 errors)
+
+**Validation**: `npx tsc --noEmit 2>&1 | grep "manifest\|training" | wc -l` returns 0
+**Commit**: `fix: TypeScript strictness in manifest and training pages`
+
+#### Ticket 55.4: Fix Account Pages (11 errors)
+
+**Files**:
+- `src/app/dashboard/accounts/[id]/edit/page.tsx` (6 errors)
+- `src/app/dashboard/accounts/[id]/page.tsx` (5 errors)
+
+**Validation**: `npx tsc --noEmit 2>&1 | grep "accounts" | wc -l` returns 0
+**Commit**: `fix: TypeScript strictness in account dashboard pages`
+
+#### Ticket 55.5: Fix Components (9 errors)
+
+**Files**:
+- `src/components/score-manager.tsx` (5 errors)
+- `src/components/ui/responsive-table.tsx` (4 errors)
+
+**Validation**: `npx tsc --noEmit 2>&1 | grep "components" | wc -l` returns 0
+**Commit**: `fix: TypeScript strictness in shared components`
+
+#### Ticket 55.6: Fix Remaining Files (~31 errors)
+
+All remaining files with 1-3 errors each:
+- `src/app/dashboard/sequences/page.tsx` (3)
+- `src/app/dashboard/people/new/page.tsx` (3)
+- `src/app/dashboard/import/preview/page.tsx` (3)
+- `src/app/dashboard/import/page.tsx` (2)
+- `src/app/dashboard/import/map/page.tsx` (2)
+- `src/app/dashboard/search/page.tsx` (2)
+- `src/app/dossier/page.tsx` (2)
+- `src/app/content-generator/page.tsx` (1)
+- `src/components/integrations/google-integration-card.tsx` (4)
+- Remaining files (~9 errors)
+
+**Validation**: `npx tsc --noEmit 2>&1 | grep "error TS" | wc -l` returns 0
+**Commit**: `fix: TypeScript strictness in remaining UI files`
+
+#### Ticket 55.7: Remove `ignoreBuildErrors`
+
+**File**: `next.config.mjs`
+
+```diff
+- typescript: {
+-   ignoreBuildErrors: true,
+- },
+```
+
+**Validation**: `npm run build` succeeds without `ignoreBuildErrors`
+**Commit**: `feat: Remove ignoreBuildErrors — full TypeScript strictness`
+
+#### Sprint 55 Completion Criteria
+- [ ] `npx tsc --noEmit` returns 0 errors
+- [ ] `ignoreBuildErrors: true` removed from `next.config.mjs`
+- [ ] `npm run build` succeeds cleanly
+- [ ] All tests pass
+
+---
+
+### Sprint 56: E2E Integration Tests & Launch Validation
+
+**Goal**: Validate the complete system works end-to-end before Manifest.
+**Priority**: P1 — Final gate before launch.
+
+#### Ticket 56.1: S2S Integration Test Harness
+
+**File**: `tests/e2e/s2s-harness.ts`
+
+Create a reusable test utility that:
+1. Sets up S2S auth headers (Bearer token + x-user-id)
+2. Makes real HTTP requests to API routes
+3. Validates response shapes against `api-contracts.ts` types
+4. Reports timing for each request
+
+**Validation**: Harness successfully makes authenticated requests
+**Commit**: `test: S2S integration test harness`
+
+#### Ticket 56.2: Critical Flow Tests
+
+**File**: `tests/e2e/critical-flows.test.ts`
+
+Test these end-to-end flows:
+1. **Account lifecycle**: Create account → Add people → Research → Score → Export
+2. **Outreach lifecycle**: Generate AI content → Create outreach → Send email → Track open → Track click
+3. **Sequence lifecycle**: Create sequence → Add steps → Enroll person → Process step
+4. **AI lifecycle**: Chat → Generate dossier → Generate content → Score ICP
+
+**Validation**: All 4 flow tests pass
+**Commit**: `test: Critical E2E flow tests`
+
+#### Ticket 56.3: Error Handling Tests
+
+**File**: `tests/e2e/error-handling.test.ts`
+
+Test that errors are handled gracefully:
+1. Invalid auth returns 401 (not 500)
+2. Missing required fields return 400 with Zod errors
+3. Rate limit exceeded returns 429 with Retry-After
+4. Server errors capture to Sentry and return 500 with generic message
+5. CORS preflight (OPTIONS) returns correct headers
+
+**Validation**: All error scenarios return expected status codes
+**Commit**: `test: E2E error handling tests`
+
+#### Ticket 56.4: Load Test (Manual)
+
+Run `autocannon` or `k6` against the top 5 endpoints:
+
+```bash
+npx autocannon -c 50 -d 30 -H "Authorization=Bearer $CRON_SECRET" \
+  https://yardflow-hitlist-production-2f41.up.railway.app/api/health
+```
+
+Targets:
+- `/api/health` — should handle 100+ RPS
+- `/api/accounts` — should handle 50+ RPS
+- `/api/ai/chat` — should handle 10+ RPS (AI-bound)
+- `/api/outreach` — should handle 50+ RPS
+
+**Validation**: P95 latency < 2s for non-AI routes, < 10s for AI routes
+**Commit**: `docs: Load test results`
+
+#### Ticket 56.5: Pre-Launch Checklist Verification
+
+Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHECKLIST.md`:
+
+- [ ] All env vars set on Railway (DATABASE_URL, REDIS_URL, AUTH_SECRET, SENDGRID_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY, CRON_SECRET, FROM_EMAIL, FROM_NAME)
+- [ ] Health endpoint returns all-green
+- [ ] Worker heartbeat active (check Redis `worker:last_heartbeat`)
+- [ ] Sentry receiving events
+- [ ] CORS allows GTM-YardFlow origin
+- [ ] Email sending works (test via `/api/email/test`)
+- [ ] AI chat works (test via `/api/ai/chat`)
+- [ ] Backups configured for PostgreSQL
+
+**Validation**: Every checklist item verified and documented
+**Commit**: `docs: Pre-launch verification results`
+
+#### Sprint 56 Completion Criteria
+- [ ] E2E test suite covers 4 critical flows
+- [ ] Error handling validated across all error types
+- [ ] Load test confirms acceptable latency
+- [ ] Pre-launch checklist fully verified
+
+---
+
+## Sprint Ordering Rationale
+
+| Sprint | Focus                    | Why This Order                                                       |
+| ------ | ------------------------ | -------------------------------------------------------------------- |
+| **48** | FreightRoll Branding     | Wrong brand at event = visible embarrassment. Fix first.             |
+| **49** | Runtime TS Safety        | 19 errors in `src/lib/` = real crash risks. Fix before event.        |
+| **50** | Security Hardening       | Data exposure + abuse vectors must be closed before live traffic.    |
+| **51** | Input Validation         | Bad data in DB during event is painful to clean up.                  |
+| **52** | API Contracts            | Frontend coordination — give them types before final frontend polish.|
+| **53** | DB Performance           | Burst traffic at event requires indexed queries.                     |
+| **54** | Rate Limiting            | Abuse protection before public attention at Manifest.                |
+| **55** | Dashboard TS Fixes       | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.          |
+| **56** | E2E Tests & Launch       | Final validation gate. Proves everything works together.             |
+
+---
+
+## Key Metrics to Track
+
+| Metric                        | Current   | Target (Post-Sprint 56) |
+| ----------------------------- | --------- | ----------------------- |
+| TypeScript errors             | 149       | 0                       |
+| Routes with Zod validation    | 16        | 30+                     |
+| Routes with auth              | 148       | 155+                    |
+| Test count                    | 334       | 400+                    |
+| Test files                    | 28        | 35+                     |
+| Lint warnings                 | 0         | 0                       |
+| `ignoreBuildErrors`           | true      | **removed**             |
+| Wrong branding occurrences    | 30+       | 0                       |
+| Rate-limited endpoints        | 2         | 10+                     |
+| Documented API contracts      | 0         | 10+                     |
+| Security headers              | 0         | 4                       |
+| Database indexes (custom)     | unknown   | 6+                      |
+
+---
+
+## Risk Matrix
+
+| Risk                                      | Probability | Impact   | Mitigation                                       |
+| ----------------------------------------- | ----------- | -------- | ------------------------------------------------ |
+| Branding slip at Manifest                 | Medium      | High     | Sprint 48 + CI grep test                         |
+| Runtime crash from suppressed TS error    | Medium      | High     | Sprint 49 fixes lib/ errors first                |
+| Database slow under event load            | Medium      | Medium   | Sprint 53 indexes + connection pool tuning       |
+| API abuse during event                    | Low         | Medium   | Sprint 54 rate limiting                          |
+| Frontend type errors from changed shapes  | Low         | Medium   | Sprint 52 documents contracts before changes     |
+| `ignoreBuildErrors` hides new TS regressions | Ongoing  | Medium   | Sprint 55 removes it entirely                    |
+
+---
+
+## Definition of Done
+
+A sprint is complete when:
+
+1. All code changes committed with descriptive messages
+2. `npm run lint` passes (0 errors, 0 warnings)
+3. All tests pass (`npx vitest run`)
+4. Pushed to `main`
+5. Railway build succeeds
+6. Sprint-specific validation criteria met
