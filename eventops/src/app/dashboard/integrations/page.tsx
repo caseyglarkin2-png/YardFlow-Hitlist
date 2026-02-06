@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Zap, Check, ExternalLink } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Zap, Check, ExternalLink } from 'lucide-react';
 
 interface Integration {
   id: string;
@@ -41,7 +41,9 @@ export default function IntegrationsPage() {
   async function toggleIntegration(integrationId: string, enable: boolean) {
     if (enable) {
       // In production, initiate OAuth or show API key input
-      const confirmed = confirm(`Connect to ${integrationId}? This will redirect you to authenticate.`);
+      const confirmed = confirm(
+        `Connect to ${integrationId}? This will redirect you to authenticate.`
+      );
       if (!confirmed) return;
 
       try {
@@ -55,18 +57,18 @@ export default function IntegrationsPage() {
         });
 
         if (res.ok) {
-          setIntegrations(integrations.map(i =>
-            i.id === integrationId ? { ...i, isConnected: true } : i
-          ));
+          setIntegrations(
+            integrations.map((i) => (i.id === integrationId ? { ...i, isConnected: true } : i))
+          );
         }
       } catch (error) {
         console.error('Failed to connect:', error);
         alert('Failed to connect integration');
       }
     } else {
-      setIntegrations(integrations.map(i =>
-        i.id === integrationId ? { ...i, isConnected: false } : i
-      ));
+      setIntegrations(
+        integrations.map((i) => (i.id === integrationId ? { ...i, isConnected: false } : i))
+      );
     }
   }
 
@@ -79,15 +81,13 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Integrations</h1>
-        <p className="text-muted-foreground">
-          Connect FreightRoll with your favorite tools
-        </p>
+        <p className="text-muted-foreground">Connect FreightRoll with your favorite tools</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {integrations.map((integration) => (
           <Card key={integration.id} className="relative">
             <CardHeader>
@@ -98,14 +98,12 @@ export default function IntegrationsPage() {
                     {integration.name}
                     {integration.isConnected && (
                       <Badge variant="default" className="ml-2">
-                        <Check className="h-3 w-3 mr-1" />
+                        <Check className="mr-1 h-3 w-3" />
                         Connected
                       </Badge>
                     )}
                   </CardTitle>
-                  <CardDescription className="mt-1">
-                    {integration.description}
-                  </CardDescription>
+                  <CardDescription className="mt-1">{integration.description}</CardDescription>
                 </div>
                 <Switch
                   checked={integration.isConnected || false}
@@ -116,8 +114,8 @@ export default function IntegrationsPage() {
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium mb-2">Features:</p>
-                  <ul className="text-sm text-muted-foreground space-y-1">
+                  <p className="mb-2 text-sm font-medium">Features:</p>
+                  <ul className="space-y-1 text-sm text-muted-foreground">
                     {integration.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center gap-2">
                         <div className="h-1 w-1 rounded-full bg-muted-foreground" />
@@ -128,9 +126,9 @@ export default function IntegrationsPage() {
                 </div>
 
                 {integration.isConnected && (
-                  <div className="pt-3 border-t">
+                  <div className="border-t pt-3">
                     <Button variant="outline" size="sm" className="w-full">
-                      <ExternalLink className="h-4 w-4 mr-2" />
+                      <ExternalLink className="mr-2 h-4 w-4" />
                       Configure Settings
                     </Button>
                   </div>
@@ -144,17 +142,14 @@ export default function IntegrationsPage() {
       <Card className="mt-8">
         <CardHeader>
           <CardTitle className="text-lg">Custom Webhooks</CardTitle>
-          <CardDescription>
-            Build your own integrations using our webhook system
-          </CardDescription>
+          <CardDescription>Build your own integrations using our webhook system</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Receive real-time notifications when events occur in FreightRoll. Perfect for custom workflows and automation.
+          <p className="mb-4 text-sm text-muted-foreground">
+            Receive real-time notifications when events occur in FreightRoll. Perfect for custom
+            workflows and automation.
           </p>
-          <Button variant="outline">
-            Manage Webhooks
-          </Button>
+          <Button variant="outline">Manage Webhooks</Button>
         </CardContent>
       </Card>
     </div>

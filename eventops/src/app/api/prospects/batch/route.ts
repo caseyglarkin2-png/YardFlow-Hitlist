@@ -21,7 +21,10 @@ const BatchProspectSchema = z.object({
 });
 
 const BatchRequestSchema = z.object({
-  prospects: z.array(BatchProspectSchema).min(1, 'prospects array must not be empty').max(1000, 'Maximum 1000 prospects per batch'),
+  prospects: z
+    .array(BatchProspectSchema)
+    .min(1, 'prospects array must not be empty')
+    .max(1000, 'Maximum 1000 prospects per batch'),
   mode: z.enum(['create', 'upsert']).default('create'),
 });
 

@@ -20,7 +20,8 @@ const TUTORIALS: Tutorial[] = [
   {
     id: 'quick-start',
     title: 'Quick Start Guide',
-    description: 'Get started with FreightRoll in 5 minutes. Learn the basics of account management and meeting scheduling.',
+    description:
+      'Get started with FreightRoll in 5 minutes. Learn the basics of account management and meeting scheduling.',
     duration: '5:30',
     videoId: 'dQw4w9WgXcQ', // Replace with actual video ID
     category: 'getting-started',
@@ -28,7 +29,8 @@ const TUTORIALS: Tutorial[] = [
   {
     id: 'daily-brief',
     title: 'Daily Intelligence Brief',
-    description: 'Learn how to use the daily brief to prioritize your event day and maximize meetings.',
+    description:
+      'Learn how to use the daily brief to prioritize your event day and maximize meetings.',
     duration: '4:15',
     videoId: 'dQw4w9WgXcQ',
     category: 'getting-started',
@@ -72,7 +74,7 @@ export default function HelpPage() {
   const [completedTutorials, setCompletedTutorials] = useState<Set<string>>(new Set());
 
   const markComplete = (tutorialId: string) => {
-    setCompletedTutorials(prev => new Set([...prev, tutorialId]));
+    setCompletedTutorials((prev) => new Set([...prev, tutorialId]));
   };
 
   const categories = [
@@ -85,9 +87,7 @@ export default function HelpPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Video Tutorials</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Learn how to get the most out of FreightRoll
-        </p>
+        <p className="mt-1 text-sm text-gray-600">Learn how to get the most out of FreightRoll</p>
       </div>
 
       {selectedVideo ? (
@@ -104,7 +104,7 @@ export default function HelpPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="aspect-video bg-black rounded-lg overflow-hidden">
+            <div className="aspect-video overflow-hidden rounded-lg bg-black">
               <iframe
                 width="100%"
                 height="100%"
@@ -119,7 +119,7 @@ export default function HelpPage() {
               <Badge variant="secondary">{selectedVideo.duration}</Badge>
               {!completedTutorials.has(selectedVideo.id) && (
                 <Button onClick={() => markComplete(selectedVideo.id)}>
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
                   Mark as Complete
                 </Button>
               )}
@@ -129,9 +129,9 @@ export default function HelpPage() {
       ) : (
         <>
           {categories.map((category) => {
-            const categoryTutorials = TUTORIALS.filter(t => t.category === category.id);
+            const categoryTutorials = TUTORIALS.filter((t) => t.category === category.id);
             const Icon = category.icon;
-            
+
             return (
               <Card key={category.id}>
                 <CardHeader>
@@ -143,20 +143,20 @@ export default function HelpPage() {
                 <CardContent className="grid gap-4 sm:grid-cols-2">
                   {categoryTutorials.map((tutorial) => {
                     const isCompleted = completedTutorials.has(tutorial.id);
-                    
+
                     return (
                       <div
                         key={tutorial.id}
-                        className="flex flex-col p-4 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer transition-colors"
+                        className="flex cursor-pointer flex-col rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
                         onClick={() => setSelectedVideo(tutorial)}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-medium text-sm">{tutorial.title}</h3>
+                        <div className="mb-2 flex items-start justify-between">
+                          <h3 className="text-sm font-medium">{tutorial.title}</h3>
                           {isCompleted && (
-                            <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 ml-2" />
+                            <CheckCircle2 className="ml-2 h-4 w-4 flex-shrink-0 text-green-600" />
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mb-3 flex-1">
+                        <p className="mb-3 flex-1 text-xs text-muted-foreground">
                           {tutorial.description}
                         </p>
                         <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function HelpPage() {
                             {tutorial.duration}
                           </Badge>
                           <Button size="sm" variant="ghost">
-                            <PlayCircle className="h-3 w-3 mr-1" />
+                            <PlayCircle className="mr-1 h-3 w-3" />
                             Watch
                           </Button>
                         </div>
@@ -184,25 +184,23 @@ export default function HelpPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <h4 className="text-sm font-medium mb-1">Documentation</h4>
+            <h4 className="mb-1 text-sm font-medium">Documentation</h4>
             <p className="text-xs text-muted-foreground">
               Visit our comprehensive documentation for detailed guides and API references.
             </p>
-            <Button variant="link" className="p-0 h-auto text-xs" asChild>
+            <Button variant="link" className="h-auto p-0 text-xs" asChild>
               <a href="https://docs.freightroll.com" target="_blank" rel="noopener noreferrer">
                 View Docs →
               </a>
             </Button>
           </div>
           <div>
-            <h4 className="text-sm font-medium mb-1">Support</h4>
+            <h4 className="mb-1 text-sm font-medium">Support</h4>
             <p className="text-xs text-muted-foreground">
               Get in touch with our support team for personalized assistance.
             </p>
-            <Button variant="link" className="p-0 h-auto text-xs" asChild>
-              <a href="mailto:support@freightroll.com">
-                Contact Support →
-              </a>
+            <Button variant="link" className="h-auto p-0 text-xs" asChild>
+              <a href="mailto:support@freightroll.com">Contact Support →</a>
             </Button>
           </div>
         </CardContent>

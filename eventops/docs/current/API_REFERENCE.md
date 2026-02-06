@@ -7,6 +7,7 @@
 ## Authentication
 
 All requests must include one of:
+
 - **S2S**: `Authorization: Bearer <CRON_SECRET>` header + optional `x-user-id` header
 - **Session**: NextAuth session cookie (browser-based requests)
 
@@ -22,16 +23,17 @@ S2S calls go through `authServiceOrSession()` which validates the Bearer token.
 
 List target accounts for the active event.
 
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `cursor` | string | — | Pagination cursor (account ID) |
-| `limit` | number | 50 | Max 100 |
-| `search` | string | — | Search by name |
-| `tier` | string | — | Filter by tier |
-| `industry` | string | — | Filter by industry |
-| `minScore` | number | — | Minimum ICP score |
+| Param      | Type   | Default | Description                    |
+| ---------- | ------ | ------- | ------------------------------ |
+| `cursor`   | string | —       | Pagination cursor (account ID) |
+| `limit`    | number | 50      | Max 100                        |
+| `search`   | string | —       | Search by name                 |
+| `tier`     | string | —       | Filter by tier                 |
+| `industry` | string | —       | Filter by industry             |
+| `minScore` | number | —       | Minimum ICP score              |
 
 **Response** (`200`): `AccountsResponse`
+
 ```json
 {
   "data": [{ "id": "...", "name": "...", "icpScore": 85, "_count": { "people": 12 } }],
@@ -42,15 +44,19 @@ List target accounts for the active event.
 ```
 
 #### `POST /api/accounts`
+
 Create a new target account. Body: `{ name, website?, industry?, eventId }`
 
 #### `GET /api/accounts/[id]`
+
 Get single account with people count.
 
 #### `PATCH /api/accounts/[id]`
+
 Update account fields. Body: partial account object.
 
 #### `DELETE /api/accounts/[id]`
+
 Delete account.
 
 ---
@@ -59,14 +65,15 @@ Delete account.
 
 #### `GET /api/people`
 
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `limit` | number | 100 | Max 500 |
-| `skip` | number | 0 | Offset |
-| `search` | string | — | Search name/email |
-| `accountId` | string | — | Filter by account |
+| Param       | Type   | Default | Description       |
+| ----------- | ------ | ------- | ----------------- |
+| `limit`     | number | 100     | Max 500           |
+| `skip`      | number | 0       | Offset            |
+| `search`    | string | —       | Search name/email |
+| `accountId` | string | —       | Filter by account |
 
 **Response** (`200`): `PeopleResponse`
+
 ```json
 {
   "people": [{ "id": "...", "name": "...", "email": "...", "title": "..." }],
@@ -75,9 +82,11 @@ Delete account.
 ```
 
 #### `PUT /api/prospects/[id]`
+
 Update a prospect. Body validated by `UpdateProspectSchema` (Zod). Email must be valid format.
 
 #### `POST /api/prospects/batch`
+
 Bulk create/upsert. Body validated by `BatchRequestSchema`: `{ prospects: [...], mode: 'create' | 'upsert' }`. Max 1000 per batch.
 
 ---
@@ -85,28 +94,37 @@ Bulk create/upsert. Body validated by `BatchRequestSchema`: `{ prospects: [...],
 ### Campaigns
 
 #### `GET /api/campaigns`
+
 List campaigns for active event.
 
 **Response** (`200`): `CampaignsResponse`
+
 ```json
 {
-  "campaigns": [{ "id": "...", "name": "...", "status": "ACTIVE", "_count": { "outreach": 45, "sequences": 2 } }]
+  "campaigns": [
+    { "id": "...", "name": "...", "status": "ACTIVE", "_count": { "outreach": 45, "sequences": 2 } }
+  ]
 }
 ```
 
 #### `POST /api/campaigns`
+
 Create campaign. Body validated by `CreateCampaignSchema`:
+
 ```json
 { "name": "Manifest Outreach", "description": "...", "startDate": "2026-02-10T00:00:00Z" }
 ```
 
 #### `GET /api/campaigns/[id]`
+
 Get campaign with outreach metrics.
 
 #### `PATCH /api/campaigns/[id]`
+
 Update campaign. Body validated by `UpdateCampaignSchema`. Status enum: `DRAFT | ACTIVE | PAUSED | COMPLETED`.
 
 #### `DELETE /api/campaigns/[id]`
+
 Delete campaign.
 
 ---
@@ -115,11 +133,12 @@ Delete campaign.
 
 #### `GET /api/sequences`
 
-| Param | Type | Description |
-|-------|------|-------------|
+| Param    | Type   | Description      |
+| -------- | ------ | ---------------- |
 | `status` | string | Filter by status |
 
 **Response** (`200`): `SequencesResponse`
+
 ```json
 {
   "sequences": [{ "id": "...", "name": "...", "status": "active", "steps": [...], "totalEnrolled": 12 }]
@@ -127,7 +146,9 @@ Delete campaign.
 ```
 
 #### `POST /api/sequences`
+
 Create sequence. Body validated by `CreateSequenceSchema`:
+
 ```json
 {
   "name": "Welcome Drip",
@@ -137,12 +158,15 @@ Create sequence. Body validated by `CreateSequenceSchema`:
   ]
 }
 ```
+
 Steps are also checked for CAN-SPAM compliance (post-Zod validation).
 
 #### `PUT /api/sequences/[id]`
+
 Update sequence. Body validated by `UpdateSequenceSchema`. All fields optional.
 
 #### `DELETE /api/sequences/[id]`
+
 Delete sequence. Fails if active enrollments exist (400).
 
 ---
@@ -151,33 +175,41 @@ Delete sequence. Fails if active enrollments exist (400).
 
 #### `GET /api/enrollments`
 
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `prospectId` | string | — | Filter by prospect |
-| `sequenceId` | string | — | Filter by sequence |
-| `status` | string | — | Filter by status |
-| `cursor` | string | — | Pagination cursor |
-| `limit` | number | 25 | Max 100 |
+| Param        | Type   | Default | Description        |
+| ------------ | ------ | ------- | ------------------ |
+| `prospectId` | string | —       | Filter by prospect |
+| `sequenceId` | string | —       | Filter by sequence |
+| `status`     | string | —       | Filter by status   |
+| `cursor`     | string | —       | Pagination cursor  |
+| `limit`      | number | 25      | Max 100            |
 
 **Response** (`200`): `EnrollmentsResponse`
+
 ```json
 {
-  "data": [{ "id": "...", "prospectId": "...", "status": "active", "metrics": { "emailsSent": 3 } }],
+  "data": [
+    { "id": "...", "prospectId": "...", "status": "active", "metrics": { "emailsSent": 3 } }
+  ],
   "pagination": { "hasMore": false, "nextCursor": null }
 }
 ```
 
 #### `POST /api/enrollments`
+
 Enroll a prospect in a sequence. Body validated by `CreateEnrollmentSchema`:
+
 ```json
 { "prospectId": "p-123", "flowId": "seq-456" }
 ```
+
 Returns `409` if already enrolled.
 
 #### `POST /api/enrollments/[id]/pause`
+
 Pause an enrollment.
 
 #### `POST /api/enrollments/[id]/resume`
+
 Resume a paused enrollment.
 
 ---
@@ -186,14 +218,15 @@ Resume a paused enrollment.
 
 #### `GET /api/outreach`
 
-| Param | Type | Default | Description |
-|-------|------|---------|-------------|
-| `limit` | number | 50 | Max 200 |
-| `skip` | number | 0 | Offset |
-| `status` | string | — | Filter by status |
-| `channel` | string | — | EMAIL, LINKEDIN, PHONE |
+| Param     | Type   | Default | Description            |
+| --------- | ------ | ------- | ---------------------- |
+| `limit`   | number | 50      | Max 200                |
+| `skip`    | number | 0       | Offset                 |
+| `status`  | string | —       | Filter by status       |
+| `channel` | string | —       | EMAIL, LINKEDIN, PHONE |
 
 **Response** (`200`): `OutreachResponse`
+
 ```json
 {
   "data": [{ "id": "...", "subject": "...", "status": "SENT", "people": { "name": "..." } }],
@@ -202,9 +235,11 @@ Resume a paused enrollment.
 ```
 
 #### `POST /api/outreach/send-email`
+
 Send an email via SendGrid.
 
 #### `POST /api/outreach/generate`
+
 Generate outreach content with AI.
 
 ---
@@ -214,11 +249,13 @@ Generate outreach content with AI.
 All AI endpoints use S2S auth. All AI keys live on Railway — **never on Vercel**.
 
 ### `POST /api/ai/chat`
+
 Brain assistant chat with context awareness.
 
 **Request**: `{ message: string, conversationId?: string, context?: object }`
 
 **Response** (`200`): `BrainChatResponse`
+
 ```json
 {
   "response": "I found 3 accounts matching...",
@@ -229,20 +266,25 @@ Brain assistant chat with context awareness.
 ```
 
 ### `GET /api/ai/chat`
+
 Get Brain capabilities.
 
 ### `POST /api/ai/content/generate`
+
 Generate email content with FreightRoll brand voice.
 
 **Rate Limit**: 30 requests/minute per service key (Redis-backed).
 
 ### `POST /api/ai/dossier/generate`
+
 Generate company research dossier.
 
 ### `POST /api/ai/score-icp`
+
 Score a company against ICP criteria.
 
 ### `POST /api/ai/sentiment`
+
 Analyze email sentiment.
 
 ---
@@ -250,15 +292,16 @@ Analyze email sentiment.
 ## Dashboards
 
 ### `GET /api/dashboards/stats`
+
 Platform-wide dashboard statistics.
 
 **Response** (`200`): `DashboardStatsResponse` (accounts, people, campaigns, meetings counts + recent activity)
 
 ### `GET /api/dashboards/email`
 
-| Param | Type | Default |
-|-------|------|---------|
-| `days` | number | 7 |
+| Param  | Type   | Default |
+| ------ | ------ | ------- |
+| `days` | number | 7       |
 
 **Response** (`200`): `EmailDashboardResponse` (send/open/response rates, daily breakdown, top accounts)
 
@@ -267,9 +310,11 @@ Platform-wide dashboard statistics.
 ## System
 
 ### `GET /api/health`
+
 Health check endpoint. No auth required.
 
 ### `GET /api/email/stats`
+
 Email system pulse.
 
 ---
@@ -277,6 +322,7 @@ Email system pulse.
 ## Error Format
 
 All error responses follow:
+
 ```json
 {
   "error": "Human-readable error message",
@@ -303,6 +349,7 @@ Status codes:
 All response types are defined in [`src/types/api-contracts.ts`](../../eventops/src/types/api-contracts.ts).
 
 Import and use:
+
 ```typescript
 import type { AccountsResponse, BrainChatResponse } from '@/types/api-contracts';
 ```

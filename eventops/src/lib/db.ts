@@ -97,7 +97,13 @@ export function getPoolMetrics(): {
   const isWorker = process.env.WORKER_MODE === 'true';
   const maxPoolSize = isWorker ? 5 : 10;
   if (!pool) {
-    return { totalCount: 0, idleCount: 0, waitingCount: 0, activeCount: 0, maxConnections: maxPoolSize };
+    return {
+      totalCount: 0,
+      idleCount: 0,
+      waitingCount: 0,
+      activeCount: 0,
+      maxConnections: maxPoolSize,
+    };
   }
   return {
     totalCount: pool.totalCount,

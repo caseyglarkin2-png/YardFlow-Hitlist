@@ -14,14 +14,14 @@ const SRC_DIR = path.resolve(__dirname, '../../src');
 // Files that are ALLOWED to contain "EventOps" or "YardFlow" references
 // because they exist to catch/prevent branding slips
 const ALLOWLISTED_PATTERNS = [
-  'voiceConfigs.ts',        // AI prompt telling model NOT to use YardFlow
-  'content-generator.ts',   // Contains sanitizeFreightRollContent() sanitizer
-  'copilot-instructions',   // Developer docs
-  '__tests__',              // Test files can reference old branding for testing
-  '.test.ts',               // Test files
-  '.test.tsx',              // Test files
-  'node_modules',           // Dependencies
-  '.next',                  // Build artifacts
+  'voiceConfigs.ts', // AI prompt telling model NOT to use YardFlow
+  'content-generator.ts', // Contains sanitizeFreightRollContent() sanitizer
+  'copilot-instructions', // Developer docs
+  '__tests__', // Test files can reference old branding for testing
+  '.test.ts', // Test files
+  '.test.tsx', // Test files
+  'node_modules', // Dependencies
+  '.next', // Build artifacts
 ];
 
 function buildGrepExclude(): string {
@@ -109,28 +109,25 @@ describe('FreightRoll Branding Compliance', () => {
 
   describe('Correct FreightRoll defaults', () => {
     it('should use freightroll.com in FROM_EMAIL default', async () => {
-      const content = execSync(
-        `grep "FROM_EMAIL" "${SRC_DIR}/lib/outreach/email-sender.ts"`,
-        { encoding: 'utf-8' }
-      );
+      const content = execSync(`grep "FROM_EMAIL" "${SRC_DIR}/lib/outreach/email-sender.ts"`, {
+        encoding: 'utf-8',
+      });
       expect(content).toContain('freightroll.com');
       expect(content).not.toContain('yardflow.com');
     });
 
     it('should use FreightRoll in FROM_NAME default', async () => {
-      const content = execSync(
-        `grep "FROM_NAME" "${SRC_DIR}/lib/outreach/email-sender.ts"`,
-        { encoding: 'utf-8' }
-      );
+      const content = execSync(`grep "FROM_NAME" "${SRC_DIR}/lib/outreach/email-sender.ts"`, {
+        encoding: 'utf-8',
+      });
       expect(content).toContain('FreightRoll');
       expect(content).not.toContain('YardFlow');
     });
 
     it('should use FreightRoll in SendGrid FROM_NAME default', async () => {
-      const content = execSync(
-        `grep "FROM_NAME" "${SRC_DIR}/lib/sendgrid.ts"`,
-        { encoding: 'utf-8' }
-      );
+      const content = execSync(`grep "FROM_NAME" "${SRC_DIR}/lib/sendgrid.ts"`, {
+        encoding: 'utf-8',
+      });
       expect(content).toContain('FreightRoll');
       expect(content).not.toContain('EventOps');
     });
@@ -154,19 +151,17 @@ describe('FreightRoll Branding Compliance', () => {
     });
 
     it('should use FreightRoll in export filenames', async () => {
-      const content = execSync(
-        `grep "filename=" "${SRC_DIR}/app/api/export/full/route.ts"`,
-        { encoding: 'utf-8' }
-      );
+      const content = execSync(`grep "filename=" "${SRC_DIR}/app/api/export/full/route.ts"`, {
+        encoding: 'utf-8',
+      });
       expect(content).toContain('FreightRoll');
       expect(content).not.toContain('EventOps');
     });
 
     it('should use FreightRoll in UI layout metadata', async () => {
-      const content = execSync(
-        `grep -n "title:" "${SRC_DIR}/app/layout.tsx"`,
-        { encoding: 'utf-8' }
-      );
+      const content = execSync(`grep -n "title:" "${SRC_DIR}/app/layout.tsx"`, {
+        encoding: 'utf-8',
+      });
       expect(content).toContain('FreightRoll');
       expect(content).not.toContain('EventOps');
     });

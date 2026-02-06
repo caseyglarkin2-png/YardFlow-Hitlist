@@ -93,7 +93,8 @@ export async function syncCalendarEvents(
           const endTime = event.end?.dateTime || event.end?.date || '';
           const description = event.description || null;
           const location = event.location || null;
-          const attendees = (event.attendees?.map((a) => a.email).filter(Boolean) as string[]) || [];
+          const attendees =
+            (event.attendees?.map((a) => a.email).filter(Boolean) as string[]) || [];
 
           if (!startTime) {
             skipped.push({
@@ -122,14 +123,16 @@ export async function syncCalendarEvents(
                 where: { id: existing.id },
                 data: {
                   description: summary,
-                  metadata: JSON.parse(JSON.stringify({
-                    start: startTime,
-                    end: endTime,
-                    description,
-                    location,
-                    attendees,
-                    lastSynced: new Date().toISOString(),
-                  })),
+                  metadata: JSON.parse(
+                    JSON.stringify({
+                      start: startTime,
+                      end: endTime,
+                      description,
+                      location,
+                      attendees,
+                      lastSynced: new Date().toISOString(),
+                    })
+                  ),
                 },
               });
             }
@@ -151,14 +154,16 @@ export async function syncCalendarEvents(
                   entityId: eventId,
                   action: 'google_calendar_import',
                   description: summary,
-                  metadata: JSON.parse(JSON.stringify({
-                    start: startTime,
-                    end: endTime,
-                    description,
-                    location,
-                    attendees,
-                    importedAt: new Date().toISOString(),
-                  })),
+                  metadata: JSON.parse(
+                    JSON.stringify({
+                      start: startTime,
+                      end: endTime,
+                      description,
+                      location,
+                      attendees,
+                      importedAt: new Date().toISOString(),
+                    })
+                  ),
                 },
               });
             }

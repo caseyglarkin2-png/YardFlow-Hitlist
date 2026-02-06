@@ -153,16 +153,24 @@ function getAgentWorker(): Worker {
           case 'start-campaign':
             // Run full campaign orchestration
             // This is long-running but acceptable for now in a worker
-            return await orchestrator.runFullCampaign(job.data.params as Parameters<typeof orchestrator.runFullCampaign>[0]);
+            return await orchestrator.runFullCampaign(
+              job.data.params as Parameters<typeof orchestrator.runFullCampaign>[0]
+            );
 
           case 'run-prospecting': {
             const prospectingAgent = new ProspectingAgent();
-            return await prospectingAgent.run(job.data.params as ProspectingCriteria, job.data.parentTaskId);
+            return await prospectingAgent.run(
+              job.data.params as ProspectingCriteria,
+              job.data.parentTaskId
+            );
           }
 
           case 'run-research': {
             const researchAgent = new ResearchAgent();
-            return await researchAgent.generateDossier(job.data.params as unknown as ResearchInput, job.data.parentTaskId);
+            return await researchAgent.generateDossier(
+              job.data.params as unknown as ResearchInput,
+              job.data.parentTaskId
+            );
           }
 
           case 'run-content': {
@@ -176,17 +184,26 @@ function getAgentWorker(): Worker {
 
           case 'run-graphics': {
             const graphicsAgent = new GraphicsAgent();
-            return await graphicsAgent.generateGraphic(job.data.params as unknown as GraphicsRequest, job.data.parentTaskId);
+            return await graphicsAgent.generateGraphic(
+              job.data.params as unknown as GraphicsRequest,
+              job.data.parentTaskId
+            );
           }
 
           case 'run-socials': {
             const socialsAgent = new SocialsAgent();
-            return await socialsAgent.schedulePost(job.data.params as unknown as SocialPost, job.data.parentTaskId);
+            return await socialsAgent.schedulePost(
+              job.data.params as unknown as SocialPost,
+              job.data.parentTaskId
+            );
           }
 
           case 'run-contracting': {
             const contractingAgent = new ContractingAgent();
-            return await contractingAgent.generateContract(job.data.params as unknown as ContractRequest, job.data.parentTaskId);
+            return await contractingAgent.generateContract(
+              job.data.params as unknown as ContractRequest,
+              job.data.parentTaskId
+            );
           }
 
           default:

@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const rateCheck = await checkRateLimit(
       rateLimitKey('ai', 'content', rateLimitId),
       RATE_LIMIT_MAX,
-      RATE_LIMIT_WINDOW_SECONDS,
+      RATE_LIMIT_WINDOW_SECONDS
     );
     if (!rateCheck.allowed) {
       logger.warn('AI content generate throttled', {

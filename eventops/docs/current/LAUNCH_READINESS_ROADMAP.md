@@ -12,21 +12,21 @@
 
 ### Current State (Post-Sprint 53)
 
-| Category          | Status       | Details                                                             |
-| ----------------- | ------------ | ------------------------------------------------------------------- |
-| **Build**         | 🟢 Deploying | Config consolidated to single `next.config.mjs`, Railway builds OK  |
-| **S2S Auth**      | 🟢 Complete  | All routes use `authServiceOrSession`, `requireAuth`, or equiv.     |
-| **Lint**          | 🟢 Zero      | 0 errors, 0 warnings                                               |
-| **Tests**         | 🟢 394       | 394 pass, 12 skipped, 31 files                                     |
-| **Sentry**        | 🟢 Active    | `captureRouteError` on 146+ routes, 10% sample rate                 |
-| **Worker**        | 🟢 Healthy   | Heartbeat, graceful shutdown, BullMQ job cleanup configured         |
-| **TypeScript**    | 🟡 Suppressed| 124 errors suppressed by `ignoreBuildErrors: true` (0 in src/lib/)  |
-| **Branding**      | 🟢 Enforced  | FreightRoll branding via voiceConfigs + sanitizer (Sprint 48)       |
-| **Input Validation** | 🟢 Strong | Zod schemas on 7 critical route files via `parseBody<T>` (Sprint 51)|
-| **Rate Limiting** | 🟢 Redis     | Shared Redis-backed rate limiter with atomic MULTI/EXEC (Sprint 53) |
-| **API Contracts** | 🟢 Documented| `api-contracts.ts` types + `API_REFERENCE.md` (Sprint 52)           |
-| **Security**      | 🟢 Hardened  | Headers on all routes, auth on stubs, admin lockdown (Sprint 50)    |
-| **DB Performance**| 🟢 Indexed   | 9 new indexes, env-aware pool, parallel health checks (Sprint 53)   |
+| Category             | Status        | Details                                                              |
+| -------------------- | ------------- | -------------------------------------------------------------------- |
+| **Build**            | 🟢 Deploying  | Config consolidated to single `next.config.mjs`, Railway builds OK   |
+| **S2S Auth**         | 🟢 Complete   | All routes use `authServiceOrSession`, `requireAuth`, or equiv.      |
+| **Lint**             | 🟢 Zero       | 0 errors, 0 warnings                                                 |
+| **Tests**            | 🟢 394        | 394 pass, 12 skipped, 31 files                                       |
+| **Sentry**           | 🟢 Active     | `captureRouteError` on 146+ routes, 10% sample rate                  |
+| **Worker**           | 🟢 Healthy    | Heartbeat, graceful shutdown, BullMQ job cleanup configured          |
+| **TypeScript**       | 🟡 Suppressed | 124 errors suppressed by `ignoreBuildErrors: true` (0 in src/lib/)   |
+| **Branding**         | 🟢 Enforced   | FreightRoll branding via voiceConfigs + sanitizer (Sprint 48)        |
+| **Input Validation** | 🟢 Strong     | Zod schemas on 7 critical route files via `parseBody<T>` (Sprint 51) |
+| **Rate Limiting**    | 🟢 Redis      | Shared Redis-backed rate limiter with atomic MULTI/EXEC (Sprint 53)  |
+| **API Contracts**    | 🟢 Documented | `api-contracts.ts` types + `API_REFERENCE.md` (Sprint 52)            |
+| **Security**         | 🟢 Hardened   | Headers on all routes, auth on stubs, admin lockdown (Sprint 50)     |
+| **DB Performance**   | 🟢 Indexed    | 9 new indexes, env-aware pool, parallel health checks (Sprint 53)    |
 
 ### What GTM-YardFlow (Frontend) Needs From Us
 
@@ -46,48 +46,48 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 
 ### Security
 
-| Finding                              | Severity | Status      |
-| ------------------------------------ | -------- | ----------- |
-| 148 routes protected with auth       | —        | ✅ Done     |
-| SendGrid webhook signature verified  | —        | ✅ Done     |
-| Cron routes check `CRON_SECRET`      | —        | ✅ Done     |
-| 501 stub routes (dashboards, workflows) unprotected | Low | ⚠️ Add auth proactively |
-| `admin/seed` uses `AUTH_SECRET.slice(0,16)` for protection | Medium | ⚠️ Fragile |
-| No security headers (HSTS, X-Frame-Options) | Medium | 🔴 Missing |
-| AI content rate limiter uses in-memory Map (lost on restart) | Medium | 🔴 Fragile |
+| Finding                                                      | Severity | Status                  |
+| ------------------------------------------------------------ | -------- | ----------------------- |
+| 148 routes protected with auth                               | —        | ✅ Done                 |
+| SendGrid webhook signature verified                          | —        | ✅ Done                 |
+| Cron routes check `CRON_SECRET`                              | —        | ✅ Done                 |
+| 501 stub routes (dashboards, workflows) unprotected          | Low      | ⚠️ Add auth proactively |
+| `admin/seed` uses `AUTH_SECRET.slice(0,16)` for protection   | Medium   | ⚠️ Fragile              |
+| No security headers (HSTS, X-Frame-Options)                  | Medium   | 🔴 Missing              |
+| AI content rate limiter uses in-memory Map (lost on restart) | Medium   | 🔴 Fragile              |
 
 ### Branding (Customer-Facing)
 
-| File                             | Wrong Brand | Occurrences |
-| -------------------------------- | ----------- | ----------- |
-| `src/lib/outreach/email-sender.ts` | YardFlow    | 5           |
-| `src/lib/sendgrid.ts`           | EventOps    | 1           |
-| `src/lib/hubspot-integration.ts` | EventOps    | 3           |
-| `src/lib/email/sprint-completion.ts` | YardFlow | 7           |
-| `src/app/api/reports/pdf/route.ts` | EventOps  | 4           |
-| `src/app/api/export/full/route.ts` | EventOps  | 1           |
-| `src/app/layout.tsx`            | EventOps    | 2           |
-| `src/app/login/page.tsx`        | EventOps    | 1           |
-| `src/app/dashboard/layout.tsx`  | EventOps    | 1           |
-| `src/app/dashboard/help/page.tsx` | EventOps  | 2           |
-| `src/app/dashboard/integrations/page.tsx` | EventOps | 2     |
-| `src/app/dashboard/reports/page.tsx` | EventOps | 1          |
+| File                                      | Wrong Brand | Occurrences |
+| ----------------------------------------- | ----------- | ----------- |
+| `src/lib/outreach/email-sender.ts`        | YardFlow    | 5           |
+| `src/lib/sendgrid.ts`                     | EventOps    | 1           |
+| `src/lib/hubspot-integration.ts`          | EventOps    | 3           |
+| `src/lib/email/sprint-completion.ts`      | YardFlow    | 7           |
+| `src/app/api/reports/pdf/route.ts`        | EventOps    | 4           |
+| `src/app/api/export/full/route.ts`        | EventOps    | 1           |
+| `src/app/layout.tsx`                      | EventOps    | 2           |
+| `src/app/login/page.tsx`                  | EventOps    | 1           |
+| `src/app/dashboard/layout.tsx`            | EventOps    | 1           |
+| `src/app/dashboard/help/page.tsx`         | EventOps    | 2           |
+| `src/app/dashboard/integrations/page.tsx` | EventOps    | 2           |
+| `src/app/dashboard/reports/page.tsx`      | EventOps    | 1           |
 
 ### TypeScript Errors (149 total, suppressed)
 
-| File                                     | Errors | Category    |
-| ---------------------------------------- | ------ | ----------- |
-| `src/app/dashboard/people/[id]/page.tsx` | 24     | UI          |
-| `src/components/research-panel.tsx`      | 22     | Component   |
-| `src/app/dashboard/people/[id]/edit/page.tsx` | 16 | UI         |
-| `src/app/dashboard/manifest/requests/page.tsx` | 11 | UI       |
-| `src/lib/google/calendar.ts`            | 7      | **Runtime** |
-| `src/lib/queue/workers.ts`              | 6      | **Runtime** |
-| `src/lib/contact-enrichment.ts`         | 6      | **Runtime** |
-| `src/app/dashboard/training/page.tsx`   | 6      | UI          |
-| `src/app/dashboard/accounts/[id]/edit/page.tsx` | 6 | UI       |
-| `src/components/score-manager.tsx`       | 5      | Component   |
-| Remaining 20+ files                     | 40     | Mixed       |
+| File                                            | Errors | Category    |
+| ----------------------------------------------- | ------ | ----------- |
+| `src/app/dashboard/people/[id]/page.tsx`        | 24     | UI          |
+| `src/components/research-panel.tsx`             | 22     | Component   |
+| `src/app/dashboard/people/[id]/edit/page.tsx`   | 16     | UI          |
+| `src/app/dashboard/manifest/requests/page.tsx`  | 11     | UI          |
+| `src/lib/google/calendar.ts`                    | 7      | **Runtime** |
+| `src/lib/queue/workers.ts`                      | 6      | **Runtime** |
+| `src/lib/contact-enrichment.ts`                 | 6      | **Runtime** |
+| `src/app/dashboard/training/page.tsx`           | 6      | UI          |
+| `src/app/dashboard/accounts/[id]/edit/page.tsx` | 6      | UI          |
+| `src/components/score-manager.tsx`              | 5      | Component   |
+| Remaining 20+ files                             | 40     | Mixed       |
 
 **Critical**: 19 errors are in `src/lib/` (runtime code) — `workers.ts`, `calendar.ts`, `contact-enrichment.ts`. These can cause real crashes.
 
@@ -113,13 +113,13 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 
 **File**: `src/lib/outreach/email-sender.ts`
 
-| Line | Current                          | Target                              |
-| ---- | -------------------------------- | ----------------------------------- |
-| 8    | `'outreach@yardflow.com'`       | `'outreach@freightroll.com'`        |
-| 9    | `'YardFlow Outreach'`           | `'FreightRoll'`                     |
-| 45   | `'https://app.yardflow.com'`    | `'https://app.freightroll.com'`     |
-| 62   | `'https://app.yardflow.com'`    | `'https://app.freightroll.com'`     |
-| 73   | `'https://app.yardflow.com'`    | `'https://app.freightroll.com'`     |
+| Line | Current                      | Target                          |
+| ---- | ---------------------------- | ------------------------------- |
+| 8    | `'outreach@yardflow.com'`    | `'outreach@freightroll.com'`    |
+| 9    | `'YardFlow Outreach'`        | `'FreightRoll'`                 |
+| 45   | `'https://app.yardflow.com'` | `'https://app.freightroll.com'` |
+| 62   | `'https://app.yardflow.com'` | `'https://app.freightroll.com'` |
+| 73   | `'https://app.yardflow.com'` | `'https://app.freightroll.com'` |
 
 **Validation**: `grep -n "yardflow\|YardFlow" src/lib/outreach/email-sender.ts` returns 0 matches
 **Commit**: `fix: FreightRoll branding in email sender defaults`
@@ -127,6 +127,7 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 #### Ticket 48.2: Fix SendGrid and HubSpot Defaults
 
 **Files**:
+
 - `src/lib/sendgrid.ts` — Line 7: `'EventOps'` → `'FreightRoll'`
 - `src/lib/hubspot-integration.ts` — Lines 96, 123: `'EventOps'` → `'FreightRoll'`
 
@@ -136,6 +137,7 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 #### Ticket 48.3: Fix Reports and Exports
 
 **Files**:
+
 - `src/app/api/reports/pdf/route.ts` — Lines 94, 117, 155, 299: `'EventOps'` → `'FreightRoll'`
 - `src/app/api/export/full/route.ts` — Line 175: `'EventOps_Full_Export'` → `'FreightRoll_Export'`
 
@@ -145,6 +147,7 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 #### Ticket 48.4: Fix Dashboard UI Defaults
 
 **Files**:
+
 - `src/app/layout.tsx` — Lines 10, 23: `'EventOps'` → `'FreightRoll'`
 - `src/app/login/page.tsx` — Line 47: `EventOps` → `FreightRoll`
 - `src/app/dashboard/layout.tsx` — Line 19: `EventOps` → `FreightRoll`
@@ -166,6 +169,7 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 ```
 
 Tests:
+
 1. No "EventOps" in `src/` (excluding comments and allowlisted files)
 2. No "YardFlow" in email templates or outreach code (excluding sanitizer references)
 3. `sanitizeFreightRollContent()` correctly replaces "YardFlow" → "FreightRoll"
@@ -175,6 +179,7 @@ Tests:
 **Commit**: `test: Add FreightRoll branding compliance tests`
 
 #### Sprint 48 Completion Criteria
+
 - [x] Zero "EventOps" in `src/` outside allowlisted comments
 - [x] Zero "YardFlow" in customer-facing output defaults
 - [x] Branding test suite passes (10 tests)
@@ -237,6 +242,7 @@ Generic type constraint errors in the queue implementation.
 **Commit**: `fix: Type safety in email sender error handling`
 
 #### Sprint 49 Completion Criteria
+
 - [x] `npx tsc --noEmit 2>&1 | grep "src/lib/" | wc -l` returns 0
 - [x] Runtime type error count: 149 → 124 (25 fixed in lib/)
 - [x] All tests pass
@@ -252,6 +258,7 @@ Generic type constraint errors in the queue implementation.
 #### Ticket 50.1: Add Auth to Stub Routes
 
 **Files** (all return 501 but should still require auth to prevent future accidental exposure):
+
 - `src/app/api/dashboards/route.ts` — Add `authServiceOrSession` check
 - `src/app/api/dashboards/[id]/route.ts` — Add `authServiceOrSession` check
 - `src/app/api/workflows/route.ts` — Add `authServiceOrSession` check
@@ -269,6 +276,7 @@ Generic type constraint errors in the queue implementation.
 Current protection: `AUTH_SECRET.slice(0,16)` — fragile, leaks secret structure.
 
 **Fix**: Either:
+
 - A) Gate behind `authServiceOrSession` + admin check, OR
 - B) Disable entirely when `NODE_ENV === 'production'`
 
@@ -280,6 +288,7 @@ Current protection: `AUTH_SECRET.slice(0,16)` — fragile, leaks secret structur
 **File**: `src/middleware.ts`
 
 Add these headers to all responses:
+
 ```typescript
 response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -306,6 +315,7 @@ Current: In-memory `Map<string, RateLimitState>` — lost on restart, doesn't wo
 **File**: `tests/security/hardening.test.ts`
 
 Tests:
+
 1. Stub routes (dashboards, workflows) return 401 without auth
 2. Admin seed route is blocked in production mode
 3. Security headers are present on responses
@@ -315,6 +325,7 @@ Tests:
 **Commit**: `test: Add security hardening test suite`
 
 #### Sprint 50 Completion Criteria
+
 - [x] Zero unprotected routes (excluding intentional public endpoints)
 - [x] Security headers on all responses (global via `setSecurityHeaders`)
 - [x] AI rate limiting is durable (Redis-backed, atomic MULTI/EXEC)
@@ -338,9 +349,10 @@ Tests:
 import { z, ZodSchema } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function parseBody<T>(req: NextRequest, schema: ZodSchema<T>): Promise<
-  { success: true; data: T } | { success: false; response: NextResponse }
-> {
+export async function parseBody<T>(
+  req: NextRequest,
+  schema: ZodSchema<T>
+): Promise<{ success: true; data: T } | { success: false; response: NextResponse }> {
   try {
     const body = await req.json();
     const data = schema.parse(body);
@@ -399,6 +411,7 @@ export async function parseBody<T>(req: NextRequest, schema: ZodSchema<T>): Prom
 **Commit**: `feat: Zod validation for prospect routes`
 
 #### Sprint 51 Completion Criteria
+
 - [x] Shared `parseBody()` wrapper available and tested
 - [x] Campaign, sequence, enrollment, prospect routes validated
 - [x] Invalid payloads return 400 with descriptive error messages
@@ -474,11 +487,11 @@ Find and fix routes that return non-standard error shapes. The standard is:
 
 3 routes return bare arrays instead of wrapped objects:
 
-| Route              | Current           | Target                          |
-| ------------------ | ----------------- | ------------------------------- |
-| `accounts/route.ts`| `[{account}...]`  | `{ accounts: [...], meta: {} }` |
-| `webhooks/route.ts`| `[{webhook}...]`  | `{ webhooks: [...] }`           |
-| `workflows/route.ts`| `[{workflow}...]` | `{ workflows: [...] }`         |
+| Route                | Current           | Target                          |
+| -------------------- | ----------------- | ------------------------------- |
+| `accounts/route.ts`  | `[{account}...]`  | `{ accounts: [...], meta: {} }` |
+| `webhooks/route.ts`  | `[{webhook}...]`  | `{ webhooks: [...] }`           |
+| `workflows/route.ts` | `[{workflow}...]` | `{ workflows: [...] }`          |
 
 **Validation**: All list endpoints return `{ <key>: [...] }` shape
 **Commit**: `fix: Wrap bare array responses in standard envelope`
@@ -488,6 +501,7 @@ Find and fix routes that return non-standard error shapes. The standard is:
 **File**: `docs/current/API_REFERENCE.md`
 
 Document all endpoints GTM-YardFlow uses:
+
 - Method, path, auth requirement
 - Request body schema (link to Zod schema if exists)
 - Response shape (link to type in `api-contracts.ts`)
@@ -498,6 +512,7 @@ Document all endpoints GTM-YardFlow uses:
 **Commit**: `docs: API reference for GTM-YardFlow integration`
 
 #### Sprint 52 Completion Criteria
+
 - [x] `api-contracts.ts` with types for 10+ endpoints
 - [x] Error responses standardized (`{ error: string }` everywhere)
 - [x] Bare arrays wrapped (accounts, webhooks)
@@ -515,6 +530,7 @@ Document all endpoints GTM-YardFlow uses:
 **File**: `prisma/schema.prisma`
 
 Audit and add indexes for common query patterns:
+
 - `outreach.personId` — used in person detail views
 - `outreach.sentAt` — used in email stats queries
 - `emailTracking.outreachId` — used in delivery tracking
@@ -528,6 +544,7 @@ Audit and add indexes for common query patterns:
 #### Ticket 53.2: Audit Top Query Performance
 
 Run `EXPLAIN ANALYZE` on the 5 most common queries:
+
 1. Account list with pagination
 2. People list by account
 3. Outreach list with status filter
@@ -542,6 +559,7 @@ Run `EXPLAIN ANALYZE` on the 5 most common queries:
 **File**: `src/lib/db.ts`
 
 Verify Prisma connection pool settings are appropriate for Railway:
+
 - `connection_limit` — should be 10-20 for Railway (shared DB)
 - `pool_timeout` — should be 10-15 seconds
 - `connect_timeout` — should be 5 seconds
@@ -550,6 +568,7 @@ Verify Prisma connection pool settings are appropriate for Railway:
 **Commit**: `perf: Optimize database connection pool for Railway`
 
 #### Sprint 53 Completion Criteria
+
 - [x] 9 indexes added for top query patterns (see `QUERY_PERFORMANCE_AUDIT.md`)
 - [x] Query audit documented (`docs/current/QUERY_PERFORMANCE_AUDIT.md`)
 - [x] Connection pool configured: env-aware sizing (web=10, worker=5), metrics in /api/health
@@ -581,7 +600,7 @@ interface RateLimitResult {
 export async function checkRateLimit(
   key: string,
   maxRequests: number,
-  windowSeconds: number,
+  windowSeconds: number
 ): Promise<RateLimitResult> {
   const redis = getRedisConnection();
   const redisKey = `ratelimit:${key}`;
@@ -603,6 +622,7 @@ export async function checkRateLimit(
 #### Ticket 54.2: Apply Rate Limiting to AI Endpoints
 
 **Files**:
+
 - `src/app/api/ai/chat/route.ts` — 20 req/min per user
 - `src/app/api/ai/content/generate/route.ts` — Replace in-memory Map with Redis limiter
 - `src/app/api/ai/dossier/generate/route.ts` — 10 req/min per user
@@ -614,6 +634,7 @@ export async function checkRateLimit(
 #### Ticket 54.3: Apply Rate Limiting to Public Endpoints
 
 **Files**:
+
 - `src/app/api/unsubscribe/route.ts` — 10 req/min per IP
 - `src/app/api/outreach/track/route.ts` — 100 req/min per IP (tracking pixels fire frequently)
 - `src/app/api/webhooks/sendgrid/route.ts` — 500 req/min (SendGrid batch sends events)
@@ -626,6 +647,7 @@ export async function checkRateLimit(
 **File**: `tests/security/rate-limiting.test.ts`
 
 Tests:
+
 1. Requests under limit succeed
 2. Requests over limit return 429
 3. Rate limit resets after window expires
@@ -636,6 +658,7 @@ Tests:
 **Commit**: `test: Rate limiting test suite`
 
 #### Sprint 54 Completion Criteria
+
 - [x] Shared rate limiter using Redis (**done in Sprint 53** — `src/lib/rate-limiter.ts`)
 - [ ] AI endpoints rate-limited (most expensive compute)
 - [ ] Public endpoints rate-limited (abuse vector)
@@ -651,6 +674,7 @@ Tests:
 #### Ticket 55.1: Fix People Pages (40 errors)
 
 **Files**:
+
 - `src/app/dashboard/people/[id]/page.tsx` (24 errors)
 - `src/app/dashboard/people/[id]/edit/page.tsx` (16 errors)
 
@@ -669,6 +693,7 @@ Tests:
 #### Ticket 55.3: Fix Manifest/Training Pages (17 errors)
 
 **Files**:
+
 - `src/app/dashboard/manifest/requests/page.tsx` (11 errors)
 - `src/app/dashboard/training/page.tsx` (6 errors)
 
@@ -678,6 +703,7 @@ Tests:
 #### Ticket 55.4: Fix Account Pages (11 errors)
 
 **Files**:
+
 - `src/app/dashboard/accounts/[id]/edit/page.tsx` (6 errors)
 - `src/app/dashboard/accounts/[id]/page.tsx` (5 errors)
 
@@ -687,6 +713,7 @@ Tests:
 #### Ticket 55.5: Fix Components (9 errors)
 
 **Files**:
+
 - `src/components/score-manager.tsx` (5 errors)
 - `src/components/ui/responsive-table.tsx` (4 errors)
 
@@ -696,6 +723,7 @@ Tests:
 #### Ticket 55.6: Fix Remaining Files (~31 errors)
 
 All remaining files with 1-3 errors each:
+
 - `src/app/dashboard/sequences/page.tsx` (3)
 - `src/app/dashboard/people/new/page.tsx` (3)
 - `src/app/dashboard/import/preview/page.tsx` (3)
@@ -724,6 +752,7 @@ All remaining files with 1-3 errors each:
 **Commit**: `feat: Remove ignoreBuildErrors — full TypeScript strictness`
 
 #### Sprint 55 Completion Criteria
+
 - [ ] `npx tsc --noEmit` returns 0 errors
 - [ ] `ignoreBuildErrors: true` removed from `next.config.mjs`
 - [ ] `npm run build` succeeds cleanly
@@ -741,6 +770,7 @@ All remaining files with 1-3 errors each:
 **File**: `tests/e2e/s2s-harness.ts`
 
 Create a reusable test utility that:
+
 1. Sets up S2S auth headers (Bearer token + x-user-id)
 2. Makes real HTTP requests to API routes
 3. Validates response shapes against `api-contracts.ts` types
@@ -754,6 +784,7 @@ Create a reusable test utility that:
 **File**: `tests/e2e/critical-flows.test.ts`
 
 Test these end-to-end flows:
+
 1. **Account lifecycle**: Create account → Add people → Research → Score → Export
 2. **Outreach lifecycle**: Generate AI content → Create outreach → Send email → Track open → Track click
 3. **Sequence lifecycle**: Create sequence → Add steps → Enroll person → Process step
@@ -767,6 +798,7 @@ Test these end-to-end flows:
 **File**: `tests/e2e/error-handling.test.ts`
 
 Test that errors are handled gracefully:
+
 1. Invalid auth returns 401 (not 500)
 2. Missing required fields return 400 with Zod errors
 3. Rate limit exceeded returns 429 with Retry-After
@@ -786,6 +818,7 @@ npx autocannon -c 50 -d 30 -H "Authorization=Bearer $CRON_SECRET" \
 ```
 
 Targets:
+
 - `/api/health` — should handle 100+ RPS
 - `/api/accounts` — should handle 50+ RPS
 - `/api/ai/chat` — should handle 10+ RPS (AI-bound)
@@ -811,6 +844,7 @@ Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHEC
 **Commit**: `docs: Pre-launch verification results`
 
 #### Sprint 56 Completion Criteria
+
 - [ ] E2E test suite covers 4 critical flows
 - [ ] Error handling validated across all error types
 - [ ] Load test confirms acceptable latency
@@ -820,49 +854,49 @@ Run through `docs/current/PRE_EVENT_CHECKLIST.md` and `docs/current/GO_LIVE_CHEC
 
 ## Sprint Ordering Rationale
 
-| Sprint | Focus                    | Why This Order                                                       |
-| ------ | ------------------------ | -------------------------------------------------------------------- |
-| **48** | FreightRoll Branding     | Wrong brand at event = visible embarrassment. Fix first.             |
-| **49** | Runtime TS Safety        | 19 errors in `src/lib/` = real crash risks. Fix before event.        |
-| **50** | Security Hardening       | Data exposure + abuse vectors must be closed before live traffic.    |
-| **51** | Input Validation         | Bad data in DB during event is painful to clean up.                  |
-| **52** | API Contracts            | Frontend coordination — give them types before final frontend polish.|
-| **53** | DB Performance           | Burst traffic at event requires indexed queries.                     |
-| **54** | Rate Limiting            | Abuse protection before public attention at Manifest.                |
-| **55** | Dashboard TS Fixes       | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.          |
-| **56** | E2E Tests & Launch       | Final validation gate. Proves everything works together.             |
+| Sprint | Focus                | Why This Order                                                        |
+| ------ | -------------------- | --------------------------------------------------------------------- |
+| **48** | FreightRoll Branding | Wrong brand at event = visible embarrassment. Fix first.              |
+| **49** | Runtime TS Safety    | 19 errors in `src/lib/` = real crash risks. Fix before event.         |
+| **50** | Security Hardening   | Data exposure + abuse vectors must be closed before live traffic.     |
+| **51** | Input Validation     | Bad data in DB during event is painful to clean up.                   |
+| **52** | API Contracts        | Frontend coordination — give them types before final frontend polish. |
+| **53** | DB Performance       | Burst traffic at event requires indexed queries.                      |
+| **54** | Rate Limiting        | Abuse protection before public attention at Manifest.                 |
+| **55** | Dashboard TS Fixes   | Cosmetic — lowest blast radius. Remove `ignoreBuildErrors`.           |
+| **56** | E2E Tests & Launch   | Final validation gate. Proves everything works together.              |
 
 ---
 
 ## Key Metrics to Track
 
-| Metric                        | Current   | Target (Post-Sprint 56) |
-| ----------------------------- | --------- | ----------------------- |
-| TypeScript errors             | 149       | 0                       |
-| Routes with Zod validation    | 16        | 30+                     |
-| Routes with auth              | 148       | 155+                    |
-| Test count                    | 334       | 400+                    |
-| Test files                    | 28        | 35+                     |
-| Lint warnings                 | 0         | 0                       |
-| `ignoreBuildErrors`           | true      | **removed**             |
-| Wrong branding occurrences    | 30+       | 0                       |
-| Rate-limited endpoints        | 2         | 10+                     |
-| Documented API contracts      | 0         | 10+                     |
-| Security headers              | 0         | 4                       |
-| Database indexes (custom)     | unknown   | 6+                      |
+| Metric                     | Current | Target (Post-Sprint 56) |
+| -------------------------- | ------- | ----------------------- |
+| TypeScript errors          | 149     | 0                       |
+| Routes with Zod validation | 16      | 30+                     |
+| Routes with auth           | 148     | 155+                    |
+| Test count                 | 334     | 400+                    |
+| Test files                 | 28      | 35+                     |
+| Lint warnings              | 0       | 0                       |
+| `ignoreBuildErrors`        | true    | **removed**             |
+| Wrong branding occurrences | 30+     | 0                       |
+| Rate-limited endpoints     | 2       | 10+                     |
+| Documented API contracts   | 0       | 10+                     |
+| Security headers           | 0       | 4                       |
+| Database indexes (custom)  | unknown | 6+                      |
 
 ---
 
 ## Risk Matrix
 
-| Risk                                      | Probability | Impact   | Mitigation                                       |
-| ----------------------------------------- | ----------- | -------- | ------------------------------------------------ |
-| Branding slip at Manifest                 | Medium      | High     | Sprint 48 + CI grep test                         |
-| Runtime crash from suppressed TS error    | Medium      | High     | Sprint 49 fixes lib/ errors first                |
-| Database slow under event load            | Medium      | Medium   | Sprint 53 indexes + connection pool tuning       |
-| API abuse during event                    | Low         | Medium   | Sprint 54 rate limiting                          |
-| Frontend type errors from changed shapes  | Low         | Medium   | Sprint 52 documents contracts before changes     |
-| `ignoreBuildErrors` hides new TS regressions | Ongoing  | Medium   | Sprint 55 removes it entirely                    |
+| Risk                                         | Probability | Impact | Mitigation                                   |
+| -------------------------------------------- | ----------- | ------ | -------------------------------------------- |
+| Branding slip at Manifest                    | Medium      | High   | Sprint 48 + CI grep test                     |
+| Runtime crash from suppressed TS error       | Medium      | High   | Sprint 49 fixes lib/ errors first            |
+| Database slow under event load               | Medium      | Medium | Sprint 53 indexes + connection pool tuning   |
+| API abuse during event                       | Low         | Medium | Sprint 54 rate limiting                      |
+| Frontend type errors from changed shapes     | Low         | Medium | Sprint 52 documents contracts before changes |
+| `ignoreBuildErrors` hides new TS regressions | Ongoing     | Medium | Sprint 55 removes it entirely                |
 
 ---
 

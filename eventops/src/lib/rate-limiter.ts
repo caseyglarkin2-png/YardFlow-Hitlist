@@ -34,7 +34,7 @@ export interface RateLimitResult {
 export async function checkRateLimit(
   key: string,
   maxRequests: number = 100,
-  windowSeconds: number = 60,
+  windowSeconds: number = 60
 ): Promise<RateLimitResult> {
   try {
     const redis = getRedisConnection();

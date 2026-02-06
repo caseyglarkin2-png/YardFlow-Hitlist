@@ -39,7 +39,9 @@ describe('Auth Guard Coverage', () => {
       const content = fs.readFileSync(filePath, 'utf-8');
 
       // Count exported async functions (handlers)
-      const handlerMatches = content.match(/export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)/g);
+      const handlerMatches = content.match(
+        /export\s+async\s+function\s+(GET|POST|PUT|PATCH|DELETE)/g
+      );
       const handlerCount = handlerMatches ? handlerMatches.length : 0;
 
       // Count authServiceOrSession calls (excluding the import)
@@ -70,10 +72,7 @@ describe('Auth Guard Coverage', () => {
           content.includes('x-sendgrid-signature') ||
           content.includes('webhook') ||
           content.includes("from '@/auth'");
-        expect(
-          hasAuth,
-          `${file} returns { success: true } but has no auth mechanism`
-        ).toBe(true);
+        expect(hasAuth, `${file} returns { success: true } but has no auth mechanism`).toBe(true);
       }
     }
   });

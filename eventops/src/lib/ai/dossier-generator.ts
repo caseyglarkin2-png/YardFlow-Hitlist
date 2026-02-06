@@ -117,7 +117,7 @@ Focus on actionable intelligence for trade show conversations. Estimate facility
 
 Be specific and practical. Return ONLY valid JSON.`;
 
-      const dossier = await this.gemini.generateJSON(prompt) as Record<string, unknown>;
+      const dossier = (await this.gemini.generateJSON(prompt)) as Record<string, unknown>;
 
       return {
         accountId,

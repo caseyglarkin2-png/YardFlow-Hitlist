@@ -147,12 +147,30 @@ export async function GET() {
   const settled = <T>(result: PromiseSettledResult<T>, fallback: T): T =>
     result.status === 'fulfilled' ? result.value : fallback;
 
-  const dbCheck = settled(dbResult, { status: 'fatal', error: String((dbResult as PromiseRejectedResult).reason) });
-  const redisCheck = settled(redisResult, { status: 'fatal', error: String((redisResult as PromiseRejectedResult).reason) });
-  const workerCheck = settled(workerResult, { status: 'fatal', error: String((workerResult as PromiseRejectedResult).reason) });
-  const queueCheck = settled(queueResult, { status: 'fatal', error: String((queueResult as PromiseRejectedResult).reason) });
-  const emailCheck = settled(emailResult, { status: 'fatal', error: String((emailResult as PromiseRejectedResult).reason) });
-  const aiCheck = settled(aiResult, { status: 'fatal', error: String((aiResult as PromiseRejectedResult).reason) });
+  const dbCheck = settled(dbResult, {
+    status: 'fatal',
+    error: String((dbResult as PromiseRejectedResult).reason),
+  });
+  const redisCheck = settled(redisResult, {
+    status: 'fatal',
+    error: String((redisResult as PromiseRejectedResult).reason),
+  });
+  const workerCheck = settled(workerResult, {
+    status: 'fatal',
+    error: String((workerResult as PromiseRejectedResult).reason),
+  });
+  const queueCheck = settled(queueResult, {
+    status: 'fatal',
+    error: String((queueResult as PromiseRejectedResult).reason),
+  });
+  const emailCheck = settled(emailResult, {
+    status: 'fatal',
+    error: String((emailResult as PromiseRejectedResult).reason),
+  });
+  const aiCheck = settled(aiResult, {
+    status: 'fatal',
+    error: String((aiResult as PromiseRejectedResult).reason),
+  });
 
   // Healthy = DB + Redis + Worker + Critical Env Vars
   const healthy =

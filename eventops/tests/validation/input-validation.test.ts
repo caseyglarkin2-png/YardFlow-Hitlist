@@ -54,7 +54,10 @@ describe('parseBody() wrapper', () => {
   });
 
   it('returns 400 for wrong types', async () => {
-    const result = await parseBody(createRequest({ name: 'Casey', age: 'not-a-number' }), TestSchema);
+    const result = await parseBody(
+      createRequest({ name: 'Casey', age: 'not-a-number' }),
+      TestSchema
+    );
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.response.status).toBe(400);

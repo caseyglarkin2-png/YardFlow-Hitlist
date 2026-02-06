@@ -11,10 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   // Block in production — seed should only run in development/staging
   if (process.env.NODE_ENV === 'production' && !process.env.ALLOW_SEED) {
-    return NextResponse.json(
-      { error: 'Seed endpoint is disabled in production' },
-      { status: 403 }
-    );
+    return NextResponse.json({ error: 'Seed endpoint is disabled in production' }, { status: 403 });
   }
 
   const authResult = await authServiceOrSession(request);

@@ -5,18 +5,20 @@ import { requireAuth } from '@/lib/auth-service';
 import { parseBody } from '@/lib/validation';
 import { captureRouteError } from '@/lib/sentry-utils';
 
-const UpdateProspectSchema = z.object({
-  name: z.string().min(1).max(255).optional(),
-  email: z.string().email('Invalid email format').optional(),
-  title: z.string().max(255).optional(),
-  company: z.string().max(255).optional(),
-  phone: z.string().max(50).optional(),
-  linkedinUrl: z.string().url().optional(),
-  status: z.string().max(50).optional(),
-  notes: z.string().max(5000).optional(),
-  tags: z.array(z.string()).optional(),
-  score: z.number().min(0).max(100).optional(),
-}).passthrough(); // Allow additional fields for flexibility
+const UpdateProspectSchema = z
+  .object({
+    name: z.string().min(1).max(255).optional(),
+    email: z.string().email('Invalid email format').optional(),
+    title: z.string().max(255).optional(),
+    company: z.string().max(255).optional(),
+    phone: z.string().max(50).optional(),
+    linkedinUrl: z.string().url().optional(),
+    status: z.string().max(50).optional(),
+    notes: z.string().max(5000).optional(),
+    tags: z.array(z.string()).optional(),
+    score: z.number().min(0).max(100).optional(),
+  })
+  .passthrough(); // Allow additional fields for flexibility
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   const { error, response } = await requireAuth(request);
@@ -55,7 +57,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Explicitly exclude protected fields from the update payload
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _id, accountId: _aid, createdAt: _ca, updatedAt: _ua, ...updateData } = parsed.data as Record<string, unknown>;
+    const {
+      id: _id,
+      accountId: _aid,
+      createdAt: _ca,
+      updatedAt: _ua,
+      ...updateData
+    } = parsed.data as Record<string, unknown>;
 
     // Don't allow updating id or accountId blindly if not intended, but usually CRUD allows it.
     // Safety: removing id/createdAt from update. allowed: accountId.

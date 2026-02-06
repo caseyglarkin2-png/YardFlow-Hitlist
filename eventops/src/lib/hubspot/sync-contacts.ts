@@ -133,13 +133,11 @@ async function fetchContactsPage(
     );
 
     return {
-      results: response.results.map(
-        (r) => ({
-          ...r,
-          createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
-          updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : String(r.updatedAt),
-        })
-      ) as HubSpotContact[],
+      results: response.results.map((r) => ({
+        ...r,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+        updatedAt: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : String(r.updatedAt),
+      })) as HubSpotContact[],
       paging: response.paging
         ? {
             next: response.paging.next
