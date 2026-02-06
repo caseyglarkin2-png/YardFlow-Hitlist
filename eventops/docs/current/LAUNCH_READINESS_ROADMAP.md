@@ -1,7 +1,7 @@
 # YardFlow-Hitlist: Launch Readiness Roadmap — Manifest 2026
 
 **Created**: February 6, 2026
-**Status**: Planning — Sprints 48-56
+**Status**: Sprints 48-53 ✅ Complete — Sprints 54-56 Remaining
 **Prerequisite**: Stability Roadmap v2 (Sprints 37-47) ✅ Complete
 **Goal**: Production-hardened backend ready for live event traffic at Manifest 2026
 **Philosophy**: Ship Fast, Ship Often — atomic commits with validation
@@ -10,21 +10,23 @@
 
 ## Executive Summary
 
-### Current State (Post-Stability Roadmap)
+### Current State (Post-Sprint 53)
 
 | Category          | Status       | Details                                                             |
 | ----------------- | ------------ | ------------------------------------------------------------------- |
 | **Build**         | 🟢 Deploying | Config consolidated to single `next.config.mjs`, Railway builds OK  |
-| **S2S Auth**      | 🟢 Complete  | 148/185 routes use `authServiceOrSession` or `requireAuth`          |
+| **S2S Auth**      | 🟢 Complete  | All routes use `authServiceOrSession`, `requireAuth`, or equiv.     |
 | **Lint**          | 🟢 Zero      | 0 errors, 0 warnings                                               |
-| **Tests**         | 🟢 334       | 322 pass, 12 skipped, 28 files                                     |
+| **Tests**         | 🟢 394       | 394 pass, 12 skipped, 31 files                                     |
 | **Sentry**        | 🟢 Active    | `captureRouteError` on 146+ routes, 10% sample rate                 |
 | **Worker**        | 🟢 Healthy   | Heartbeat, graceful shutdown, BullMQ job cleanup configured         |
-| **TypeScript**    | 🟡 Suppressed| 149 errors suppressed by `ignoreBuildErrors: true`                  |
-| **Branding**      | 🔴 Wrong     | Email/UI defaults say "YardFlow" and "EventOps" instead of "FreightRoll" |
-| **Input Validation** | 🟡 Partial | 16/185 routes use Zod; critical CRUD routes covered, many gaps     |
-| **Rate Limiting** | 🟡 Partial   | Only on email send + AI content; no global API protection           |
-| **API Contracts** | 🔴 Missing   | No shared types or docs for GTM-YardFlow frontend                   |
+| **TypeScript**    | 🟡 Suppressed| 124 errors suppressed by `ignoreBuildErrors: true` (0 in src/lib/)  |
+| **Branding**      | 🟢 Enforced  | FreightRoll branding via voiceConfigs + sanitizer (Sprint 48)       |
+| **Input Validation** | 🟢 Strong | Zod schemas on 7 critical route files via `parseBody<T>` (Sprint 51)|
+| **Rate Limiting** | 🟢 Redis     | Shared Redis-backed rate limiter with atomic MULTI/EXEC (Sprint 53) |
+| **API Contracts** | 🟢 Documented| `api-contracts.ts` types + `API_REFERENCE.md` (Sprint 52)           |
+| **Security**      | 🟢 Hardened  | Headers on all routes, auth on stubs, admin lockdown (Sprint 50)    |
+| **DB Performance**| 🟢 Indexed   | 9 new indexes, env-aware pool, parallel health checks (Sprint 53)   |
 
 ### What GTM-YardFlow (Frontend) Needs From Us
 
@@ -102,7 +104,7 @@ The Vercel frontend does NOT need code changes from us. But it needs **documenta
 
 ## Sprint Plan
 
-### Sprint 48: FreightRoll Branding Compliance
+### Sprint 48: FreightRoll Branding Compliance ✅ COMPLETE (commit `ebaec97`)
 
 **Goal**: All customer-facing output uses "FreightRoll" branding. Zero "YardFlow" or "EventOps" in emails, exports, reports, or UI defaults.
 **Priority**: P0 — Wrong branding at Manifest is a visible embarrassment.
@@ -173,15 +175,15 @@ Tests:
 **Commit**: `test: Add FreightRoll branding compliance tests`
 
 #### Sprint 48 Completion Criteria
-- [ ] Zero "EventOps" in `src/` outside allowlisted comments
-- [ ] Zero "YardFlow" in customer-facing output defaults
-- [ ] Branding test suite passes
-- [ ] `npm run lint` passes
-- [ ] All 334+ tests pass
+- [x] Zero "EventOps" in `src/` outside allowlisted comments
+- [x] Zero "YardFlow" in customer-facing output defaults
+- [x] Branding test suite passes (10 tests)
+- [x] `npm run lint` passes
+- [x] All tests pass (344 at time of commit)
 
 ---
 
-### Sprint 49: Runtime TypeScript Safety
+### Sprint 49: Runtime TypeScript Safety ✅ COMPLETE (commit `42264d0`)
 
 **Goal**: Fix the 19 type errors in `src/lib/` (runtime code). These are actual crash risks — not cosmetic UI issues.
 **Priority**: P0 — Runtime crashes at a live event are unacceptable.
@@ -235,14 +237,14 @@ Generic type constraint errors in the queue implementation.
 **Commit**: `fix: Type safety in email sender error handling`
 
 #### Sprint 49 Completion Criteria
-- [ ] `npx tsc --noEmit 2>&1 | grep "src/lib/" | wc -l` returns 0
-- [ ] Runtime type error count: 149 → 126 (19 fixed in lib/)
-- [ ] All 334+ tests pass
-- [ ] `npm run lint` passes
+- [x] `npx tsc --noEmit 2>&1 | grep "src/lib/" | wc -l` returns 0
+- [x] Runtime type error count: 149 → 124 (25 fixed in lib/)
+- [x] All tests pass
+- [x] `npm run lint` passes
 
 ---
 
-### Sprint 50: Security Hardening
+### Sprint 50: Security Hardening ✅ COMPLETE (commit `c845d51`)
 
 **Goal**: Close the remaining security gaps before going live with real customer data.
 **Priority**: P0 — Data exposure at a live event is catastrophic.
@@ -313,15 +315,15 @@ Tests:
 **Commit**: `test: Add security hardening test suite`
 
 #### Sprint 50 Completion Criteria
-- [ ] Zero unprotected routes (excluding intentional public endpoints)
-- [ ] Security headers on all responses
-- [ ] AI rate limiting is durable (Redis-backed)
-- [ ] Admin seed blocked in production
-- [ ] All 334+ tests pass
+- [x] Zero unprotected routes (excluding intentional public endpoints)
+- [x] Security headers on all responses (global via `setSecurityHeaders`)
+- [x] AI rate limiting is durable (Redis-backed, atomic MULTI/EXEC)
+- [x] Admin seed blocked in production
+- [x] All tests pass (28 security tests added)
 
 ---
 
-### Sprint 51: Input Validation (Remaining Routes)
+### Sprint 51: Input Validation (Remaining Routes) ✅ COMPLETE (commit `a10c29e`)
 
 **Goal**: Add Zod validation to POST/PUT routes that currently accept unvalidated input.
 **Priority**: P1 — Prevents bad data from corrupting the database during live use.
@@ -397,14 +399,14 @@ export async function parseBody<T>(req: NextRequest, schema: ZodSchema<T>): Prom
 **Commit**: `feat: Zod validation for prospect routes`
 
 #### Sprint 51 Completion Criteria
-- [ ] Shared `parseBody()` wrapper available and tested
-- [ ] Campaign, sequence, enrollment, prospect routes validated
-- [ ] Invalid payloads return 400 with descriptive error messages
-- [ ] All tests pass
+- [x] Shared `parseBody()` wrapper available and tested
+- [x] Campaign, sequence, enrollment, prospect routes validated
+- [x] Invalid payloads return 400 with descriptive error messages
+- [x] All tests pass (33 validation tests added)
 
 ---
 
-### Sprint 52: API Contract Documentation
+### Sprint 52: API Contract Documentation ✅ COMPLETE (commit `816fa38`)
 
 **Goal**: Give the GTM-YardFlow frontend team everything they need to type their API calls.
 **Priority**: P1 — Frontend can use untyped APIs but this eliminates runtime surprises.
@@ -496,14 +498,14 @@ Document all endpoints GTM-YardFlow uses:
 **Commit**: `docs: API reference for GTM-YardFlow integration`
 
 #### Sprint 52 Completion Criteria
-- [ ] `api-contracts.ts` with types for 10+ endpoints
-- [ ] Error responses standardized
-- [ ] Bare arrays wrapped
-- [ ] API reference doc created
+- [x] `api-contracts.ts` with types for 10+ endpoints
+- [x] Error responses standardized (`{ error: string }` everywhere)
+- [x] Bare arrays wrapped (accounts, webhooks)
+- [x] API reference doc created (`docs/current/API_REFERENCE.md`)
 
 ---
 
-### Sprint 53: Database & Performance Optimization
+### Sprint 53: Database & Performance Optimization ✅ COMPLETE (commits `b02eb59`, `4077af3`)
 
 **Goal**: Ensure the database can handle burst traffic during a live event.
 **Priority**: P1 — Slow queries under load = degraded UX at Manifest.
@@ -548,9 +550,11 @@ Verify Prisma connection pool settings are appropriate for Railway:
 **Commit**: `perf: Optimize database connection pool for Railway`
 
 #### Sprint 53 Completion Criteria
-- [ ] Indexes added for top query patterns
-- [ ] Query audit documented
-- [ ] Connection pool configured for production load
+- [x] 9 indexes added for top query patterns (see `QUERY_PERFORMANCE_AUDIT.md`)
+- [x] Query audit documented (`docs/current/QUERY_PERFORMANCE_AUDIT.md`)
+- [x] Connection pool configured: env-aware sizing (web=10, worker=5), metrics in /api/health
+- [x] Shared Redis rate limiter with atomic MULTI/EXEC
+- [x] Health checks parallelized with Promise.allSettled
 
 ---
 
@@ -632,7 +636,7 @@ Tests:
 **Commit**: `test: Rate limiting test suite`
 
 #### Sprint 54 Completion Criteria
-- [ ] Shared rate limiter using Redis
+- [x] Shared rate limiter using Redis (**done in Sprint 53** — `src/lib/rate-limiter.ts`)
 - [ ] AI endpoints rate-limited (most expensive compute)
 - [ ] Public endpoints rate-limited (abuse vector)
 - [ ] Test suite validates all rate limiting behavior
