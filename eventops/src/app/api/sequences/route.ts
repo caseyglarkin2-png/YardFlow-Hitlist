@@ -7,6 +7,8 @@ import { parseBody } from '@/lib/validation';
 import { checkCanSpamCompliance } from '@/lib/outreach/compliance';
 import { captureRouteError } from '@/lib/sentry-utils';
 
+export const dynamic = 'force-dynamic';
+
 const SequenceStepSchema = z.object({
   subject: z.string().min(1, 'Subject is required'),
   emailBody: z.string().min(1, 'Email body is required'),

@@ -68,6 +68,16 @@ describe('Email Config Validator', () => {
       expect(result.valid).toBe(true);
       expect(result.apiKeySet).toBe(true);
     });
+
+    it('warns about whitespace in API key', () => {
+      process.env.SENDGRID_API_KEY =
+        '  SG.valid-api-key-that-is-definitely-long-enough-1234567890  ';
+      process.env.SENDGRID_FROM_EMAIL = 'casey@freightroll.com';
+      const result = validateEmailConfig();
+      expect(result.warnings).toContain(
+        'SENDGRID_API_KEY has leading/trailing whitespace - may cause auth failures'
+      );
+    });
   });
 
   describe('From Email Validation', () => {

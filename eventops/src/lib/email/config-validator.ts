@@ -67,6 +67,11 @@ export function validateEmailConfig(): EmailConfigValidation {
     );
   }
 
+  // Warn about whitespace in API key (common copy-paste issue)
+  if (apiKey && (apiKey.startsWith(' ') || apiKey.endsWith(' ') || apiKey !== apiKey.trim())) {
+    warnings.push('SENDGRID_API_KEY has leading/trailing whitespace - may cause auth failures');
+  }
+
   // Check from email
   const fromEmailSet = !!fromEmail;
   const fromEmailValid = fromEmail
@@ -89,8 +94,8 @@ export function validateEmailConfig(): EmailConfigValidation {
     );
   }
 
-  // Warn about wrong domain
-  if (fromEmail && !fromEmail.endsWith('@freightroll.com')) {
+  // Warn about wrong domain (case-insensitive)
+  if (fromEmail && !fromEmail.toLowerCase().endsWith('@freightroll.com')) {
     warnings.push(
       `SENDGRID_FROM_EMAIL "${fromEmail}" is not from @freightroll.com domain`
     );
