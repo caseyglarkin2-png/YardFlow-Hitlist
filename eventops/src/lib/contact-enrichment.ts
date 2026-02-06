@@ -112,7 +112,7 @@ export async function enrichContact(
 
       if (hunterResult.email) {
         result.email = hunterResult.email;
-        result.emailConfidence = hunterResult.confidence;
+        result.emailConfidence = hunterResult.confidence ?? 0;
         result.emailSource = 'hunter';
         sources.push('hunter.io');
       }
@@ -126,11 +126,11 @@ export async function enrichContact(
     try {
       const clearbitData = await enrichWithClearbit(result.email);
       if (clearbitData) {
-        result.title = clearbitData.title || result.title;
-        result.seniority = clearbitData.seniority || result.seniority;
-        result.linkedInUrl = clearbitData.linkedin || result.linkedInUrl;
-        result.twitterUrl = clearbitData.twitter || result.twitterUrl;
-        result.companySize = clearbitData.companySize || result.companySize;
+        result.title = (clearbitData.title as string) || result.title;
+        result.seniority = (clearbitData.seniority as string) || result.seniority;
+        result.linkedInUrl = (clearbitData.linkedin as string) || result.linkedInUrl;
+        result.twitterUrl = (clearbitData.twitter as string) || result.twitterUrl;
+        result.companySize = (clearbitData.companySize as string) || result.companySize;
         sources.push('clearbit');
       }
     } catch (error) {

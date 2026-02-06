@@ -12,6 +12,12 @@ import { ContentPurposingAgent } from '@/lib/agents/content-purposing-agent';
 import { GraphicsAgent } from '@/lib/agents/graphics-agent';
 import { SocialsAgent } from '@/lib/agents/socials-agent';
 import { ContractingAgent } from '@/lib/agents/contracting-agent';
+import type { ProspectingCriteria } from '@/lib/agents/prospecting-agent';
+import type { ResearchInput } from '@/lib/agents/research-agent';
+import type { ContentRequest } from '@/lib/agents/content-purposing-agent';
+import type { GraphicsRequest } from '@/lib/agents/graphics-agent';
+import type { SocialPost } from '@/lib/agents/socials-agent';
+import type { ContractRequest } from '@/lib/agents/contracting-agent';
 import * as http from 'http';
 import type {
   EmailPatternJobData,
@@ -147,38 +153,41 @@ function getAgentWorker(): Worker {
           case 'start-campaign':
             // Run full campaign orchestration
             // This is long-running but acceptable for now in a worker
-            return await orchestrator.runFullCampaign(job.data.params);
+            return await orchestrator.runFullCampaign(job.data.params as Parameters<typeof orchestrator.runFullCampaign>[0]);
 
-          case 'run-prospecting':
+          case 'run-prospecting': {
             const prospectingAgent = new ProspectingAgent();
-            return await prospectingAgent.run(job.data.params, job.data.parentTaskId);
+            return await prospectingAgent.run(job.data.params as ProspectingCriteria, job.data.parentTaskId);
+          }
 
-          case 'run-research':
+          case 'run-research': {
             const researchAgent = new ResearchAgent();
-            return await researchAgent.generateDossier(job.data.params, job.data.parentTaskId);
+            return await researchAgent.generateDossier(job.data.params as unknown as ResearchInput, job.data.parentTaskId);
+          }
 
-          case 'run-content':
+          case 'run-content': {
             const contentAgent = new ContentPurposingAgent();
-            // contentAgent.purposeContent requires 2nd arg accountId if strictly typed,
-            // but params should include it. Let's assume params maps correctly.
-            // Actually purposeContent signature: purposeContent(request, accountId?, parentTaskId?)
             return await contentAgent.purposeContent(
-              job.data.params.request,
-              job.data.params.accountId,
+              job.data.params.request as ContentRequest,
+              job.data.params.accountId as string | undefined,
               job.data.parentTaskId
             );
+          }
 
-          case 'run-graphics':
+          case 'run-graphics': {
             const graphicsAgent = new GraphicsAgent();
-            return await graphicsAgent.generateGraphic(job.data.params, job.data.parentTaskId);
+            return await graphicsAgent.generateGraphic(job.data.params as unknown as GraphicsRequest, job.data.parentTaskId);
+          }
 
-          case 'run-socials':
+          case 'run-socials': {
             const socialsAgent = new SocialsAgent();
-            return await socialsAgent.schedulePost(job.data.params, job.data.parentTaskId);
+            return await socialsAgent.schedulePost(job.data.params as unknown as SocialPost, job.data.parentTaskId);
+          }
 
-          case 'run-contracting':
+          case 'run-contracting': {
             const contractingAgent = new ContractingAgent();
-            return await contractingAgent.generateContract(job.data.params, job.data.parentTaskId);
+            return await contractingAgent.generateContract(job.data.params as unknown as ContractRequest, job.data.parentTaskId);
+          }
 
           default:
             throw new Error(`Unknown agent action: ${job.data.action}`);

@@ -39,13 +39,14 @@ export class HubSpotRateLimiter {
    * @returns Promise with the function result
    */
   async execute<T>(fn: () => Promise<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      this.queue.push({
+    return new Promise<T>((resolve, reject) => {
+      const request: QueuedRequest<unknown> = {
         fn,
-        resolve,
+        resolve: resolve as (value: unknown) => void,
         reject,
         retries: 0,
-      });
+      };
+      this.queue.push(request);
 
       if (!this.processing) {
         this.processQueue();
@@ -103,7 +104,7 @@ export class HubSpotRateLimiter {
   /**
    * Handle errors with exponential backoff retry logic
    */
-  private async handleError<T>(error: unknown, request: QueuedRequest<T>): Promise<void> {
+  private async handleError(error: unknown, request: QueuedRequest<unknown>): Promise<void> {
     const isRateLimitError = this.isRateLimitError(error);
     const shouldRetry = request.retries < this.config.maxRetries;
 

@@ -90,14 +90,14 @@ export async function syncCalendarEvents(
         limit(async () => {
           const summary = event.summary || '(No title)';
           const startTime = event.start?.dateTime || event.start?.date;
-          const endTime = event.end?.dateTime || event.end?.date;
+          const endTime = event.end?.dateTime || event.end?.date || '';
           const description = event.description || null;
           const location = event.location || null;
-          const attendees = event.attendees?.map((a) => a.email) || [];
+          const attendees = (event.attendees?.map((a) => a.email).filter(Boolean) as string[]) || [];
 
           if (!startTime) {
             skipped.push({
-              id: event.id,
+              id: event.id || 'unknown',
               summary,
               start: 'unknown',
               action: 'skipped',
@@ -106,11 +106,12 @@ export async function syncCalendarEvents(
           }
 
           // Check if event already exists
+          const eventId = event.id || crypto.randomUUID();
           const existing = await prisma.activities.findFirst({
             where: {
               userId,
               entityType: 'calendar_event',
-              entityId: event.id,
+              entityId: eventId,
             },
           });
 
@@ -121,20 +122,20 @@ export async function syncCalendarEvents(
                 where: { id: existing.id },
                 data: {
                   description: summary,
-                  metadata: {
+                  metadata: JSON.parse(JSON.stringify({
                     start: startTime,
                     end: endTime,
                     description,
                     location,
                     attendees,
                     lastSynced: new Date().toISOString(),
-                  },
+                  })),
                 },
               });
             }
 
             updated.push({
-              id: event.id,
+              id: eventId,
               summary,
               start: startTime,
               action: 'updated',
@@ -147,23 +148,23 @@ export async function syncCalendarEvents(
                   id: crypto.randomUUID(),
                   userId,
                   entityType: 'calendar_event',
-                  entityId: event.id,
+                  entityId: eventId,
                   action: 'google_calendar_import',
                   description: summary,
-                  metadata: {
+                  metadata: JSON.parse(JSON.stringify({
                     start: startTime,
                     end: endTime,
                     description,
                     location,
                     attendees,
                     importedAt: new Date().toISOString(),
-                  },
+                  })),
                 },
               });
             }
 
             imported.push({
-              id: event.id,
+              id: eventId,
               summary,
               start: startTime,
               action: 'imported',
